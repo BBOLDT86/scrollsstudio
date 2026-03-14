@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Serverless HTML: The Template Marketplace Opportunity</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-dark: #0a0a0f;
+  --bg-card: #12121a;
+  --accent: #00e599;
+  --accent-dim: #00e59933;
+  --accent-glow: #00e59966;
+  --text-primary: #eaeaf0;
+  --text-muted: #8888a0;
+  --text-dim: #55556a;
+  --hot: #ff4d6a;
+  --gold: #ffc842;
+  --blue: #4d8bff;
+  --purple: #a855f7;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg-dark);
+  color: var(--text-primary);
+  overflow: hidden;
+  height: 100vh;
+  width: 100vw;
+}
+
+.deck {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+}
+
+.slide {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 5vh 8vw;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+  pointer-events: none;
+  overflow-y: auto;
+}
+
+.slide.active {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: all;
+}
+
+/* NAV */
+.nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 40px;
+  z-index: 100;
+  background: linear-gradient(transparent, rgba(10,10,15,0.95) 40%);
+}
+
+.nav button {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: var(--text-primary);
+  font-family: 'Syne', sans-serif;
+  font-weight: 600;
+  font-size: 13px;
+  padding: 10px 24px;
+  border-radius: 6px;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  transition: all 0.25s ease;
+}
+
+.nav button:hover { background: var(--accent); color: var(--bg-dark); border-color: var(--accent); }
+.nav button:disabled { opacity: 0.2; cursor: default; }
+.nav button:disabled:hover { background: rgba(255,255,255,0.06); color: var(--text-primary); border-color: rgba(255,255,255,0.1); }
+
+.progress-track {
+  flex: 1;
+  max-width: 300px;
+  height: 3px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 3px;
+  margin: 0 24px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 3px;
+  transition: width 0.4s ease;
+}
+
+.slide-counter {
+  font-family: 'Syne', sans-serif;
+  font-size: 12px;
+  color: var(--text-dim);
+  letter-spacing: 1px;
+  min-width: 50px;
+  text-align: center;
+}
+
+/* TYPOGRAPHY */
+h1 {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: clamp(2.2rem, 5vw, 4rem);
+  line-height: 1.1;
+  letter-spacing: -1px;
+  margin-bottom: 24px;
+}
+
+h2 {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: clamp(1.6rem, 3.5vw, 2.6rem);
+  line-height: 1.15;
+  letter-spacing: -0.5px;
+  margin-bottom: 20px;
+}
+
+h3 {
+  font-family: 'Syne', sans-serif;
+  font-weight: 600;
+  font-size: clamp(1rem, 1.8vw, 1.3rem);
+  color: var(--accent);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+p, li {
+  font-size: clamp(0.9rem, 1.5vw, 1.1rem);
+  line-height: 1.7;
+  color: var(--text-muted);
+  max-width: 800px;
+}
+
+.highlight { color: var(--accent); }
+.hot { color: var(--hot); }
+.gold { color: var(--gold); }
+.blue { color: var(--blue); }
+
+/* SLIDE-SPECIFIC */
+
+/* Slide 1 — Title */
+.slide-title {
+  position: relative;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.slide-title::before {
+  content: '';
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, var(--accent-dim) 0%, transparent 70%);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  animation: pulse-glow 4s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.4; transform: translate(-50%, -50%) scale(1); }
+  50% { opacity: 0.7; transform: translate(-50%, -50%) scale(1.15); }
+}
+
+.slide-title h1 { font-size: clamp(2.5rem, 6vw, 5rem); position: relative; }
+.slide-title .subtitle {
+  font-size: clamp(1rem, 2vw, 1.4rem);
+  color: var(--text-muted);
+  font-weight: 300;
+  max-width: 600px;
+  margin: 0 auto;
+  position: relative;
+}
+
+/* Stat Grid */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-top: 28px;
+  width: 100%;
+  max-width: 1000px;
+}
+
+.stat-card {
+  background: var(--bg-card);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 12px;
+  padding: 24px;
+  transition: border-color 0.3s;
+}
+
+.stat-card:hover { border-color: var(--accent-glow); }
+
+.stat-number {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: clamp(1.8rem, 3vw, 2.4rem);
+  color: var(--accent);
+  margin-bottom: 6px;
+}
+
+.stat-label {
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  line-height: 1.4;
+}
+
+/* Category Cards */
+.cat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-top: 20px;
+  width: 100%;
+  max-width: 1100px;
+}
+
+.cat-card {
+  background: var(--bg-card);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 10px;
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.25s, border-color 0.3s;
+}
+
+.cat-card:hover { transform: translateY(-3px); border-color: rgba(255,255,255,0.12); }
+
+.cat-icon {
+  font-size: 1.8rem;
+  margin-bottom: 10px;
+  display: block;
+}
+
+.cat-card h4 {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 0.95rem;
+  margin-bottom: 6px;
+  color: var(--text-primary);
+}
+
+.cat-card p {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  line-height: 1.5;
+}
+
+/* Comparison Table */
+.compare-table {
+  width: 100%;
+  max-width: 1000px;
+  border-collapse: collapse;
+  margin-top: 20px;
+  font-size: clamp(0.7rem, 1.2vw, 0.9rem);
+}
+
+.compare-table th {
+  font-family: 'Syne', sans-serif;
+  font-weight: 600;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-dim);
+  text-align: left;
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.compare-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  color: var(--text-muted);
+}
+
+.compare-table tr:hover td { background: rgba(0,229,153,0.03); }
+
+.win { color: var(--accent); font-weight: 600; }
+.lose { color: var(--text-dim); }
+
+/* Tier section */
+.tier-badge {
+  display: inline-block;
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 0.75rem;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 5px 14px;
+  border-radius: 20px;
+  margin-bottom: 16px;
+}
+
+.tier-guerrilla { background: rgba(0,229,153,0.15); color: var(--accent); }
+.tier-mid { background: rgba(77,139,255,0.15); color: var(--blue); }
+.tier-enterprise { background: rgba(168,85,247,0.15); color: var(--purple); }
+
+.use-list {
+  list-style: none;
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 10px;
+  width: 100%;
+  max-width: 1000px;
+}
+
+.use-list li {
+  background: var(--bg-card);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.use-list li .num {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  min-width: 22px;
+}
+
+/* Insights list */
+.insight-list {
+  list-style: none;
+  margin-top: 16px;
+  max-width: 800px;
+}
+
+.insight-list li {
+  padding: 14px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.insight-list li strong {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.insight-marker {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 0.8rem;
+  color: var(--accent);
+  min-width: 20px;
+  margin-top: 2px;
+}
+
+/* Distribution phases */
+.phase-flow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 20px;
+  max-width: 1100px;
+}
+
+.phase-card {
+  flex: 1;
+  min-width: 180px;
+  background: var(--bg-card);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 10px;
+  padding: 20px;
+  position: relative;
+}
+
+.phase-card::before {
+  content: attr(data-phase);
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 2rem;
+  color: rgba(255,255,255,0.03);
+  position: absolute;
+  top: 10px;
+  right: 14px;
+}
+
+.phase-card h4 {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+
+.phase-card p {
+  font-size: 0.82rem;
+  color: var(--text-dim);
+  line-height: 1.5;
+}
+
+/* Final CTA */
+.slide-cta {
+  text-align: center;
+  align-items: center;
+}
+
+.slide-cta::before {
+  content: '';
+  position: absolute;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(168,85,247,0.12) 0%, transparent 70%);
+  top: 30%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.cta-box {
+  position: relative;
+  background: var(--bg-card);
+  border: 1px solid rgba(0,229,153,0.2);
+  border-radius: 16px;
+  padding: 40px 50px;
+  max-width: 700px;
+  margin-top: 20px;
+}
+
+.cta-box p { margin: 0 auto; }
+
+/* Animations */
+.slide.active .anim-up {
+  animation: fadeUp 0.6s ease forwards;
+}
+
+.slide.active .anim-up:nth-child(2) { animation-delay: 0.1s; }
+.slide.active .anim-up:nth-child(3) { animation-delay: 0.2s; }
+.slide.active .anim-up:nth-child(4) { animation-delay: 0.3s; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.anim-up { opacity: 0; }
+
+/* Decorative noise */
+.deck::after {
+  content: '';
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+}
+
+.slide { z-index: 1; }
+.nav { z-index: 100; }
+
+@media (max-width: 600px) {
+  .slide { padding: 4vh 5vw; padding-bottom: 80px; }
+  .stat-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .cat-grid { grid-template-columns: 1fr; }
+  .nav { padding: 12px 16px; }
+  .phase-flow { flex-direction: column; }
+}
+</style>
+</head>
+<body>
+
+<div class="deck">
+
+  <!-- SLIDE 1: Title -->
+  <div class="slide slide-title active" data-slide="0">
+    <h3 class="anim-up">Market Intelligence Brief</h3>
+    <h1 class="anim-up">The <span class="highlight">$4.2B</span> Template Economy<br>Meets Serverless HTML</h1>
+    <p class="subtitle anim-up">Mapping proven demand from Canva, Notion, Etsy &amp; Gumroad to a new delivery format that wins on every dimension.</p>
+  </div>
+
+  <!-- SLIDE 2: Market Scale -->
+  <div class="slide" data-slide="1">
+    <h3 class="anim-up">The Market Today</h3>
+    <h2 class="anim-up">People Pay Real Money for<br><span class="highlight">Pre-Built Systems</span></h2>
+    <p class="anim-up">The digital template market hit $4.2B in 2024 — and the core value proposition is simple: eliminate setup friction, solve a narrow problem, look good doing it.</p>
+    <div class="stat-grid anim-up">
+      <div class="stat-card">
+        <div class="stat-number">$3.5B</div>
+        <div class="stat-label">Canva annual revenue<br>260M monthly users</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">$1M+</div>
+        <div class="stat-label">Earned by a single Notion creator from just two templates</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">$280K+</div>
+        <div class="stat-label">Single Etsy seller — budget planners &amp; Google Sheets at $5–$25</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">53M</div>
+        <div class="stat-label">Creative assets on Envato / ThemeForest marketplace</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 3: 8 Categories -->
+  <div class="slide" data-slide="2">
+    <h3 class="anim-up">Proven Demand</h3>
+    <h2 class="anim-up">8 Categories Where HTML <span class="highlight">Wins</span></h2>
+    <p class="anim-up">Every top-selling template category has a serverless HTML equivalent that's more interactive, more private, and zero-cost to the buyer.</p>
+    <div class="cat-grid anim-up">
+      <div class="cat-card">
+        <span class="cat-icon">💰</span>
+        <h4>Budget & Finance</h4>
+        <p>#1 digital product on Etsy. Top listings: 100K+ sales. HTML beats Sheets on mobile, offline, and design.</p>
+      </div>
+      <div class="cat-card">
+        <span class="cat-icon">⚡</span>
+        <h4>Productivity Systems</h4>
+        <p>Year-round sellers. Notion dashboards $15–$50. HTML adds timers, streak counters, dynamic scoring.</p>
+      </div>
+      <div class="cat-card">
+        <span class="cat-icon">🏢</span>
+        <h4>Business Operations</h4>
+        <p>Small biz templates: 5K+ Etsy listings. Replace $50/mo SaaS with a single zero-subscription file.</p>
+      </div>
+      <div class="cat-card">
+        <span class="cat-icon">🏋️</span>
+        <h4>Health & Wellness</h4>
+        <p>Growing fast. Rest timers, rep counters, progress charts — features static PDFs can't touch.</p>
+      </div>
+      <div class="cat-card">
+        <span class="cat-icon">📚</span>
+        <h4>Education & Study</h4>
+        <p>Seasonal goldmine (Aug + Jan). Students are broke and device-agnostic. HTML runs everywhere.</p>
+      </div>
+      <div class="cat-card">
+        <span class="cat-icon">💍</span>
+        <h4>Event Planning</h4>
+        <p>Wedding suites $15–$50. HTML replaces $15–$30/mo wedding websites with a single free file.</p>
+      </div>
+      <div class="cat-card">
+        <span class="cat-icon">🏈</span>
+        <h4>Sports & Gaming</h4>
+        <p>Biggest HTML advantage. Live scoring, brackets, randomization — features PDFs can't do at all.</p>
+      </div>
+      <div class="cat-card">
+        <span class="cat-icon">🏠</span>
+        <h4>Real Estate & Legal</h4>
+        <p>Higher prices ($25–$70). Pro audience hates both spreadsheets and $500/mo SaaS. Sweet spot.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 4: Why HTML Wins -->
+  <div class="slide" data-slide="3">
+    <h3 class="anim-up">Format Advantage</h3>
+    <h2 class="anim-up">Head-to-Head: <span class="highlight">HTML vs. Everyone</span></h2>
+    <table class="compare-table anim-up">
+      <thead>
+        <tr>
+          <th>Factor</th>
+          <th>Google Sheets</th>
+          <th>Notion</th>
+          <th>Canva</th>
+          <th>Serverless HTML</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Requires account</td>
+          <td class="lose">Google</td>
+          <td class="lose">Notion</td>
+          <td class="lose">Canva</td>
+          <td class="win">None ✓</td>
+        </tr>
+        <tr>
+          <td>Works offline</td>
+          <td class="lose">No</td>
+          <td class="lose">No</td>
+          <td class="lose">No</td>
+          <td class="win">Yes ✓</td>
+        </tr>
+        <tr>
+          <td>Mobile-friendly</td>
+          <td class="lose">Poor</td>
+          <td>Decent</td>
+          <td>Good</td>
+          <td class="win">Excellent ✓</td>
+        </tr>
+        <tr>
+          <td>Interactive features</td>
+          <td class="lose">Formulas</td>
+          <td class="lose">Basic DB</td>
+          <td class="lose">Static</td>
+          <td class="win">Unlimited JS ✓</td>
+        </tr>
+        <tr>
+          <td>Data privacy</td>
+          <td class="lose">Google Cloud</td>
+          <td class="lose">Notion servers</td>
+          <td class="lose">Canva servers</td>
+          <td class="win">Local ✓</td>
+        </tr>
+        <tr>
+          <td>Recurring cost</td>
+          <td>Free*</td>
+          <td class="lose">$0–$10/mo</td>
+          <td class="lose">$0–$13/mo</td>
+          <td class="win">Zero ✓</td>
+        </tr>
+        <tr>
+          <td>Platform fee</td>
+          <td class="lose">6.5% + $0.20</td>
+          <td class="lose">10% + $0.40</td>
+          <td class="lose">Varies</td>
+          <td class="win">0% self-hosted ✓</td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="anim-up" style="margin-top:16px;">HTML wins on every dimension except marketplace discovery — which is solvable with the right distribution strategy.</p>
+  </div>
+
+  <!-- SLIDE 5: What Top Sellers Know -->
+  <div class="slide" data-slide="4">
+    <h3 class="anim-up">Playbook</h3>
+    <h2 class="anim-up">What the Top Sellers <span class="gold">Know</span></h2>
+    <ul class="insight-list anim-up">
+      <li>
+        <span class="insight-marker">01</span>
+        <div><strong>Niche beats general, every time.</strong> "Paycheck-by-Paycheck Budget Planner for Nurses Working 3×12 Shifts" converts 3–5× better than a generic "budget planner."</div>
+      </li>
+      <li>
+        <span class="insight-marker">02</span>
+        <div><strong>Bundles outsell singles 3×.</strong> The hub-and-spoke model — one core product with 5–8 add-ons at a bundle discount — generates far more revenue per customer.</div>
+      </li>
+      <li>
+        <span class="insight-marker">03</span>
+        <div><strong>Design matters more than function.</strong> One seller built a $280K business by making budget spreadsheets pink and modern instead of the default greens and blues.</div>
+      </li>
+      <li>
+        <span class="insight-marker">04</span>
+        <div><strong>Seasonal timing is everything.</strong> January resolutions, August back-to-school, March Madness, tax season — timing your launch to demand spikes is a multiplier.</div>
+      </li>
+      <li>
+        <span class="insight-marker">05</span>
+        <div><strong>Free tier → paid upsell.</strong> Give away basic, collect emails, sell premium. The growth engine that works across every template platform.</div>
+      </li>
+      <li>
+        <span class="insight-marker">06</span>
+        <div><strong>Video demos convert.</strong> A 15-second screen recording of data entry → chart update outperforms any written listing description.</div>
+      </li>
+    </ul>
+  </div>
+
+  <!-- SLIDE 6: Guerrilla Tier -->
+  <div class="slide" data-slide="5">
+    <span class="tier-badge tier-guerrilla anim-up">Guerrilla Tier · $0–$500</span>
+    <h2 class="anim-up">Viral Adoption via <span class="highlight">Group Chats</span></h2>
+    <p class="anim-up">Impulse-buy price points. Every share in a group chat is free marketing.</p>
+    <ul class="use-list anim-up">
+      <li><span class="num">01</span>Super Bowl Squares — auto-randomize, track payments, highlight winners live</li>
+      <li><span class="num">02</span>March Madness Bracket Pool — private group, custom scoring rules</li>
+      <li><span class="num">03</span>Potluck Signup Board — visual, mobile, prevents duplicates</li>
+      <li><span class="num">04</span>Rent / Bill Splitter — replaces Splitwise, no app or account</li>
+      <li><span class="num">05</span>Baby Pool Betting — due date, weight, name guessing game</li>
+      <li><span class="num">06</span>Pickup Game Scheduler — claim spots, auto-waitlist, track flake rates</li>
+      <li><span class="num">07</span>Fantasy Draft Board — screen-share or offline at a bar</li>
+      <li><span class="num">08</span>Chore Rotation Wheel — visual weekly rotation for roommates</li>
+      <li><span class="num">09</span>Wedding RSVP Collector — replaces $15/mo wedding site subscriptions</li>
+      <li><span class="num">10</span>Concert Lineup Ranker — group rank, find overlaps, build schedule</li>
+    </ul>
+  </div>
+
+  <!-- SLIDE 7: Mid-Range Tier -->
+  <div class="slide" data-slide="6">
+    <span class="tier-badge tier-mid anim-up">Mid-Range Tier · $500–$10K</span>
+    <h2 class="anim-up">Replacing <span class="blue">Monthly Subscriptions</span></h2>
+    <p class="anim-up">Professional tools at $25–$70. Target the tool-fatigued solopreneur.</p>
+    <ul class="use-list anim-up">
+      <li><span class="num">11</span>Freelancer Invoice + Payment Tracker — branded PDFs, quarterly tax estimates</li>
+      <li><span class="num">12</span>Real Estate Open House Lead Capture — QR → form → ranked leads</li>
+      <li><span class="num">13</span>Local League Manager — scheduling, scoring, standings, playoffs</li>
+      <li><span class="num">14</span>Restaurant Daily Specials Board — tablet display + social output</li>
+      <li><span class="num">15</span>Contractor Estimate Builder — generate pro estimates on-site from a phone</li>
+      <li><span class="num">16</span>Church / Nonprofit Volunteer Coordinator — meal trains, hours, sign-ups</li>
+      <li><span class="num">17</span>Short-Term Rental Dashboard — bookings, cleaning, inventory, P&L</li>
+      <li><span class="num">18</span>Classroom Gradebook + Parent Portal — weighted grades, read-only link</li>
+      <li><span class="num">19</span>HOA Maintenance Tracker — violations, work orders, monthly reports</li>
+      <li><span class="num">20</span>Food Truck Route Planner — schedule, notifications, location-based sales</li>
+    </ul>
+  </div>
+
+  <!-- SLIDE 8: Enterprise Tier -->
+  <div class="slide" data-slide="7">
+    <span class="tier-badge tier-enterprise anim-up">Enterprise Tier · $10K–$100K+</span>
+    <h2 class="anim-up">Competing with <span style="color:var(--purple)">SaaS</span></h2>
+    <p class="anim-up">White-label systems, licensing deals, and near-zero marginal cost.</p>
+    <ul class="use-list anim-up">
+      <li><span class="num">21</span>Social Betting Platform — white-label sportsbook sim with real odds, parlays</li>
+      <li><span class="num">22</span>Mortgage Broker Pipeline — lead capture → closing. Replaces $500/mo CRMs</li>
+      <li><span class="num">23</span>Multi-Property RE Portfolio — rent rolls, cap rates, 1031 timelines</li>
+      <li><span class="num">24</span>Legal Practice Mgmt Lite — cases, conflicts, trust accounts. Solo attorneys.</li>
+      <li><span class="num">25</span>White-Label Fantasy Engine — licensable to media companies</li>
+      <li><span class="num">26</span>Municipal Permit Tracker — replace paper workflows for small cities</li>
+      <li><span class="num">27</span>Multi-Location Restaurant Ops — inventory, labor, sales, inspections</li>
+      <li><span class="num">28</span>Student Loan Repayment Engine — model every plan, project lifetime cost</li>
+      <li><span class="num">29</span>Insurance Claims Dashboard — intake, triage, pipeline analytics</li>
+      <li><span class="num">30</span>Conference Command Center — reg, speakers, sponsors, networking</li>
+    </ul>
+  </div>
+
+  <!-- SLIDE 9: Distribution -->
+  <div class="slide" data-slide="8">
+    <h3 class="anim-up">Go-to-Market</h3>
+    <h2 class="anim-up">Distribution in <span class="highlight">5 Phases</span></h2>
+    <p class="anim-up">Discovery is the bottleneck, not product quality. Here's the playbook:</p>
+    <div class="phase-flow anim-up">
+      <div class="phase-card" data-phase="1">
+        <h4>Marketplace Seeding</h4>
+        <p>List free / low-cost on Etsy, Gumroad, Product Hunt. $0.20 listing fee beats building an audience from scratch.</p>
+      </div>
+      <div class="phase-card" data-phase="2">
+        <h4>Viral Group Shares</h4>
+        <p>Guerrilla tools spread via group chats. One bracket in 50 friend groups = 500+ potential buyers.</p>
+      </div>
+      <div class="phase-card" data-phase="3">
+        <h4>Content Marketing</h4>
+        <p>YouTube tutorials, TikTok demos, Pinterest pins — highest-converting channels for digital products.</p>
+      </div>
+      <div class="phase-card" data-phase="4">
+        <h4>Bundle Economics</h4>
+        <p>"Complete Sports Pool Kit" at $29 outsells individual $5 tools. Bundles = 3× revenue per customer.</p>
+      </div>
+      <div class="phase-card" data-phase="5">
+        <h4>White-Label Licensing</h4>
+        <p>200 bowling alleys × $500/yr = $100K ARR. Near-zero marginal cost at scale.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 10: Closing -->
+  <div class="slide slide-cta" data-slide="9">
+    <h3 class="anim-up">The Key Insight</h3>
+    <h2 class="anim-up" style="max-width:700px;">The Market Proved the Demand.<br>HTML Proves the <span class="highlight">Delivery Method.</span></h2>
+    <div class="cta-box anim-up">
+      <p>People will pay for anything that saves them 30 minutes of setup time and looks good doing it. Serverless HTML files do everything existing templates do — and more. They're interactive, private, free to host, work offline, and lock no one into an ecosystem.</p>
+      <p style="margin-top:14px;color:var(--accent);font-weight:500;">The opportunity is in connecting the two.</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- NAV -->
+<div class="nav">
+  <button id="prevBtn" disabled>← Prev</button>
+  <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+  <span class="slide-counter" id="slideCounter">1 / 10</span>
+  <button id="nextBtn">Next →</button>
+</div>
+
+<script>
+const slides = document.querySelectorAll('.slide');
+const total = slides.length;
+let current = 0;
+
+const prevBtn = document.getElementById('prevBtn');
+const nextBtn = document.getElementById('nextBtn');
+const counter = document.getElementById('slideCounter');
+const progress = document.getElementById('progressFill');
+
+function goTo(n) {
+  if (n < 0 || n >= total) return;
+  slides[current].classList.remove('active');
+  // reset animations
+  slides[n].querySelectorAll('.anim-up').forEach(el => {
+    el.style.animation = 'none';
+    el.offsetHeight; // reflow
+    el.style.animation = '';
+  });
+  current = n;
+  slides[current].classList.add('active');
+  prevBtn.disabled = current === 0;
+  nextBtn.disabled = current === total - 1;
+  counter.textContent = `${current + 1} / ${total}`;
+  progress.style.width = `${((current + 1) / total) * 100}%`;
+}
+
+prevBtn.addEventListener('click', () => goTo(current - 1));
+nextBtn.addEventListener('click', () => goTo(current + 1));
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); goTo(current + 1); }
+  if (e.key === 'ArrowLeft') { e.preventDefault(); goTo(current - 1); }
+});
+
+// Touch swipe
+let touchStartX = 0;
+document.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; });
+document.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - touchStartX;
+  if (Math.abs(dx) > 50) { dx < 0 ? goTo(current + 1) : goTo(current - 1); }
+});
+
+goTo(0);
+</script>
+
+</body>
+</html>

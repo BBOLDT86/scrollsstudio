@@ -1,0 +1,1137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kan</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --cream: #faf7f2;
+  --cream-deep: #f2ede4;
+  --white: #ffffff;
+  --ink: #1a1612;
+  --ink-mid: #4a4540;
+  --ink-soft: #7a756e;
+  --ink-muted: #a8a29e;
+  --ink-faint: #d4d0ca;
+  --ink-ghost: #e8e4dd;
+  --coral: #e8613c;
+  --coral-glow: rgba(232,97,60,0.08);
+  --coral-deep: #c8482a;
+  --green: #2a8c5a;
+  --green-soft: rgba(42,140,90,0.07);
+  --blue: #3068b8;
+  --blue-soft: rgba(48,104,184,0.07);
+  --warm: #c47030;
+  --warm-soft: rgba(196,112,48,0.07);
+  --purple: #7252b5;
+  --purple-soft: rgba(114,82,181,0.07);
+
+  --col-backlog: var(--ink-muted);
+  --col-todo: var(--warm);
+  --col-progress: var(--green);
+  --col-review: var(--purple);
+  --col-done: var(--blue);
+
+  --shadow-sm: 0 1px 3px rgba(26,22,18,0.04);
+  --shadow-md: 0 8px 24px rgba(26,22,18,0.06);
+  --shadow-lg: 0 20px 48px rgba(26,22,18,0.10);
+
+  --radius: 12px;
+  --radius-lg: 16px;
+  --sidebar-width: 232px;
+  --topbar-height: 56px;
+}
+
+html, body { height: 100%; }
+
+body {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  background: var(--cream);
+  color: var(--ink);
+  display: flex;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Film grain overlay */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 180px;
+}
+
+/* ─── Sidebar ─── */
+
+.sidebar {
+  width: var(--sidebar-width);
+  background: var(--white);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  border-right: 1px solid var(--ink-ghost);
+  transition: width 0.3s cubic-bezier(0.16,1,0.3,1);
+}
+
+.sidebar.collapsed { width: 56px; }
+
+.sidebar.collapsed .sidebar-label,
+.sidebar.collapsed .sidebar-section-title,
+.sidebar.collapsed .sidebar-item span,
+.sidebar.collapsed .workspace-name,
+.sidebar.collapsed .workspace-plan,
+.sidebar.collapsed .sidebar-footer span { display: none; }
+
+.sidebar.collapsed .sidebar-item { justify-content: center; padding: 10px 0; }
+
+.sidebar-top {
+  padding: 18px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid var(--ink-ghost);
+}
+
+.workspace-icon {
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, var(--coral), var(--coral-deep));
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 800;
+  color: #fff;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(232,97,60,0.25);
+}
+
+.workspace-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -0.3px;
+}
+
+.workspace-plan {
+  font-size: 10.5px;
+  color: var(--ink-muted);
+  font-weight: 500;
+  letter-spacing: 0.2px;
+}
+
+.sidebar-nav { flex: 1; overflow-y: auto; padding: 10px 10px; }
+
+.sidebar-section-title {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  padding: 18px 10px 8px;
+}
+
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--ink-soft);
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all .2s;
+}
+
+.sidebar-item:hover {
+  background: var(--cream);
+  color: var(--ink);
+}
+
+.sidebar-item.active {
+  background: var(--coral-glow);
+  color: var(--coral);
+}
+
+.sidebar-item .icon {
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.sidebar-footer {
+  padding: 10px;
+  border-top: 1px solid var(--ink-ghost);
+}
+
+.collapse-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  background: none;
+  border: none;
+  color: var(--ink-muted);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  width: 100%;
+  transition: all .2s;
+}
+
+.collapse-btn:hover { background: var(--cream); color: var(--ink-soft); }
+
+/* ─── Main ─── */
+
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.topbar {
+  height: var(--topbar-height);
+  background: rgba(250,247,242,0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(0,0,0,0.04);
+  display: flex;
+  align-items: center;
+  padding: 0 28px;
+}
+
+.topbar-title {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  color: var(--ink);
+}
+
+.topbar-subtitle {
+  font-family: 'Source Serif 4', serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: 13px;
+  color: var(--ink-muted);
+  margin-left: 12px;
+}
+
+.topbar-actions { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+
+.btn {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 12.5px;
+  font-weight: 600;
+  border: 1px solid var(--ink-ghost);
+  background: var(--white);
+  color: var(--ink-soft);
+  padding: 7px 16px;
+  border-radius: 9px;
+  cursor: pointer;
+  transition: all .2s;
+  letter-spacing: -0.2px;
+}
+
+.btn:hover { border-color: var(--ink-faint); color: var(--ink); }
+
+.btn-primary {
+  background: var(--coral);
+  border-color: var(--coral);
+  color: white;
+  box-shadow: 0 2px 10px rgba(232,97,60,0.2);
+}
+
+.btn-primary:hover {
+  background: var(--coral-deep);
+  border-color: var(--coral-deep);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(232,97,60,0.3);
+}
+
+/* ─── Filter bar ─── */
+
+.filterbar {
+  background: var(--white);
+  border-bottom: 1px solid var(--ink-ghost);
+  display: flex;
+  align-items: center;
+  padding: 8px 28px;
+  gap: 10px;
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--cream);
+  border: 1px solid var(--ink-ghost);
+  border-radius: 9px;
+  padding: 0 12px;
+  height: 34px;
+  min-width: 220px;
+  transition: border-color .2s;
+}
+
+.search-box:focus-within { border-color: var(--coral); }
+
+.search-box .search-icon {
+  color: var(--ink-muted);
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.search-box input {
+  border: none;
+  background: none;
+  outline: none;
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 12.5px;
+  font-weight: 400;
+  width: 100%;
+  color: var(--ink);
+}
+
+.search-box input::placeholder { color: var(--ink-muted); }
+
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  background: var(--cream);
+  border: 1px solid var(--ink-ghost);
+  border-radius: 100px;
+  padding: 5px 12px;
+  cursor: pointer;
+  transition: all .2s;
+  letter-spacing: 0.3px;
+}
+
+.filter-chip:hover { border-color: var(--ink-faint); color: var(--ink); }
+.filter-chip.active { background: var(--coral-glow); border-color: rgba(232,97,60,0.2); color: var(--coral); }
+
+/* ─── Board ─── */
+
+.board-wrapper {
+  flex: 1;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 24px 28px;
+}
+
+.board-wrapper::-webkit-scrollbar { height: 6px; }
+.board-wrapper::-webkit-scrollbar-track { background: transparent; }
+.board-wrapper::-webkit-scrollbar-thumb { background: var(--ink-ghost); border-radius: 3px; }
+
+.board {
+  display: flex;
+  gap: 16px;
+  height: 100%;
+}
+
+/* ─── Columns ─── */
+
+.column {
+  flex: 0 0 292px;
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--ink-ghost);
+  box-shadow: var(--shadow-sm);
+  max-height: 100%;
+  transition: box-shadow .3s;
+}
+
+.column:hover { box-shadow: var(--shadow-md); }
+
+.column-header {
+  padding: 16px 16px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid var(--ink-ghost);
+}
+
+.column-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.column-title {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--ink-mid);
+}
+
+.column-count {
+  font-family: 'Source Serif 4', serif;
+  font-style: italic;
+  font-size: 12px;
+  color: var(--ink-muted);
+  margin-left: auto;
+}
+
+.column-body {
+  padding: 8px 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.column-body::-webkit-scrollbar { width: 3px; }
+.column-body::-webkit-scrollbar-track { background: transparent; }
+.column-body::-webkit-scrollbar-thumb { background: var(--ink-ghost); border-radius: 2px; }
+
+/* ─── Cards ─── */
+
+.card {
+  background: var(--cream);
+  border: 1px solid var(--ink-ghost);
+  border-radius: var(--radius);
+  padding: 14px;
+  cursor: grab;
+  transition: all .25s cubic-bezier(0.16,1,0.3,1);
+  position: relative;
+}
+
+.card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+  border-color: var(--ink-faint);
+}
+
+.card:active { cursor: grabbing; }
+
+.card-id {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--ink-muted);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.card-title {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--ink);
+  letter-spacing: -0.2px;
+  line-height: 1.35;
+}
+
+.card-desc {
+  font-family: 'Source Serif 4', serif;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--ink-muted);
+  line-height: 1.5;
+  margin-top: 6px;
+}
+
+.card-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+.priority-badge {
+  font-size: 9.5px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 100px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.pri-low { background: var(--blue-soft); color: var(--blue); }
+.pri-medium { background: var(--warm-soft); color: var(--warm); }
+.pri-high { background: var(--coral-glow); color: var(--coral); }
+.pri-critical { background: var(--purple-soft); color: var(--purple); }
+
+.label-badge {
+  font-size: 9.5px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 100px;
+  letter-spacing: 0.5px;
+}
+
+.label-bug { background: rgba(232,97,60,0.08); color: var(--coral); }
+.label-feature { background: var(--green-soft); color: var(--green); }
+.label-design { background: var(--purple-soft); color: var(--purple); }
+.label-docs { background: var(--blue-soft); color: var(--blue); }
+.label-research { background: var(--warm-soft); color: var(--warm); }
+
+.card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--ink-ghost);
+}
+
+.card-avatar {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--ink-ghost);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--ink-mid);
+}
+
+.card-date {
+  font-size: 10.5px;
+  color: var(--ink-muted);
+  font-weight: 500;
+}
+
+/* ─── Add card button ─── */
+
+.add-card-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1.5px dashed var(--ink-ghost);
+  background: transparent;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink-muted);
+  transition: all .2s;
+  margin-top: 2px;
+}
+
+.add-card-btn:hover {
+  border-color: var(--coral);
+  color: var(--coral);
+  background: var(--coral-glow);
+}
+
+/* ─── List view ─── */
+
+.list-wrapper { display: none; flex: 1; overflow-y: auto; padding: 24px 28px; }
+
+.list-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--ink-ghost);
+}
+
+.list-table th {
+  text-align: left;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--ink-ghost);
+  background: var(--cream);
+}
+
+.list-table td {
+  font-size: 13px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--ink-ghost);
+  color: var(--ink-mid);
+}
+
+.list-table tr:last-child td { border-bottom: none; }
+
+.list-table tr:hover td { background: var(--cream); }
+
+.list-task-title {
+  font-weight: 600;
+  color: var(--ink);
+  letter-spacing: -0.2px;
+}
+
+.list-status-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+/* ─── Modal ─── */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(26,22,18,0.3);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .25s;
+}
+
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+
+.modal {
+  background: var(--white);
+  border: 1px solid var(--ink-ghost);
+  border-radius: var(--radius-lg);
+  width: 420px;
+  max-width: 90vw;
+  padding: 28px;
+  box-shadow: var(--shadow-lg);
+  transform: translateY(20px) scale(0.97);
+  transition: transform .3s cubic-bezier(0.16,1,0.3,1);
+}
+
+.modal-overlay.open .modal { transform: translateY(0) scale(1); }
+
+.modal-title {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  margin-bottom: 20px;
+}
+
+.modal-field {
+  margin-bottom: 16px;
+}
+
+.modal-field label {
+  display: block;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  margin-bottom: 6px;
+}
+
+.modal-field input,
+.modal-field textarea,
+.modal-field select {
+  width: 100%;
+  border: 1px solid var(--ink-ghost);
+  background: var(--cream);
+  border-radius: 9px;
+  padding: 10px 12px;
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink);
+  outline: none;
+  transition: border-color .2s;
+}
+
+.modal-field input:focus,
+.modal-field textarea:focus,
+.modal-field select:focus { border-color: var(--coral); }
+
+.modal-field textarea { resize: vertical; min-height: 70px; }
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+/* ─── Drag states ─── */
+
+.card.dragging {
+  opacity: 0.5;
+  transform: rotate(2deg) scale(0.96);
+}
+
+.column.drag-over {
+  background: var(--cream);
+  border-color: var(--coral);
+  box-shadow: 0 0 0 2px var(--coral-glow);
+}
+
+/* ─── Responsive ─── */
+
+@media (max-width: 768px) {
+  .sidebar { display: none; }
+  .topbar { padding: 0 16px; }
+  .filterbar { padding: 8px 16px; }
+  .board-wrapper { padding: 16px; }
+}
+
+/* ─── Animations ─── */
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.column {
+  animation: fadeInUp 0.5s cubic-bezier(0.16,1,0.3,1) both;
+}
+
+.column:nth-child(1) { animation-delay: 0s; }
+.column:nth-child(2) { animation-delay: 0.06s; }
+.column:nth-child(3) { animation-delay: 0.12s; }
+.column:nth-child(4) { animation-delay: 0.18s; }
+.column:nth-child(5) { animation-delay: 0.24s; }
+</style>
+</head>
+<body>
+
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-top">
+    <div class="workspace-icon">K</div>
+    <div>
+      <div class="workspace-name">Kan</div>
+      <div class="workspace-plan">Focus Workspace</div>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="sidebar-section-title">Views</div>
+
+    <a class="sidebar-item active" id="navBoard" onclick="setView('board')">
+      <span class="icon">▦</span>
+      <span>Board</span>
+    </a>
+
+    <a class="sidebar-item" id="navList" onclick="setView('list')">
+      <span class="icon">☰</span>
+      <span>List</span>
+    </a>
+
+    <div class="sidebar-section-title">Tools</div>
+
+    <a class="sidebar-item" onclick="exportJSON()">
+      <span class="icon">↓</span>
+      <span>Export</span>
+    </a>
+
+    <a class="sidebar-item" onclick="importJSON()">
+      <span class="icon">↑</span>
+      <span>Import</span>
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <button class="collapse-btn" onclick="toggleSidebar()">
+      <span class="icon">‹</span>
+      <span>Collapse</span>
+    </button>
+  </div>
+</aside>
+
+<div class="main">
+
+  <div class="topbar">
+    <div class="topbar-title">Kan</div>
+    <span class="topbar-subtitle">task board</span>
+    <div class="topbar-actions">
+      <button class="btn btn-primary" onclick="openAddModal()">+ New Task</button>
+    </div>
+  </div>
+
+  <div class="filterbar">
+    <div class="search-box">
+      <span class="search-icon">⌕</span>
+      <input type="text" placeholder="Search tasks…" id="searchInput" oninput="handleSearch()">
+    </div>
+    <div class="filter-chip" onclick="toggleFilter(this, 'all')">All</div>
+    <div class="filter-chip" onclick="toggleFilter(this, 'high')">High</div>
+    <div class="filter-chip" onclick="toggleFilter(this, 'medium')">Medium</div>
+    <div class="filter-chip" onclick="toggleFilter(this, 'low')">Low</div>
+  </div>
+
+  <div class="board-wrapper" id="boardView">
+    <div class="board" id="board"></div>
+  </div>
+
+  <div class="list-wrapper" id="listView">
+    <div id="listContent"></div>
+  </div>
+
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-title" id="modalTitle">New Task</div>
+    <div class="modal-field">
+      <label>Title</label>
+      <input type="text" id="modalTaskTitle" placeholder="What needs to be done?">
+    </div>
+    <div class="modal-field">
+      <label>Description</label>
+      <textarea id="modalTaskDesc" placeholder="Optional details…"></textarea>
+    </div>
+    <div class="modal-field">
+      <label>Column</label>
+      <select id="modalTaskCol">
+        <option value="backlog">Backlog</option>
+        <option value="todo" selected>To Do</option>
+        <option value="progress">In Progress</option>
+        <option value="review">Review</option>
+        <option value="done">Done</option>
+      </select>
+    </div>
+    <div class="modal-field">
+      <label>Priority</label>
+      <select id="modalTaskPri">
+        <option value="low">Low</option>
+        <option value="medium" selected>Medium</option>
+        <option value="high">High</option>
+        <option value="critical">Critical</option>
+      </select>
+    </div>
+    <div class="modal-field">
+      <label>Label</label>
+      <select id="modalTaskLabel">
+        <option value="">None</option>
+        <option value="feature">Feature</option>
+        <option value="bug">Bug</option>
+        <option value="design">Design</option>
+        <option value="docs">Docs</option>
+        <option value="research">Research</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" id="modalSaveBtn" onclick="saveTask()">Create</button>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="importInput" accept=".json" style="display:none" onchange="handleImport(event)">
+
+<script>
+const COLUMNS = [
+  { id:'backlog', title:'Backlog', color:'#a8a29e' },
+  { id:'todo', title:'To Do', color:'#c47030' },
+  { id:'progress', title:'In Progress', color:'#2a8c5a' },
+  { id:'review', title:'Review', color:'#7252b5' },
+  { id:'done', title:'Done', color:'#3068b8' }
+];
+
+let tasks = [];
+let searchQuery = '';
+let priorityFilter = 'all';
+let currentView = 'board';
+let editingId = null;
+let draggedCard = null;
+
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+
+function save() { localStorage.setItem("kan_tasks", JSON.stringify(tasks)); }
+
+function load() {
+  const d = localStorage.getItem("kan_tasks");
+  if (d) tasks = JSON.parse(d);
+  if (tasks.length === 0) {
+    tasks = [
+      { id: uid(), title: "Design system audit", column: "progress", priority: "high", label: "design", description: "Review typography, color, and spacing tokens" },
+      { id: uid(), title: "API rate limiting", column: "todo", priority: "critical", label: "feature", description: "Implement per-user throttling" },
+      { id: uid(), title: "Onboarding flow v2", column: "review", priority: "medium", label: "feature", description: "Simplified three-step signup" },
+      { id: uid(), title: "Fix auth redirect loop", column: "progress", priority: "high", label: "bug", description: "" },
+      { id: uid(), title: "Update API docs", column: "backlog", priority: "low", label: "docs", description: "Add new endpoint examples" },
+      { id: uid(), title: "Dark mode support", column: "todo", priority: "medium", label: "design", description: "Implement theme toggle and CSS variables" },
+      { id: uid(), title: "User analytics dashboard", column: "backlog", priority: "medium", label: "feature", description: "" },
+      { id: uid(), title: "Performance profiling", column: "done", priority: "high", label: "research", description: "Lighthouse audit completed" },
+      { id: uid(), title: "Migrate to Edge Functions", column: "todo", priority: "low", label: "research", description: "Evaluate Vercel vs Cloudflare" },
+      { id: uid(), title: "Ship notification system", column: "done", priority: "critical", label: "feature", description: "Email + in-app notifications live" }
+    ];
+    save();
+  }
+}
+
+function handleSearch() {
+  searchQuery = document.getElementById("searchInput").value.toLowerCase();
+  render();
+}
+
+function toggleFilter(el, val) {
+  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  priorityFilter = val;
+  render();
+}
+
+function getFiltered() {
+  return tasks.filter(t => {
+    const matchSearch = t.title.toLowerCase().includes(searchQuery) || (t.description || '').toLowerCase().includes(searchQuery);
+    const matchPri = priorityFilter === 'all' || t.priority === priorityFilter;
+    return matchSearch && matchPri;
+  });
+}
+
+function getTaskNum(id) {
+  return 'KAN-' + (tasks.findIndex(t => t.id === id) + 1);
+}
+
+function render() {
+  if (currentView === 'board') renderBoard();
+  else renderList();
+}
+
+function renderBoard() {
+  const board = document.getElementById("board");
+  board.innerHTML = "";
+  const filtered = getFiltered();
+
+  COLUMNS.forEach(col => {
+    const colTasks = filtered.filter(t => t.column === col.id);
+    const el = document.createElement("div");
+    el.className = "column";
+    el.dataset.col = col.id;
+
+    el.innerHTML = `
+      <div class="column-header">
+        <div class="column-dot" style="background:${col.color}"></div>
+        <div class="column-title">${col.title}</div>
+        <div class="column-count">${colTasks.length}</div>
+      </div>
+      <div class="column-body" data-col="${col.id}">
+        ${colTasks.map(t => renderCard(t)).join("")}
+        <button class="add-card-btn" onclick="openAddModal('${col.id}')">+ Add task</button>
+      </div>
+    `;
+
+    // Drag & drop on column body
+    const body = el.querySelector('.column-body');
+    body.addEventListener('dragover', e => {
+      e.preventDefault();
+      el.classList.add('drag-over');
+    });
+    body.addEventListener('dragleave', () => el.classList.remove('drag-over'));
+    body.addEventListener('drop', e => {
+      e.preventDefault();
+      el.classList.remove('drag-over');
+      if (draggedCard) {
+        const task = tasks.find(t => t.id === draggedCard);
+        if (task) {
+          task.column = col.id;
+          save();
+          render();
+        }
+      }
+    });
+
+    board.appendChild(el);
+  });
+
+  // Attach drag events to cards
+  document.querySelectorAll('.card').forEach(card => {
+    card.addEventListener('dragstart', e => {
+      draggedCard = card.dataset.id;
+      card.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    card.addEventListener('dragend', () => {
+      draggedCard = null;
+      document.querySelectorAll('.card').forEach(c => c.classList.remove('dragging'));
+      document.querySelectorAll('.column').forEach(c => c.classList.remove('drag-over'));
+    });
+  });
+}
+
+function renderCard(t) {
+  const labelHtml = t.label ? `<span class="label-badge label-${t.label}">${t.label}</span>` : '';
+  const descHtml = t.description ? `<div class="card-desc">${t.description}</div>` : '';
+
+  return `
+    <div class="card" draggable="true" data-id="${t.id}" ondblclick="openEditModal('${t.id}')">
+      <div class="card-id">${getTaskNum(t.id)}</div>
+      <div class="card-title">${t.title}</div>
+      ${descHtml}
+      <div class="card-meta">
+        <span class="priority-badge pri-${t.priority}">${t.priority}</span>
+        ${labelHtml}
+      </div>
+    </div>
+  `;
+}
+
+function renderList() {
+  const filtered = getFiltered();
+  const content = document.getElementById("listContent");
+
+  content.innerHTML = `
+    <table class="list-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Task</th>
+          <th>Status</th>
+          <th>Priority</th>
+          <th>Label</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${filtered.map(t => {
+          const col = COLUMNS.find(c => c.id === t.column);
+          return `
+            <tr ondblclick="openEditModal('${t.id}')" style="cursor:pointer;">
+              <td style="font-size:11px;color:var(--ink-muted);font-weight:600;letter-spacing:0.5px;">${getTaskNum(t.id)}</td>
+              <td><span class="list-task-title">${t.title}</span></td>
+              <td><span class="list-status-dot" style="background:${col.color}"></span>${col.title}</td>
+              <td><span class="priority-badge pri-${t.priority}">${t.priority}</span></td>
+              <td>${t.label ? `<span class="label-badge label-${t.label}">${t.label}</span>` : '—'}</td>
+            </tr>
+          `;
+        }).join("")}
+      </tbody>
+    </table>
+  `;
+}
+
+function setView(v) {
+  currentView = v;
+  document.getElementById("boardView").style.display = v === "board" ? "block" : "none";
+  document.getElementById("listView").style.display = v === "list" ? "flex" : "none";
+  document.getElementById("navBoard").classList.toggle("active", v === "board");
+  document.getElementById("navList").classList.toggle("active", v === "list");
+  render();
+}
+
+function openAddModal(colId) {
+  editingId = null;
+  document.getElementById("modalTitle").textContent = "New Task";
+  document.getElementById("modalSaveBtn").textContent = "Create";
+  document.getElementById("modalTaskTitle").value = "";
+  document.getElementById("modalTaskDesc").value = "";
+  document.getElementById("modalTaskCol").value = colId || "todo";
+  document.getElementById("modalTaskPri").value = "medium";
+  document.getElementById("modalTaskLabel").value = "";
+  document.getElementById("modalOverlay").classList.add("open");
+  setTimeout(() => document.getElementById("modalTaskTitle").focus(), 100);
+}
+
+function openEditModal(id) {
+  const t = tasks.find(x => x.id === id);
+  if (!t) return;
+  editingId = id;
+  document.getElementById("modalTitle").textContent = "Edit Task";
+  document.getElementById("modalSaveBtn").textContent = "Save";
+  document.getElementById("modalTaskTitle").value = t.title;
+  document.getElementById("modalTaskDesc").value = t.description || "";
+  document.getElementById("modalTaskCol").value = t.column;
+  document.getElementById("modalTaskPri").value = t.priority;
+  document.getElementById("modalTaskLabel").value = t.label || "";
+  document.getElementById("modalOverlay").classList.add("open");
+  setTimeout(() => document.getElementById("modalTaskTitle").focus(), 100);
+}
+
+function closeModal(e) {
+  if (e && e.target !== e.currentTarget) return;
+  document.getElementById("modalOverlay").classList.remove("open");
+}
+
+function saveTask() {
+  const title = document.getElementById("modalTaskTitle").value.trim();
+  if (!title) return;
+
+  const data = {
+    title,
+    description: document.getElementById("modalTaskDesc").value.trim(),
+    column: document.getElementById("modalTaskCol").value,
+    priority: document.getElementById("modalTaskPri").value,
+    label: document.getElementById("modalTaskLabel").value
+  };
+
+  if (editingId) {
+    const t = tasks.find(x => x.id === editingId);
+    if (t) Object.assign(t, data);
+  } else {
+    tasks.push({ id: uid(), ...data });
+  }
+
+  save();
+  render();
+  closeModal();
+}
+
+function toggleSidebar() {
+  document.getElementById("sidebar").classList.toggle("collapsed");
+}
+
+function exportJSON() {
+  const blob = new Blob([JSON.stringify(tasks, null, 2)], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "kan-export.json";
+  a.click();
+}
+
+function importJSON() {
+  document.getElementById("importInput").click();
+}
+
+function handleImport(e) {
+  const file = e.target.files[0];
+  const r = new FileReader();
+  r.onload = x => {
+    tasks = JSON.parse(x.target.result);
+    save();
+    render();
+  };
+  r.readAsText(file);
+}
+
+// Keyboard shortcuts
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeModal();
+  if (e.key === 'n' && !e.ctrlKey && !e.metaKey && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA' && document.activeElement.tagName !== 'SELECT') {
+    e.preventDefault();
+    openAddModal();
+  }
+});
+
+load();
+render();
+</script>
+
+</body>
+</html>

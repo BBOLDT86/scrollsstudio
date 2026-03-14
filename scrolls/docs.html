@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SimpleDoc</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Literata:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+--bg:#f5f5f7;
+--paper:#ffffff;
+--text:#1d1d1f;
+--muted:#6e6e73;
+--accent:#0071e3;
+--border:#e5e5ea;
+--shadow:0 10px 25px rgba(0,0,0,.08);
+}
+body{
+font-family:Inter,system-ui;
+background:var(--bg);
+height:100vh;
+display:flex;
+flex-direction:column;
+color:var(--text);
+overflow:hidden
+}
+header{
+height:54px;
+display:flex;
+align-items:center;
+justify-content:space-between;
+padding:0 18px;
+background:#fff;
+border-bottom:1px solid var(--border)
+}
+#title{
+font-size:16px;
+font-weight:600;
+border:none;
+outline:none;
+background:transparent
+}
+.actions{
+display:flex;
+gap:8px
+}
+button{
+border:none;
+background:#f2f2f4;
+padding:6px 10px;
+border-radius:8px;
+font-size:13px;
+cursor:pointer
+}
+button:hover{background:#e8e8ed}
+.primary{
+background:var(--accent);
+color:#fff
+}
+.primary:hover{opacity:.9}
+.toolbar{
+height:44px;
+display:flex;
+align-items:center;
+gap:6px;
+padding:0 12px;
+background:#fff;
+border-bottom:1px solid var(--border)
+}
+.toolbar button{background:none}
+.editorWrap{
+flex:1;
+overflow:auto;
+display:flex;
+justify-content:center;
+padding:40px 0
+}
+.page{
+width:820px;
+min-height:1100px;
+background:var(--paper);
+box-shadow:var(--shadow);
+padding:90px;
+font-family:Literata,serif;
+font-size:16px;
+line-height:1.7
+}
+#editor{outline:none;min-height:800px}
+footer{
+height:28px;
+font-size:12px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:0 14px;
+background:#fff;
+border-top:1px solid var(--border);
+color:var(--muted)
+}
+.dark{
+--bg:#1c1c1e;
+--paper:#2c2c2e;
+--text:#f5f5f7;
+--muted:#9a9aa0;
+--border:#3a3a3c
+}
+.command{
+position:fixed;
+top:20%;
+left:50%;
+transform:translateX(-50%);
+background:#fff;
+border-radius:14px;
+box-shadow:var(--shadow);
+padding:14px;
+width:340px;
+display:none;
+flex-direction:column;
+gap:8px
+}
+.command input{
+border:1px solid var(--border);
+padding:8px 10px;
+border-radius:8px;
+outline:none
+}
+.command div{
+padding:6px 8px;
+border-radius:6px;
+cursor:pointer;
+font-size:14px
+}
+.command div:hover{background:#f2f2f4}
+</style>
+</head>
+<body>
+
+<header>
+<input id="title" value="Untitled document">
+<div class="actions">
+<button onclick="toggleDark()">Theme</button>
+<button onclick="downloadTxt()">Export</button>
+<button class="primary" onclick="window.print()">Print</button>
+</div>
+</header>
+
+<div class="toolbar">
+<button onclick="cmd('bold')"><b>B</b></button>
+<button onclick="cmd('italic')"><i>I</i></button>
+<button onclick="cmd('underline')"><u>U</u></button>
+<button onclick="cmd('insertUnorderedList')">• List</button>
+<button onclick="cmd('insertOrderedList')">1. List</button>
+<button onclick="cmd('justifyCenter')">Center</button>
+<button onclick="cmd('formatBlock','h1')">H1</button>
+<button onclick="cmd('formatBlock','h2')">H2</button>
+<button onclick="insertLink()">Link</button>
+<button onclick="insertImage()">Image</button>
+</div>
+
+<div class="editorWrap">
+<div class="page">
+<div id="editor" contenteditable="true"></div>
+</div>
+</div>
+
+<footer>
+<span id="stats">Words: 0</span>
+<span id="status">Saved</span>
+</footer>
+
+<div class="command" id="cmd">
+<input placeholder="Type a command…" oninput="filterCmd(this.value)">
+<div data-c="bold">Bold</div>
+<div data-c="italic">Italic</div>
+<div data-c="underline">Underline</div>
+<div data-c="insertUnorderedList">Bullet list</div>
+<div data-c="insertOrderedList">Numbered list</div>
+<div data-c="justifyCenter">Center text</div>
+</div>
+
+<script>
+const e=document.getElementById("editor")
+const stats=document.getElementById("stats")
+const status=document.getElementById("status")
+
+function cmd(c,v){
+e.focus()
+document.execCommand(c,false,v||null)
+save()
+}
+
+function insertLink(){
+let url=prompt("Enter URL")
+if(!url)return
+document.execCommand("createLink",false,url)
+save()
+}
+
+function insertImage(){
+let i=document.createElement("input")
+i.type="file"
+i.accept="image/*"
+i.onchange=()=>{
+let f=i.files[0]
+let r=new FileReader()
+r.onload=()=>cmd("insertHTML","<img src='"+r.result+"' style='max-width:100%'>")
+r.readAsDataURL(f)
+}
+i.click()
+}
+
+function save(){
+status.textContent="Saving…"
+clearTimeout(window.sv)
+window.sv=setTimeout(()=>{
+localStorage.setItem("simpledoc",e.innerHTML)
+status.textContent="Saved"
+},500)
+updateStats()
+}
+
+function updateStats(){
+let t=e.innerText.trim()
+let w=t? t.split(/\s+/).length:0
+stats.textContent="Words: "+w
+}
+
+try{
+let s=localStorage.getItem("simpledoc")
+if(s)e.innerHTML=s
+}catch{}
+
+e.addEventListener("input",save)
+
+function downloadTxt(){
+let blob=new Blob([e.innerText])
+let a=document.createElement("a")
+a.href=URL.createObjectURL(blob)
+a.download=(document.getElementById("title").value||"doc")+".txt"
+a.click()
+}
+
+function toggleDark(){
+document.body.classList.toggle("dark")
+}
+
+document.addEventListener("keydown",k=>{
+if((k.metaKey||k.ctrlKey)&&k.key==="k"){
+k.preventDefault()
+toggleCmd()
+}
+})
+
+const cmdBox=document.getElementById("cmd")
+
+function toggleCmd(){
+cmdBox.style.display=cmdBox.style.display==="flex"?"none":"flex"
+if(cmdBox.style.display==="flex")cmdBox.querySelector("input").focus()
+}
+
+cmdBox.querySelectorAll("div").forEach(d=>{
+d.onclick=()=>{
+cmd(d.dataset.c)
+toggleCmd()
+}
+})
+
+function filterCmd(q){
+q=q.toLowerCase()
+cmdBox.querySelectorAll("div").forEach(d=>{
+d.style.display=d.textContent.toLowerCase().includes(q)?"block":"none"
+})
+}
+
+updateStats()
+</script>
+
+</body>
+</html>

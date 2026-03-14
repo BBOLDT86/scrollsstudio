@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>The Vivian Dossier — Vertiv, Delaware</title>
+<style>
+  :root {
+    --ink: #1a1a1a;
+    --paper: #faf8f5;
+    --blush: #c4566a;
+    --champagne: #e8d5c4;
+    --gold: #b8963e;
+    --smoke: #6b6b6b;
+    --whisper: #f0ebe4;
+    --rule: #c8c0b4;
+    --midnight: #2c2c2c;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: Georgia, 'Times New Roman', Times, serif;
+    font-size: 16px;
+    line-height: 1.72;
+    -webkit-font-smoothing: antialiased;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  .masthead {
+    text-align: center;
+    padding: 44px 20px 26px;
+    border-bottom: 3px double var(--ink);
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .masthead-date {
+    font-family: -apple-system, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 10px;
+    letter-spacing: 3.5px;
+    text-transform: uppercase;
+    color: var(--smoke);
+    margin-bottom: 10px;
+  }
+
+  .masthead h1 {
+    font-family: Georgia, 'Times New Roman', Times, serif;
+    font-size: 42px;
+    font-weight: bold;
+    letter-spacing: -0.5px;
+    line-height: 1.08;
+    color: var(--ink);
+  }
+
+  .masthead h1 em {
+    font-style: italic;
+    color: var(--blush);
+  }
+
+  .masthead-subtitle {
+    font-family: -apple-system, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 11px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--smoke);
+    margin-top: 12px;
+  }
+
+  .article {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+
+  .section-label {
+    font-family: -apple-system, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 10px;
+    letter-spacing: 3.5px;
+    text-transform: uppercase;
+    color: var(--blush);
+    margin-top: 44px;
+    margin-bottom: 5px;
+  }
+
+  h2 {
+    font-family: Georgia, 'Times New Roman', Times, serif;
+    font-size: 28px;
+    font-weight: bold;
+    line-height: 1.2;
+    color: var(--ink);
+    margin-bottom: 18px;
+  }
+
+  h3 {
+    font-family: Georgia, 'Times New Roman', Times, serif;
+    font-size: 20px;
+    font-weight: normal;
+    font-style: italic;
+    color: var(--midnight);
+    margin-top: 30px;
+    margin-bottom: 10px;
+  }
+
+  p {
+    margin-bottom: 16px;
+    color: var(--ink);
+  }
+
+  .pull-quote {
+    border-left: 3px solid var(--blush);
+    padding: 16px 0 16px 22px;
+    margin: 30px 0;
+    font-family: Georgia, 'Times New Roman', Times, serif;
+    font-size: 19px;
+    font-style: italic;
+    line-height: 1.5;
+    color: var(--midnight);
+  }
+
+  .pull-quote .attribution {
+    display: block;
+    font-family: -apple-system, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 10px;
+    font-style: normal;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--smoke);
+    margin-top: 10px;
+  }
+
+  .lede::first-letter {
+    font-family: Georgia, 'Times New Roman', Times, serif;
+    font-size: 62px;
+    float: left;
+    line-height: 0.78;
+    margin: 5px 8px 0 0;
+    color: var(--blush);
+    font-weight: bold;
+  }
+
+  .lede {
+    font-size: 17px;
+    line-height: 1.78;
+    margin-top: 28px;
+  }
+
+  .ornament {
+    text-align: center;
+    margin: 36px 0;
+    color: var(--rule);
+    font-size: 16px;
+    letter-spacing: 10px;
+  }
+
+  hr.thin {
+    border: none;
+    border-top: 1px solid var(--rule);
+    margin: 34px 0;
+  }
+
+  .fact-card {
+    background: var(--whisper);
+    border: 1px solid var(--rule);
+    border-left: 4px solid var(--blush);
+    padding: 22px 20px;
+    margin: 24px 0;
+  }
+
+  .fact-card h4 {
+    font-family: -apple-system, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 10px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--blush);
+    margin-bottom: 10px;
+  }
+
+  .fact-card p {
+    font-size: 14px;
+    margin-bottom: 7px;
+    color: var(--midnight);
+    line-height: 1.65;
+  }
+
+  .fact-card p:last-child { margin-bottom: 0; }
+  .fact-card strong { color: var(--ink); }
+
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin: 24px 0;
+  }
+
+  .stat-item {
+    text-align: center;
+    padding: 18px 8px;
+    border: 1px solid var(--rule);
+    background: white;
+  }
+
+  .stat-number {
+    font-family: Georgia, 'Times New Roman', Times, serif;
+    font-size: 26px;
+    font-weight: bold;
+    color: var(--blush);
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-family: -apple-system, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--smoke);
+    margin-top: 6px;
+  }
+
+  .convo-card {
+    background: white;
+    border: 1px solid var(--rule);
+    padding: 20px;
+    margin: 16px 0;
+  }
+
+  .convo-card .q {
+    font-family: -apple-system, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--blush);
+    margin-bottom: 6px;
+  }
+
+  .convo-card .question {
+    font-family: Georgia, 'Times New Roman', Times, serif;
+    font-size: 17px;
+    font-style: italic;
+    line-height: 1.35;
+    color: var(--ink);
+    margin-bottom: 12px;
+  }
+
+  .convo-card .answer {
+    font-size: 14px;
+    line-height: 1.65;
+    color: var(--midnight);
+  }
+
+  .checklist {
+    list-style: none;
+    padding: 0;
+    margin: 20px 0;
+  }
+
+  .checklist li {
+    padding: 9px 0 9px 28px;
+    position: relative;
+    font-size: 15px;
+    border-bottom: 1px dotted var(--rule);
+    line-height: 1.6;
+  }
+
+  .checklist li::before {
+    content: '\25C7';
+    position: absolute;
+    left: 0;
+    color: var(--blush);
+    font-size: 12px;
+    top: 12px;
+  }
+
+  .schedule-block {
+    background: white;
+    border: 1px solid var(--rule);
+    border-left: 4px solid var(--blush);
+    padding: 20px;
+    margin: 16px 0;
+  }
+
+  .schedule-time {
+    font-family: -apple-system, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--blush);
+    margin-bottom: 6px;
+  }
+
+  .schedule-names {
+    font-family: Georgia, 'Times New Roman', Times, serif;
+    font-size: 18px;
+    font-weight: bold;
+    line-height: 1.3;
+    color: var(--ink);
+    margin-bottom: 6px;
+  }
+
+  .schedule-title {
+    font-family: -apple-system, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 12px;
+    color: var(--smoke);
+    line-height: 1.5;
+  }
+
+  .schedule-note {
+    font-size: 14px;
+    font-style: italic;
+    color: var(--midnight);
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px dotted var(--rule);
+    line-height: 1.6;
+  }
+
+  .person-card {
+    background: white;
+    border: 1px solid var(--rule);
+    margin: 20px 0;
+    overflow: hidden;
+  }
+
+  .person-header {
+    background: var(--midnight);
+    color: var(--paper);
+    padding: 16px 20px;
+  }
+
+  .person-header h4 {
+    font-family: Georgia, 'Times New Roman', Times, serif;
+    font-size: 19px;
+    font-weight: bold;
+    margin-bottom: 3px;
+  }
+
+  .person-header .person-title-line {
+    font-family: -apple-system, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 11px;
+    letter-spacing: 1px;
+    color: var(--champagne);
+  }
+
+  .person-body {
+    padding: 18px 20px;
+  }
+
+  .person-body p {
+    font-size: 14px;
+    line-height: 1.65;
+    margin-bottom: 10px;
+    color: var(--midnight);
+  }
+
+  .person-body p:last-child { margin-bottom: 0; }
+
+  .person-body .talk-about {
+    font-family: -apple-system, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--blush);
+    margin-top: 12px;
+    margin-bottom: 6px;
+  }
+
+  .closing-note {
+    background: var(--midnight);
+    color: var(--paper);
+    padding: 40px 24px;
+    margin: 44px -20px 0;
+    text-align: center;
+  }
+
+  .closing-note h2 {
+    color: var(--champagne);
+    font-style: italic;
+    margin-bottom: 14px;
+    font-size: 24px;
+  }
+
+  .closing-note p {
+    color: rgba(250, 248, 245, 0.8);
+    font-size: 15px;
+    max-width: 520px;
+    margin: 0 auto 12px;
+    line-height: 1.65;
+  }
+
+  .closing-note .sign-off {
+    font-family: Georgia, 'Times New Roman', Times, serif;
+    font-size: 18px;
+    font-style: italic;
+    color: var(--blush);
+    margin-top: 24px;
+  }
+
+  .footer {
+    text-align: center;
+    padding: 28px 20px 44px;
+    font-family: -apple-system, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 9px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--rule);
+  }
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="masthead-date">Confidential Briefing &bull; March 2026</div>
+  <h1>The <em>Vivian</em> Dossier</h1>
+  <div class="masthead-subtitle">Vertiv &bull; Delaware, Ohio &bull; Tuesday, March 24 &bull; 12&ndash;2 PM</div>
+</header>
+
+<article class="article">
+
+  <p class="section-label">The Situation</p>
+  <h2>She Got the Call. Now She's Getting Ready.</h2>
+
+  <p class="lede">Tuesday, March 24th. Noon sharp. You walk into Vertiv's Delaware, Ohio facility, ask for Dominic at the front desk, and spend the next two hours meeting the people who already want to hire you. This is a three-part interview: first your future PM peers and their senior director, then the VP who runs Power Solutions &amp; Distribution, then the VP who runs Energy Storage. They've already informally offered. This is the final confirmation&mdash;the "let's make sure we all want to do this together" day. And Vivian? She's going in knowing everything.</p>
+
+  <div class="ornament">&#10022; &nbsp; &#10022; &nbsp; &#10022;</div>
+
+  <p class="section-label">Your Day</p>
+  <h2>The Schedule, Minute by Minute</h2>
+
+  <div class="schedule-block">
+    <div class="schedule-time">11:45 AM &mdash; Arrival</div>
+    <div class="schedule-names">Check in. Ask for Dominic.</div>
+    <div class="schedule-title">Arrive 15 minutes early. Check in at the front desk and ask for Dominic Ruggerie by name&mdash;he's your first point of contact and one of your interviewers.</div>
+  </div>
+
+  <div class="schedule-block">
+    <div class="schedule-time">12:00 PM &mdash; 1:00 PM &bull; One Hour</div>
+    <div class="schedule-names">Todd Schleucher, Dominic Ruggerie &amp; Ben Kissell</div>
+    <div class="schedule-title">Todd &amp; Dominic: Project Managers, Product Dev/Engineering<br>Ben: Sr. Director, Global Power Strategy &amp; Program Mgmt</div>
+    <div class="schedule-note">Your longest block&mdash;a full hour with your would-be peers and their senior leader. Expect a mix of getting-to-know-you conversation, discussion of how the PM team operates, and likely a facility walkthrough. Be warm, collaborative, and genuinely curious about their projects and processes.</div>
+  </div>
+
+  <div class="schedule-block">
+    <div class="schedule-time">1:00 PM &mdash; 1:30 PM &bull; Thirty Minutes</div>
+    <div class="schedule-names">Todd Marchal</div>
+    <div class="schedule-title">Vice President, Power Solutions &amp; Distribution, Product Dev/Engineering</div>
+    <div class="schedule-note">Half hour with a VP. More strategic&mdash;expect bigger-picture questions about product development, market demands, and cross-functional leadership. He's evaluating your executive presence as much as your PM skills.</div>
+  </div>
+
+  <div class="schedule-block">
+    <div class="schedule-time">1:30 PM &mdash; 2:00 PM &bull; Thirty Minutes</div>
+    <div class="schedule-names">Milind Paranjape</div>
+    <div class="schedule-title">Vice President, Energy Storage, Product Dev/Engineering</div>
+    <div class="schedule-note">Your closer. Milind leads one of Vertiv's fastest-growing segments. Energy storage is at the heart of the AI data center revolution. Leave him feeling like you understand why this work matters.</div>
+  </div>
+
+  <hr class="thin">
+
+  <p class="section-label">Chapter One</p>
+  <h2>Know Your People</h2>
+
+  <p>Five people. Two hours. Here's what to know about each one&mdash;and what to talk about when the conversation gets rolling.</p>
+
+  <div class="person-card">
+    <div class="person-header">
+      <h4>Todd Schleucher</h4>
+      <div class="person-title-line">Project Manager, Product Development/Engineering</div>
+    </div>
+    <div class="person-body">
+      <p>Your potential peer on the PM team. Todd works on the product development side, managing NPD and sustaining engineering projects within the AC Power portfolio. He'll be evaluating whether you'd be a great colleague&mdash;someone who can carry their weight on complex cross-functional programs.</p>
+      <div class="talk-about">What to talk about</div>
+      <p>Ask about his current projects. What NPD programs is he managing? What tools does the team use day to day? What does the handoff from engineering to manufacturing look like? Show you're someone who digs into details and wants to learn the rhythm fast.</p>
+    </div>
+  </div>
+
+  <div class="person-card">
+    <div class="person-header">
+      <h4>Dominic Ruggerie</h4>
+      <div class="person-title-line">Project Manager, Product Development/Engineering &bull; Your Host</div>
+    </div>
+    <div class="person-body">
+      <p>Your other potential peer&mdash;and your first point of contact. The invite says to ask for Dominic when you arrive, so he's your host and likely the one who'll walk you in. He's also a PM in Product Development/Engineering, evaluating day-to-day team fit.</p>
+      <div class="talk-about">What to talk about</div>
+      <p>Use the walk-in to build rapport. Ask how long he's been at Vertiv, what he likes about the Delaware campus. When the formal conversation starts, ask about the team's biggest wins and what the workload looks like with the current backlog surge. Be the kind of person people want to grab lunch with.</p>
+    </div>
+  </div>
+
+  <div class="person-card">
+    <div class="person-header">
+      <h4>Ben Kissell</h4>
+      <div class="person-title-line">Sr. Director, Global Power Strategy &amp; Program Management</div>
+    </div>
+    <div class="person-body">
+      <p>The senior leader in the room during Hour One&mdash;and likely the person with the most influence over the PM team's direction. Ben's career at Vertiv spans energy storage product management, battery programs, commercial operations, and now global power strategy and program management. He has prior experience at Eaton and Texas Instruments. He's been around the power industry and understands both the technical and strategic sides deeply.</p>
+      <div class="talk-about">What to talk about</div>
+      <p>Ben thinks in terms of portfolio strategy and program execution at scale. Ask where the AC Power PM function is headed as the company grows. How does he balance NPD speed with quality? Show you can think beyond individual projects to the health of the entire program portfolio. Ask what success looks like in the first 90 days&mdash;this is the person most likely to define it.</p>
+    </div>
+  </div>
+
+  <div class="person-card">
+    <div class="person-header">
+      <h4>Todd Marchal</h4>
+      <div class="person-title-line">VP, Power Solutions &amp; Distribution, Product Dev/Engineering</div>
+    </div>
+    <div class="person-body">
+      <p>A VP-level executive and a Vertiv/Emerson veteran. Todd rose from strategic planning and remote services roles at Emerson Network Power, through director-level positions in Power Switching &amp; Distribution product management and AC Power offering management, to his current VP role overseeing Global AC Power Solutions. He holds an MBA from Ohio State's Fisher College of Business (with studies at Hong Kong University of Science &amp; Technology) and a BS from the University of Toledo.</p>
+      <div class="talk-about">What to talk about</div>
+      <p>Todd owns product strategy for power solutions and distribution&mdash;UPS, static transfer switches, PDUs. He'll want to know you understand the business impact of PM, not just the mechanics. Talk about accelerating time-to-market, managing scope in technical environments, and navigating speed/cost/quality trade-offs. He spent years in offering management, so he appreciates someone who speaks the language of market needs, not just Gantt charts. Ask where the roadmap is heading.</p>
+    </div>
+  </div>
+
+  <div class="person-card">
+    <div class="person-header">
+      <h4>Milind Paranjape</h4>
+      <div class="person-title-line">VP, Energy Storage, Product Dev/Engineering</div>
+    </div>
+    <div class="person-body">
+      <p>Milind leads Vertiv's entire Global Energy Storage segment&mdash;one of the most strategically critical parts of the company. He rose from Senior Director to VP, with prior roles at Emerson Network Power and Vistar Electronics. He holds an engineering degree from Amravati University. Most recently, Milind spearheaded the launch of <strong>Vertiv EnergyCore</strong>&mdash;compact, high-density LFP lithium battery cabinets designed specifically for AI-era data centers. He also led the ZincFive nickel-zinc battery partnership.</p>
+      <div class="talk-about">What to talk about</div>
+      <p>Energy storage is the sexiest corner of this business right now. AI data centers need more power in less space, and batteries are the bridge. Ask about the EnergyCore launch&mdash;how did the PM team support development to market? Ask about DynaFlex BESS and how energy storage connects to the BYOP microgrid vision on the Delaware campus. Show you understand this isn't just batteries&mdash;it's the foundation of the "Bring Your Own Power" future.</p>
+    </div>
+  </div>
+
+  <hr class="thin">
+
+  <p class="section-label">Chapter Two</p>
+  <h2>Vertiv: The 60-Second Version</h2>
+
+  <p>Vertiv (NYSE: VRT) is a global leader in critical digital infrastructure&mdash;power, cooling, and IT management for data centers. Headquartered in Westerville, Ohio. 20,000+ employees, 130+ countries. Originally Emerson Electric's Network Power division, spun off 2016, went public. The Liebert UPS brand dates to the 1960s in Columbus. The Delaware facility has been part of the story since 1980.</p>
+
+  <div class="stat-grid">
+    <div class="stat-item">
+      <div class="stat-number">$10.2B</div>
+      <div class="stat-label">2025 Revenue</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number">$15B</div>
+      <div class="stat-label">Backlog</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number">+28%</div>
+      <div class="stat-label">YoY Growth</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number">2.9x</div>
+      <div class="stat-label">Book-to-Bill</div>
+    </div>
+  </div>
+
+  <p>The growth engine is AI. Data centers need exponentially more power than grids can deliver, and Vertiv makes the UPS systems, battery storage, power distribution, and microgrid solutions that fill the gap. Partnerships with Nvidia, Caterpillar, and Oklo. Stock rose 191% over the past year. 2026 guidance: $13.3&ndash;$13.8B revenue. CEO: Giovanni Albertazzi. Chairman: David Cote (former Honeywell CEO). SVP Global AC Power: Kyle Keeper.</p>
+
+  <hr class="thin">
+
+  <p class="section-label">Chapter Three</p>
+  <h2>The Delaware Campus</h2>
+
+  <p><strong>975 Pittsburg Drive, Delaware, OH 43015.</strong> About 30 minutes north of Columbus. Manufacturing + R&amp;D hub since 1980. Six acres.</p>
+
+  <div class="fact-card">
+    <h4>Customer Experience Center &amp; Microgrid</h4>
+    <p><strong>1.0 MW Solar PV Array</strong> &mdash; Full megawatt of solar on site</p>
+    <p><strong>400 kW Hydrogen Fuel Cell</strong> &mdash; In a Vertiv SmartMod enclosure</p>
+    <p><strong>1.5 MWh DynaFlex BESS</strong> &mdash; Lithium-ion battery storage (Milind's domain)</p>
+    <p><strong>Liebert EXL S1 UPS</strong> &mdash; Flagship UPS with fuel cell integration</p>
+    <p><strong>DynaFlex Microgrid Controller</strong> &mdash; Orchestrates all energy sources</p>
+  </div>
+
+  <div class="fact-card">
+    <h4>Power Systems Test Center</h4>
+    <p><strong>41,000 sq ft</strong> &mdash; Largest test facility of its kind in the industry</p>
+    <p><strong>2,600 sq ft</strong> customer observation suite with live data displays</p>
+    <p>Large UPS factory witness testing over multiple days</p>
+  </div>
+
+  <p>Big theme: <strong>"Bring Your Own Power" (BYOP).</strong> As grids become unreliable for hyperscale data centers, Vertiv helps customers generate, store, and manage power on-site. This campus is the living proof-of-concept.</p>
+
+  <hr class="thin">
+
+  <p class="section-label">Chapter Four</p>
+  <h2>Your Conversation Playbook</h2>
+
+  <div class="convo-card">
+    <div class="q">When They Ask</div>
+    <div class="question">"What do you know about Vertiv?"</div>
+    <div class="answer">Tell the story: Liebert heritage, Emerson spin-off, AI-driven inflection point. Mention the Delaware microgrid and BYOP vision. Show you understand this isn't just a power company&mdash;it's the infrastructure backbone of the AI revolution. Stats to back you up: $10.2B revenue, $15B backlog, 2.9x book-to-bill. But lead with the narrative.</div>
+  </div>
+
+  <div class="convo-card">
+    <div class="q">When They Ask</div>
+    <div class="question">"Why project management? Why here?"</div>
+    <div class="answer">Connect the velocity of innovation&mdash;fuel cell UPS integration, EnergyCore battery cabinets, microgrid controllers&mdash;to your ability to keep complex cross-functional programs on track. You thrive where stakes are real and pace is fast. Delaware isn't just a campus. It's where the products powering the next decade of data centers are born.</div>
+  </div>
+
+  <div class="convo-card">
+    <div class="q">When They Ask</div>
+    <div class="question">"How do you handle a project falling behind?"</div>
+    <div class="answer">Vertiv values "Act With Urgency" and "Own It." Root-cause fast, rally the right people, communicate transparently, build a recovery plan with clear milestones. Don't hide problems. Have a specific example ready.</div>
+  </div>
+
+  <div class="convo-card">
+    <div class="q">Tailored Questions for Each Session</div>
+    <div class="question">Pick 1&ndash;2 per person. Quality over quantity.</div>
+    <div class="answer">
+      <strong>Todd S. &amp; Dominic (peers):</strong> "What does a typical week look like for a PM here? How many active programs are you each running?" &bull; "Where do NPD projects tend to hit the most friction?"<br><br>
+      <strong>Ben (Sr. Director):</strong> "How is the PM function evolving as the backlog accelerates&mdash;process, headcount, or both?" &bull; "What does success look like in the first 90 days?"<br><br>
+      <strong>Todd Marchal (VP):</strong> "Where is the Power Solutions roadmap heading, and what are the biggest priorities the PM team needs to support?" &bull; "How do you balance time-to-market urgency against getting the product right?"<br><br>
+      <strong>Milind (VP):</strong> "The EnergyCore cabinet launch was impressive. How did the PM team support that from development to market?" &bull; "How does energy storage connect to the broader BYOP and microgrid vision?"
+    </div>
+  </div>
+
+  <hr class="thin">
+
+  <p class="section-label">Chapter Five</p>
+  <h2>Day-Of Survival Guide</h2>
+
+  <ul class="checklist">
+    <li><strong>Tuesday, March 24. 12:00 PM ET.</strong> Be there by 11:45. Ask for Dominic at the front desk.</li>
+    <li><strong>Dress smart-casual to business casual.</strong> Polished but practical&mdash;closed-toe shoes likely required on the plant floor. No stilettos on this one, babe.</li>
+    <li><strong>Address is in your calendar invite.</strong> Delaware is ~30 min north of Columbus. Buffer for traffic.</li>
+    <li><strong>Bring a slim notebook.</strong> Write down names and key details. Reference them later. It shows you listen.</li>
+    <li><strong>Safety first&mdash;literally.</strong> Vertiv's #1 principle. If they hand you PPE, put it on without hesitation.</li>
+    <li><strong>Pace yourself across 3 sessions.</strong> Hour One is longest and most conversational. The two 30-min VP sessions will be faster and more strategic. Calibrate your energy.</li>
+    <li><strong>Follow up within 24 hours.</strong> Email Jai asking to pass along thanks to each interviewer. Reference one specific thing per conversation.</li>
+    <li><strong>Questions? Call or email Jai or Ryan.</strong> They're your recruiting contacts and want you to succeed.</li>
+    <li><strong>The unofficial rule:</strong> They already like you. The informal offer happened for a reason. Be present, curious, yourself.</li>
+  </ul>
+
+  <hr class="thin">
+
+  <p class="section-label">Quick Reference</p>
+  <h2>Your Cheat Sheet</h2>
+
+  <div class="fact-card">
+    <h4>Your Interviewers</h4>
+    <p><strong>Todd Schleucher</strong> &mdash; PM, Product Dev/Engineering (peer)</p>
+    <p><strong>Dominic Ruggerie</strong> &mdash; PM, Product Dev/Engineering (peer, your host)</p>
+    <p><strong>Ben Kissell</strong> &mdash; Sr. Director, Global Power Strategy &amp; Program Mgmt</p>
+    <p><strong>Todd Marchal</strong> &mdash; VP, Power Solutions &amp; Distribution (Ohio State MBA)</p>
+    <p><strong>Milind Paranjape</strong> &mdash; VP, Energy Storage (EnergyCore launch lead)</p>
+  </div>
+
+  <div class="fact-card">
+    <h4>Company Snapshot</h4>
+    <p><strong>Vertiv Holdings Co</strong> (NYSE: VRT) &bull; HQ: Westerville, OH</p>
+    <p><strong>CEO:</strong> Giovanni Albertazzi &bull; <strong>Chairman:</strong> David Cote</p>
+    <p><strong>SVP, Global AC Power:</strong> Kyle Keeper</p>
+    <p><strong>2025 Revenue:</strong> $10.2B (+28%) &bull; <strong>2026 Guidance:</strong> $13.3&ndash;$13.8B</p>
+    <p><strong>Backlog:</strong> $15.0B &bull; <strong>Employees:</strong> ~20K &bull; <strong>Countries:</strong> 130+</p>
+  </div>
+
+  <div class="fact-card">
+    <h4>Key Products</h4>
+    <p><strong>Liebert EXL S1 UPS</strong> &mdash; Flagship, fuel cell integrated</p>
+    <p><strong>EnergyCore Battery Cabinets</strong> &mdash; LFP lithium, AI-optimized (Milind)</p>
+    <p><strong>DynaFlex BESS</strong> &mdash; Battery energy storage system</p>
+    <p><strong>Trinergy UPS</strong> &mdash; Modular, pairs with EnergyCore</p>
+    <p><strong>Static Transfer Switches &amp; PDUs</strong> &mdash; Todd Marchal's domain</p>
+  </div>
+
+  <div class="fact-card">
+    <h4>Culture &amp; Values</h4>
+    <p><strong>Principles:</strong> Safety &middot; Integrity &middot; Respect &middot; Teamwork &middot; D&amp;I</p>
+    <p><strong>Priorities:</strong> Customer Focus &middot; Operational Excellence &middot; High-Performance Culture &middot; Innovation &middot; Financial Strength</p>
+    <p><strong>Behaviors:</strong> Own It &middot; Act With Urgency &middot; Customer-First &middot; Think Big &amp; Execute &middot; Lead by Example &middot; Continuous Improvement</p>
+    <p><strong>ERGs:</strong> WAVE (Women) &middot; Vertiv Pride (LGBTQ+) &middot; BRITE (Black excellence)</p>
+  </div>
+
+</article>
+
+<div class="closing-note">
+  <h2>One Last Thing, Vivian.</h2>
+  <p>Five people. Two hours. Three sessions. They've already chosen you&mdash;this is just confirming what they already know.</p>
+  <p>When Dominic greets you at the front desk, smile. When Todd and Ben walk you through the floor, be curious. When Todd Marchal talks strategy, match his altitude. When Milind closes out the day on energy storage, let him see you get why this work matters.</p>
+  <p>Then go home, write five thank-you notes, and wait for that offer letter.</p>
+  <div class="sign-off">You've got this. &#10022;</div>
+</div>
+
+<div class="footer">
+  Prepared with care &bull; March 2026 &bull; Confidential
+</div>
+
+</body>
+</html>

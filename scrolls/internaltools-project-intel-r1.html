@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Adversarial PM Debate Engine</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg-root: #0C0C0E;
+    --bg-card: #18181B;
+    --bg-inset: #0C0C0E;
+    --border: #27272A;
+    --text-primary: #E4E4E7;
+    --text-secondary: #A1A1AA;
+    --text-muted: #71717A;
+    --text-dim: #52525B;
+    --blue: #3B82F6;
+    --indigo: #6366F1;
+    --green: #52C41A;
+    --yellow: #FAAD14;
+    --red: #FF4D4F;
+    --mono: 'JetBrains Mono', monospace;
+    --sans: 'DM Sans', 'Helvetica Neue', sans-serif;
+  }
+
+  body {
+    min-height: 100vh;
+    background: var(--bg-root);
+    color: var(--text-primary);
+    font-family: var(--sans);
+    padding: 40px 20px;
+  }
+
+  .container { max-width: 720px; margin: 0 auto; }
+
+  /* Header */
+  .header { text-align: center; margin-bottom: 40px; }
+  .header-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .header h1 {
+    font-size: 28px;
+    font-weight: 700;
+    background: linear-gradient(135deg, #E4E4E7, #A1A1AA);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .header p { color: var(--text-muted); font-size: 14px; margin-top: 8px; }
+
+  /* Input area */
+  .input-area {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 24px;
+  }
+  .input-area textarea {
+    width: 100%;
+    background: var(--bg-inset);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-family: var(--sans);
+    font-size: 15px;
+    padding: 12px 16px;
+    resize: vertical;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .input-area textarea:focus { border-color: var(--blue); }
+  .input-area textarea::placeholder { color: var(--text-dim); }
+
+  .run-btn {
+    margin-top: 12px;
+    width: 100%;
+    padding: 12px 0;
+    background: linear-gradient(135deg, var(--blue), var(--indigo));
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    font-family: var(--sans);
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 0.03em;
+    transition: opacity 0.2s;
+  }
+  .run-btn:hover { opacity: 0.9; }
+  .run-btn:disabled {
+    background: var(--border);
+    cursor: not-allowed;
+    opacity: 1;
+  }
+
+  /* Progress bar */
+  .progress { display: flex; gap: 4px; margin-bottom: 28px; padding: 0 4px; }
+  .progress-step { flex: 1; }
+  .progress-bar {
+    height: 3px;
+    border-radius: 2px;
+    background: var(--border);
+    transition: background 0.4s;
+  }
+  .progress-bar.active {
+    background: linear-gradient(90deg, var(--blue), #3B82F644);
+  }
+  .progress-bar.done { background: var(--blue); }
+  .progress-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text-dim);
+    margin-top: 6px;
+    text-align: center;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    transition: color 0.3s;
+  }
+  .progress-label.active { color: var(--blue); }
+
+  /* Section cards */
+  .section-card {
+    background: var(--bg-card);
+    border: 1px solid transparent;
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin-bottom: 16px;
+    opacity: 0;
+    transform: translateY(12px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+  .section-card.visible { opacity: 1; transform: translateY(0); }
+
+  .section-card.proposer {
+    border-color: #3B82F633;
+    border-left: 3px solid var(--blue);
+  }
+  .section-card.challenger {
+    border-color: #FF4D4F33;
+    border-left: 3px solid var(--red);
+  }
+  .section-card.resolver {
+    border-color: #52C41A33;
+    border-left: 3px solid var(--green);
+  }
+  .section-card.resolver.mitigated {
+    border-color: #FAAD1433;
+    border-left-color: var(--yellow);
+  }
+  .section-card.resolver.rejected {
+    border-color: #FF4D4F33;
+    border-left-color: var(--red);
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .section-header.proposer-h { color: var(--blue); }
+  .section-header.challenger-h { color: var(--red); }
+  .section-header.resolver-h { color: var(--green); }
+
+  .section-header .icon { font-size: 18px; }
+
+  /* Tags */
+  .tag {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: #fff;
+    text-transform: uppercase;
+  }
+
+  /* Content styles */
+  .rec-title { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+  .rec-summary { color: var(--text-secondary); font-size: 14px; line-height: 1.6; margin-bottom: 14px; }
+
+  .label { color: var(--text-muted); font-weight: 700; font-size: 13px; }
+  .content-list { margin: 6px 0 0; padding-left: 18px; color: #D4D4D8; font-size: 13px; }
+  .content-list li { margin-bottom: 4px; }
+  .impl-text { margin: 4px 0 0; color: #D4D4D8; font-size: 13px; }
+  .risks-list { color: var(--text-secondary); }
+
+  .tag-row { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+  .assessment { font-size: 13px; color: var(--text-secondary); }
+
+  .challenge-item {
+    background: var(--bg-inset);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-bottom: 8px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .sev-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-top: 5px;
+    flex-shrink: 0;
+  }
+  .challenge-point { font-weight: 700; font-size: 13px; margin-bottom: 4px; }
+  .challenge-evidence { font-size: 12px; color: var(--text-secondary); }
+
+  .final-rec { font-size: 15px; line-height: 1.7; margin-bottom: 14px; color: #F4F4F5; }
+
+  .mitigation-label { color: var(--yellow); font-weight: 700; font-size: 13px; }
+  .mitigation-list { margin: 6px 0 14px; padding-left: 18px; color: #D4D4D8; font-size: 13px; }
+  .mitigation-list li { margin-bottom: 4px; }
+
+  .reasoning-box {
+    background: var(--bg-inset);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+  }
+  .reasoning-box .rlabel { font-weight: 700; color: var(--text-muted); }
+
+  /* Error */
+  .error-box {
+    background: #2D1215;
+    border: 1px solid #FF4D4F44;
+    border-radius: 8px;
+    padding: 12px 16px;
+    color: #FF7875;
+    font-size: 13px;
+    margin-bottom: 16px;
+  }
+
+  /* Loading dots */
+  @keyframes pulse { 0%,80%,100% { opacity: 0.3; } 40% { opacity: 1; } }
+  .dots span {
+    display: inline-block;
+    animation: pulse 1.4s infinite;
+    font-size: 20px;
+    color: var(--text-muted);
+  }
+  .dots span:nth-child(2) { animation-delay: 0.2s; }
+  .dots span:nth-child(3) { animation-delay: 0.4s; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <!-- Header -->
+  <div class="header">
+    <div class="header-label">Adversarial Debate Engine</div>
+    <h1>PM Decision Module</h1>
+    <p>Proposer → Challenger → Resolution</p>
+  </div>
+
+  <!-- Input -->
+  <div class="input-area">
+    <textarea id="question" rows="3" placeholder="Enter your product question or decision…"></textarea>
+    <button class="run-btn" id="runBtn" onclick="runDebate()">Run Adversarial Debate</button>
+  </div>
+
+  <!-- Progress -->
+  <div class="progress" id="progress" style="display:none;">
+    <div class="progress-step">
+      <div class="progress-bar" id="bar0"></div>
+      <div class="progress-label" id="lbl0">Propose</div>
+    </div>
+    <div class="progress-step">
+      <div class="progress-bar" id="bar1"></div>
+      <div class="progress-label" id="lbl1">Challenge</div>
+    </div>
+    <div class="progress-step">
+      <div class="progress-bar" id="bar2"></div>
+      <div class="progress-label" id="lbl2">Resolve</div>
+    </div>
+  </div>
+
+  <!-- Error -->
+  <div class="error-box" id="errorBox" style="display:none;"></div>
+
+  <!-- Results -->
+  <div id="proposalCard"></div>
+  <div id="challengeCard"></div>
+  <div id="resolutionCard"></div>
+</div>
+
+<script>
+const API_URL = "https://api.anthropic.com/v1/messages";
+const MODEL = "claude-sonnet-4-20250514";
+
+const PROPOSER_SYSTEM = `You are the PROPOSER agent — a senior product manager who builds decisive, actionable solutions. Given a product question or problem, deliver a concrete recommendation.
+
+Respond ONLY in this JSON format (no markdown fences, no extra text):
+{
+  "title": "Short recommendation title",
+  "summary": "2-3 sentence executive summary",
+  "rationale": ["reason 1", "reason 2", "reason 3"],
+  "implementation": "Brief implementation approach",
+  "risks_acknowledged": ["risk 1", "risk 2"]
+}`;
+
+const CHALLENGER_SYSTEM = `You are the CHALLENGER agent — a ruthless devil's advocate. Your job is to find every flaw, risk, and blind spot in a proposed solution. Be specific and cite real-world failure modes.
+
+Respond ONLY in this JSON format (no markdown fences, no extra text):
+{
+  "verdict": "FATAL" or "SERIOUS" or "MINOR" or "NONE",
+  "challenges": [
+    { "point": "The specific challenge", "severity": "high" or "medium" or "low", "evidence": "Why this matters" }
+  ],
+  "overall_assessment": "1-2 sentence summary of critique"
+}`;
+
+const RESOLVER_SYSTEM = `You are the RESOLVER agent — a calm, objective arbiter. Given a proposal and its challenges, determine the final recommendation.
+
+Rules:
+- If challenges have verdict FATAL and cannot be mitigated, reject the proposal and say why.
+- If challenges are SERIOUS but addressable, present the original recommendation WITH mitigations for each serious challenge.
+- If challenges are MINOR or NONE, endorse the recommendation as strong.
+
+Respond ONLY in this JSON format (no markdown fences, no extra text):
+{
+  "outcome": "ENDORSED" or "ENDORSED_WITH_MITIGATIONS" or "REJECTED",
+  "final_recommendation": "The recommendation to present to the PM",
+  "mitigations": ["mitigation 1 if applicable"],
+  "confidence": "HIGH" or "MEDIUM" or "LOW",
+  "reasoning": "Why this outcome"
+}`;
+
+async function callClaude(systemPrompt, userMessage) {
+  const res = await fetch(API_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: MODEL,
+      max_tokens: 1000,
+      system: systemPrompt,
+      messages: [{ role: "user", content: userMessage }],
+    }),
+  });
+  const data = await res.json();
+  if (data.error) throw new Error(data.error.message || "API error");
+  return data.content.filter(b => b.type === "text").map(b => b.text).join("\n");
+}
+
+function safeParse(text) {
+  try {
+    return JSON.parse(text.replace(/```json|```/g, "").trim());
+  } catch { return null; }
+}
+
+const sevColors = { high: "#FF4D4F", medium: "#FAAD14", low: "#8C8C8C" };
+const verdictColors = { FATAL: "#FF4D4F", SERIOUS: "#FAAD14", MINOR: "#8C8C8C", NONE: "#52C41A" };
+const outcomeColors = { ENDORSED: "#52C41A", ENDORSED_WITH_MITIGATIONS: "#FAAD14", REJECTED: "#FF4D4F" };
+const confColors = { HIGH: "#52C41A", MEDIUM: "#FAAD14", LOW: "#FF4D4F" };
+
+function setProgress(step) {
+  // step: 0=proposing, 1=challenging, 2=resolving, 3=done
+  document.getElementById("progress").style.display = "flex";
+  for (let i = 0; i < 3; i++) {
+    const bar = document.getElementById("bar" + i);
+    const lbl = document.getElementById("lbl" + i);
+    bar.className = "progress-bar";
+    lbl.className = "progress-label";
+    if (i < step) { bar.classList.add("done"); lbl.classList.add("active"); }
+    else if (i === step) { bar.classList.add("active"); lbl.classList.add("active"); }
+  }
+}
+
+function tag(color, text) {
+  return `<span class="tag" style="background:${color}">${text}</span>`;
+}
+
+function renderProposal(d) {
+  const risks = (d.risks_acknowledged || []).map(r => `<li>${esc(r)}</li>`).join("");
+  const rationale = (d.rationale || []).map(r => `<li>${esc(r)}</li>`).join("");
+  document.getElementById("proposalCard").innerHTML = `
+    <div class="section-card proposer" id="proposalInner">
+      <div class="section-header proposer-h"><span class="icon">◆</span> Proposer</div>
+      <div class="rec-title">${esc(d.title)}</div>
+      <div class="rec-summary">${esc(d.summary)}</div>
+      <div style="margin-bottom:10px"><span class="label">Rationale</span><ul class="content-list">${rationale}</ul></div>
+      ${d.implementation ? `<div style="margin-bottom:10px"><span class="label">Implementation</span><p class="impl-text">${esc(d.implementation)}</p></div>` : ""}
+      ${risks ? `<div><span class="label">Self-identified Risks</span><ul class="content-list risks-list">${risks}</ul></div>` : ""}
+    </div>`;
+  requestAnimationFrame(() => document.getElementById("proposalInner").classList.add("visible"));
+}
+
+function renderChallenge(d) {
+  const items = (d.challenges || []).map(c => `
+    <div class="challenge-item">
+      <div class="sev-dot" style="background:${sevColors[c.severity] || '#71717A'}"></div>
+      <div><div class="challenge-point">${esc(c.point)}</div><div class="challenge-evidence">${esc(c.evidence)}</div></div>
+    </div>`).join("");
+  document.getElementById("challengeCard").innerHTML = `
+    <div class="section-card challenger" id="challengeInner">
+      <div class="section-header challenger-h"><span class="icon">✦</span> Challenger</div>
+      <div class="tag-row">
+        ${tag(verdictColors[d.verdict] || "#71717A", d.verdict)}
+        <span class="assessment">${esc(d.overall_assessment)}</span>
+      </div>
+      ${items}
+    </div>`;
+  requestAnimationFrame(() => document.getElementById("challengeInner").classList.add("visible"));
+}
+
+function renderResolution(d) {
+  const outcomeLabel = (d.outcome || "").replace(/_/g, " ");
+  const cardClass = d.outcome === "REJECTED" ? "rejected" : d.outcome === "ENDORSED_WITH_MITIGATIONS" ? "mitigated" : "";
+  const mits = (d.mitigations || []).length > 0
+    ? `<div><span class="mitigation-label">Mitigations Required</span><ul class="mitigation-list">${d.mitigations.map(m => `<li>${esc(m)}</li>`).join("")}</ul></div>`
+    : "";
+  document.getElementById("resolutionCard").innerHTML = `
+    <div class="section-card resolver ${cardClass}" id="resolutionInner">
+      <div class="section-header resolver-h"><span class="icon">●</span> Final Recommendation</div>
+      <div class="tag-row">
+        ${tag(outcomeColors[d.outcome] || "#71717A", outcomeLabel)}
+        ${tag(confColors[d.confidence] || "#71717A", (d.confidence || "") + " confidence")}
+      </div>
+      <div class="final-rec">${esc(d.final_recommendation)}</div>
+      ${mits}
+      <div class="reasoning-box"><span class="rlabel">Reasoning: </span>${esc(d.reasoning)}</div>
+    </div>`;
+  requestAnimationFrame(() => document.getElementById("resolutionInner").classList.add("visible"));
+}
+
+function esc(s) {
+  if (!s) return "";
+  const d = document.createElement("div");
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+function showError(msg) {
+  const box = document.getElementById("errorBox");
+  box.style.display = "block";
+  box.textContent = "⚠ " + msg;
+}
+
+function clearResults() {
+  document.getElementById("proposalCard").innerHTML = "";
+  document.getElementById("challengeCard").innerHTML = "";
+  document.getElementById("resolutionCard").innerHTML = "";
+  document.getElementById("errorBox").style.display = "none";
+  document.getElementById("progress").style.display = "none";
+}
+
+async function runDebate() {
+  const q = document.getElementById("question").value.trim();
+  if (!q) return;
+
+  const btn = document.getElementById("runBtn");
+  btn.disabled = true;
+  clearResults();
+
+  try {
+    // Phase 1
+    btn.textContent = "Proposer Generating Solution…";
+    setProgress(0);
+    const propRaw = await callClaude(PROPOSER_SYSTEM, "Product question: " + q);
+    const propData = safeParse(propRaw);
+    if (!propData) throw new Error("Proposer returned malformed response. Try again.");
+    renderProposal(propData);
+    setProgress(1);
+
+    // Phase 2
+    btn.textContent = "Challenger Stress-Testing…";
+    const chalRaw = await callClaude(CHALLENGER_SYSTEM, "Evaluate this proposal:\n" + JSON.stringify(propData, null, 2));
+    const chalData = safeParse(chalRaw);
+    if (!chalData) throw new Error("Challenger returned malformed response. Try again.");
+    renderChallenge(chalData);
+    setProgress(2);
+
+    // Phase 3
+    btn.textContent = "Resolving Debate…";
+    const resRaw = await callClaude(
+      RESOLVER_SYSTEM,
+      "Proposal:\n" + JSON.stringify(propData, null, 2) + "\n\nChallenges:\n" + JSON.stringify(chalData, null, 2)
+    );
+    const resData = safeParse(resRaw);
+    if (!resData) throw new Error("Resolver returned malformed response. Try again.");
+    renderResolution(resData);
+    setProgress(3);
+
+  } catch (e) {
+    showError(e.message);
+  }
+
+  btn.disabled = false;
+  btn.textContent = "Run Adversarial Debate";
+}
+</script>
+</body>
+</html>

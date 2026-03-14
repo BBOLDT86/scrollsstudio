@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Open Intranet — A Design Vision</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300;1,9..40,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f6f5f1;
+  --bg-card: #ffffff;
+  --border: rgba(0,0,0,0.07);
+  --border-strong: rgba(0,0,0,0.12);
+  --text: #1a1a1a;
+  --text-mid: #4a4a4a;
+  --text-muted: #888888;
+  --text-dim: #b0b0b0;
+  --green: #1a8a5c;
+  --green-bg: rgba(26,138,92,0.07);
+  --blue: #2d6bcf;
+  --blue-bg: rgba(45,107,207,0.06);
+  --warm: #c4723a;
+  --warm-bg: rgba(196,114,58,0.07);
+  --purple: #7c5cbf;
+  --purple-bg: rgba(124,92,191,0.06);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  overflow: hidden;
+  height: 100vh; width: 100vw;
+  -webkit-font-smoothing: antialiased;
+}
+
+.deck { position: relative; width: 100%; height: 100vh; }
+
+.slide {
+  position: absolute; top: 0; left: 0;
+  width: 100%; height: 100%;
+  display: flex; flex-direction: column; justify-content: center;
+  padding: 5vh 8vw;
+  opacity: 0; transform: translateY(20px);
+  transition: opacity 0.45s ease, transform 0.45s ease;
+  pointer-events: none; overflow-y: auto; z-index: 1;
+}
+.slide.active { opacity: 1; transform: translateY(0); pointer-events: all; }
+
+.nav {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 16px 40px; z-index: 100;
+  background: linear-gradient(transparent, var(--bg) 50%);
+}
+.nav button {
+  background: var(--bg-card); border: 1px solid var(--border);
+  color: var(--text); font-family: 'DM Sans', sans-serif;
+  font-weight: 500; font-size: 13px; padding: 9px 22px;
+  border-radius: 8px; cursor: pointer; transition: all 0.2s ease;
+}
+.nav button:hover { border-color: var(--border-strong); box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+.nav button:disabled { opacity: 0.25; cursor: default; }
+.nav button:disabled:hover { border-color: var(--border); box-shadow: none; }
+
+.progress-track {
+  flex: 1; max-width: 260px; height: 2px;
+  background: var(--border); border-radius: 2px; margin: 0 24px; overflow: hidden;
+}
+.progress-fill { height: 100%; background: var(--text-dim); border-radius: 2px; transition: width 0.4s ease; }
+.slide-counter { font-size: 12px; color: var(--text-dim); letter-spacing: 0.5px; min-width: 50px; text-align: center; font-variant-numeric: tabular-nums; }
+
+h1 {
+  font-family: 'Instrument Serif', serif; font-weight: 400;
+  font-size: clamp(2.6rem, 5.5vw, 4.4rem); line-height: 1.08;
+  letter-spacing: -1px; margin-bottom: 20px;
+}
+h2 {
+  font-family: 'Instrument Serif', serif; font-weight: 400;
+  font-size: clamp(1.7rem, 3.5vw, 2.8rem); line-height: 1.12;
+  letter-spacing: -0.5px; margin-bottom: 16px;
+}
+.kicker {
+  font-weight: 500; font-size: 0.78rem; color: var(--text-muted);
+  letter-spacing: 2.5px; text-transform: uppercase; margin-bottom: 12px;
+}
+p {
+  font-size: clamp(0.92rem, 1.4vw, 1.05rem); line-height: 1.72;
+  color: var(--text-mid); max-width: 640px;
+}
+em.hl { font-family: 'Instrument Serif', serif; font-style: italic; color: var(--text); }
+
+.slide-title { justify-content: center; align-items: flex-start; padding-left: 10vw; }
+.title-rule { width: 48px; height: 1.5px; background: var(--text-dim); margin-bottom: 24px; border: none; }
+.slide-title .sub {
+  font-size: clamp(1rem, 1.7vw, 1.18rem); color: var(--text-muted);
+  font-weight: 300; max-width: 500px; line-height: 1.65;
+}
+
+.stat-row { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 24px; max-width: 880px; }
+.stat-card { flex: 1; min-width: 170px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 20px; }
+.stat-num { font-family: 'Instrument Serif', serif; font-size: clamp(1.6rem, 2.6vw, 2.2rem); margin-bottom: 4px; }
+.stat-label { font-size: 0.78rem; color: var(--text-muted); line-height: 1.4; }
+
+.pgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin-top: 18px; max-width: 960px; }
+.pcard { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 22px; }
+.pcard h4 { font-family: 'Instrument Serif', serif; font-weight: 400; font-size: 1.05rem; margin-bottom: 6px; }
+.pcard p { font-size: 0.82rem; color: var(--text-muted); line-height: 1.55; max-width: none; }
+.pcard-icon {
+  width: 28px; height: 28px; border-radius: 6px; margin-bottom: 12px;
+  display: flex; align-items: center; justify-content: center; font-size: 0.85rem;
+}
+
+.ctable { width: 100%; max-width: 820px; border-collapse: collapse; margin-top: 18px; font-size: clamp(0.76rem, 1.1vw, 0.88rem); }
+.ctable th { font-weight: 500; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-dim); text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--border-strong); }
+.ctable td { padding: 9px 12px; border-bottom: 1px solid var(--border); color: var(--text-muted); }
+.ctable .win { color: var(--green); font-weight: 500; }
+
+.uc-section { margin-top: 18px; max-width: 1000px; }
+.uc-tag { display: inline-block; font-weight: 500; font-size: 0.72rem; letter-spacing: 1.5px; text-transform: uppercase; padding: 4px 12px; border-radius: 20px; margin-bottom: 10px; }
+.tag-green { background: var(--green-bg); color: var(--green); }
+.tag-blue { background: var(--blue-bg); color: var(--blue); }
+.tag-purple { background: var(--purple-bg); color: var(--purple); }
+.tag-warm { background: var(--warm-bg); color: var(--warm); }
+
+.uc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 8px; margin-bottom: 22px; }
+.uc-item {
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px;
+  padding: 11px 14px; font-size: 0.86rem; color: var(--text-mid);
+  display: flex; gap: 10px; align-items: flex-start; transition: border-color 0.2s;
+}
+.uc-item:hover { border-color: var(--border-strong); }
+.dot { width: 5px; height: 5px; border-radius: 50%; margin-top: 7px; flex-shrink: 0; }
+.dot-green { background: var(--green); }
+.dot-blue { background: var(--blue); }
+.dot-purple { background: var(--purple); }
+.dot-warm { background: var(--warm); }
+
+.connect-flow { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-top: 18px; max-width: 960px; }
+.conn-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 20px; position: relative; }
+.conn-card .step { font-family: 'Instrument Serif', serif; font-size: 2.2rem; color: var(--border); position: absolute; top: 12px; right: 16px; }
+.conn-card h4 { font-family: 'Instrument Serif', serif; font-weight: 400; font-size: 1rem; margin-bottom: 6px; }
+.conn-card p { font-size: 0.8rem; color: var(--text-muted); line-height: 1.5; max-width: none; }
+
+.slide-final { align-items: flex-start; padding-left: 10vw; }
+.final-box { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 32px 38px; max-width: 580px; margin-top: 16px; }
+.final-box p { max-width: none; }
+
+.ins-list { list-style: none; margin-top: 14px; max-width: 680px; }
+.ins-list li { padding: 12px 0; border-bottom: 1px solid var(--border); font-size: 0.92rem; color: var(--text-mid); line-height: 1.6; }
+.ins-list li strong { color: var(--text); font-weight: 600; }
+
+.slide.active .a { animation: up 0.5s ease forwards; }
+.slide.active .a:nth-child(2) { animation-delay: 0.06s; }
+.slide.active .a:nth-child(3) { animation-delay: 0.12s; }
+.slide.active .a:nth-child(4) { animation-delay: 0.18s; }
+.slide.active .a:nth-child(5) { animation-delay: 0.24s; }
+.slide.active .a:nth-child(6) { animation-delay: 0.30s; }
+@keyframes up { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+.a { opacity: 0; }
+
+@media (max-width: 640px) {
+  .slide { padding: 4vh 5vw 80px; }
+  .slide-title, .slide-final { padding-left: 5vw; }
+  .stat-row { flex-direction: column; }
+  .pgrid { grid-template-columns: 1fr; }
+  .uc-grid { grid-template-columns: 1fr; }
+  .nav { padding: 12px 16px; }
+  .connect-flow { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="deck">
+
+  <!-- 1: TITLE -->
+  <div class="slide slide-title active" data-slide="0">
+    <hr class="title-rule a">
+    <h1 class="a">The internet as<br><em class="hl">an intranet.</em></h1>
+    <p class="sub a">Standalone HTML documents — beautifully designed, privately owned, universally accessible — that work like the connected tools inside a company. But for everyone, everywhere.</p>
+    <p class="a" style="margin-top:18px;font-size:0.84rem;color:var(--text-dim);">No accounts. No cloud. No subscriptions. Just files that work.</p>
+  </div>
+
+  <!-- 2: THE PROBLEM -->
+  <div class="slide" data-slide="1">
+    <div class="kicker a">The Problem</div>
+    <h2 class="a">Everything simple became<br><em class="hl">complicated.</em></h2>
+    <p class="a">You want to collect RSVPs for a party. Now you need a Zola account. You want to share holiday photos with your family. Now you're paying for iCloud. You want to keep an address list for Christmas cards. Now that's a Google Sheet synced to someone's cloud.</p>
+    <p class="a" style="margin-top:14px;">Every small, human task got captured by a platform that wants your email, your data, and $10 a month. The web was supposed to be <em>documents.</em> Readable by anyone. Ownable by you. Running anywhere.</p>
+    <p class="a" style="margin-top:14px;">We're going back to that.</p>
+  </div>
+
+  <!-- 3: THE VISION -->
+  <div class="slide" data-slide="2">
+    <div class="kicker a">The Vision</div>
+    <h2 class="a">One design system.<br>Dozens of <em class="hl">tools.</em><br>Zero dependencies.</h2>
+    <p class="a">A library of standalone HTML tools — each a single file — sharing a unified design language. They look like they belong together. They feel like a product. But each one is complete on its own.</p>
+    <div class="pgrid a">
+      <div class="pcard">
+        <div class="pcard-icon" style="background:var(--green-bg);color:var(--green);">◯</div>
+        <h4>Runs everywhere</h4>
+        <p>Phone, tablet, laptop, work computer. No install. Opens in any browser, works offline.</p>
+      </div>
+      <div class="pcard">
+        <div class="pcard-icon" style="background:var(--blue-bg);color:var(--blue);">◈</div>
+        <h4>Owned design</h4>
+        <p>Shared typography, color, motion. Recognizable at a glance. The brand is the ecosystem.</p>
+      </div>
+      <div class="pcard">
+        <div class="pcard-icon" style="background:var(--warm-bg);color:var(--warm);">◇</div>
+        <h4>Private by default</h4>
+        <p>Your data stays on your device. No cloud sync, no telemetry, no "sign in to continue."</p>
+      </div>
+      <div class="pcard">
+        <div class="pcard-icon" style="background:var(--purple-bg);color:var(--purple);">△</div>
+        <h4>Connected later</h4>
+        <p>Standalone first. Designed so tools can eventually discover each other — via Doccoin or similar.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4: DEMAND VALIDATION -->
+  <div class="slide" data-slide="3">
+    <div class="kicker a">Why This Works</div>
+    <h2 class="a">$4.2 billion in demand —<br>for <em class="hl">worse versions</em> of this.</h2>
+    <p class="a">The template economy already proved people want pre-built tools that save them setup time. What they're buying today is locked into platforms, only works online, and looks like a spreadsheet. We remove every limitation.</p>
+    <div class="stat-row a">
+      <div class="stat-card"><div class="stat-num">$4.2B</div><div class="stat-label">Digital template market in 2024</div></div>
+      <div class="stat-card"><div class="stat-num">260M</div><div class="stat-label">Monthly Canva users seeking pre-built design</div></div>
+      <div class="stat-card"><div class="stat-num">100K+</div><div class="stat-label">Sales on single Etsy budget template listings</div></div>
+      <div class="stat-card"><div class="stat-num">$0</div><div class="stat-label">Ongoing cost to run an HTML file</div></div>
+    </div>
+  </div>
+
+  <!-- 5: FORMAT COMPARISON -->
+  <div class="slide" data-slide="4">
+    <div class="kicker a">Format Advantage</div>
+    <h2 class="a">HTML vs. the platforms</h2>
+    <p class="a">Every existing format forces a tradeoff. HTML files don't.</p>
+    <table class="ctable a">
+      <thead><tr><th></th><th>Sheets</th><th>Notion</th><th>Canva</th><th>Our HTML</th></tr></thead>
+      <tbody>
+        <tr><td>Account needed</td><td>Google</td><td>Notion</td><td>Canva</td><td class="win">None</td></tr>
+        <tr><td>Works offline</td><td>No</td><td>No</td><td>No</td><td class="win">Yes</td></tr>
+        <tr><td>Mobile experience</td><td>Poor</td><td>OK</td><td>Good</td><td class="win">Native-feel</td></tr>
+        <tr><td>Interactivity</td><td>Formulas</td><td>Databases</td><td>Static</td><td class="win">Full JavaScript</td></tr>
+        <tr><td>Embed media</td><td>Limited</td><td>Limited</td><td>Static</td><td class="win">Video, audio, images</td></tr>
+        <tr><td>Data ownership</td><td>Google</td><td>Notion</td><td>Canva</td><td class="win">Your device</td></tr>
+        <tr><td>Ongoing cost</td><td>Free*</td><td>$0–10/mo</td><td>$0–13/mo</td><td class="win">Zero forever</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 6: USE CASES — Personal & Social -->
+  <div class="slide" data-slide="5">
+    <div class="kicker a">The Library — Personal & Social</div>
+    <h2 class="a">Tools for <em class="hl">real life</em></h2>
+    <p class="a">Things you'd text to a friend. Things that replace an app you shouldn't need.</p>
+    <div class="uc-section a">
+      <div class="uc-tag tag-green">Life & Household</div>
+      <div class="uc-grid">
+        <div class="uc-item"><span class="dot dot-green"></span>Address book for holiday cards — names, addresses, sent/received tracking</div>
+        <div class="uc-item"><span class="dot dot-green"></span>Contact info hub — family, doctors, school, emergency numbers — one file, always current</div>
+        <div class="uc-item"><span class="dot dot-green"></span>E-card — embed a photo or short video, styled and shareable, works without a separate file</div>
+        <div class="uc-item"><span class="dot dot-green"></span>Photo slideshow — add images, auto-play with transitions, runs offline on any screen</div>
+        <div class="uc-item"><span class="dot dot-green"></span>Budget planner — paycheck-by-paycheck, visual spending, no spreadsheet required</div>
+        <div class="uc-item"><span class="dot dot-green"></span>Chore rotation — visual weekly schedule for roommates or families</div>
+      </div>
+      <div class="uc-tag tag-blue">Group & Social</div>
+      <div class="uc-grid">
+        <div class="uc-item"><span class="dot dot-blue"></span>Group trip planner — itinerary builder, votes on activities, packing lists, expense splitting</div>
+        <div class="uc-item"><span class="dot dot-blue"></span>Potluck signup — visual, prevents duplicates, mobile-friendly</div>
+        <div class="uc-item"><span class="dot dot-blue"></span>Wedding RSVP collector — meals, dietary needs, plus-ones — replaces $15/mo subscription sites</div>
+        <div class="uc-item"><span class="dot dot-blue"></span>Bill splitter — recurring splits, no app, no account</div>
+        <div class="uc-item"><span class="dot dot-blue"></span>Baby pool — due date, weight, name guesses</div>
+        <div class="uc-item"><span class="dot dot-blue"></span>Concert lineup ranker — group ranks artists, finds overlapping must-sees</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7: USE CASES — Sports & Professional -->
+  <div class="slide" data-slide="6">
+    <div class="kicker a">The Library — Sports & Work</div>
+    <h2 class="a">Games, leagues &<br><em class="hl">professional tools</em></h2>
+    <div class="uc-section a">
+      <div class="uc-tag tag-warm">Sports & Games</div>
+      <div class="uc-grid">
+        <div class="uc-item"><span class="dot dot-warm"></span>Super Bowl squares — auto-randomize numbers, track payments, highlight winners live</div>
+        <div class="uc-item"><span class="dot dot-warm"></span>March Madness bracket — private groups, custom scoring rules</div>
+        <div class="uc-item"><span class="dot dot-warm"></span>Fantasy draft board — click to pick, screen-share or offline at a bar</div>
+        <div class="uc-item"><span class="dot dot-warm"></span>Pickup game scheduler — claim spots, waitlist, flake-rate tracking</div>
+        <div class="uc-item"><span class="dot dot-warm"></span>Local league manager — scheduling, scoring, standings, playoffs</div>
+        <div class="uc-item"><span class="dot dot-warm"></span>Golf / poker night tracker — session stats, running totals</div>
+      </div>
+      <div class="uc-tag tag-purple">Professional</div>
+      <div class="uc-grid">
+        <div class="uc-item"><span class="dot dot-purple"></span>Freelancer invoice + payment tracker — branded PDFs, quarterly tax estimates</div>
+        <div class="uc-item"><span class="dot dot-purple"></span>Contractor estimate builder — pro estimates on-site from a phone</div>
+        <div class="uc-item"><span class="dot dot-purple"></span>Real estate lead capture — QR code → form → ranked follow-ups</div>
+        <div class="uc-item"><span class="dot dot-purple"></span>Volunteer coordinator — sign-ups, meal trains, service hours</div>
+        <div class="uc-item"><span class="dot dot-purple"></span>Classroom gradebook — weighted grades, parent read-only portal</div>
+        <div class="uc-item"><span class="dot dot-purple"></span>Mortgage comparison — side-by-side scenarios, total cost of ownership</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 8: INSIGHTS -->
+  <div class="slide" data-slide="7">
+    <div class="kicker a">What the Market Teaches</div>
+    <h2 class="a">Six things the top sellers <em class="hl">know</em></h2>
+    <ul class="ins-list a">
+      <li><strong>Niche beats general.</strong> A budget planner for nurses on 3×12 shifts converts 3–5× better than a generic one. Specificity is the advantage.</li>
+      <li><strong>Design matters more than features.</strong> One seller built a $280K business by making spreadsheets pink instead of green. Aesthetics drive adoption.</li>
+      <li><strong>Bundles create gravity.</strong> A suite of related tools generates 3× more engagement than any single tool. The ecosystem is the product.</li>
+      <li><strong>Seasons drive waves.</strong> January resolutions, back-to-school, March Madness, holiday cards — timing to demand cycles is a multiplier.</li>
+      <li><strong>Sharing is distribution.</strong> Every group-chat link is organic reach. Social tools — trip planners, brackets, bill splitters — market themselves.</li>
+      <li><strong>Show, don't describe.</strong> A 15-second screen recording converts better than any written description. Show the tool working.</li>
+    </ul>
+  </div>
+
+  <!-- 9: CONNECTION LAYER -->
+  <div class="slide" data-slide="8">
+    <div class="kicker a">Future Architecture</div>
+    <h2 class="a">Standalone first.<br><em class="hl">Connected later.</em></h2>
+    <p class="a">Every tool works perfectly alone. The long game is a protocol — Doccoin or similar — that lets HTML documents discover each other, share state, and form a network no one owns.</p>
+    <div class="connect-flow a">
+      <div class="conn-card"><span class="step">1</span><h4>Build the library</h4><p>Dozens of tools under unified design. Each a standalone .html file. No backend, no dependencies.</p></div>
+      <div class="conn-card"><span class="step">2</span><h4>Build recognition</h4><p>The design language becomes the signal. People recognize the ecosystem before any formal connection exists.</p></div>
+      <div class="conn-card"><span class="step">3</span><h4>Add the protocol</h4><p>Doccoin or equivalent — a lightweight layer letting documents link, reference, and optionally transact.</p></div>
+      <div class="conn-card"><span class="step">4</span><h4>Let revenue emerge</h4><p>The brand, library, and network are the asset. Monetization becomes available without being forced.</p></div>
+    </div>
+  </div>
+
+  <!-- 10: CLOSE -->
+  <div class="slide slide-final" data-slide="9">
+    <hr class="title-rule a">
+    <h2 class="a" style="max-width:520px;">Build the library.<br>Own the design.<br>Connect the <em class="hl">documents.</em></h2>
+    <div class="final-box a">
+      <p>The web was supposed to be documents — readable by anyone, owned by no one, running everywhere. Somewhere along the way it became platforms, logins, and monthly fees.</p>
+      <p style="margin-top:12px;">We're going back. One beautifully designed HTML file at a time.</p>
+      <p style="margin-top:12px;color:var(--text);font-weight:500;font-family:'Instrument Serif',serif;font-style:italic;font-size:1.1rem;">The intranet Jobs would have wanted.</p>
+    </div>
+  </div>
+
+</div>
+
+<div class="nav">
+  <button id="prevBtn" disabled>← Prev</button>
+  <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+  <span class="slide-counter" id="slideCounter">1 / 10</span>
+  <button id="nextBtn">Next →</button>
+</div>
+
+<script>
+const slides = document.querySelectorAll('.slide');
+const total = slides.length;
+let current = 0;
+const prevBtn = document.getElementById('prevBtn');
+const nextBtn = document.getElementById('nextBtn');
+const counter = document.getElementById('slideCounter');
+const progress = document.getElementById('progressFill');
+
+function goTo(n) {
+  if (n < 0 || n >= total) return;
+  slides[current].classList.remove('active');
+  slides[n].querySelectorAll('.a').forEach(el => { el.style.animation = 'none'; el.offsetHeight; el.style.animation = ''; });
+  current = n;
+  slides[current].classList.add('active');
+  prevBtn.disabled = current === 0;
+  nextBtn.disabled = current === total - 1;
+  counter.textContent = (current + 1) + ' / ' + total;
+  progress.style.width = ((current + 1) / total * 100) + '%';
+}
+
+prevBtn.addEventListener('click', () => goTo(current - 1));
+nextBtn.addEventListener('click', () => goTo(current + 1));
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); goTo(current + 1); }
+  if (e.key === 'ArrowLeft') { e.preventDefault(); goTo(current - 1); }
+});
+let sx = 0;
+document.addEventListener('touchstart', e => { sx = e.touches[0].clientX; });
+document.addEventListener('touchend', e => { const dx = e.changedTouches[0].clientX - sx; if (Math.abs(dx) > 50) { dx < 0 ? goTo(current + 1) : goTo(current - 1); } });
+goTo(0);
+</script>
+</body>
+</html>

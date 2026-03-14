@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Team Manager — Kids Sports</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{--bg:#f6f5f1;--card:#fff;--border:#e5e2dd;--text:#1a1a1a;--mid:#4a4a4a;--muted:#888;--dim:#b0b0b0;--green:#1a8a5c;--blue:#2d6bcf;--warm:#c4723a;--purple:#7c5cbf;--red:#c43a3a;--green-bg:rgba(26,138,92,.07);--blue-bg:rgba(45,107,207,.06);--warm-bg:rgba(196,114,58,.07)}
+html,body{height:100%;overflow-x:hidden;overscroll-behavior:contain}
+body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro','Helvetica Neue',sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.4;-webkit-font-smoothing:antialiased;padding-bottom:72px}
+
+header{padding:16px 16px 12px;background:var(--card);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:50}
+header h1{font-size:18px;font-weight:700;letter-spacing:-.3px;display:flex;align-items:center;gap:6px}
+header p{font-size:11px;color:var(--muted);margin-top:2px}
+
+.tabs{display:flex;gap:0;border-bottom:1px solid var(--border);background:var(--card);overflow-x:auto;-webkit-overflow-scrolling:touch;padding:0 8px}
+.tabs::-webkit-scrollbar{display:none}
+.tab{padding:10px 14px;font-size:12px;font-weight:600;color:var(--muted);border:none;background:none;cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;transition:all .2s}
+.tab.active{color:var(--blue);border-bottom-color:var(--blue)}
+
+.panel{display:none;padding:12px}
+.panel.active{display:block}
+
+.card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:8px}
+.card-row{display:flex;align-items:center;gap:10px}
+.avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:#fff;flex-shrink:0}
+.card-info{flex:1;min-width:0}
+.card-title{font-size:14px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.card-sub{font-size:11px;color:var(--muted)}
+
+.field-group{margin-bottom:12px}
+.field-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:5px}
+.field-input{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;background:var(--card);color:var(--text);outline:none}
+.field-input:focus{border-color:var(--blue)}
+select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg width='10' height='6' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23888'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;padding:10px 18px;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:opacity .15s}
+.btn:active{opacity:.7}
+.btn-primary{background:var(--blue);color:#fff}
+.btn-green{background:var(--green);color:#fff}
+.btn-outline{background:none;border:1px solid var(--border);color:var(--text)}
+.btn-sm{padding:7px 12px;font-size:12px}
+.btn-danger{background:none;border:1px solid var(--red);color:var(--red)}
+
+.empty{text-align:center;padding:40px 16px;color:var(--muted);font-size:13px}
+
+/* Schedule game card */
+.game-card{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:8px}
+.game-header{padding:10px 12px;display:flex;justify-content:space-between;align-items:center}
+.game-date{font-size:13px;font-weight:600}
+.game-type{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1px;padding:3px 8px;border-radius:12px}
+.game-body{padding:0 12px 12px;display:flex;justify-content:space-between;align-items:center}
+.game-team{text-align:center;flex:1}
+.game-team-name{font-size:12px;font-weight:600}
+.game-score{font-size:24px;font-weight:800;color:var(--text);margin-top:2px}
+.game-vs{font-size:11px;color:var(--dim);font-weight:600}
+.game-detail{padding:8px 12px;background:var(--bg);font-size:11px;color:var(--muted);border-top:1px solid var(--border)}
+
+/* Attendance */
+.att-row{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--card);border:1px solid var(--border);border-radius:8px;margin-bottom:4px}
+.att-name{flex:1;font-size:13px;font-weight:500}
+.att-btns{display:flex;gap:4px}
+.att-btn{width:30px;height:30px;border-radius:50%;border:1px solid var(--border);background:var(--card);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.att-btn.yes{background:var(--green-bg);border-color:var(--green);color:var(--green)}
+.att-btn.no{background:rgba(196,58,58,.07);border-color:var(--red);color:var(--red)}
+.att-btn.maybe{background:var(--warm-bg);border-color:var(--warm);color:var(--warm)}
+
+.save-bar{position:fixed;bottom:0;left:0;right:0;padding:12px 16px;background:var(--card);border-top:1px solid var(--border);display:flex;gap:8px;z-index:60}
+.save-bar .btn{flex:1}
+
+.toast{position:fixed;bottom:72px;left:50%;transform:translateX(-50%) translateY(60px);background:var(--text);color:#fff;padding:10px 20px;border-radius:20px;font-size:12px;font-weight:500;opacity:0;transition:all .3s;z-index:999;pointer-events:none}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+
+/* Modal */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;display:none;align-items:flex-end;justify-content:center}
+.modal-bg.open{display:flex}
+.modal{background:var(--card);border-radius:16px 16px 0 0;width:100%;max-width:500px;max-height:80vh;overflow-y:auto;padding:20px 16px 32px}
+.modal h3{font-size:16px;font-weight:700;margin-bottom:14px}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>⚽ Team Manager</h1>
+  <p id="teamLabel">Kids Sports Organizer</p>
+</header>
+
+<div class="tabs">
+  <button class="tab active" onclick="showTab('roster')">Roster</button>
+  <button class="tab" onclick="showTab('schedule')">Schedule</button>
+  <button class="tab" onclick="showTab('attendance')">RSVP</button>
+  <button class="tab" onclick="showTab('settings')">Setup</button>
+</div>
+
+<div class="panel active" id="panel-roster"></div>
+<div class="panel" id="panel-schedule"></div>
+<div class="panel" id="panel-attendance"></div>
+<div class="panel" id="panel-settings">
+  <div class="field-group">
+    <div class="field-label">Team Name</div>
+    <input class="field-input" id="teamName" placeholder="e.g. Lightning U10">
+  </div>
+  <div class="field-group">
+    <div class="field-label">Sport</div>
+    <select class="field-input" id="teamSport">
+      <option>Soccer</option><option>Basketball</option><option>Baseball</option><option>Football</option><option>Hockey</option><option>Lacrosse</option><option>Volleyball</option><option>Swimming</option><option>Other</option>
+    </select>
+  </div>
+  <div class="field-group">
+    <div class="field-label">Season</div>
+    <input class="field-input" id="teamSeason" placeholder="e.g. Spring 2026">
+  </div>
+  <div style="margin-top:12px;display:flex;gap:8px">
+    <button class="btn btn-primary" onclick="saveSettings()">Save</button>
+    <button class="btn btn-danger" onclick="resetAll()">Reset All</button>
+  </div>
+</div>
+
+<div class="modal-bg" id="modalBg" onclick="if(event.target===this)closeModal()">
+  <div class="modal" id="modalContent"></div>
+</div>
+
+<div class="save-bar">
+  <button class="btn btn-outline" onclick="saveAll()">💾 Save</button>
+  <button class="btn btn-primary" onclick="shareFile()">📤 Share</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let state=load();
+const COLORS=['#2d6bcf','#1a8a5c','#c4723a','#7c5cbf','#c43a3a','#d4903a','#2d9ecf','#5cbf7c','#bf5c8a','#3a5cc4'];
+
+function load(){try{const s=localStorage.getItem('kidsteam');if(s)return JSON.parse(s)}catch(e){}
+return{team:'',sport:'Soccer',season:'',roster:[],schedule:[],attendance:{}}}
+function save(){localStorage.setItem('kidsteam',JSON.stringify(state))}
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2000)}
+
+function showTab(id){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelector(`.tab[onclick*="${id}"]`).classList.add('active');
+  document.getElementById('panel-'+id).classList.add('active');
+  if(id==='roster')renderRoster();
+  if(id==='schedule')renderSchedule();
+  if(id==='attendance')renderAttendance();
+}
+
+function renderRoster(){
+  const el=document.getElementById('panel-roster');
+  let html=`<button class="btn btn-primary btn-sm" onclick="showAddPlayer()" style="margin-bottom:10px;width:100%">+ Add Player</button>`;
+  if(!state.roster.length){html+='<div class="empty">No players yet</div>';el.innerHTML=html;return}
+  state.roster.forEach((p,i)=>{
+    const c=COLORS[i%COLORS.length];
+    const initials=p.name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+    html+=`<div class="card"><div class="card-row">
+      <div class="avatar" style="background:${c}">${initials}</div>
+      <div class="card-info"><div class="card-title">#${p.number||'—'} ${p.name}</div><div class="card-sub">${p.position||''}${p.parent?' · Parent: '+p.parent:''}</div></div>
+      <button onclick="removePlayer(${i})" style="background:none;border:none;color:var(--red);font-size:18px;cursor:pointer">&times;</button>
+    </div></div>`;
+  });
+  el.innerHTML=html;
+}
+
+function showAddPlayer(){
+  document.getElementById('modalContent').innerHTML=`<h3>Add Player</h3>
+    <div class="field-group"><div class="field-label">Player Name</div><input class="field-input" id="mp-name" placeholder="First Last"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <div class="field-group"><div class="field-label">Number</div><input class="field-input" id="mp-num" type="number" placeholder="#"></div>
+      <div class="field-group"><div class="field-label">Position</div><input class="field-input" id="mp-pos" placeholder="e.g. Forward"></div>
+    </div>
+    <div class="field-group"><div class="field-label">Parent/Guardian</div><input class="field-input" id="mp-parent" placeholder="Name"></div>
+    <div class="field-group"><div class="field-label">Contact</div><input class="field-input" id="mp-phone" placeholder="Phone or email"></div>
+    <button class="btn btn-primary" onclick="addPlayer()" style="width:100%;margin-top:4px">Add to Roster</button>`;
+  document.getElementById('modalBg').classList.add('open');
+}
+
+function addPlayer(){
+  const name=document.getElementById('mp-name').value.trim();if(!name){toast('Name required');return}
+  state.roster.push({name,number:document.getElementById('mp-num').value,position:document.getElementById('mp-pos').value,parent:document.getElementById('mp-parent').value,phone:document.getElementById('mp-phone').value});
+  save();closeModal();renderRoster();toast(name+' added');
+}
+function removePlayer(i){state.roster.splice(i,1);save();renderRoster()}
+
+function renderSchedule(){
+  const el=document.getElementById('panel-schedule');
+  let html=`<button class="btn btn-primary btn-sm" onclick="showAddGame()" style="margin-bottom:10px;width:100%">+ Add Game / Practice</button>`;
+  if(!state.schedule.length){html+='<div class="empty">No games scheduled</div>';el.innerHTML=html;return}
+  const sorted=[...state.schedule].sort((a,b)=>new Date(a.date)-new Date(b.date));
+  sorted.forEach((g,i)=>{
+    const d=new Date(g.date+'T00:00:00');
+    const day=d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+    const isPractice=g.type==='practice';
+    const typeColor=isPractice?'background:var(--blue-bg);color:var(--blue)':'background:var(--warm-bg);color:var(--warm)';
+    html+=`<div class="game-card">
+      <div class="game-header"><span class="game-date">${day} · ${g.time||''}</span><span class="game-type" style="${typeColor}">${g.type||'game'}</span></div>
+      <div class="game-body">
+        <div class="game-team"><div class="game-team-name">${state.team||'Our Team'}</div>${g.ourScore!=null?`<div class="game-score">${g.ourScore}</div>`:''}</div>
+        ${!isPractice?`<div class="game-vs">VS</div><div class="game-team"><div class="game-team-name">${g.opponent||'TBD'}</div>${g.theirScore!=null?`<div class="game-score">${g.theirScore}</div>`:''}</div>`:''}
+      </div>
+      <div class="game-detail">${g.location||'Location TBD'} <span style="float:right;cursor:pointer" onclick="removeGame(${state.schedule.indexOf(g)})">&times; Remove</span></div>
+    </div>`;
+  });
+  el.innerHTML=html;
+}
+
+function showAddGame(){
+  document.getElementById('modalContent').innerHTML=`<h3>Add Event</h3>
+    <div class="field-group"><div class="field-label">Type</div><select class="field-input" id="mg-type"><option value="game">Game</option><option value="practice">Practice</option><option value="tournament">Tournament</option></select></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <div class="field-group"><div class="field-label">Date</div><input class="field-input" id="mg-date" type="date"></div>
+      <div class="field-group"><div class="field-label">Time</div><input class="field-input" id="mg-time" type="time"></div>
+    </div>
+    <div class="field-group"><div class="field-label">Opponent</div><input class="field-input" id="mg-opp" placeholder="Team name"></div>
+    <div class="field-group"><div class="field-label">Location</div><input class="field-input" id="mg-loc" placeholder="Field / Address"></div>
+    <button class="btn btn-primary" onclick="addGame()" style="width:100%;margin-top:4px">Add</button>`;
+  document.getElementById('modalBg').classList.add('open');
+}
+
+function addGame(){
+  state.schedule.push({type:document.getElementById('mg-type').value,date:document.getElementById('mg-date').value,time:document.getElementById('mg-time').value,opponent:document.getElementById('mg-opp').value,location:document.getElementById('mg-loc').value,ourScore:null,theirScore:null});
+  save();closeModal();renderSchedule();toast('Added');
+}
+function removeGame(i){state.schedule.splice(i,1);save();renderSchedule()}
+
+function renderAttendance(){
+  const el=document.getElementById('panel-attendance');
+  if(!state.schedule.length||!state.roster.length){el.innerHTML='<div class="empty">Add players and games first</div>';return}
+  const nextGame=state.schedule.filter(g=>new Date(g.date+'T23:59:59')>=new Date()).sort((a,b)=>new Date(a.date)-new Date(b.date))[0];
+  if(!nextGame){el.innerHTML='<div class="empty">No upcoming games</div>';return}
+  const gKey=nextGame.date+'-'+nextGame.type;
+  if(!state.attendance[gKey])state.attendance[gKey]={};
+  const d=new Date(nextGame.date+'T00:00:00');
+  const day=d.toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric'});
+  let html=`<div style="padding:8px 4px 10px"><div style="font-size:13px;font-weight:700">${day} — ${nextGame.type}</div><div style="font-size:11px;color:var(--muted)">${nextGame.opponent?'vs '+nextGame.opponent:''} ${nextGame.location?'@ '+nextGame.location:''}</div></div>`;
+  const att=state.attendance[gKey];
+  const counts={yes:0,no:0,maybe:0};
+  state.roster.forEach(p=>{
+    const v=att[p.name]||'';
+    if(v)counts[v]++;
+    html+=`<div class="att-row">
+      <span class="att-name">${p.name}</span>
+      <div class="att-btns">
+        <button class="att-btn ${v==='yes'?'yes':''}" onclick="setAtt('${gKey}','${p.name.replace(/'/g,"\\'")}','yes')">✓</button>
+        <button class="att-btn ${v==='maybe'?'maybe':''}" onclick="setAtt('${gKey}','${p.name.replace(/'/g,"\\'")}','maybe')">?</button>
+        <button class="att-btn ${v==='no'?'no':''}" onclick="setAtt('${gKey}','${p.name.replace(/'/g,"\\'")}','no')">✗</button>
+      </div>
+    </div>`;
+  });
+  html+=`<div style="display:flex;gap:8px;margin-top:12px;justify-content:center">
+    <span style="font-size:12px;color:var(--green);font-weight:600">✓ ${counts.yes}</span>
+    <span style="font-size:12px;color:var(--warm);font-weight:600">? ${counts.maybe}</span>
+    <span style="font-size:12px;color:var(--red);font-weight:600">✗ ${counts.no}</span>
+  </div>`;
+  el.innerHTML=html;
+}
+
+function setAtt(gKey,name,val){
+  if(!state.attendance[gKey])state.attendance[gKey]={};
+  state.attendance[gKey][name]=state.attendance[gKey][name]===val?'':val;
+  save();renderAttendance();
+}
+
+function closeModal(){document.getElementById('modalBg').classList.remove('open')}
+
+function saveSettings(){
+  state.team=document.getElementById('teamName').value;
+  state.sport=document.getElementById('teamSport').value;
+  state.season=document.getElementById('teamSeason').value;
+  save();toast('Saved ✓');
+  document.getElementById('teamLabel').textContent=state.team||'Kids Sports Organizer';
+}
+function saveAll(){saveSettings();save();toast('All saved ✓')}
+
+function shareFile(){
+  const blob=new Blob([document.documentElement.outerHTML],{type:'text/html'});
+  const file=new File([blob],(state.team||'team-manager').replace(/\s+/g,'-').toLowerCase()+'.html',{type:'text/html'});
+  if(navigator.canShare&&navigator.canShare({files:[file]})){
+    navigator.share({files:[file],title:state.team||'Team Manager'});
+  } else {
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=file.name;a.click();
+    toast('Downloaded — send to your team');
+  }
+}
+
+function resetAll(){if(confirm('Reset everything?')){localStorage.removeItem('kidsteam');state=load();save();location.reload()}}
+
+// Init
+document.getElementById('teamName').value=state.team;
+document.getElementById('teamSport').value=state.sport;
+document.getElementById('teamSeason').value=state.season;
+document.getElementById('teamLabel').textContent=state.team||'Kids Sports Organizer';
+renderRoster();
+</script>
+</body>
+</html>

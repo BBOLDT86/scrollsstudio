@@ -1,0 +1,1215 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PINBOARD — P2P Collective Pinning</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.4/peerjs.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=DM+Sans:wght@300;400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #0a0a0a;
+  --surface: #141414;
+  --surface-2: #1e1e1e;
+  --surface-3: #282828;
+  --border: #2a2a2a;
+  --text: #e8e4df;
+  --text-muted: #7a756e;
+  --accent: #e85d3a;
+  --accent-glow: rgba(232, 93, 58, 0.15);
+  --green: #4ecb71;
+  --yellow: #f0c55e;
+  --blue: #5b9cf5;
+  --radius: 12px;
+  --radius-lg: 20px;
+}
+
+html { font-size: 15px; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Noise overlay */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* HEADER */
+header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(10, 10, 10, 0.85);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 2rem;
+}
+
+.header-inner {
+  max-width: 1600px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+  gap: 1.5rem;
+}
+
+.logo {
+  font-family: 'Instrument Serif', serif;
+  font-size: 1.6rem;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-shrink: 0;
+}
+
+.logo-dot {
+  width: 10px;
+  height: 10px;
+  background: var(--accent);
+  border-radius: 50%;
+  display: inline-block;
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(0.85); }
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-shrink: 0;
+}
+
+/* BUTTONS */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 1.1rem;
+  border-radius: 100px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.btn:hover { background: var(--surface-2); border-color: #3a3a3a; }
+
+.btn-accent {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.btn-accent:hover { background: #d14e2d; }
+
+.btn svg { width: 16px; height: 16px; }
+
+.btn-sm {
+  padding: 0.4rem 0.8rem;
+  font-size: 0.8rem;
+}
+
+/* PEER STATUS BAR */
+.peer-bar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0.6rem 2rem;
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.peer-bar-inner {
+  max-width: 1600px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  width: 100%;
+  flex-wrap: wrap;
+}
+
+.peer-id-display {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.78rem;
+  background: var(--surface-2);
+  padding: 0.3rem 0.7rem;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.peer-id-display:hover { border-color: var(--accent); color: var(--text); }
+
+.status-indicator {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.status-indicator.online { background: var(--green); box-shadow: 0 0 6px rgba(78, 203, 113, 0.5); }
+
+.connect-input {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.connect-input input {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.78rem;
+  padding: 0.35rem 0.7rem;
+  border-radius: 6px;
+  width: 220px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.connect-input input::placeholder { color: var(--text-muted); }
+.connect-input input:focus { border-color: var(--accent); }
+
+.peers-list {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-left: auto;
+  color: var(--text-muted);
+}
+
+.peer-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: rgba(78, 203, 113, 0.1);
+  border: 1px solid rgba(78, 203, 113, 0.2);
+  color: var(--green);
+  padding: 0.2rem 0.6rem;
+  border-radius: 100px;
+  font-size: 0.72rem;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.peer-chip .dot {
+  width: 5px; height: 5px; border-radius: 50%; background: var(--green);
+}
+
+/* MAIN CONTENT */
+.main-content {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 1.5rem 2rem 4rem;
+}
+
+/* TOOLBAR */
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.board-tabs {
+  display: flex;
+  gap: 0.3rem;
+  flex-wrap: wrap;
+}
+
+.board-tab {
+  padding: 0.45rem 0.9rem;
+  border-radius: 100px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: transparent;
+  color: var(--text-muted);
+  border: none;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.board-tab:hover { color: var(--text); background: var(--surface); }
+.board-tab.active { color: var(--text); background: var(--surface-2); }
+
+.toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.pin-count {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* MASONRY */
+.masonry {
+  columns: 5;
+  column-gap: 16px;
+}
+
+@media (max-width: 1400px) { .masonry { columns: 4; } }
+@media (max-width: 1100px) { .masonry { columns: 3; } }
+@media (max-width: 750px) { .masonry { columns: 2; } }
+@media (max-width: 450px) { .masonry { columns: 1; } }
+
+/* PIN CARD */
+.pin-card {
+  break-inside: avoid;
+  margin-bottom: 16px;
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
+  animation: pin-in 0.4s ease-out both;
+  position: relative;
+}
+
+@keyframes pin-in {
+  from { opacity: 0; transform: translateY(20px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.pin-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+  border-color: #3a3a3a;
+}
+
+.pin-card img {
+  width: 100%;
+  display: block;
+  background: var(--surface-2);
+}
+
+.pin-info {
+  padding: 0.8rem;
+}
+
+.pin-title {
+  font-family: 'Instrument Serif', serif;
+  font-size: 1rem;
+  line-height: 1.3;
+  margin-bottom: 0.3rem;
+}
+
+.pin-desc {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  line-height: 1.45;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.pin-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.4rem 0.8rem 0.6rem;
+}
+
+.pin-board-tag {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+  background: var(--accent-glow);
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+}
+
+.pin-source {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.pin-overlay {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  display: flex;
+  gap: 0.3rem;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.pin-card:hover .pin-overlay { opacity: 1; }
+
+.pin-overlay-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.65);
+  backdrop-filter: blur(8px);
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+
+.pin-overlay-btn:hover { background: var(--accent); }
+
+/* MODALS */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(8px);
+  z-index: 200;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  animation: fade-in 0.2s;
+}
+
+.modal-backdrop.active { display: flex; }
+
+@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  width: 100%;
+  max-width: 520px;
+  max-height: 85vh;
+  overflow-y: auto;
+  animation: modal-up 0.3s ease-out;
+}
+
+@keyframes modal-up {
+  from { opacity: 0; transform: translateY(24px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.modal-header {
+  padding: 1.3rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-header h2 {
+  font-family: 'Instrument Serif', serif;
+  font-size: 1.3rem;
+  font-weight: 400;
+}
+
+.modal-close {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  transition: all 0.2s;
+}
+
+.modal-close:hover { color: var(--text); background: var(--surface-3); }
+
+.modal-body { padding: 1.5rem; }
+
+.form-group { margin-bottom: 1.2rem; }
+
+.form-group label {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+  width: 100%;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.9rem;
+  padding: 0.65rem 0.9rem;
+  border-radius: 10px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+  border-color: var(--accent);
+}
+
+.form-group textarea { resize: vertical; min-height: 80px; }
+.form-group select { cursor: pointer; }
+.form-group select option { background: var(--surface); }
+
+/* Image upload area */
+.upload-area {
+  border: 2px dashed var(--border);
+  border-radius: var(--radius);
+  padding: 2rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.upload-area:hover { border-color: var(--accent); background: var(--accent-glow); }
+.upload-area.has-image { border-style: solid; border-color: var(--green); padding: 0; }
+
+.upload-area img {
+  width: 100%;
+  border-radius: var(--radius);
+  display: block;
+}
+
+.upload-placeholder {
+  color: var(--text-muted);
+}
+
+.upload-placeholder svg {
+  width: 40px; height: 40px; margin-bottom: 0.8rem; opacity: 0.5;
+}
+
+.upload-placeholder p {
+  font-size: 0.85rem;
+}
+
+.upload-placeholder span {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  opacity: 0.6;
+}
+
+.modal-footer {
+  padding: 1rem 1.5rem 1.3rem;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+/* PIN DETAIL MODAL */
+.pin-detail-modal {
+  max-width: 900px;
+}
+
+.pin-detail-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+}
+
+@media (max-width: 700px) {
+  .pin-detail-content { grid-template-columns: 1fr; }
+}
+
+.pin-detail-image {
+  background: var(--surface-2);
+  display: flex;
+  align-items: center;
+}
+
+.pin-detail-image img {
+  width: 100%;
+  display: block;
+}
+
+.pin-detail-info {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.pin-detail-info h2 {
+  font-family: 'Instrument Serif', serif;
+  font-size: 1.6rem;
+  font-weight: 400;
+  line-height: 1.25;
+}
+
+.pin-detail-info p {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  line-height: 1.55;
+}
+
+.pin-detail-meta {
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+/* EMPTY STATE */
+.empty-state {
+  text-align: center;
+  padding: 6rem 2rem;
+}
+
+.empty-state h2 {
+  font-family: 'Instrument Serif', serif;
+  font-size: 2rem;
+  font-weight: 400;
+  margin-bottom: 0.6rem;
+}
+
+.empty-state p {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  max-width: 420px;
+  margin: 0 auto 1.5rem;
+  line-height: 1.55;
+}
+
+/* TOASTS */
+.toast-container {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  z-index: 300;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.toast {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.7rem 1rem;
+  font-size: 0.82rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  animation: toast-in 0.3s ease-out, toast-out 0.3s 3s ease-in forwards;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+}
+
+@keyframes toast-in { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes toast-out { to { opacity: 0; transform: translateX(30px); } }
+
+.toast-dot {
+  width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--surface-3); border-radius: 3px; }
+
+/* RESPONSIVE HEADER */
+@media (max-width: 600px) {
+  header { padding: 0 1rem; }
+  .peer-bar { padding: 0.6rem 1rem; }
+  .main-content { padding: 1rem; }
+  .connect-input input { width: 140px; }
+}
+</style>
+<style>:is([id*='google_ads_iframe'],[id*='taboola-'],.taboolaHeight,.taboola-placeholder,#top-ad,#credential_picker_container,#credentials-picker-container,#credential_picker_iframe,[id*='google-one-tap-iframe'],#google-one-tap-popup-container,.google-one-tap__module,.google-one-tap-modal-div,#amp_floatingAdDiv,#ez-content-blocker-container) {display:none!important;min-height:0!important;height:0!important;}</style></head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo">
+      <span class="logo-dot"></span>
+      PINBOARD
+    </div>
+    <div class="header-actions">
+      <button class="btn" onclick="showBoardModal()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="3" width="7" height="7" rx="1"></rect><rect x="3" y="14" width="7" height="7" rx="1"></rect><rect x="14" y="14" width="7" height="7" rx="1"></rect></svg>
+        New Board
+      </button>
+      <button class="btn btn-accent" onclick="showPinModal()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        Pin
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="peer-bar">
+  <div class="peer-bar-inner">
+    <div class="peer-id-display" onclick="copyPeerId()" title="Click to copy">
+      <span class="status-indicator online" id="statusDot"></span>
+      <span id="peerIdText">pb-fmxz37wk</span>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+    </div>
+    <div class="connect-input">
+      <input type="text" id="connectIdInput" placeholder="Paste a peer ID to connect…" onkeydown="if(event.key==='Enter')connectToPeer()">
+      <button class="btn btn-sm" onclick="connectToPeer()">Connect</button>
+    </div>
+    <div class="peers-list" id="peersList">
+      <span style="font-size:0.78rem">No peers</span>
+    </div>
+  </div>
+</div>
+
+<div class="main-content">
+  <div class="toolbar">
+    <div class="board-tabs" id="boardTabs"><button class="board-tab active" onclick="filterBoard('all')">All Pins</button><button class="board-tab " onclick="filterBoard('Inspiration')">Inspiration <span style="opacity:0.4;font-size:0.75rem">0</span></button><button class="board-tab " onclick="filterBoard('Reference')">Reference <span style="opacity:0.4;font-size:0.75rem">0</span></button><button class="board-tab " onclick="filterBoard('Ideas')">Ideas <span style="opacity:0.4;font-size:0.75rem">0</span></button></div>
+    <div class="toolbar-right">
+      <span class="pin-count" id="pinCount">0 pins</span>
+    </div>
+  </div>
+
+  <div class="masonry" id="masonry"></div>
+  <div class="empty-state" id="emptyState">
+    <h2>Start pinning</h2>
+    <p>Drop images, add links, or connect with a peer to start building your collective board.</p>
+    <button class="btn btn-accent" onclick="showPinModal()" style="margin:0 auto">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+      Create First Pin
+    </button>
+  </div>
+</div>
+
+<!-- ADD PIN MODAL -->
+<div class="modal-backdrop" id="pinModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>New Pin</h2>
+      <button class="modal-close" onclick="closePinModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Image</label>
+        <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+          <div class="upload-placeholder" id="uploadPlaceholder">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+            <p>Click or drop an image</p>
+            <span>JPG, PNG, GIF, WebP — max 4MB</span>
+          </div>
+        </div>
+        <input type="file" id="fileInput" accept="image/*" hidden="">
+      </div>
+      <div class="form-group">
+        <label>Title</label>
+        <input type="text" id="pinTitle" placeholder="Give your pin a name…" data-ddg-inputtype="unknown">
+      </div>
+      <div class="form-group">
+        <label>Description</label>
+        <textarea id="pinDesc" placeholder="What's this pin about?"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Board</label>
+        <select id="pinBoard" data-ddg-inputtype="unknown"><option value="Inspiration">Inspiration</option><option value="Reference">Reference</option><option value="Ideas">Ideas</option></select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closePinModal()">Cancel</button>
+      <button class="btn btn-accent" onclick="savePin()">Save Pin</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD BOARD MODAL -->
+<div class="modal-backdrop" id="boardModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>New Board</h2>
+      <button class="modal-close" onclick="closeBoardModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Board Name</label>
+        <input type="text" id="boardName" placeholder="e.g. Inspiration, Architecture, Memes…">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeBoardModal()">Cancel</button>
+      <button class="btn btn-accent" onclick="saveBoard()">Create</button>
+    </div>
+  </div>
+</div>
+
+<!-- PIN DETAIL MODAL -->
+<div class="modal-backdrop" id="detailModal">
+  <div class="modal pin-detail-modal">
+    <div class="pin-detail-content" id="detailContent"></div>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+// ═══════════════════ STATE ═══════════════════
+let peer = null;
+let connections = [];
+let myPeerId = '';
+let pins = [];
+let boards = ['Inspiration', 'Reference', 'Ideas'];
+let currentBoard = 'all';
+let pendingImage = null;
+
+const DB_NAME = 'pinboard_db';
+const DB_VERSION = 1;
+
+// ═══════════════════ INDEXED DB ═══════════════════
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, DB_VERSION);
+    req.onupgradeneeded = e => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains('pins')) db.createObjectStore('pins', { keyPath: 'id' });
+      if (!db.objectStoreNames.contains('boards')) db.createObjectStore('boards', { keyPath: 'name' });
+    };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function saveToDB() {
+  const db = await openDB();
+  const tx = db.transaction(['pins', 'boards'], 'readwrite');
+  const pinStore = tx.objectStore('pins');
+  const boardStore = tx.objectStore('boards');
+  // Clear and re-add
+  pinStore.clear();
+  boardStore.clear();
+  pins.forEach(p => pinStore.put(p));
+  boards.forEach(b => boardStore.put({ name: b }));
+}
+
+async function loadFromDB() {
+  try {
+    const db = await openDB();
+    const tx = db.transaction(['pins', 'boards'], 'readonly');
+    const allPins = await new Promise(r => { const req = tx.objectStore('pins').getAll(); req.onsuccess = () => r(req.result); });
+    const allBoards = await new Promise(r => { const req = tx.objectStore('boards').getAll(); req.onsuccess = () => r(req.result); });
+    if (allPins.length) pins = allPins;
+    if (allBoards.length) boards = allBoards.map(b => b.name);
+  } catch(e) { console.warn('DB load failed', e); }
+}
+
+// ═══════════════════ PEER JS ═══════════════════
+function initPeer() {
+  const id = 'pb-' + Math.random().toString(36).slice(2, 10);
+  try {
+    peer = new Peer(id, { debug: 0 });
+
+    peer.on('open', peerId => {
+      myPeerId = peerId;
+      document.getElementById('peerIdText').textContent = peerId;
+      document.getElementById('statusDot').classList.add('online');
+      toast('Online as ' + peerId, 'var(--green)');
+    });
+
+    peer.on('connection', conn => handleConnection(conn));
+
+    peer.on('error', err => {
+      console.warn('Peer error:', err.type);
+      if (err.type === 'network' || err.type === 'server-error') {
+        document.getElementById('peerIdText').textContent = 'Offline — local only';
+        toast('P2P offline — working locally', 'var(--yellow)');
+      }
+    });
+  } catch(e) {
+    document.getElementById('peerIdText').textContent = 'P2P unavailable — local mode';
+    toast('Running in local-only mode', 'var(--yellow)');
+  }
+}
+
+function handleConnection(conn) {
+  conn.on('open', () => {
+    connections.push(conn);
+    updatePeersList();
+    toast('Peer connected: ' + conn.peer, 'var(--green)');
+    // Sync: send all our pins
+    conn.send({ type: 'sync', pins, boards });
+  });
+
+  conn.on('data', data => {
+    if (data.type === 'sync') {
+      mergeData(data.pins, data.boards);
+    } else if (data.type === 'new-pin') {
+      if (!pins.find(p => p.id === data.pin.id)) {
+        pins.unshift(data.pin);
+        saveToDB();
+        renderPins();
+        toast('New pin from peer', 'var(--blue)');
+      }
+    } else if (data.type === 'new-board') {
+      if (!boards.includes(data.board)) {
+        boards.push(data.board);
+        saveToDB();
+        renderBoardTabs();
+      }
+    } else if (data.type === 'delete-pin') {
+      pins = pins.filter(p => p.id !== data.pinId);
+      saveToDB();
+      renderPins();
+    }
+  });
+
+  conn.on('close', () => {
+    connections = connections.filter(c => c !== conn);
+    updatePeersList();
+    toast('Peer disconnected', 'var(--yellow)');
+  });
+}
+
+function connectToPeer() {
+  const targetId = document.getElementById('connectIdInput').value.trim();
+  if (!targetId || !peer) return;
+  if (targetId === myPeerId) { toast('Cannot connect to yourself', 'var(--accent)'); return; }
+  if (connections.find(c => c.peer === targetId)) { toast('Already connected', 'var(--yellow)'); return; }
+
+  const conn = peer.connect(targetId, { reliable: true });
+  conn.on('open', () => {
+    handleConnection(conn);
+    document.getElementById('connectIdInput').value = '';
+  });
+  conn.on('error', () => toast('Connection failed', 'var(--accent)'));
+}
+
+function mergeData(remotePins, remoteBoards) {
+  let added = 0;
+  remotePins.forEach(rp => {
+    if (!pins.find(p => p.id === rp.id)) {
+      pins.push(rp);
+      added++;
+    }
+  });
+  remoteBoards.forEach(rb => {
+    if (!boards.includes(rb)) boards.push(rb);
+  });
+  if (added > 0) {
+    pins.sort((a, b) => b.created - a.created);
+    saveToDB();
+    renderPins();
+    renderBoardTabs();
+    toast(`Synced ${added} pin${added > 1 ? 's' : ''} from peer`, 'var(--blue)');
+  }
+}
+
+function broadcast(data) {
+  connections.forEach(c => {
+    if (c.open) c.send(data);
+  });
+}
+
+function updatePeersList() {
+  const el = document.getElementById('peersList');
+  if (connections.length === 0) {
+    el.innerHTML = '<span style="font-size:0.78rem">No peers</span>';
+  } else {
+    el.innerHTML = connections.map(c =>
+      `<span class="peer-chip"><span class="dot"></span>${c.peer}</span>`
+    ).join('');
+  }
+}
+
+function copyPeerId() {
+  if (!myPeerId) return;
+  navigator.clipboard.writeText(myPeerId).then(() => toast('Peer ID copied', 'var(--green)'));
+}
+
+// ═══════════════════ PINS ═══════════════════
+function showPinModal() {
+  document.getElementById('pinModal').classList.add('active');
+  renderBoardSelect();
+  pendingImage = null;
+  document.getElementById('uploadArea').classList.remove('has-image');
+  document.getElementById('uploadPlaceholder').style.display = '';
+  document.getElementById('pinTitle').value = '';
+  document.getElementById('pinDesc').value = '';
+}
+
+function closePinModal() {
+  document.getElementById('pinModal').classList.remove('active');
+}
+
+function showBoardModal() {
+  document.getElementById('boardModal').classList.add('active');
+  document.getElementById('boardName').value = '';
+}
+
+function closeBoardModal() {
+  document.getElementById('boardModal').classList.remove('active');
+}
+
+function renderBoardSelect() {
+  const sel = document.getElementById('pinBoard');
+  sel.innerHTML = boards.map(b => `<option value="${b}">${b}</option>`).join('');
+}
+
+function saveBoard() {
+  const name = document.getElementById('boardName').value.trim();
+  if (!name) return;
+  if (boards.includes(name)) { toast('Board already exists', 'var(--yellow)'); return; }
+  boards.push(name);
+  saveToDB();
+  renderBoardTabs();
+  broadcast({ type: 'new-board', board: name });
+  closeBoardModal();
+  toast(`Board "${name}" created`, 'var(--green)');
+}
+
+function savePin() {
+  const title = document.getElementById('pinTitle').value.trim();
+  const desc = document.getElementById('pinDesc').value.trim();
+  const board = document.getElementById('pinBoard').value;
+
+  if (!pendingImage) { toast('Please add an image', 'var(--accent)'); return; }
+  if (!title) { toast('Please add a title', 'var(--accent)'); return; }
+
+  const pin = {
+    id: 'pin-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6),
+    image: pendingImage,
+    title,
+    description: desc,
+    board,
+    source: myPeerId || 'local',
+    created: Date.now(),
+  };
+
+  pins.unshift(pin);
+  saveToDB();
+  renderPins();
+  broadcast({ type: 'new-pin', pin });
+  closePinModal();
+  toast('Pin saved!', 'var(--green)');
+}
+
+function deletePin(id, e) {
+  if (e) e.stopPropagation();
+  pins = pins.filter(p => p.id !== id);
+  saveToDB();
+  renderPins();
+  broadcast({ type: 'delete-pin', pinId: id });
+  toast('Pin removed', 'var(--text-muted)');
+}
+
+function showDetail(pin) {
+  const el = document.getElementById('detailContent');
+  const date = new Date(pin.created).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  el.innerHTML = `
+    <div class="pin-detail-image"><img src="${pin.image}" alt="${pin.title}"></div>
+    <div class="pin-detail-info">
+      <div style="display:flex;justify-content:space-between;align-items:start">
+        <h2>${escHtml(pin.title)}</h2>
+        <button class="modal-close" onclick="closeDetail()">×</button>
+      </div>
+      <p>${escHtml(pin.description || 'No description.')}</p>
+      <div class="pin-detail-meta">
+        <span><strong>Board:</strong> ${escHtml(pin.board)}</span>
+        <span><strong>Source:</strong> ${pin.source}</span>
+        <span><strong>Created:</strong> ${date}</span>
+      </div>
+      <div style="display:flex;gap:0.5rem;margin-top:1rem">
+        <button class="btn btn-sm" onclick="deletePin('${pin.id}');closeDetail()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+          Delete
+        </button>
+      </div>
+    </div>
+  `;
+  document.getElementById('detailModal').classList.add('active');
+}
+
+function closeDetail() {
+  document.getElementById('detailModal').classList.remove('active');
+}
+
+// ═══════════════════ RENDER ═══════════════════
+function renderPins() {
+  const grid = document.getElementById('masonry');
+  const empty = document.getElementById('emptyState');
+  const filtered = currentBoard === 'all' ? pins : pins.filter(p => p.board === currentBoard);
+
+  document.getElementById('pinCount').textContent = `${filtered.length} pin${filtered.length !== 1 ? 's' : ''}`;
+
+  if (filtered.length === 0) {
+    grid.innerHTML = '';
+    empty.style.display = '';
+    return;
+  }
+
+  empty.style.display = 'none';
+  grid.innerHTML = filtered.map((pin, i) => `
+    <div class="pin-card" style="animation-delay:${Math.min(i * 0.04, 0.5)}s" onclick="showDetail(pins.find(p=>p.id==='${pin.id}'))">
+      <div class="pin-overlay">
+        <button class="pin-overlay-btn" title="Delete" onclick="deletePin('${pin.id}', event)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <img src="${pin.image}" alt="${escHtml(pin.title)}" loading="lazy">
+      <div class="pin-info">
+        <div class="pin-title">${escHtml(pin.title)}</div>
+        ${pin.description ? `<div class="pin-desc">${escHtml(pin.description)}</div>` : ''}
+      </div>
+      <div class="pin-meta">
+        <span class="pin-board-tag">${escHtml(pin.board)}</span>
+        <span class="pin-source">${pin.source === myPeerId ? 'you' : pin.source.slice(0, 10)}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderBoardTabs() {
+  const el = document.getElementById('boardTabs');
+  const counts = {};
+  boards.forEach(b => counts[b] = 0);
+  pins.forEach(p => { if (counts[p.board] !== undefined) counts[p.board]++; });
+
+  el.innerHTML = `<button class="board-tab ${currentBoard === 'all' ? 'active' : ''}" onclick="filterBoard('all')">All Pins</button>` +
+    boards.map(b => `<button class="board-tab ${currentBoard === b ? 'active' : ''}" onclick="filterBoard('${escHtml(b)}')">${escHtml(b)} <span style="opacity:0.4;font-size:0.75rem">${counts[b] || 0}</span></button>`).join('');
+}
+
+function filterBoard(board) {
+  currentBoard = board;
+  renderBoardTabs();
+  renderPins();
+}
+
+// ═══════════════════ IMAGE HANDLING ═══════════════════
+const uploadArea = document.getElementById('uploadArea');
+const fileInput = document.getElementById('fileInput');
+
+fileInput.addEventListener('change', e => {
+  if (e.target.files[0]) processFile(e.target.files[0]);
+});
+
+uploadArea.addEventListener('dragover', e => { e.preventDefault(); uploadArea.style.borderColor = 'var(--accent)'; });
+uploadArea.addEventListener('dragleave', () => { uploadArea.style.borderColor = ''; });
+uploadArea.addEventListener('drop', e => {
+  e.preventDefault();
+  uploadArea.style.borderColor = '';
+  if (e.dataTransfer.files[0]) processFile(e.dataTransfer.files[0]);
+});
+
+function processFile(file) {
+  if (!file.type.startsWith('image/')) { toast('Not an image file', 'var(--accent)'); return; }
+  if (file.size > 4 * 1024 * 1024) { toast('Image too large (4MB max)', 'var(--accent)'); return; }
+
+  const reader = new FileReader();
+  reader.onload = e => {
+    // Resize for P2P friendliness
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const MAX = 800;
+      let w = img.width, h = img.height;
+      if (w > MAX || h > MAX) {
+        if (w > h) { h = Math.round(h * MAX / w); w = MAX; }
+        else { w = Math.round(w * MAX / h); h = MAX; }
+      }
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      pendingImage = canvas.toDataURL('image/jpeg', 0.8);
+
+      uploadArea.classList.add('has-image');
+      uploadArea.innerHTML = `<img src="${pendingImage}" alt="Preview">`;
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+// Global drag & drop to main page
+document.body.addEventListener('dragover', e => e.preventDefault());
+document.body.addEventListener('drop', e => {
+  e.preventDefault();
+  if (e.dataTransfer.files[0] && e.dataTransfer.files[0].type.startsWith('image/')) {
+    showPinModal();
+    processFile(e.dataTransfer.files[0]);
+  }
+});
+
+// ═══════════════════ UTILS ═══════════════════
+function escHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s || '';
+  return d.innerHTML;
+}
+
+function toast(msg, color = 'var(--text-muted)') {
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.innerHTML = `<span class="toast-dot" style="background:${color}"></span>${escHtml(msg)}`;
+  document.getElementById('toastContainer').appendChild(el);
+  setTimeout(() => el.remove(), 3500);
+}
+
+// Click outside modal to close
+['pinModal', 'boardModal', 'detailModal'].forEach(id => {
+  document.getElementById(id).addEventListener('click', e => {
+    if (e.target === e.currentTarget) {
+      e.currentTarget.classList.remove('active');
+    }
+  });
+});
+
+// ═══════════════════ INIT ═══════════════════
+(async () => {
+  await loadFromDB();
+  renderBoardTabs();
+  renderPins();
+  initPeer();
+})();
+</script>
+
+
+</body></html>

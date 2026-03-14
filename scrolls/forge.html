@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FORGE — HTML Tool Generator</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #08090b;
+    --bg-warm: #0c0b09;
+    --surface: #111318;
+    --surface-2: #171a20;
+    --surface-3: #1d2028;
+    --border: #252830;
+    --border-lit: #33363f;
+    --text: #e4e2dc;
+    --text-2: #a09d95;
+    --text-3: #605d55;
+    --fire: #e8922a;
+    --fire-dim: #a06318;
+    --fire-glow: rgba(232,146,42,0.07);
+    --fire-glow-2: rgba(232,146,42,0.14);
+    --ember: #c44b1a;
+    --green: #3d9e6a;
+    --green-dim: rgba(61,158,106,0.12);
+    --red: #c44b4b;
+    --red-dim: rgba(196,75,75,0.12);
+    --blue: #4b7ec4;
+    --r: 5px;
+    --r2: 10px;
+    --r3: 16px;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: 'Outfit', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── Grain Overlay ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* ── Layout ── */
+  .shell {
+    display: grid;
+    grid-template-columns: 480px 1fr;
+    grid-template-rows: auto 1fr;
+    min-height: 100vh;
+  }
+
+  /* ── Top Bar ── */
+  .topbar {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 28px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .logo-mark {
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, var(--fire), var(--ember));
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    color: #fff;
+    font-weight: 700;
+    box-shadow: 0 2px 12px rgba(232,146,42,0.25);
+  }
+  .logo-text {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+  .logo-text span { color: var(--fire); }
+  .logo-sub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--text-3);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .topbar-right { display:flex; gap:8px; align-items:center; }
+  .top-btn {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    color: var(--text-2);
+    padding: 7px 14px;
+    border-radius: var(--r);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .top-btn:hover { border-color: var(--fire-dim); color: var(--fire); }
+  .top-btn.active { background: var(--fire-glow); border-color: var(--fire-dim); color: var(--fire); }
+
+  /* ── Left Panel ── */
+  .left {
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    background: var(--surface);
+    overflow-y: auto;
+  }
+
+  .input-section {
+    padding: 28px;
+    flex-shrink: 0;
+  }
+
+  .section-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--text-3);
+    margin-bottom: 12px;
+  }
+
+  .idea-box {
+    width: 100%;
+    min-height: 160px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--r2);
+    color: var(--text);
+    font-family: 'Outfit', sans-serif;
+    font-size: 15px;
+    line-height: 1.65;
+    padding: 16px 20px;
+    resize: vertical;
+    outline: none;
+    transition: border-color 0.25s;
+  }
+  .idea-box:focus { border-color: var(--fire-dim); }
+  .idea-box::placeholder { color: var(--text-3); }
+
+  /* ── Refinement Toggles ── */
+  .refine-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 14px;
+  }
+  .refine-chip {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    color: var(--text-2);
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    user-select: none;
+  }
+  .refine-chip:hover { border-color: var(--border-lit); }
+  .refine-chip.on {
+    background: var(--fire-glow);
+    border-color: var(--fire-dim);
+    color: var(--fire);
+  }
+
+  /* ── Generate Button ── */
+  .gen-btn {
+    width: 100%;
+    margin-top: 20px;
+    padding: 16px;
+    background: linear-gradient(135deg, var(--fire-dim), var(--ember));
+    border: none;
+    border-radius: var(--r2);
+    color: #fff;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+  .gen-btn:hover { filter: brightness(1.15); transform: translateY(-1px); }
+  .gen-btn:active { transform: translateY(0); }
+  .gen-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    filter: none;
+    transform: none;
+  }
+  .gen-btn .spinner {
+    display: none;
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-right: 10px;
+    vertical-align: middle;
+  }
+  .gen-btn.loading .spinner { display: inline-block; }
+  .gen-btn.loading .btn-text { display: none; }
+  .gen-btn.loading .btn-loading { display: inline; }
+  .btn-loading { display: none; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── History ── */
+  .history-section {
+    flex: 1;
+    border-top: 1px solid var(--border);
+    padding: 20px 28px;
+    overflow-y: auto;
+  }
+  .history-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  .history-item:hover { opacity: 0.8; }
+  .history-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--fire);
+    margin-top: 6px;
+    flex-shrink: 0;
+  }
+  .history-info { flex:1; min-width:0; }
+  .history-name {
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .history-time {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--text-3);
+    margin-top: 2px;
+  }
+  .history-actions {
+    display: flex;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+  .hist-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-3);
+    width: 28px;
+    height: 28px;
+    border-radius: var(--r);
+    cursor: pointer;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+  }
+  .hist-btn:hover { border-color: var(--fire-dim); color: var(--fire); }
+  .hist-btn.del:hover { border-color: var(--red); color: var(--red); }
+
+  .empty-history {
+    text-align: center;
+    padding: 40px 0;
+    color: var(--text-3);
+    font-size: 13px;
+  }
+
+  /* ── Right Panel ── */
+  .right {
+    display: flex;
+    flex-direction: column;
+    background: var(--bg);
+    position: relative;
+  }
+
+  .preview-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 24px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    flex-shrink: 0;
+  }
+  .preview-tabs { display:flex; gap:0; }
+  .preview-tab {
+    padding: 6px 16px;
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-3);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .preview-tab:first-child { border-radius: var(--r) 0 0 var(--r); }
+  .preview-tab:last-child { border-radius: 0 var(--r) var(--r) 0; border-left:none; }
+  .preview-tab.active { background: var(--fire-glow); border-color: var(--fire-dim); color: var(--fire); }
+  .preview-actions { display:flex; gap:6px; }
+  .prev-btn {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    color: var(--text-2);
+    padding: 6px 14px;
+    border-radius: var(--r);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .prev-btn:hover { border-color: var(--fire-dim); color: var(--fire); }
+  .prev-btn.primary {
+    background: var(--fire-dim);
+    border-color: transparent;
+    color: #fff;
+  }
+  .prev-btn.primary:hover { background: var(--fire); }
+
+  .preview-frame {
+    flex: 1;
+    background: #fff;
+    position: relative;
+  }
+  .preview-frame iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    position: absolute;
+    inset: 0;
+  }
+
+  .code-view {
+    flex: 1;
+    display: none;
+    overflow: auto;
+    background: var(--bg);
+  }
+  .code-view pre {
+    padding: 24px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    line-height: 1.7;
+    color: var(--text-2);
+    white-space: pre-wrap;
+    word-break: break-all;
+    tab-size: 2;
+  }
+
+  .welcome-state {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    color: var(--text-3);
+  }
+  .welcome-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+  }
+  .welcome-state h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 400;
+    color: var(--text-2);
+  }
+  .welcome-state p { font-size: 13px; max-width: 360px; text-align: center; line-height: 1.6; }
+
+  /* ── Settings Modal ── */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r3);
+    width: 520px;
+    max-width: 92vw;
+    max-height: 85vh;
+    overflow-y: auto;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+  }
+  .modal-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border);
+  }
+  .modal-head h3 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .modal-close {
+    background: none;
+    border: none;
+    color: var(--text-3);
+    font-size: 18px;
+    cursor: pointer;
+    padding: 4px;
+  }
+  .modal-close:hover { color: var(--text); }
+  .modal-body { padding: 24px; }
+  .field { margin-bottom: 20px; }
+  .field label {
+    display: block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text-3);
+    margin-bottom: 8px;
+  }
+  .field input, .field select {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 10px 14px;
+    border-radius: var(--r);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .field input:focus, .field select:focus { border-color: var(--fire-dim); }
+  .field input::placeholder { color: var(--text-3); }
+  .field .hint {
+    font-size: 11px;
+    color: var(--text-3);
+    margin-top: 6px;
+    line-height: 1.5;
+  }
+  .save-settings-btn {
+    width: 100%;
+    padding: 12px;
+    background: var(--fire-dim);
+    border: none;
+    border-radius: var(--r);
+    color: #fff;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .save-settings-btn:hover { background: var(--fire); }
+
+  /* ── Error Toast ── */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--surface-2);
+    border: 1px solid var(--red);
+    color: var(--text);
+    padding: 14px 20px;
+    border-radius: var(--r2);
+    font-size: 13px;
+    max-width: 420px;
+    z-index: 2000;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    transform: translateY(120%);
+    transition: transform 0.3s ease;
+  }
+  .toast.show { transform: translateY(0); }
+  .toast.success { border-color: var(--green); }
+
+  /* ── Status Indicator ── */
+  .status-line {
+    padding: 10px 28px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-3);
+    border-top: 1px solid var(--border);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 38px;
+  }
+  .status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--text-3);
+  }
+  .status-dot.connected { background: var(--green); }
+  .status-dot.generating { background: var(--fire); animation: pulse 1s infinite; }
+  .status-dot.error { background: var(--red); }
+  @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.4; } }
+
+  /* ── Prompt editor ── */
+  .system-prompt-box {
+    width: 100%;
+    min-height: 120px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    color: var(--text-2);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    line-height: 1.6;
+    padding: 12px 14px;
+    resize: vertical;
+    outline: none;
+  }
+  .system-prompt-box:focus { border-color: var(--fire-dim); }
+
+  /* ── Responsive ── */
+  @media (max-width: 960px) {
+    .shell { grid-template-columns: 1fr; grid-template-rows: auto auto 1fr; }
+    .left { max-height: 50vh; border-right: none; border-bottom: 1px solid var(--border); }
+    .history-section { max-height: 200px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <!-- Top Bar -->
+  <div class="topbar">
+    <div class="logo">
+      <div class="logo-mark">⚒</div>
+      <div>
+        <div class="logo-text"><span>FORGE</span></div>
+        <div class="logo-sub">Idea → HTML Tool · Azure OpenAI</div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <button class="top-btn" onclick="openSettings()" id="settingsBtn">⚙ Settings</button>
+      <button class="top-btn" onclick="openPromptEditor()">✎ System Prompt</button>
+    </div>
+  </div>
+
+  <!-- Left Panel -->
+  <div class="left">
+    <div class="input-section">
+      <div class="section-label">Describe Your Tool</div>
+      <textarea class="idea-box" id="ideaInput" placeholder="e.g. A battery sizing calculator for VRLA and Li-ion chemistries with NEC compliance checks, exportable to PDF...
+
+Be specific: what inputs, what outputs, what logic, who uses it."></textarea>
+
+      <div class="refine-row">
+        <span class="refine-chip on" data-tag="offline" onclick="toggleChip(this)">Offline-Ready</span>
+        <span class="refine-chip on" data-tag="dark" onclick="toggleChip(this)">Dark Theme</span>
+        <span class="refine-chip" data-tag="localStorage" onclick="toggleChip(this)">LocalStorage</span>
+        <span class="refine-chip" data-tag="export" onclick="toggleChip(this)">CSV Export</span>
+        <span class="refine-chip" data-tag="print" onclick="toggleChip(this)">Print-Friendly</span>
+        <span class="refine-chip" data-tag="charts" onclick="toggleChip(this)">Charts</span>
+        <span class="refine-chip" data-tag="mobile" onclick="toggleChip(this)">Mobile-First</span>
+        <span class="refine-chip" data-tag="table" onclick="toggleChip(this)">Data Tables</span>
+      </div>
+
+      <button class="gen-btn" id="genBtn" onclick="generate()">
+        <span class="spinner"></span>
+        <span class="btn-text">⚒ Forge HTML Tool</span>
+        <span class="btn-loading">Forging...</span>
+      </button>
+    </div>
+
+    <!-- History -->
+    <div class="history-section">
+      <div class="section-label">Build History</div>
+      <div id="historyList">
+        <div class="empty-history" id="emptyHistory">No tools forged yet.</div>
+      </div>
+    </div>
+
+    <div class="status-line">
+      <span class="status-dot" id="statusDot"></span>
+      <span id="statusText">Configure Azure endpoint in Settings</span>
+    </div>
+  </div>
+
+  <!-- Right Panel -->
+  <div class="right">
+    <div class="preview-bar" id="previewBar" style="display:none">
+      <div class="preview-tabs">
+        <button class="preview-tab active" onclick="showView('preview',this)">Preview</button>
+        <button class="preview-tab" onclick="showView('code',this)">Code</button>
+      </div>
+      <div class="preview-actions">
+        <button class="prev-btn" onclick="copyCode()">Copy</button>
+        <button class="prev-btn primary" onclick="downloadHTML()">↓ Download .html</button>
+      </div>
+    </div>
+
+    <div class="preview-frame" id="previewFrame" style="display:none">
+      <iframe id="previewIframe" sandbox="allow-scripts allow-modals"></iframe>
+    </div>
+    <div class="code-view" id="codeView"><pre id="codeContent"></pre></div>
+
+    <div class="welcome-state" id="welcomeState">
+      <div class="welcome-icon">⚒</div>
+      <h2>Describe a tool. Get HTML.</h2>
+      <p>Enter any idea — calculator, dashboard, tracker, report template — and Forge will generate a complete standalone HTML file powered by Azure OpenAI.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Settings Modal -->
+<div class="modal-overlay" id="settingsModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>Azure OpenAI Settings</h3>
+      <button class="modal-close" onclick="closeSettings()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label>Azure Endpoint</label>
+        <input type="text" id="cfgEndpoint" placeholder="https://your-resource.openai.azure.com" />
+        <div class="hint">Your Azure OpenAI resource URL (no trailing slash)</div>
+      </div>
+      <div class="field">
+        <label>API Key</label>
+        <input type="password" id="cfgApiKey" placeholder="••••••••••••••••" />
+        <div class="hint">Stored locally in your browser only — never transmitted elsewhere</div>
+      </div>
+      <div class="field">
+        <label>Deployment Name</label>
+        <input type="text" id="cfgDeployment" placeholder="gpt-4o" />
+        <div class="hint">The deployment name from Azure AI Studio (e.g. gpt-4o, chat5.3, gpt-4.1)</div>
+      </div>
+      <div class="field">
+        <label>API Version</label>
+        <input type="text" id="cfgApiVersion" placeholder="2024-12-01-preview" />
+        <div class="hint">Azure API version string</div>
+      </div>
+      <button class="save-settings-btn" onclick="saveSettings()">Save Settings</button>
+    </div>
+  </div>
+</div>
+
+<!-- System Prompt Modal -->
+<div class="modal-overlay" id="promptModal">
+  <div class="modal" style="width:640px">
+    <div class="modal-head">
+      <h3>System Prompt</h3>
+      <button class="modal-close" onclick="closePromptEditor()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label>Instructions sent to the model</label>
+        <textarea class="system-prompt-box" id="cfgPrompt" rows="14"></textarea>
+        <div class="hint">Controls how the model generates HTML tools. Edit to change behavior.</div>
+      </div>
+      <button class="save-settings-btn" onclick="savePrompt()">Save Prompt</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════
+// State
+// ═══════════════════════════════════════════
+const KEYS = {
+  endpoint: 'forge_endpoint',
+  apiKey: 'forge_apikey',
+  deployment: 'forge_deployment',
+  apiVersion: 'forge_apiversion',
+  prompt: 'forge_system_prompt',
+  history: 'forge_history',
+};
+
+const DEFAULT_SYSTEM_PROMPT = `You are an expert HTML tool builder. You create COMPLETE, STANDALONE, SINGLE-FILE HTML applications.
+
+CRITICAL RULES:
+1. Output ONLY the HTML code. No markdown, no backticks, no explanation. Start with <!DOCTYPE html> and end with </html>.
+2. Everything — HTML, CSS, JavaScript — must be in ONE file.
+3. The tool must work completely OFFLINE with zero external dependencies (no CDNs, no APIs, no external scripts/fonts unless specifically requested).
+4. Use modern, clean, professional design. Dark theme by default. High contrast for readability.
+5. Include proper input validation, error handling, and user feedback.
+6. Make it mobile-responsive.
+7. Use semantic HTML and accessible patterns.
+8. Include a clear title and any instructions the user needs inline.
+9. If the tool involves data, include localStorage persistence so work survives page refresh.
+10. If calculations are involved, show your work — display intermediate values so the user can verify.
+11. Use CSS custom properties (variables) for theming.
+12. Include a print-friendly @media print stylesheet if the output might be printed.
+
+DESIGN GUIDELINES:
+- Professional industrial aesthetic — this is for engineers and technical users
+- Monospace fonts for data, clean sans-serif for UI
+- Subtle borders, no harsh shadows
+- Functional first, beautiful second
+- Tables should be sortable when appropriate
+- Forms should have clear labels and units
+- Include export functionality (CSV, JSON, or print) when data is involved
+
+You are generating tools for an Applications Engineering team in the industrial power systems industry (UPS, batteries, inverters, chargers). Make reasonable domain assumptions when helpful.`;
+
+let currentCode = '';
+let history = [];
+
+// ═══════════════════════════════════════════
+// Settings
+// ═══════════════════════════════════════════
+function loadSettings() {
+  document.getElementById('cfgEndpoint').value = localStorage.getItem(KEYS.endpoint) || '';
+  document.getElementById('cfgApiKey').value = localStorage.getItem(KEYS.apiKey) || '';
+  document.getElementById('cfgDeployment').value = localStorage.getItem(KEYS.deployment) || 'gpt-4o';
+  document.getElementById('cfgApiVersion').value = localStorage.getItem(KEYS.apiVersion) || '2024-12-01-preview';
+  document.getElementById('cfgPrompt').value = localStorage.getItem(KEYS.prompt) || DEFAULT_SYSTEM_PROMPT;
+  try { history = JSON.parse(localStorage.getItem(KEYS.history) || '[]'); } catch(e) { history = []; }
+  updateStatus();
+  renderHistory();
+}
+
+function saveSettings() {
+  localStorage.setItem(KEYS.endpoint, document.getElementById('cfgEndpoint').value.trim().replace(/\/+$/, ''));
+  localStorage.setItem(KEYS.apiKey, document.getElementById('cfgApiKey').value.trim());
+  localStorage.setItem(KEYS.deployment, document.getElementById('cfgDeployment').value.trim());
+  localStorage.setItem(KEYS.apiVersion, document.getElementById('cfgApiVersion').value.trim());
+  closeSettings();
+  updateStatus();
+  showToast('Settings saved', true);
+}
+
+function savePrompt() {
+  localStorage.setItem(KEYS.prompt, document.getElementById('cfgPrompt').value);
+  closePromptEditor();
+  showToast('System prompt saved', true);
+}
+
+function openSettings() { document.getElementById('settingsModal').classList.add('open'); }
+function closeSettings() { document.getElementById('settingsModal').classList.remove('open'); }
+function openPromptEditor() { document.getElementById('promptModal').classList.add('open'); }
+function closePromptEditor() { document.getElementById('promptModal').classList.remove('open'); }
+
+function getConfig() {
+  return {
+    endpoint: localStorage.getItem(KEYS.endpoint) || '',
+    apiKey: localStorage.getItem(KEYS.apiKey) || '',
+    deployment: localStorage.getItem(KEYS.deployment) || 'gpt-4o',
+    apiVersion: localStorage.getItem(KEYS.apiVersion) || '2024-12-01-preview',
+    prompt: localStorage.getItem(KEYS.prompt) || DEFAULT_SYSTEM_PROMPT,
+  };
+}
+
+function updateStatus() {
+  const cfg = getConfig();
+  const dot = document.getElementById('statusDot');
+  const txt = document.getElementById('statusText');
+  if (cfg.endpoint && cfg.apiKey) {
+    dot.className = 'status-dot connected';
+    txt.textContent = `Connected · ${cfg.deployment} · ${cfg.endpoint.replace('https://','').split('.')[0]}`;
+    document.getElementById('settingsBtn').classList.add('active');
+  } else {
+    dot.className = 'status-dot';
+    txt.textContent = 'Configure Azure endpoint in Settings';
+    document.getElementById('settingsBtn').classList.remove('active');
+  }
+}
+
+// ═══════════════════════════════════════════
+// Chip Toggles
+// ═══════════════════════════════════════════
+function toggleChip(el) { el.classList.toggle('on'); }
+
+function getActiveChips() {
+  return [...document.querySelectorAll('.refine-chip.on')].map(c => c.dataset.tag);
+}
+
+// ═══════════════════════════════════════════
+// Generate
+// ═══════════════════════════════════════════
+async function generate() {
+  const cfg = getConfig();
+  if (!cfg.endpoint || !cfg.apiKey) {
+    openSettings();
+    showToast('Configure your Azure OpenAI endpoint first');
+    return;
+  }
+
+  const idea = document.getElementById('ideaInput').value.trim();
+  if (!idea) {
+    showToast('Describe what you want to build');
+    return;
+  }
+
+  const chips = getActiveChips();
+  let userMsg = idea;
+  if (chips.length) {
+    userMsg += '\n\nAdditional requirements: ' + chips.map(c => {
+      const map = {
+        'offline': 'Must work fully offline',
+        'dark': 'Use dark theme',
+        'localStorage': 'Persist data with localStorage',
+        'export': 'Include CSV export',
+        'print': 'Include print-friendly styles',
+        'charts': 'Include data visualization/charts (inline SVG or canvas)',
+        'mobile': 'Mobile-first responsive design',
+        'table': 'Use sortable data tables'
+      };
+      return map[c] || c;
+    }).join(', ');
+  }
+
+  const btn = document.getElementById('genBtn');
+  btn.classList.add('loading');
+  btn.disabled = true;
+  setStatus('generating', 'Forging HTML...');
+
+  try {
+    const url = `${cfg.endpoint}/openai/deployments/${cfg.deployment}/chat/completions?api-version=${cfg.apiVersion}`;
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'api-key': cfg.apiKey,
+      },
+      body: JSON.stringify({
+        messages: [
+          { role: 'system', content: cfg.prompt },
+          { role: 'user', content: userMsg }
+        ],
+        max_tokens: 16000,
+        temperature: 0.4,
+      }),
+    });
+
+    if (!res.ok) {
+      const err = await res.text();
+      throw new Error(`Azure API error ${res.status}: ${err.slice(0, 200)}`);
+    }
+
+    const data = await res.json();
+    let content = data.choices?.[0]?.message?.content || '';
+
+    // Strip markdown fences if present
+    content = content.replace(/^```html?\s*\n?/i, '').replace(/\n?```\s*$/i, '').trim();
+
+    // Validate it looks like HTML
+    if (!content.includes('<!DOCTYPE') && !content.includes('<html')) {
+      // Try to find HTML within the response
+      const match = content.match(/<!DOCTYPE[\s\S]*<\/html>/i) || content.match(/<html[\s\S]*<\/html>/i);
+      if (match) content = match[0];
+      else throw new Error('Model did not return valid HTML. Try being more specific.');
+    }
+
+    currentCode = content;
+
+    // Add to history
+    const name = idea.length > 60 ? idea.slice(0, 57) + '...' : idea;
+    history.unshift({ name, code: content, time: new Date().toISOString(), id: Date.now() });
+    if (history.length > 30) history = history.slice(0, 30);
+    localStorage.setItem(KEYS.history, JSON.stringify(history));
+    renderHistory();
+
+    showOutput(content);
+    setStatus('connected', `Done · ${(content.length/1024).toFixed(1)} KB · ${data.usage?.total_tokens || '?'} tokens`);
+
+  } catch (err) {
+    showToast(err.message);
+    setStatus('error', 'Generation failed');
+  } finally {
+    btn.classList.remove('loading');
+    btn.disabled = false;
+  }
+}
+
+// ═══════════════════════════════════════════
+// Output Display
+// ═══════════════════════════════════════════
+function showOutput(code) {
+  document.getElementById('welcomeState').style.display = 'none';
+  document.getElementById('previewBar').style.display = 'flex';
+  document.getElementById('previewFrame').style.display = 'block';
+  document.getElementById('codeView').style.display = 'none';
+
+  const iframe = document.getElementById('previewIframe');
+  iframe.srcdoc = code;
+
+  document.getElementById('codeContent').textContent = code;
+
+  // Reset tabs
+  document.querySelectorAll('.preview-tab').forEach((t,i) => t.classList.toggle('active', i===0));
+}
+
+function showView(view, tab) {
+  document.querySelectorAll('.preview-tab').forEach(t => t.classList.remove('active'));
+  tab.classList.add('active');
+  if (view === 'preview') {
+    document.getElementById('previewFrame').style.display = 'block';
+    document.getElementById('codeView').style.display = 'none';
+  } else {
+    document.getElementById('previewFrame').style.display = 'none';
+    document.getElementById('codeView').style.display = 'block';
+  }
+}
+
+function copyCode() {
+  if (!currentCode) return;
+  navigator.clipboard.writeText(currentCode).then(() => showToast('Copied to clipboard', true));
+}
+
+function downloadHTML() {
+  if (!currentCode) return;
+  const blob = new Blob([currentCode], { type: 'text/html' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  const idea = document.getElementById('ideaInput').value.trim();
+  const slug = idea.slice(0, 40).replace(/[^a-zA-Z0-9]+/g, '-').replace(/-+$/,'').toLowerCase() || 'tool';
+  a.download = slug + '.html';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ═══════════════════════════════════════════
+// History
+// ═══════════════════════════════════════════
+function renderHistory() {
+  const list = document.getElementById('historyList');
+  const empty = document.getElementById('emptyHistory');
+  if (!history.length) {
+    list.innerHTML = '';
+    list.appendChild(empty);
+    return;
+  }
+  list.innerHTML = history.map((h, i) => `
+    <div class="history-item" onclick="loadHistory(${i})">
+      <span class="history-dot"></span>
+      <div class="history-info">
+        <div class="history-name">${esc(h.name)}</div>
+        <div class="history-time">${formatTime(h.time)} · ${(h.code.length/1024).toFixed(1)} KB</div>
+      </div>
+      <div class="history-actions" onclick="event.stopPropagation()">
+        <button class="hist-btn" onclick="downloadHistoryItem(${i})" title="Download">↓</button>
+        <button class="hist-btn del" onclick="deleteHistory(${i})" title="Delete">✕</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function loadHistory(i) {
+  currentCode = history[i].code;
+  showOutput(currentCode);
+}
+
+function downloadHistoryItem(i) {
+  const h = history[i];
+  const blob = new Blob([h.code], { type: 'text/html' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  const slug = h.name.slice(0,40).replace(/[^a-zA-Z0-9]+/g,'-').replace(/-+$/,'').toLowerCase() || 'tool';
+  a.download = slug + '.html';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function deleteHistory(i) {
+  history.splice(i, 1);
+  localStorage.setItem(KEYS.history, JSON.stringify(history));
+  renderHistory();
+}
+
+// ═══════════════════════════════════════════
+// Utils
+// ═══════════════════════════════════════════
+function setStatus(state, text) {
+  document.getElementById('statusDot').className = 'status-dot ' + (state || '');
+  document.getElementById('statusText').textContent = text;
+}
+
+function showToast(msg, success) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast' + (success ? ' success' : '');
+  requestAnimationFrame(() => t.classList.add('show'));
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 4000);
+}
+
+function formatTime(iso) {
+  try {
+    const d = new Date(iso);
+    return d.toLocaleDateString('en-US', { month:'short', day:'numeric' }) + ' ' +
+           d.toLocaleTimeString('en-US', { hour:'numeric', minute:'2-digit' });
+  } catch(e) { return ''; }
+}
+
+function esc(s) {
+  return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// Close modals on overlay click
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); });
+});
+
+// Keyboard shortcuts
+document.addEventListener('keydown', e => {
+  if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') { e.preventDefault(); generate(); }
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
+  }
+});
+
+// Init
+loadSettings();
+</script>
+</body>
+</html>

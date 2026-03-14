@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kan</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+<style>
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+:root{
+--bg:#f5f5f7;
+--white:#ffffff;
+--border:#e5e5ea;
+--border-light:#f0f0f3;
+--text:#1d1d1f;
+--text-secondary:#6e6e73;
+--text-muted:#8e8e93;
+--sidebar-width:240px;
+--topbar-height:56px;
+--radius:12px;
+--radius-lg:16px;
+
+--pri-low:#64a8ff;
+--pri-medium:#ff9f0a;
+--pri-high:#ff453a;
+--pri-critical:#5e5ce6;
+}
+
+body{
+font-family:'Inter',system-ui;
+background:var(--bg);
+color:var(--text);
+display:flex;
+height:100vh;
+overflow:hidden;
+}
+
+.sidebar{
+width:var(--sidebar-width);
+background:#fff;
+border-right:1px solid var(--border);
+display:flex;
+flex-direction:column;
+}
+
+.sidebar-top{
+padding:18px;
+display:flex;
+gap:10px;
+border-bottom:1px solid var(--border);
+}
+
+.workspace-icon{
+width:34px;height:34px;background:#1d1d1f;color:#fff;
+display:flex;align-items:center;justify-content:center;
+border-radius:8px;font-weight:700;
+}
+
+.workspace-name{font-weight:600;font-size:14px;}
+.workspace-plan{font-size:11px;color:var(--text-muted);}
+
+.sidebar-nav{padding:10px;flex:1;}
+
+.sidebar-section-title{
+font-size:10px;
+letter-spacing:1px;
+text-transform:uppercase;
+color:var(--text-muted);
+padding:12px 10px;
+}
+
+.sidebar-item{
+display:flex;gap:10px;
+padding:8px 10px;
+border-radius:8px;
+cursor:pointer;
+font-size:13px;
+color:var(--text-secondary);
+}
+
+.sidebar-item:hover{background:#f2f2f5;color:var(--text);}
+
+.main{flex:1;display:flex;flex-direction:column;}
+
+.topbar{
+height:var(--topbar-height);
+background:#fff;
+border-bottom:1px solid var(--border);
+display:flex;align-items:center;
+padding:0 20px;
+}
+
+.topbar-title{font-size:20px;font-weight:600;}
+
+.topbar-actions{margin-left:auto;}
+
+.btn{
+border:1px solid var(--border);
+background:#fff;
+padding:6px 12px;
+border-radius:10px;
+cursor:pointer;
+font-weight:600;
+}
+
+.btn-primary{background:#1d1d1f;color:#fff;border-color:#1d1d1f;}
+
+.filterbar{
+background:#fff;
+border-bottom:1px solid var(--border);
+padding:8px 20px;
+}
+
+.search-box{
+display:flex;
+align-items:center;
+gap:6px;
+background:var(--bg);
+border:1px solid var(--border);
+border-radius:10px;
+padding:6px 10px;
+max-width:260px;
+}
+
+.search-box input{
+border:none;background:none;outline:none;width:100%;
+}
+
+.board-wrapper{flex:1;overflow-x:auto;padding:20px;}
+
+.board{display:flex;gap:14px;}
+
+.column{
+flex:0 0 280px;
+background:#fff;
+border:1px solid var(--border);
+border-radius:var(--radius-lg);
+display:flex;
+flex-direction:column;
+}
+
+.column-header{
+padding:12px;
+display:flex;
+gap:10px;
+align-items:center;
+font-weight:600;
+}
+
+.column-body{
+padding:10px;
+display:flex;
+flex-direction:column;
+gap:8px;
+min-height:50px;
+}
+
+.card{
+background:#fff;
+border:1px solid var(--border-light);
+border-radius:var(--radius);
+padding:10px;
+cursor:grab;
+}
+
+.card-title{font-size:13px;font-weight:500;}
+
+.card-meta{margin-top:6px;display:flex;gap:6px;}
+
+.priority-badge{
+font-size:10px;
+font-weight:700;
+padding:2px 6px;
+border-radius:4px;
+color:#fff;
+}
+
+.pri-low{background:var(--pri-low);}
+.pri-medium{background:var(--pri-medium);}
+.pri-high{background:var(--pri-high);}
+.pri-critical{background:var(--pri-critical);}
+
+.list-wrapper{display:none;flex:1;overflow:auto;padding:20px;}
+
+.list-item{
+background:#fff;
+border:1px solid var(--border);
+border-radius:10px;
+padding:12px;
+margin-bottom:10px;
+display:flex;
+justify-content:space-between;
+}
+
+.modal{
+position:fixed;
+inset:0;
+background:rgba(0,0,0,0.4);
+display:none;
+align-items:center;
+justify-content:center;
+}
+
+.modal-box{
+background:#fff;
+padding:20px;
+border-radius:14px;
+width:320px;
+display:flex;
+flex-direction:column;
+gap:10px;
+}
+
+.modal-box input,.modal-box textarea,.modal-box select{
+padding:8px;
+border:1px solid var(--border);
+border-radius:8px;
+font-family:inherit;
+}
+
+.modal-actions{
+display:flex;
+justify-content:flex-end;
+gap:8px;
+margin-top:6px;
+}
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+<div class="sidebar-top">
+<div class="workspace-icon">K</div>
+<div>
+<div class="workspace-name">Kan</div>
+<div class="workspace-plan">Focus Workspace</div>
+</div>
+</div>
+
+<nav class="sidebar-nav">
+<div class="sidebar-section-title">Views</div>
+
+<div class="sidebar-item" onclick="setView('board')">
+<span class="material-icons-outlined">view_kanban</span> Board
+</div>
+
+<div class="sidebar-item" onclick="setView('list')">
+<span class="material-icons-outlined">view_list</span> List
+</div>
+
+<div class="sidebar-section-title">Tools</div>
+
+<div class="sidebar-item" onclick="exportJSON()">
+<span class="material-icons-outlined">download</span> Export
+</div>
+
+<div class="sidebar-item" onclick="importJSON()">
+<span class="material-icons-outlined">upload</span> Import
+</div>
+</nav>
+</aside>
+
+<div class="main">
+
+<div class="topbar">
+<div class="topbar-title">Kan</div>
+<div class="topbar-actions">
+<button class="btn btn-primary" onclick="openModal()">New Task</button>
+</div>
+</div>
+
+<div class="filterbar">
+<div class="search-box">
+<span class="material-icons-outlined">search</span>
+<input id="searchInput" placeholder="Search..." oninput="handleSearch()">
+</div>
+</div>
+
+<div class="board-wrapper" id="boardView">
+<div class="board" id="board"></div>
+</div>
+
+<div class="list-wrapper" id="listView">
+<div id="listContent"></div>
+</div>
+
+</div>
+
+<div class="modal" id="taskModal">
+<div class="modal-box">
+<input id="taskTitle" placeholder="Task title">
+<textarea id="taskDesc" placeholder="Description"></textarea>
+
+<select id="taskPriority">
+<option value="low">Low</option>
+<option value="medium">Medium</option>
+<option value="high">High</option>
+<option value="critical">Critical</option>
+</select>
+
+<div class="modal-actions">
+<button class="btn" onclick="closeModal()">Cancel</button>
+<button class="btn btn-primary" onclick="addTask()">Create</button>
+</div>
+</div>
+</div>
+
+<input type="file" id="importInput" accept=".json" style="display:none" onchange="handleImport(event)">
+
+<script>
+const COLUMNS=[
+{id:'backlog',title:'Backlog',color:'#d2d2d7'},
+{id:'todo',title:'To Do',color:'#ff9f0a'},
+{id:'progress',title:'In Progress',color:'#30d158'},
+{id:'review',title:'Review',color:'#bf5af2'},
+{id:'done',title:'Done',color:'#0a84ff'}
+];
+
+let tasks=[];
+let searchQuery='';
+
+function uid(){return Date.now()+Math.random().toString(16).slice(2);}
+
+function save(){localStorage.setItem("kan_tasks",JSON.stringify(tasks));}
+
+function load(){
+const d=localStorage.getItem("kan_tasks");
+if(d)tasks=JSON.parse(d);
+if(tasks.length===0){
+tasks.push({id:uid(),title:"Welcome to Kan",description:"Drag tasks between columns",column:"todo",priority:"medium"});
+}
+}
+
+function handleSearch(){
+searchQuery=document.getElementById("searchInput").value.toLowerCase();
+render();
+}
+
+function filtered(){
+return tasks.filter(t=>t.title.toLowerCase().includes(searchQuery)||(t.description||"").toLowerCase().includes(searchQuery));
+}
+
+function render(){
+const board=document.getElementById("board");
+board.innerHTML="";
+
+COLUMNS.forEach(col=>{
+const colTasks=filtered().filter(t=>t.column===col.id);
+
+const el=document.createElement("div");
+el.className="column";
+
+el.innerHTML=`
+<div class="column-header">
+<div style="width:4px;height:20px;border-radius:3px;background:${col.color}"></div>
+${col.title} (${colTasks.length})
+</div>
+<div class="column-body" ondragover="event.preventDefault()" ondrop="dropTask(event,'${col.id}')">
+${colTasks.map(renderCard).join("")}
+</div>
+`;
+
+board.appendChild(el);
+});
+
+renderList();
+}
+
+function renderCard(t){
+return `
+<div class="card" draggable="true" ondragstart="dragTask(event,'${t.id}')">
+<div class="card-title">${t.title}</div>
+<div class="card-meta">
+<span class="priority-badge pri-${t.priority}">${t.priority}</span>
+<span style="margin-left:auto;cursor:pointer" onclick="deleteTask('${t.id}')">✕</span>
+</div>
+</div>
+`;
+}
+
+function renderList(){
+const el=document.getElementById("listContent");
+el.innerHTML=filtered().map(t=>`
+<div class="list-item">
+<div>
+<div><b>${t.title}</b></div>
+<div style="font-size:12px;color:#666">${t.column}</div>
+</div>
+<div class="priority-badge pri-${t.priority}">${t.priority}</div>
+</div>
+`).join("");
+}
+
+function dragTask(ev,id){ev.dataTransfer.setData("id",id);}
+
+function dropTask(ev,col){
+const id=ev.dataTransfer.getData("id");
+const t=tasks.find(x=>x.id===id);
+if(t){t.column=col;save();render();}
+}
+
+function openModal(){document.getElementById("taskModal").style.display="flex";}
+function closeModal(){document.getElementById("taskModal").style.display="none";}
+
+function addTask(){
+const title=document.getElementById("taskTitle").value.trim();
+if(!title)return;
+tasks.push({
+id:uid(),
+title,
+description:document.getElementById("taskDesc").value,
+priority:document.getElementById("taskPriority").value,
+column:"todo"
+});
+save();
+closeModal();
+render();
+}
+
+function deleteTask(id){
+tasks=tasks.filter(t=>t.id!==id);
+save();
+render();
+}
+
+function setView(v){
+document.getElementById("boardView").style.display=v==="board"?"block":"none";
+document.getElementById("listView").style.display=v==="list"?"block":"none";
+}
+
+function exportJSON(){
+const blob=new Blob([JSON.stringify(tasks,null,2)],{type:"application/json"});
+const a=document.createElement("a");
+a.href=URL.createObjectURL(blob);
+a.download="kan-export.json";
+a.click();
+}
+
+function importJSON(){document.getElementById("importInput").click();}
+
+function handleImport(e){
+const file=e.target.files[0];
+const r=new FileReader();
+r.onload=x=>{
+tasks=JSON.parse(x.target.result);
+save();
+render();
+};
+r.readAsText(file);
+}
+
+load();
+render();
+</script>
+
+</body>
+</html>

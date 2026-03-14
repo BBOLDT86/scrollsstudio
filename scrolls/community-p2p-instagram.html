@@ -1,0 +1,1301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Operation Front Page V2 — The 128-Day Sprint</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f6f5f1;
+  --bg-card: #ffffff;
+  --bg-dark: #1a1a1a;
+  --bg-dark-card: #242424;
+  --border: rgba(0,0,0,0.07);
+  --border-strong: rgba(0,0,0,0.13);
+  --text: #1a1a1a;
+  --text-mid: #4a4a4a;
+  --text-muted: #888888;
+  --text-dim: #b0b0b0;
+  --green: #1a8a5c;
+  --green-bg: rgba(26,138,92,0.07);
+  --blue: #2d6bcf;
+  --blue-bg: rgba(45,107,207,0.06);
+  --warm: #c4723a;
+  --warm-bg: rgba(196,114,58,0.07);
+  --purple: #7c5cbf;
+  --purple-bg: rgba(124,92,191,0.06);
+  --red: #c0392b;
+  --red-bg: rgba(192,57,43,0.06);
+  --gold: #b8860b;
+  --gold-bg: rgba(184,134,11,0.07);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* ─── Progress bar ─── */
+.progress-bar {
+  position: fixed; top: 0; left: 0; height: 3px;
+  background: linear-gradient(90deg, var(--red) 0%, var(--warm) 25%, var(--green) 50%, var(--blue) 75%, var(--purple) 100%);
+  width: 0%; z-index: 1000; transition: width 0.1s linear;
+}
+
+/* ─── Countdown ─── */
+.countdown-strip {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 900;
+  background: var(--bg-dark); color: #fff; padding: 10px 8vw;
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 0.76rem; letter-spacing: 0.5px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+.countdown-strip .days {
+  font-family: 'Instrument Serif', serif; font-size: 1.3rem;
+  color: var(--warm);
+}
+.countdown-strip .label { color: rgba(255,255,255,0.5); }
+.countdown-strip .expiry { color: rgba(255,255,255,0.35); font-size: 0.68rem; }
+
+/* ─── Navigation ─── */
+.nav {
+  position: fixed; top: 16px; right: 20px; z-index: 900;
+  background: rgba(246,245,241,0.92); backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border); border-radius: 10px;
+  padding: 14px 18px; max-height: calc(100vh - 80px);
+  overflow-y: auto; width: 210px;
+  opacity: 0; transform: translateX(16px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.nav.visible { opacity: 1; transform: translateX(0); }
+.nav-title {
+  font-size: 0.65rem; font-weight: 600; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--text-dim); margin-bottom: 10px;
+}
+.nav a {
+  display: block; font-size: 0.74rem; color: var(--text-muted);
+  text-decoration: none; padding: 3px 0; transition: color 0.2s;
+}
+.nav a:hover { color: var(--warm); }
+.nav a.active { color: var(--warm); font-weight: 500; }
+.nav .nav-divider { height: 1px; background: var(--border); margin: 6px 0; }
+
+@media (max-width: 1300px) { .nav { display: none; } }
+
+/* ─── Reveal ─── */
+.reveal {
+  opacity: 0; transform: translateY(24px);
+  transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1), transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.reveal.visible { opacity: 1; transform: translateY(0); }
+.reveal:nth-child(2) { transition-delay: 0.05s; }
+.reveal:nth-child(3) { transition-delay: 0.10s; }
+.reveal:nth-child(4) { transition-delay: 0.15s; }
+.reveal:nth-child(5) { transition-delay: 0.20s; }
+
+/* ─── Typography ─── */
+h1 {
+  font-family: 'Instrument Serif', serif; font-weight: 400;
+  font-size: clamp(2.6rem, 5vw, 4.4rem); line-height: 1.06;
+  letter-spacing: -1.5px; margin-bottom: 20px;
+}
+h2 {
+  font-family: 'Instrument Serif', serif; font-weight: 400;
+  font-size: clamp(1.7rem, 3.2vw, 2.7rem); line-height: 1.1;
+  letter-spacing: -0.5px; margin-bottom: 16px;
+}
+h3 {
+  font-family: 'Instrument Serif', serif; font-weight: 400;
+  font-size: clamp(1.15rem, 1.8vw, 1.5rem); line-height: 1.2;
+  margin-bottom: 8px;
+}
+.kicker {
+  font-weight: 500; font-size: 0.72rem; color: var(--text-muted);
+  letter-spacing: 2.5px; text-transform: uppercase; margin-bottom: 12px;
+}
+p {
+  font-size: clamp(0.9rem, 1.3vw, 1.02rem); line-height: 1.72;
+  color: var(--text-mid); max-width: 640px;
+}
+em.hl { font-family: 'Instrument Serif', serif; font-style: italic; color: var(--text); }
+.code { font-family: 'JetBrains Mono', monospace; font-size: 0.82em; background: rgba(0,0,0,0.04); padding: 2px 6px; border-radius: 3px; }
+.title-rule { width: 48px; height: 1.5px; background: var(--text-dim); margin-bottom: 22px; border: none; }
+
+/* ─── Sections ─── */
+section {
+  min-height: auto; display: flex; flex-direction: column;
+  justify-content: center; padding: 10vh 8vw;
+  position: relative;
+}
+section.hero-section { min-height: 100vh; padding-left: 10vw; }
+
+/* ─── Cards ─── */
+.card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 12px; padding: 24px;
+}
+
+/* ─── Stat row ─── */
+.stat-row { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 22px; max-width: 1100px; }
+.stat-card {
+  flex: 1; min-width: 140px; background: var(--bg-card);
+  border: 1px solid var(--border); border-radius: 10px; padding: 18px;
+}
+.stat-num {
+  font-family: 'Instrument Serif', serif;
+  font-size: clamp(1.4rem, 2.4vw, 2rem); margin-bottom: 3px;
+}
+.stat-label { font-size: 0.72rem; color: var(--text-muted); line-height: 1.4; }
+
+/* ─── Grids ─── */
+.pgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin-top: 18px; max-width: 1100px; }
+.pcard { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 20px; }
+.pcard h4 { font-family: 'Instrument Serif', serif; font-weight: 400; font-size: 1.02rem; margin-bottom: 5px; }
+.pcard p { font-size: 0.8rem; color: var(--text-muted); line-height: 1.55; max-width: none; }
+.pcard-icon {
+  width: 28px; height: 28px; border-radius: 6px; margin-bottom: 10px;
+  display: flex; align-items: center; justify-content: center; font-size: 0.85rem;
+}
+
+/* ─── Tables ─── */
+.dtable { width: 100%; max-width: 1100px; border-collapse: collapse; font-size: 0.84rem; margin-top: 16px; }
+.dtable th {
+  font-weight: 500; font-size: 0.66rem; text-transform: uppercase;
+  letter-spacing: 1px; color: var(--text-dim); text-align: left;
+  padding: 8px 12px; border-bottom: 1px solid var(--border-strong);
+}
+.dtable td { padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--text-mid); vertical-align: top; }
+.dtable td strong { color: var(--text); }
+
+/* ─── Badges ─── */
+.badge {
+  display: inline-block; padding: 2px 9px; border-radius: 20px;
+  font-size: 0.62rem; font-weight: 600; letter-spacing: 0.4px;
+}
+.badge-green { background: var(--green-bg); color: var(--green); }
+.badge-blue { background: var(--blue-bg); color: var(--blue); }
+.badge-warm { background: var(--warm-bg); color: var(--warm); }
+.badge-purple { background: var(--purple-bg); color: var(--purple); }
+.badge-red { background: var(--red-bg); color: var(--red); }
+.badge-gold { background: var(--gold-bg); color: var(--gold); }
+
+/* ─── Solution portfolio grid ─── */
+.sol-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; margin-top: 18px; max-width: 1100px; }
+.sol-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 10px; padding: 14px 16px; position: relative;
+  transition: border-color 0.2s;
+}
+.sol-card:hover { border-color: var(--border-strong); }
+.sol-card .sol-name { font-family: 'Instrument Serif', serif; font-size: 0.95rem; margin-bottom: 3px; }
+.sol-card .sol-desc { font-size: 0.72rem; color: var(--text-muted); line-height: 1.45; }
+.sol-card .sol-tag {
+  position: absolute; top: 10px; right: 10px;
+  font-size: 0.55rem; font-weight: 600; letter-spacing: 0.5px;
+  text-transform: uppercase; padding: 2px 6px; border-radius: 3px;
+}
+.sol-card .sol-icon { font-size: 1.1rem; margin-bottom: 6px; display: block; }
+
+/* ─── Sprint cards ─── */
+.sprint-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; margin-top: 18px; max-width: 1100px; }
+.sprint-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 12px; padding: 22px; position: relative; overflow: hidden;
+}
+.sprint-card .stripe {
+  position: absolute; top: 0; left: 0; right: 0; height: 3px;
+}
+.sprint-label {
+  font-size: 0.68rem; font-weight: 600; letter-spacing: 1.5px;
+  text-transform: uppercase; color: var(--text-dim); margin-bottom: 6px;
+}
+.sprint-title {
+  font-family: 'Instrument Serif', serif; font-weight: 400;
+  font-size: 1.2rem; margin-bottom: 10px;
+}
+.sprint-list { list-style: none; padding: 0; }
+.sprint-list li {
+  font-size: 0.8rem; color: var(--text-mid); padding: 5px 0;
+  border-bottom: 1px solid var(--border); display: flex; gap: 8px; align-items: flex-start;
+}
+.sprint-list li:last-child { border-bottom: none; }
+.sprint-list li::before { content: '→'; color: var(--text-dim); flex-shrink: 0; font-size: 0.78rem; margin-top: 1px; }
+
+/* ─── Budget bar ─── */
+.budget-bar-wrap { margin-top: 14px; max-width: 700px; }
+.budget-bar {
+  height: 28px; border-radius: 8px; background: var(--border);
+  overflow: hidden; display: flex; position: relative;
+}
+.budget-seg {
+  height: 100%; display: flex; align-items: center; justify-content: center;
+  font-size: 0.60rem; font-weight: 600; color: #fff; letter-spacing: 0.3px;
+  white-space: nowrap; overflow: hidden;
+}
+.budget-legend { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 10px; }
+.budget-legend-item { display: flex; align-items: center; gap: 5px; font-size: 0.76rem; color: var(--text-mid); }
+.budget-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+/* ─── Burn gauge ─── */
+.burn-gauge { max-width: 700px; margin-top: 18px; }
+.burn-track { height: 10px; border-radius: 5px; background: var(--border); position: relative; overflow: hidden; }
+.burn-fill { height: 100%; border-radius: 5px; transition: width 0.5s ease; }
+.burn-markers { position: relative; height: 20px; margin-top: 4px; }
+.burn-marker {
+  position: absolute; top: 0; font-size: 0.62rem; color: var(--text-dim);
+  transform: translateX(-50%); white-space: nowrap;
+}
+
+/* ─── Flow cards ─── */
+.flow-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-top: 16px; max-width: 1100px; }
+.flow-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 18px; position: relative; }
+.flow-card .step { font-family: 'Instrument Serif', serif; font-size: 2rem; color: var(--border-strong); position: absolute; top: 10px; right: 14px; }
+.flow-card h4 { font-family: 'Instrument Serif', serif; font-weight: 400; font-size: 0.98rem; margin-bottom: 5px; }
+.flow-card p { font-size: 0.78rem; color: var(--text-muted); line-height: 1.5; max-width: none; }
+
+/* ─── Gantt ─── */
+.gantt-wrap { overflow-x: auto; margin-top: 14px; }
+.gantt {
+  width: 100%; min-width: 700px; border-collapse: separate; border-spacing: 0;
+}
+.gantt thead th {
+  padding: 7px 0; font-size: 0.58rem; font-weight: 600;
+  letter-spacing: 0.5px; text-transform: uppercase; color: var(--text-dim);
+  text-align: center; border-bottom: 1px solid var(--border);
+}
+.gantt thead th:first-child { text-align: left; padding-left: 10px; width: 200px; min-width: 200px; }
+.gantt tbody td {
+  padding: 3px 2px; border-bottom: 1px solid var(--border);
+  position: relative; height: 26px;
+}
+.gantt tbody td:first-child {
+  font-size: 0.7rem; font-weight: 500; color: var(--text);
+  padding-left: 10px; white-space: nowrap;
+}
+.gantt-bar {
+  height: 16px; border-radius: 3px; position: absolute;
+  top: 50%; transform: translateY(-50%); opacity: 0.8;
+}
+
+/* ─── Questions list ─── */
+.q-list { list-style: none; margin-top: 12px; max-width: 700px; counter-reset: q; }
+.q-list li {
+  padding: 11px 0; border-bottom: 1px solid var(--border);
+  font-size: 0.88rem; color: var(--text-mid); line-height: 1.55;
+  display: flex; gap: 10px;
+}
+.q-list li::before {
+  counter-increment: q; content: counter(q);
+  font-family: 'Instrument Serif', serif; font-size: 1.1rem;
+  color: var(--text-dim); flex-shrink: 0; min-width: 20px;
+}
+.q-list li strong { color: var(--text); font-weight: 600; }
+
+/* ─── Callout ─── */
+.callout {
+  background: var(--warm-bg); border-left: 3px solid var(--warm);
+  border-radius: 0 8px 8px 0; padding: 16px 20px; margin-top: 18px; max-width: 700px;
+}
+.callout p { color: var(--text-mid); font-size: 0.86rem; max-width: none; }
+.callout strong { color: var(--warm); }
+
+/* ─── Revenue table ─── */
+.rev-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; margin-top: 18px; max-width: 1100px; }
+.rev-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 10px; padding: 20px; border-top: 3px solid transparent;
+}
+.rev-card .rev-label { font-size: 0.62rem; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-dim); margin-bottom: 4px; }
+.rev-card h4 { font-family: 'Instrument Serif', serif; font-weight: 400; font-size: 1.1rem; margin-bottom: 6px; }
+.rev-card p { font-size: 0.78rem; color: var(--text-muted); line-height: 1.5; max-width: none; }
+
+/* ─── Final box ─── */
+.final-box {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 12px; padding: 30px 34px; max-width: 580px; margin-top: 14px;
+}
+.final-box p { max-width: none; }
+
+/* ─── Separator ─── */
+.sep { width: 100%; max-width: 1100px; height: 1px; background: var(--border); margin: 0 auto; }
+
+/* ─── Footer ─── */
+.footer {
+  padding: 40px 8vw 60px; text-align: center;
+  font-size: 0.74rem; color: var(--text-dim); border-top: 1px solid var(--border);
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 640px) {
+  section { padding: 6vh 5vw; }
+  section.hero-section { padding-left: 5vw; }
+  .stat-row { flex-direction: column; }
+  .pgrid, .sprint-grid, .flow-grid, .sol-grid, .rev-grid { grid-template-columns: 1fr; }
+  .dtable { font-size: 0.76rem; }
+  .countdown-strip { font-size: 0.68rem; padding: 8px 5vw; }
+}
+</style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<!-- COUNTDOWN STRIP -->
+<div class="countdown-strip">
+  <div><span class="label">AZURE CREDITS EXPIRE</span></div>
+  <div><span class="days" id="daysLeft">128</span> <span class="label">days remaining</span></div>
+  <div class="expiry">July 22, 2026 · $45K to burn</div>
+</div>
+
+<!-- NAV -->
+<nav class="nav" id="navEl">
+  <div class="nav-title">Battle Plan V2</div>
+  <a href="#situation">Situation</a>
+  <a href="#naming">The Name</a>
+  <a href="#portfolio">Solution Portfolio</a>
+  <a href="#warchest">128-Day War Chest</a>
+  <div class="nav-divider"></div>
+  <a href="#podcasters">Podcaster Channel</a>
+  <a href="#demos">Demo Engine</a>
+  <a href="#revenue">Revenue Streams</a>
+  <div class="nav-divider"></div>
+  <a href="#sprints">Sprint Plan</a>
+  <a href="#gantt">Timeline</a>
+  <a href="#adjacent">Adjacent Solutions</a>
+  <a href="#tactics">Guerilla Tactics</a>
+  <a href="#decisions">Decisions Needed</a>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- HERO -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<section class="hero-section">
+  <hr class="title-rule reveal">
+  <div class="kicker reveal">Strategy V2 · Updated March 13, 2026</div>
+  <h1 class="reveal">128 days.<br><em class="hl">Burn everything.</em></h1>
+  <p class="reveal" style="font-size:clamp(1rem,1.6vw,1.14rem);color:var(--text-muted);font-weight:300;max-width:540px;line-height:1.65;">Azure credits expire July 22, 2026. We have 30+ working solutions, a proven creation engine, and a clear thesis. The mission isn't to save credits — it's to convert every dollar into shipped solutions, distribution channels, and revenue infrastructure before the clock hits zero.</p>
+  <p class="reveal" style="margin-top:16px;font-size:0.82rem;color:var(--text-dim);">Pan Tech Corporation · $45K Azure credit · 128 days · 30+ working solutions · Zero excuses.</p>
+
+  <div class="stat-row reveal">
+    <div class="stat-card"><div class="stat-num" style="color:var(--red);">128</div><div class="stat-label">Days until credits expire</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--warm);">$45K</div><div class="stat-label">Azure war chest</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--green);">30+</div><div class="stat-label">Working solutions today</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--blue);">∞</div><div class="stat-label">Solutions to ship</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--purple);">3</div><div class="stat-label">Revenue channels to open</div></div>
+  </div>
+</section>
+
+<div class="sep reveal"></div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- SITUATION -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<section id="situation">
+  <div class="kicker reveal">Situation Assessment — Updated</div>
+  <h2 class="reveal">We're not at Day Zero<br>anymore. <em class="hl">We're at Day One.</em></h2>
+  <p class="reveal">Since the original strategy was drafted this morning, the landscape has shifted dramatically. We don't have 5-6 prototypes — we have 30+ working solutions spanning communication, productivity, creativity, finance, and lifestyle. The creation engine works. The question is no longer "can we build?" — it's "how do we distribute, monetize, and maximize every remaining Azure dollar before July 22?"</p>
+
+  <div class="pgrid reveal">
+    <div class="pcard">
+      <div class="pcard-icon" style="background:var(--green-bg);color:var(--green);">✓</div>
+      <h4>What changed</h4>
+      <p>30+ working solutions proven today. P2P communication stack (phone, video, chat). Full productivity suite (docs, sheets, slides, kanban, project mgmt). Creative tools (Canva, Loom, photo books). Lifestyle (cooking, travel, calendar, home org). The creation engine is real — we can spin up new solutions in minutes.</p>
+    </div>
+    <div class="pcard">
+      <div class="pcard-icon" style="background:var(--red-bg);color:var(--red);">⏰</div>
+      <h4>The constraint</h4>
+      <p>128 days. Azure credits expire July 22, 2026. Every day that passes without burning credits toward shipped solutions is a day wasted. This is not a budget to manage conservatively — it's ammo with an expiration date.</p>
+    </div>
+    <div class="pcard">
+      <div class="pcard-icon" style="background:var(--blue-bg);color:var(--blue);">◈</div>
+      <h4>New channels identified</h4>
+      <p>Podcasters as a distribution and revenue channel. Demo automation via the Foundry. AI credit sales as a revenue stream. Video-first social content from working solution demos. Peer-to-peer gifting as a viral mechanic.</p>
+    </div>
+    <div class="pcard">
+      <div class="pcard-icon" style="background:var(--purple-bg);color:var(--purple);">△</div>
+      <h4>The new posture</h4>
+      <p>Stop calling them "apps." They're <strong>solutions</strong>. Technically: Serverless HTML Solutions. Culturally: something catchier. We need to name this category and own it before anyone else does.</p>
+    </div>
+  </div>
+</section>
+
+<div class="sep reveal"></div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- NAMING -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<section id="naming">
+  <div class="kicker reveal">Naming & Category</div>
+  <h2 class="reveal">What do we<br><em class="hl">call these things?</em></h2>
+  <p class="reveal">The technical name is <span class="code">Serverless HTML Solutions</span> — accurate, credible, explains the architecture. But for the world, we need something people can say in a sentence, text to a friend, and remember. Something that feels like a format, not a product.</p>
+
+  <div class="pgrid reveal" style="margin-top:22px;">
+    <div class="pcard" style="border-color:var(--warm);border-width:2px;">
+      <div class="pcard-icon" style="background:var(--warm-bg);color:var(--warm);">★</div>
+      <h4>Scrolls</h4>
+      <p><strong>Recommended.</strong> Ancient wisdom meets modern web. "Send me the travel scroll." "There's a scroll for that." A scroll is a single document that contains everything — the tool, the data, the design. It evokes libraries, knowledge, portability. Technical enough to feel real, cultural enough to feel cool. <em>"Powered by Pan Tech Scrolls"</em></p>
+    </div>
+    <div class="pcard">
+      <div class="pcard-icon" style="background:var(--green-bg);color:var(--green);">◎</div>
+      <h4>Zines</h4>
+      <p>Self-published, grassroots, countercultural. "I made a zine for tracking our trip." Echoes punk/DIY culture. The risk: too niche, implies static content, not interactive tools.</p>
+    </div>
+    <div class="pcard">
+      <div class="pcard-icon" style="background:var(--blue-bg);color:var(--blue);">◎</div>
+      <h4>Panes</h4>
+      <p>Window panes — you look through them to see and do things. "Open the finance pane." Clean, modern, technical without being cold. Risk: sounds too much like "pain."</p>
+    </div>
+    <div class="pcard">
+      <div class="pcard-icon" style="background:var(--purple-bg);color:var(--purple);">◎</div>
+      <h4>Drops</h4>
+      <p>Like music drops, sneaker drops. "New drop just landed: a full project manager." Creates urgency and culture. Risk: overused in crypto/NFT space, might feel disposable.</p>
+    </div>
+  </div>
+
+  <div class="callout reveal">
+    <p><strong>Decision needed:</strong> Lock the name this week. Every solution, every demo video, every social post, every line of copy needs to use one consistent term. The name IS the brand. "There's a Scroll for that" could be our "There's an app for that."</p>
+  </div>
+</section>
+
+<div class="sep reveal"></div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- PORTFOLIO -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<section id="portfolio">
+  <div class="kicker reveal">Solution Portfolio — Working Today</div>
+  <h2 class="reveal">30+ solutions,<br><em class="hl">built and running.</em></h2>
+  <p class="reveal">Every one of these works today. Not prototypes. Not wireframes. Working HTML solutions that can be shipped, shared, demo'd, and iterated. Organized by category with distribution potential scored.</p>
+
+  <h3 class="reveal" style="margin-top:28px; color:var(--warm);">Communication & P2P</h3>
+  <div class="sol-grid reveal">
+    <div class="sol-card">
+      <span class="sol-icon">📞</span>
+      <div class="sol-name">Phone</div>
+      <div class="sol-desc">P2P phone calls — WebRTC, no server, no account</div>
+      <span class="sol-tag" style="background:var(--green-bg);color:var(--green);">LIVE</span>
+    </div>
+    <div class="sol-card">
+      <span class="sol-icon">🎬</span>
+      <div class="sol-name">Reel</div>
+      <div class="sol-desc">P2P Cameo-style video cards for gifts and greetings</div>
+      <span class="sol-tag" style="background:var(--green-bg);color:var(--green);">LIVE</span>
+    </div>
+    <div class="sol-card">
+      <span class="sol-icon">📹</span>
+      <div class="sol-name">Teams</div>
+      <div class="sol-desc">Video conferencing + chat — full Microsoft Teams replacement</div>
+      <span class="sol-tag" style="background:var(--green-bg);color:var(--green);">LIVE</span>
+    </div>
+    <div class="sol-card">
+      <span class="sol-icon">💬</span>
+      <div class="sol-name">Chat & Text</div>
+      <div class="sol-desc">P2P messaging — Slack/WhatsApp without the platform</div>
+      <span class="sol-tag" style="background:var(--green-bg);color:var(--green);">LIVE</span>
+    </div>
+    <div class="sol-card">
+      <span class="sol-icon">🖼️</span>
+      <div class="sol-name">Shared Frame</div>
+      <div class="sol-desc">Photo frame sharing between nodes — digital picture frame across devices</div>
+      <span class="sol-tag" style="background:var(--green-bg);color:var(--green);">LIVE</span>
+    </div>
+  </div>
+
+  <h3 class="reveal" style="margin-top:28px; color:var(--blue);">Productivity & Work</h3>
+  <div class="sol-grid reveal">
+    <div class="sol-card">
+      <span class="sol-icon">📝</span>
+      <div class="sol-name">Docs</div>
+      <div class="sol-desc">Full document editor — rich text, export, offline</div>
+      <span class="sol-tag" style="background:var(--green-bg);color:var(--green);">LIVE</span>
+    </div>
+    <div class="sol-card">
+      <span class="sol-icon">📊</span>
+      <div class="sol-name">Spreadsheet</div>
+      <div class="sol-desc">Full spreadsheet with formulas, formatting, CSV export</div>
+      <span class="sol-tag" style="background:var(--green-bg);color:var(--green);">LIVE</span>
+    </div>
+    <div class="sol-card">
+      <span class="sol-icon">📺</span>
+      <div class="sol-name">Slides</div>
+      <div class="sol-desc">PowerPoint/HTML presentation generator</div>
+      <span class="sol-tag" style="background:var(--green-bg);color:var(--green);">LIVE</span>
+    </div>
+    <div class="sol-card">
+      <span class="sol-icon">📋</span>
+      <div class="sol-name">Kanban</div>
+      <div class="sol-desc">Drag-and-drop board — project tracking, team workflows</div>
+      <span class="sol-tag" style="background:var(--green-bg);color:var(--green);">LIVE</span>
+    </div>
+    <div class="sol-card">
+      <span class="sol-icon">🏗️</span>
+      <div class="sol-name">Project Manager</div>
+      <div class="sol-desc">Monday.com replacement — full project workspace with timelines</div>
+      <span class="sol-tag" style="background:var(--green-bg);color:var(--green);">LIVE</span>
+    </div>
+    <div class="sol-card">
+      <span class="sol-icon">📓</span>
+      <div class="sol-name">Notion</div>
+      <div class="sol-desc">Notion replacement — blocks, databases, wiki, all-in-one workspace</div>
+      <span class="sol-tag" style="background:var(--green-bg);color:var(--green);">LIVE</span>
+    </div>
+    <div class="sol-card">
+      <span class="sol-icon">🔌</span>
+      <div class="sol-name">NiFi</div>
+      <div class="sol-desc">Apache NiFi replacement — data flow and integration builder</div>
+      <span class="sol-tag" style="background:var(--green-bg);color:var(--green);">LIVE</span>
+    </div>
+    <div class="sol-card">
+      <span class="sol-icon">🤝</span>
+      <div class="sol-name">Jam Board</div>
+      <div class="sol-desc">Collaborative whiteboard for brainstorming and ideation</div>
+      <span class="sol-tag" style="background:var(--green-bg);color:var(--green);">LIVE</span>
+    </div>
+    <div class="sol-card">
+      <span class="sol-icon">✏️</span>
+      <div class="sol-name">Remarkable</div>
+      <div class="sol-desc">Interactive drawing tablet with screenshare — reMarkable replacement</div>
+      <span class="sol-tag" style="background:var(--green-bg);color:var(--green);">LIVE</span>
+    </div>
+    <div class="sol-card">
+      <span class="sol-icon">📑</span>
+      <div class="sol-name">PDF Markup</div>
+      <div class="sol-desc">Annotate, mark up, and sign PDFs — DocuSign potential w/ blockchain</div>
+      <span class="sol-tag" style="background:var(--green-bg);color:var(--green);">LIVE</span>
+    </div>
+  </div>
+
+  <h3 class="reveal" style="margin-top:28px; color:var(--purple);">Creative & Content</h3>
+  <div class="sol-grid reveal">
+    <div class="sol-card">
+      <span class="sol-icon">🎨</span>
+      <div class="sol-name">Canvas</div>
+      <div class="sol-desc">Canva replacement — design tool for creators, templates, export</div>
+      <span class="sol-tag" style="background:var(--green-bg);color:var(--green);">LIVE</span>
+    </div>
+    <div class="sol-card">
+      <span class="sol-icon">🎥</span>
+      <div class="sol-name">Loom</div>
+      <div class="sol-desc">Loom replacement — screen recording, async video messaging</div>
+      <span class="sol-tag" style="background:var(--green-bg);color:var(--green);">LIVE</span>
+    </div>
+    <div class="sol-card">
+      <span class="sol-icon">📌</span>
+      <div class="sol-name">Pinterest Board</div>
+      <div class="sol-desc">Visual pinboard — mood boards, collections, inspiration</div>
+      <span class="sol-tag" style="background:var(--green-bg);color:var(--green);">LIVE</span>
+    </div>
+    <div class="sol-card">
+      <span class="sol-icon">📷</span>
+      <div class="sol-name">Photo Books</div>
+      <div class="sol-desc">Create and share photo albums — digital photo book builder</div>
+      <span class="sol-tag" style="background:var(--green-bg);color:var(--green);">LIVE</span>
+    </div>
+    <div class="sol-card">
+      <span class="sol-icon">📰</span>
+      <div class="sol-name">Newspaper</div>
+      <div class="sol-desc">P2P newspaper — create, curate, and send editorial-style content</div>
+      <span class="sol-tag" style="background:var(--green-bg);color:var(--green);">LIVE</span>
+    </div>
+    <div class="sol-card">
+      <span class="sol-icon">📺</span>
+      <div class="sol-name">Local Netflix</div>
+      <div class="sol-desc">Netflix-style browser for local video files and P2P video sharing</div>
+      <span class="sol-tag" style="background:var(--green-bg);color:var(--green);">LIVE</span>
+    </div>
+    <div class="sol-card">
+      <span class="sol-icon">📖</span>
+      <div class="sol-name">Wikipedia</div>
+      <div class="sol-desc">Personal/team wiki — knowledge base builder</div>
+      <span class="sol-tag" style="background:var(--green-bg);color:var(--green);">LIVE</span>
+    </div>
+  </div>
+
+  <h3 class="reveal" style="margin-top:28px; color:var(--green);">Lifestyle & Personal</h3>
+  <div class="sol-grid reveal">
+    <div class="sol-card">
+      <span class="sol-icon">🍳</span>
+      <div class="sol-name">Cooking</div>
+      <div class="sol-desc">Recipe cards — type a recipe, get a cook-from card with steps and timers</div>
+      <span class="sol-tag" style="background:var(--green-bg);color:var(--green);">LIVE</span>
+    </div>
+    <div class="sol-card">
+      <span class="sol-icon">🏠</span>
+      <div class="sol-name">Home Org</div>
+      <div class="sol-desc">Home organization + calendar — household management hub</div>
+      <span class="sol-tag" style="background:var(--green-bg);color:var(--green);">LIVE</span>
+    </div>
+    <div class="sol-card">
+      <span class="sol-icon">✈️</span>
+      <div class="sol-name">Travel Planner</div>
+      <div class="sol-desc">Trip planning newsletter — detailed itinerary you can P2P send as a gift</div>
+      <span class="sol-tag" style="background:var(--green-bg);color:var(--green);">LIVE</span>
+    </div>
+    <div class="sol-card">
+      <span class="sol-icon">💰</span>
+      <div class="sol-name">Financial Letter</div>
+      <div class="sol-desc">P2P financial newspaper — curated finance content to share</div>
+      <span class="sol-tag" style="background:var(--green-bg);color:var(--green);">LIVE</span>
+    </div>
+    <div class="sol-card">
+      <span class="sol-icon">♠️</span>
+      <div class="sol-name">Poker Solver</div>
+      <div class="sol-desc">Poker strategy solver — hand analysis, odds calculator, GTO advisor</div>
+      <span class="sol-tag" style="background:var(--green-bg);color:var(--green);">LIVE</span>
+    </div>
+  </div>
+
+  <h3 class="reveal" style="margin-top:28px; color:var(--gold);">AI-Powered</h3>
+  <div class="sol-grid reveal">
+    <div class="sol-card" style="border-color:var(--gold);border-width:1.5px;">
+      <span class="sol-icon">🤖</span>
+      <div class="sol-name">AI Integration Hub</div>
+      <div class="sol-desc">Connects AI to Notion and other solutions via custom API — represents a <strong>direct revenue stream</strong> selling AI credits for usage</div>
+      <span class="sol-tag" style="background:var(--gold-bg);color:var(--gold);">REVENUE</span>
+    </div>
+    <div class="sol-card" style="border-color:var(--gold);border-width:1.5px;">
+      <span class="sol-icon">🔄</span>
+      <div class="sol-name">Revised Presentation</div>
+      <div class="sol-desc">Send a presentation with new information auto-integrated — AI-powered P2P content updates</div>
+      <span class="sol-tag" style="background:var(--gold-bg);color:var(--gold);">REVENUE</span>
+    </div>
+  </div>
+
+  <div class="callout reveal">
+    <p><strong>Portfolio Score:</strong> 32 working solutions across 5 categories. This is not a startup with an idea — this is a library with an inventory. The creation engine has proven it can produce solutions at scale. Now the mission shifts to distribution and monetization.</p>
+  </div>
+</section>
+
+<div class="sep reveal"></div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- WAR CHEST — 128 DAYS -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<section id="warchest">
+  <div class="kicker reveal">The 128-Day War Chest</div>
+  <h2 class="reveal">$45K. 128 days.<br><em class="hl">Burn with intent.</em></h2>
+  <p class="reveal">The original strategy assumed 6–9 months of runway. We actually have ~4.2 months. That changes the burn rate, the allocation, and the mentality. We are not conserving — we are maximizing throughput. Every dollar should produce a shipped solution, a demo asset, a distribution touchpoint, or a revenue experiment.</p>
+
+  <div class="budget-bar-wrap reveal">
+    <div class="budget-bar">
+      <div class="budget-seg" style="width:45%;background:var(--warm);">$20K — AI API</div>
+      <div class="budget-seg" style="width:20%;background:var(--blue);">$9K — Hosting</div>
+      <div class="budget-seg" style="width:15%;background:var(--green);">$7K — Compute</div>
+      <div class="budget-seg" style="width:10%;background:var(--purple);">$4.5K — Demos</div>
+      <div class="budget-seg" style="width:10%;background:var(--gold);">$4.5K — Revenue R&D</div>
+    </div>
+    <div class="budget-legend">
+      <div class="budget-legend-item"><div class="budget-dot" style="background:var(--warm);"></div>AI API — Forge + AI features (~45%)</div>
+      <div class="budget-legend-item"><div class="budget-dot" style="background:var(--blue);"></div>Hosting + CDN (~20%)</div>
+      <div class="budget-legend-item"><div class="budget-dot" style="background:var(--green);"></div>Compute + CI (~15%)</div>
+      <div class="budget-legend-item"><div class="budget-dot" style="background:var(--purple);"></div>Demo automation (~10%)</div>
+      <div class="budget-legend-item"><div class="budget-dot" style="background:var(--gold);"></div>Revenue experiments (~10%)</div>
+    </div>
+  </div>
+
+  <p class="reveal" style="margin-top:20px;">Target burn rate: <strong>$8K–$11K/month</strong> for the first 3 months (aggressive building + demo generation), tapering to $4K–$5K in the final month as we shift to distribution.</p>
+
+  <div class="burn-gauge reveal">
+    <div style="display:flex;justify-content:space-between;font-size:0.72rem;color:var(--text-muted);margin-bottom:6px;">
+      <span>March 13</span>
+      <span>Today</span>
+      <span>July 22</span>
+    </div>
+    <div class="burn-track">
+      <div class="burn-fill" style="width:2%;background:linear-gradient(90deg,var(--green),var(--warm),var(--red));"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;font-size:0.68rem;color:var(--text-dim);margin-top:6px;">
+      <span>$45K remaining</span>
+      <span>$0 target</span>
+    </div>
+  </div>
+</section>
+
+<div class="sep reveal"></div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- PODCASTER CHANNEL -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<section id="podcasters">
+  <div class="kicker reveal">Distribution Channel</div>
+  <h2 class="reveal">The podcaster<br><em class="hl">play.</em></h2>
+  <p class="reveal">Every podcaster is a small business that needs tools — social media management, content generation, audience engagement, monetization. They're also natural amplifiers: if we build them something genuinely useful, they'll talk about it to their audience. That's organic reach at scale, and it burns Azure credits toward solutions people will actively promote.</p>
+
+  <div class="pgrid reveal">
+    <div class="pcard">
+      <div class="pcard-icon" style="background:var(--warm-bg);color:var(--warm);">🎙</div>
+      <h4>What podcasters need</h4>
+      <p>Social media content generators (audiograms, quote cards, episode summaries). Scheduling tools. Guest booking workflows. Sponsorship trackers. Episode planners. Clip editors. Newsletter builders. Landing page generators. Merch calculators. Revenue dashboards.</p>
+    </div>
+    <div class="pcard">
+      <div class="pcard-icon" style="background:var(--green-bg);color:var(--green);">📢</div>
+      <h4>Why they promote us</h4>
+      <p>Podcasters talk for a living. Give them a tool that saves them 2 hours a week and they'll mention it on-air, in newsletters, and in group chats with other podcasters. One good tool = access to an entire podcast network's audience.</p>
+    </div>
+    <div class="pcard">
+      <div class="pcard-icon" style="background:var(--blue-bg);color:var(--blue);">🔧</div>
+      <h4>Solutions to build</h4>
+      <p>Episode show notes generator (AI). Social media clip card maker. Guest outreach tracker. Sponsorship rate calculator. Podcast analytics dashboard. Episode calendar planner. Listener survey tool. Merch store builder. Revenue/expense tracker.</p>
+    </div>
+    <div class="pcard">
+      <div class="pcard-icon" style="background:var(--purple-bg);color:var(--purple);">💡</div>
+      <h4>The flywheel</h4>
+      <p>Build tools → Give to podcasters for free → They promote on their shows → Their audience discovers the library → Some of them are also creators who need tools → Build more tools for them. Each cycle amplifies the next.</p>
+    </div>
+  </div>
+
+  <div class="callout reveal">
+    <p><strong>Target:</strong> 5–8 podcaster-specific solutions shipped by end of April. Identify 10 mid-tier podcasters (5K–50K listeners) in business, tech, and creator niches. Cold outreach: "We built this for you, for free. No catch." Track which ones mention it on-air.</p>
+  </div>
+</section>
+
+<div class="sep reveal"></div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- DEMO ENGINE -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<section id="demos">
+  <div class="kicker reveal">Demo Automation</div>
+  <h2 class="reveal">Hardcode the demo.<br><em class="hl">Automate the wow.</em></h2>
+  <p class="reveal">Every working solution needs a demo — but recording manually doesn't scale. The play: hardcode simulated user actions directly into the Foundry output, creating self-playing demos that can be hosted as iframes, embedded on landing pages, or screen-captured for social content.</p>
+
+  <div class="flow-grid reveal">
+    <div class="flow-card">
+      <div class="step">1</div>
+      <h4>Script the action</h4>
+      <p>Define a 15–30 second sequence of user actions for each solution — clicks, typing, scrolling, state changes. This becomes the demo script.</p>
+    </div>
+    <div class="flow-card">
+      <div class="step">2</div>
+      <h4>Hardcode into HTML</h4>
+      <p>Embed the action sequence as a JavaScript animation loop directly in the solution's HTML. Uses <span class="code">setTimeout</span>, CSS transitions, and DOM manipulation to simulate real usage. No external deps.</p>
+    </div>
+    <div class="flow-card">
+      <div class="step">3</div>
+      <h4>Host as iframe</h4>
+      <p>Deploy the self-playing demo HTML to Azure Static Web Apps. Embed as an iframe on the catalog site, landing pages, or partner sites. Visitors see a live, interactive demo without downloading anything.</p>
+    </div>
+    <div class="flow-card">
+      <div class="step">4</div>
+      <h4>Capture for social</h4>
+      <p>Screen capture the self-playing demo for TikTok, Reels, Twitter/X, LinkedIn. 15-second clips of a solution working itself — no narration needed. Batch-produce 30+ demo videos in a day.</p>
+    </div>
+  </div>
+
+  <table class="dtable reveal">
+    <thead><tr><th>Implementation</th><th>How</th><th>Azure Cost</th><th>Output</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>Demo Mode Flag</strong></td>
+        <td>Add <span class="code">?demo=true</span> URL param to any solution. When present, triggers the hardcoded action sequence instead of waiting for user input.</td>
+        <td>$0 (static)</td>
+        <td>Self-playing solution</td>
+      </tr>
+      <tr>
+        <td><strong>Foundry Template</strong></td>
+        <td>Add a "Generate Demo Script" step to the Forge workflow. AI generates the JS animation sequence based on the solution's UI structure.</td>
+        <td>~$0.02/demo (API call)</td>
+        <td>Automated demo generation</td>
+      </tr>
+      <tr>
+        <td><strong>Iframe Embed Kit</strong></td>
+        <td>One-line embed code: <span class="code">&lt;iframe src="scroll.html?demo=true"&gt;</span>. Add to catalog site, partner pages, blog posts.</td>
+        <td>$0 (static hosting)</td>
+        <td>Embeddable demos everywhere</td>
+      </tr>
+      <tr>
+        <td><strong>Batch Video Pipeline</strong></td>
+        <td>Headless browser (Playwright on Azure VM) opens each demo URL, records 15-sec screen capture, exports as MP4/GIF. Batch all 30+ solutions in one run.</td>
+        <td>~$5–10/batch</td>
+        <td>30+ social-ready clips</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<div class="sep reveal"></div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- REVENUE STREAMS -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<section id="revenue">
+  <div class="kicker reveal">Revenue Architecture</div>
+  <h2 class="reveal">Three paths to<br><em class="hl">money.</em></h2>
+  <p class="reveal">The original strategy said "let revenue emerge." That's still true for the ecosystem — but we now have specific mechanisms that can generate revenue within the 128-day window. These aren't distractions from the mission; they're aligned with it.</p>
+
+  <div class="rev-grid reveal">
+    <div class="rev-card" style="border-top-color:var(--gold);">
+      <div class="rev-label" style="color:var(--gold);">Revenue Stream 1</div>
+      <h4>AI Credit Sales</h4>
+      <p>The AI Integration Hub connects AI capabilities to any solution via custom API. Users consume AI credits for features like: generating content, analyzing data, auto-filling forms, smart suggestions. <strong>We sell the credits.</strong> This is a metered utility model — pay-per-use AI that powers the solutions they already love.</p>
+      <p style="margin-top:8px;"><strong>How it works:</strong> User buys a credit pack ($5/50 credits, $20/250, $50/750). Credits are consumed when any AI-powered feature fires inside any solution. We proxy through Azure OpenAI and mark up the cost. Margin: 40–60%.</p>
+    </div>
+    <div class="rev-card" style="border-top-color:var(--green);">
+      <div class="rev-label" style="color:var(--green);">Revenue Stream 2</div>
+      <h4>Podcaster Toolkits</h4>
+      <p>Free solutions get them in the door. Premium bundles get them paying. A "Podcaster Pro Kit" with 8–10 solutions pre-configured for podcast workflows: episode planner → show notes generator → social card maker → analytics dashboard. Bundle for $29–$49 one-time or $9/mo for AI features.</p>
+    </div>
+    <div class="rev-card" style="border-top-color:var(--blue);">
+      <div class="rev-label" style="color:var(--blue);">Revenue Stream 3</div>
+      <h4>Custom Solution Building</h4>
+      <p>The Forge proves we can build solutions fast. Offer custom solution building as a service: "Tell us what you need, we'll build you a Scroll." $200–$2,000 per custom solution depending on complexity. Target: small businesses, teams, niche communities.</p>
+    </div>
+  </div>
+
+  <div class="callout reveal">
+    <p><strong>Revenue target shift:</strong> The original plan said "$0 revenue target." Updated position: <strong>$0 revenue requirement, but active revenue experiments.</strong> If AI credit sales generate $500/month by June, that validates the model and funds post-Azure operations. We're not chasing revenue — we're testing revenue while building the library.</p>
+  </div>
+</section>
+
+<div class="sep reveal"></div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- SPRINT PLAN -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<section id="sprints">
+  <div class="kicker reveal">128-Day Sprint Plan</div>
+  <h2 class="reveal">The countdown<br><em class="hl">sprints.</em></h2>
+  <p class="reveal">Every sprint has hard deliverables. The 128-day clock doesn't pause. Ship, distribute, test revenue, repeat. We're front-loading the heaviest Azure spend in Sprints 1–3 when we have the most credits to burn.</p>
+
+  <div class="sprint-grid reveal">
+    <div class="sprint-card">
+      <div class="stripe" style="background:var(--red);"></div>
+      <div class="sprint-label" style="color:var(--red);">Days 0–14 · Mar 13–27</div>
+      <div class="sprint-title">Lock & Load</div>
+      <ul class="sprint-list">
+        <li>Lock the name (Scrolls/Zines/Drops/Panes) — all assets use it</li>
+        <li>Polish top 10 solutions to design system standard</li>
+        <li>Build demo mode (<span class="code">?demo=true</span>) into all 10</li>
+        <li>Deploy catalog site skeleton on Azure Static Web Apps</li>
+        <li>Batch-generate 10 demo videos (Playwright pipeline)</li>
+        <li>Build the AI credit purchase flow (Stripe or simple)</li>
+        <li>First social posts: 3 demo clips across Twitter/X, TikTok, LinkedIn</li>
+      </ul>
+    </div>
+
+    <div class="sprint-card">
+      <div class="stripe" style="background:var(--warm);"></div>
+      <div class="sprint-label" style="color:var(--warm);">Days 15–42 · Mar 28 – Apr 24</div>
+      <div class="sprint-title">Podcaster Blitz</div>
+      <ul class="sprint-list">
+        <li>Build 5–8 podcaster-specific solutions</li>
+        <li>Identify and cold-outreach 10 mid-tier podcasters</li>
+        <li>Ship full catalog site with search, categories, iframe demos</li>
+        <li>Polish remaining 20+ solutions to shippable standard</li>
+        <li>Generate 30+ demo videos — post 2–3/week on social</li>
+        <li>AI credit sales live — first paying users</li>
+        <li>Target: 40+ solutions cataloged, 5 podcasters actively using</li>
+      </ul>
+    </div>
+
+    <div class="sprint-card">
+      <div class="stripe" style="background:var(--green);"></div>
+      <div class="sprint-label" style="color:var(--green);">Days 43–84 · Apr 25 – Jun 5</div>
+      <div class="sprint-title">Amplification</div>
+      <ul class="sprint-list">
+        <li>Build 15+ new solutions from the intake engine</li>
+        <li>Hacker News "Show HN" launch — the library + the Forge</li>
+        <li>Product Hunt launch — category: developer tools + productivity</li>
+        <li>YouTube channel: solution demos + "how it's built" behind-the-scenes</li>
+        <li>Podcaster toolkit premium bundle — test $29 price point</li>
+        <li>Custom solution building — first 3 paid clients</li>
+        <li>Adjacent solutions: DocuSign w/ blockchain, custom Slack alternatives</li>
+        <li>Target: 55+ solutions, first $1K revenue, 100+ GitHub stars</li>
+      </ul>
+    </div>
+
+    <div class="sprint-card">
+      <div class="stripe" style="background:var(--blue);"></div>
+      <div class="sprint-label" style="color:var(--blue);">Days 85–128 · Jun 6 – Jul 22</div>
+      <div class="sprint-title">Final Burn</div>
+      <ul class="sprint-list">
+        <li>Burn remaining Azure credits on solution generation + hosting assets</li>
+        <li>Pre-generate solution library for post-Azure period (static HTML needs no credits)</li>
+        <li>Lock AI credit pricing model — ensure revenue covers post-Azure API costs</li>
+        <li>Community Forge V3 — accept outside submissions</li>
+        <li>Doccoin protocol draft — document connection layer design</li>
+        <li>Full portfolio documentation + handoff materials</li>
+        <li>Target: 70+ solutions, sustainable revenue, brand established</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<div class="sep reveal"></div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- GANTT -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<section id="gantt">
+  <div class="kicker reveal">Timeline</div>
+  <h2 class="reveal">128-day Gantt.</h2>
+  <p class="reveal">Color-coded by workstream. The vertical red line is July 22 — everything must ship before it.</p>
+
+  <div class="card reveal" style="max-width:1100px;overflow:hidden;">
+    <div class="gantt-wrap">
+      <table class="gantt">
+        <thead>
+          <tr>
+            <th>Workstream</th>
+            <th>Mar</th><th>Apr</th><th>May</th><th>Jun</th><th>Jul</th>
+          </tr>
+        </thead>
+        <tbody id="gantt-body"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<div class="sep reveal"></div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- ADJACENT SOLUTIONS -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<section id="adjacent">
+  <div class="kicker reveal">Adjacent Solutions — Next Wave</div>
+  <h2 class="reveal">What to build<br><em class="hl">next.</em></h2>
+  <p class="reveal">With the creation engine proven, we can rapidly expand into adjacent categories. These are high-value additions that complement the existing portfolio and open new distribution channels. Organized by strategic value.</p>
+
+  <table class="dtable reveal">
+    <thead><tr><th>Solution</th><th>Category</th><th>Why Now</th><th>Revenue Potential</th><th>Priority</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>Audiogram Maker</strong></td>
+        <td>Podcaster</td>
+        <td>Turn audio clips into shareable video cards with waveforms — podcasters' #1 social need</td>
+        <td><span class="badge badge-gold">High</span></td>
+        <td><span class="badge badge-red">Sprint 2</span></td>
+      </tr>
+      <tr>
+        <td><strong>Show Notes Generator</strong></td>
+        <td>Podcaster / AI</td>
+        <td>AI writes show notes from episode summary — burns credits, sells credits, saves podcasters hours</td>
+        <td><span class="badge badge-gold">High</span></td>
+        <td><span class="badge badge-red">Sprint 2</span></td>
+      </tr>
+      <tr>
+        <td><strong>Invoice Generator</strong></td>
+        <td>Professional</td>
+        <td>Freelancers and creators need invoicing — high search volume, high sharing potential</td>
+        <td><span class="badge badge-warm">Medium</span></td>
+        <td><span class="badge badge-warm">Sprint 2</span></td>
+      </tr>
+      <tr>
+        <td><strong>Social Media Calendar</strong></td>
+        <td>Creator / Podcaster</td>
+        <td>Plan and organize social posts — every creator needs this, burns into our design system</td>
+        <td><span class="badge badge-warm">Medium</span></td>
+        <td><span class="badge badge-warm">Sprint 2</span></td>
+      </tr>
+      <tr>
+        <td><strong>DocuSign + Blockchain</strong></td>
+        <td>Professional</td>
+        <td>PDF Markup already exists — add signature flow + blockchain verification. Enterprise potential.</td>
+        <td><span class="badge badge-gold">High</span></td>
+        <td><span class="badge badge-green">Sprint 3</span></td>
+      </tr>
+      <tr>
+        <td><strong>Sponsorship Rate Card</strong></td>
+        <td>Podcaster</td>
+        <td>Podcasters need a professional media kit / rate card to send to sponsors</td>
+        <td><span class="badge badge-warm">Medium</span></td>
+        <td><span class="badge badge-green">Sprint 3</span></td>
+      </tr>
+      <tr>
+        <td><strong>CRM / Lead Tracker</strong></td>
+        <td>Professional</td>
+        <td>Simple lead management for solopreneurs — Salesforce is overkill, this is just right</td>
+        <td><span class="badge badge-warm">Medium</span></td>
+        <td><span class="badge badge-green">Sprint 3</span></td>
+      </tr>
+      <tr>
+        <td><strong>Meeting Notes + AI Summary</strong></td>
+        <td>Productivity / AI</td>
+        <td>Record meeting → AI summarizes → Exports action items. Burns and sells AI credits.</td>
+        <td><span class="badge badge-gold">High</span></td>
+        <td><span class="badge badge-green">Sprint 3</span></td>
+      </tr>
+      <tr>
+        <td><strong>Email Newsletter Builder</strong></td>
+        <td>Creator</td>
+        <td>Design and generate email newsletters from templates — Mailchimp in a file</td>
+        <td><span class="badge badge-warm">Medium</span></td>
+        <td><span class="badge badge-blue">Sprint 3</span></td>
+      </tr>
+      <tr>
+        <td><strong>Budget vs. Actual Tracker</strong></td>
+        <td>Finance</td>
+        <td>Personal finance tracking that shows planned vs actual spending — high virality in "FinTok"</td>
+        <td><span class="badge badge-blue">Low</span></td>
+        <td><span class="badge badge-blue">Sprint 4</span></td>
+      </tr>
+      <tr>
+        <td><strong>Contract Template Builder</strong></td>
+        <td>Professional</td>
+        <td>AI-powered contract drafting from templates — freelancers, agencies, consultants</td>
+        <td><span class="badge badge-gold">High</span></td>
+        <td><span class="badge badge-blue">Sprint 4</span></td>
+      </tr>
+      <tr>
+        <td><strong>Course / Lesson Builder</strong></td>
+        <td>Education</td>
+        <td>Create interactive lessons and courses — sell to educators and online course creators</td>
+        <td><span class="badge badge-gold">High</span></td>
+        <td><span class="badge badge-blue">Sprint 4</span></td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<div class="sep reveal"></div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- TACTICS — UPDATED -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<section id="tactics">
+  <div class="kicker reveal">Guerilla Tactics — Updated</div>
+  <h2 class="reveal">Old tactics +<br><em class="hl">new weapons.</em></h2>
+  <p class="reveal">All the original tactics still apply — but now we have new distribution vectors: podcasters as promoters, automated demo videos at scale, iframe embeds for partner sites, and AI credits as a monetizable hook. Here are the additions.</p>
+
+  <table class="dtable reveal">
+    <thead><tr><th>Tactic</th><th>How It Works</th><th>Azure Cost</th><th>When</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>The Podcaster Gift</strong></td>
+        <td>Build a custom solution for a specific podcaster. Send it to them. "We made this for your show." Not a pitch — a gift. They'll mention it because it's genuinely useful and nobody does this.</td>
+        <td>~$2/solution (AI gen)</td>
+        <td>Sprint 2</td>
+      </tr>
+      <tr>
+        <td><strong>The Self-Playing Demo</strong></td>
+        <td>Every solution ships with <span class="code">?demo=true</span> mode. Embed on catalog site, partner sites, blog posts. Visitors see the solution working without clicking anything. Conversion from "what is this?" to "I want this" in 15 seconds.</td>
+        <td>$0 (static)</td>
+        <td>Sprint 1</td>
+      </tr>
+      <tr>
+        <td><strong>The 30-Video Blitz</strong></td>
+        <td>Use Playwright batch pipeline to screen-capture all 30+ demo modes in one run. Post 2–3/day across TikTok, Reels, Twitter/X, LinkedIn. No editing, no narration — just the solution working. Volume play.</td>
+        <td>~$10/batch</td>
+        <td>Sprint 2</td>
+      </tr>
+      <tr>
+        <td><strong>The P2P Kindness Loop</strong></td>
+        <td>Travel Planner, Reel (Cameo cards), Financial Letter, Revised Presentation — all P2P solutions that are inherently acts of kindness. "I prepared this travel guide for your trip." Every send is marketing to the recipient and everyone they show.</td>
+        <td>$0</td>
+        <td>Ongoing</td>
+      </tr>
+      <tr>
+        <td><strong>The Credit Hook</strong></td>
+        <td>AI features work for free up to a limit (5 free credits). Then users buy more. The free tier gets them using AI-powered features; the purchase is frictionless because they've already experienced the value. Classic freemium on AI usage.</td>
+        <td>API cost (offset by revenue)</td>
+        <td>Sprint 2</td>
+      </tr>
+      <tr>
+        <td><strong>Iframe Seeding</strong></td>
+        <td>Offer bloggers, podcasters, and niche sites a one-line iframe embed of any solution's demo mode. They get free interactive content for their page; we get distribution. "Embed this budget planner on your finance blog — it's one line of code."</td>
+        <td>$0 (static hosting)</td>
+        <td>Sprint 3</td>
+      </tr>
+      <tr>
+        <td><strong>"There's a Scroll for That"</strong></td>
+        <td>Reply to every tweet/post where someone complains about paying for a SaaS tool. "There's a Scroll for that" + link. Not spammy — genuinely helpful. The solution actually solves their problem.</td>
+        <td>$0</td>
+        <td>Ongoing</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<div class="sep reveal"></div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- PRODUCT FEATURE INTAKE -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<section id="intake">
+  <div class="kicker reveal">The Intake Engine</div>
+  <h2 class="reveal">Solution ideation<br><em class="hl">at scale.</em></h2>
+  <p class="reveal">You mentioned "once we hone out the product feature intake engine concept." Here's what that looks like: a systematic workflow that turns any problem statement into a shippable solution in under 24 hours.</p>
+
+  <div class="flow-grid reveal">
+    <div class="flow-card">
+      <div class="step">1</div>
+      <h4>Problem capture</h4>
+      <p>Someone identifies a problem: from social media complaints, podcaster feedback, internal needs, or community requests. Logged in the Intake Tracker (itself a solution).</p>
+    </div>
+    <div class="flow-card">
+      <div class="step">2</div>
+      <h4>Forge generation</h4>
+      <p>Problem → Forge V2 → AI generates the solution with design system tokens, mobile responsive, offline-capable, demo mode baked in. 80% done in 10 minutes.</p>
+    </div>
+    <div class="flow-card">
+      <div class="step">3</div>
+      <h4>Human polish</h4>
+      <p>20% human touch: UX refinement, edge cases, copy, specific domain knowledge. Quality Gate pass. This is where taste lives — AI can't do this part.</p>
+    </div>
+    <div class="flow-card">
+      <div class="step">4</div>
+      <h4>Ship + demo + distribute</h4>
+      <p>Solution → catalog. Demo video auto-generated. Social post queued. Iframe embed code ready. If it's for a podcaster, send directly. If it has AI features, credits system integrated. Done.</p>
+    </div>
+  </div>
+</section>
+
+<div class="sep reveal"></div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- DECISIONS NEEDED -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<section id="decisions">
+  <div class="kicker reveal">Decisions Needed — This Week</div>
+  <h2 class="reveal">Lock these<br><em class="hl">by Friday.</em></h2>
+  <p class="reveal">The 128-day clock is running. These decisions unblock everything downstream. None are permanent — but having a working answer beats having a perfect debate.</p>
+
+  <ol class="q-list reveal">
+    <li><strong>The Name:</strong> Scrolls, Zines, Drops, Panes, or something else? This goes on every solution, every demo, every social post. Pick one and commit. Recommendation: Scrolls.</li>
+    <li><strong>Podcaster targets:</strong> Which 10 podcasters do we approach first? Need names, show sizes, niches. Business and tech podcasters are highest leverage — their audiences are tool-hungry.</li>
+    <li><strong>AI credit pricing:</strong> $5/50, $20/250, $50/750? Or simpler: $1/10 credits? What's one AI action worth? We need to test this before Sprint 3.</li>
+    <li><strong>Demo automation priority:</strong> Which 10 solutions get the <span class="code">?demo=true</span> treatment first? Recommend: the most visually impressive ones — Teams, Canvas, Project Manager, Kanban, Cooking, Travel Planner.</li>
+    <li><strong>Domain and hosting:</strong> Is openintranet.com still the domain? Or something more consumer-friendly like getscrolls.com, scrolls.tools, etc.?</li>
+    <li><strong>Revenue launch timing:</strong> AI credit sales in Sprint 2 (aggressive) or Sprint 3 (more polished)? Recommendation: Sprint 2 — even rough revenue validates the model and funds post-Azure.</li>
+    <li><strong>Social accounts:</strong> Which platforms first? Twitter/X and TikTok have the best organic reach for short demo clips. LinkedIn for professional solutions. Instagram Reels for visual ones.</li>
+    <li><strong>DocuSign + blockchain:</strong> How deep do we go? Simple signature capture + hash verification, or full blockchain notarization? Deeper = more impressive but more Azure spend.</li>
+  </ol>
+</section>
+
+<div class="sep reveal"></div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- CLOSING -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<section>
+  <hr class="title-rule reveal">
+  <h2 class="reveal" style="max-width:520px;">128 days.<br>30+ solutions.<br>Burn every credit.<br>Own the <em class="hl">front page.</em></h2>
+  <div class="final-box reveal">
+    <p>The strategy has evolved. We're not starting from zero — we're starting from thirty. The creation engine works. The solutions are real. The distribution channels are identified. The revenue experiments are designed.</p>
+    <p style="margin-top:12px;">What remains is execution under a hard deadline. $45K in Azure credits. 128 days. Every dollar converts to a shipped solution, a demo asset, a distribution touchpoint, or a revenue experiment. No credit left unburned. No solution left unshipped.</p>
+    <p style="margin-top:12px;color:var(--text);font-weight:500;font-family:'Instrument Serif',serif;font-style:italic;font-size:1.08rem;">The clock started today. Let's build.</p>
+  </div>
+  <div style="height:10vh;"></div>
+</section>
+
+<div class="footer">
+  Operation Front Page V2 — The 128-Day Sprint · Pan Tech Corporation · March 13, 2026 · Serverless HTML Solutions
+</div>
+
+<script>
+// ─── Countdown ───
+function updateCountdown() {
+  const expiry = new Date('2026-07-22T00:00:00');
+  const now = new Date();
+  const diff = Math.ceil((expiry - now) / (1000 * 60 * 60 * 24));
+  document.getElementById('daysLeft').textContent = Math.max(0, diff);
+}
+updateCountdown();
+setInterval(updateCountdown, 60000);
+
+// ─── Progress bar ───
+const progressBar = document.getElementById('progressBar');
+function updateProgress() {
+  const scrollTop = window.scrollY;
+  const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+  const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+  progressBar.style.width = progress + '%';
+}
+window.addEventListener('scroll', updateProgress, { passive: true });
+
+// ─── Scroll-triggered reveal ───
+const reveals = document.querySelectorAll('.reveal');
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) entry.target.classList.add('visible');
+  });
+}, { threshold: 0.1, rootMargin: '0px 0px -30px 0px' });
+reveals.forEach(el => observer.observe(el));
+
+// ─── Nav visibility ───
+const navEl = document.getElementById('navEl');
+const heroSection = document.querySelector('.hero-section');
+const heroObs = new IntersectionObserver(entries => {
+  entries.forEach(e => navEl.classList.toggle('visible', !e.isIntersecting));
+}, { threshold: 0 });
+heroObs.observe(heroSection);
+
+// ─── Nav active state ───
+const navLinks = navEl.querySelectorAll('a');
+const sectionEls = document.querySelectorAll('section[id]');
+const secObs = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      navLinks.forEach(l => l.classList.remove('active'));
+      const active = navEl.querySelector(`a[href="#${entry.target.id}"]`);
+      if (active) active.classList.add('active');
+    }
+  });
+}, { rootMargin: '-20% 0px -70% 0px' });
+sectionEls.forEach(s => secObs.observe(s));
+
+// ─── 128-Day Gantt chart ───
+const ganttData = [
+  { name: 'Solution Polish (Top 10)', start: 0, end: 1, color: '#c0392b' },
+  { name: 'Demo Mode System', start: 0, end: 1, color: '#c0392b' },
+  { name: 'Catalog Site', start: 0.5, end: 2, color: '#c4723a' },
+  { name: 'AI Credit System', start: 0.5, end: 1.5, color: '#b8860b' },
+  { name: 'Podcaster Solutions (5-8)', start: 1, end: 2.5, color: '#c4723a' },
+  { name: 'Podcaster Outreach', start: 1.5, end: 3, color: '#c4723a' },
+  { name: 'Demo Video Pipeline', start: 0.5, end: 4, color: '#7c5cbf' },
+  { name: 'Social Content (2-3/week)', start: 1, end: 5, color: '#7c5cbf' },
+  { name: 'New Solutions (Sprint 3)', start: 2, end: 3.5, color: '#1a8a5c' },
+  { name: 'Show HN + Product Hunt', start: 2.5, end: 3, color: '#2d6bcf' },
+  { name: 'Premium Bundles', start: 2, end: 3.5, color: '#b8860b' },
+  { name: 'Custom Solution Service', start: 2.5, end: 5, color: '#b8860b' },
+  { name: 'Adjacent Solutions', start: 3, end: 5, color: '#1a8a5c' },
+  { name: 'DocuSign + Blockchain', start: 3, end: 4.5, color: '#7c5cbf' },
+  { name: 'Community Forge V3', start: 3.5, end: 5, color: '#2d6bcf' },
+  { name: 'Final Azure Burn', start: 4, end: 5, color: '#c0392b' },
+  { name: 'Doccoin Protocol Draft', start: 4, end: 5, color: '#888' },
+];
+
+const ganttBody = document.getElementById('gantt-body');
+const totalMonths = 5; // Mar through Jul
+
+ganttData.forEach(item => {
+  const tr = document.createElement('tr');
+  const tdName = document.createElement('td');
+  tdName.textContent = item.name;
+  tr.appendChild(tdName);
+
+  for (let m = 0; m < totalMonths; m++) {
+    const td = document.createElement('td');
+    td.style.position = 'relative';
+    const mStart = Math.floor(item.start);
+    const mEnd = Math.ceil(item.end);
+    if (m >= mStart && m < mEnd) {
+      const bar = document.createElement('div');
+      bar.className = 'gantt-bar';
+      bar.style.background = item.color;
+      if (m === mStart && m === mEnd - 1) {
+        bar.style.left = '3px'; bar.style.right = '3px'; bar.style.borderRadius = '3px';
+      } else if (m === mStart) {
+        bar.style.left = '3px'; bar.style.right = '0'; bar.style.borderRadius = '3px 0 0 3px';
+      } else if (m === mEnd - 1) {
+        bar.style.left = '0'; bar.style.right = '3px'; bar.style.borderRadius = '0 3px 3px 0';
+      } else {
+        bar.style.left = '0'; bar.style.right = '0'; bar.style.borderRadius = '0';
+      }
+      td.appendChild(bar);
+    }
+    tr.appendChild(td);
+  }
+  ganttBody.appendChild(tr);
+});
+</script>
+</body>
+</html>

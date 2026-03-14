@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DocChain — Serverless Application Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0A0C14;--bg-s:#10131F;--bg-c:#141829;--bg-ch:#1A1F35;
+  --ink:#F0F2F5;--ink-s:#A8B2C1;--ink-m:#5E6B80;--ink-f:#3A4356;
+  --accent:#3B82F6;--al:rgba(59,130,246,.12);
+  --warm:#F59E0B;--wl:rgba(245,158,11,.1);
+  --ok:#10B981;--ol:rgba(16,185,129,.1);
+  --purple:#8B5CF6;--pl:rgba(139,92,246,.1);
+  --rose:#F43F5E;--rl:rgba(244,63,94,.1);
+  --cyan:#06B6D4;--cl:rgba(6,182,212,.1);
+  --rule:rgba(255,255,255,.06);--r:14px;--rs:8px;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Geist','Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+button{cursor:pointer;font-family:inherit}
+input,textarea,select{font-family:inherit;font-size:inherit}
+
+:root{--font-display:'Instrument Serif',serif}
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:.025;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size:200px 200px;
+}
+
+/* Hero */
+.hero{
+  text-align:center;padding:5rem 1.5rem 3rem;position:relative;overflow:hidden;
+}
+.hero::before{
+  content:'';position:absolute;top:-30%;left:50%;transform:translateX(-50%);
+  width:900px;height:900px;
+  background:radial-gradient(ellipse,rgba(59,130,246,.07) 0%,rgba(139,92,246,.04) 40%,transparent 70%);
+  pointer-events:none;
+}
+.hero-eyebrow{
+  font-family:'IBM Plex Mono',monospace;font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--accent);margin-bottom:1.2rem;opacity:0;animation:fadeUp .7s .1s ease both;
+}
+.hero h1{
+  font-family:var(--font-display);font-weight:400;
+  font-size:clamp(2rem,6vw,3.5rem);line-height:1.1;letter-spacing:-.02em;
+  color:var(--ink);max-width:700px;margin:0 auto;opacity:0;animation:fadeUp .7s .2s ease both;
+}
+.hero h1 em{
+  font-style:italic;
+  background:linear-gradient(135deg,var(--accent),var(--purple));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.hero .subtitle{
+  font-weight:300;font-size:clamp(.82rem,1.8vw,1rem);
+  color:var(--ink-m);max-width:550px;margin:1.2rem auto 0;line-height:1.75;
+  opacity:0;animation:fadeUp .7s .35s ease both;
+}
+.hero-count{
+  margin-top:2rem;opacity:0;animation:fadeUp .7s .5s ease both;
+}
+.hero-count .big{
+  font-family:var(--font-display);font-size:clamp(3rem,9vw,5rem);line-height:1;
+  background:linear-gradient(135deg,var(--accent),var(--purple),var(--warm));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.hero-count .lbl{
+  font-family:'IBM Plex Mono',monospace;font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--ink-m);display:block;margin-top:.3rem;
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+
+/* Nav */
+.top-bar{
+  position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;
+  padding:.7rem 1.5rem;background:rgba(10,12,20,.9);backdrop-filter:blur(18px);border-bottom:1px solid var(--rule);
+}
+.top-bar .logo{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:.88rem;letter-spacing:.05em;color:var(--ink)}
+.top-bar .logo span{color:var(--accent)}
+.top-bar .badge{
+  font-family:'IBM Plex Mono',monospace;font-size:.52rem;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--warm);padding:.2rem .6rem;border:1px solid rgba(245,158,11,.25);border-radius:99px;
+}
+
+/* App Grid */
+.app-section{max-width:820px;margin:0 auto;padding:0 1.5rem 4rem}
+.section-divider{
+  display:flex;align-items:center;gap:.8rem;margin-bottom:1.2rem;padding-top:1rem;
+}
+.section-divider .line{flex:1;height:1px;background:var(--rule)}
+.section-divider .label{
+  font-family:'IBM Plex Mono',monospace;font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-f);
+}
+
+.app-card{
+  display:flex;align-items:center;gap:.9rem;
+  padding:.75rem 1rem;margin-bottom:4px;
+  background:var(--bg-s);border:1px solid var(--rule);border-radius:var(--rs);
+  text-decoration:none;color:var(--ink);
+  transition:all .2s ease;
+}
+.app-card:hover{
+  border-color:rgba(59,130,246,.3);background:var(--bg-ch);transform:translateX(4px);
+  text-decoration:none;
+}
+.app-emoji{
+  width:42px;height:42px;border-radius:10px;
+  background:var(--bg-c);border:1px solid var(--rule);
+  display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;
+}
+.app-info{flex:1}
+.app-title{font-weight:500;font-size:.88rem}
+.app-replaces{font-size:.65rem;color:var(--ink-m);font-family:'IBM Plex Mono',monospace;margin-top:.1rem}
+.app-arrow{color:var(--ink-f);font-size:.9rem;transition:color .2s}
+.app-card:hover .app-arrow{color:var(--accent)}
+
+/* Footer */
+.footer{text-align:center;padding:3rem 1.5rem 2rem;border-top:1px solid var(--rule)}
+.footer-logo{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:.9rem;letter-spacing:.06em;color:var(--ink);margin-bottom:.4rem}
+.footer-logo span{color:var(--accent)}
+.footer p{font-size:.72rem;color:var(--ink-m);line-height:1.5}
+.footer .colophon{
+  font-family:'IBM Plex Mono',monospace;font-size:.5rem;letter-spacing:.08em;color:var(--ink-f);margin-top:.8rem;
+}
+
+/* Stats */
+.stats{display:flex;justify-content:center;gap:2rem;margin:2rem 0 1rem;opacity:0;animation:fadeUp .7s .65s ease both;flex-wrap:wrap}
+.stat{text-align:center}
+.stat .val{font-family:var(--font-display);font-size:1.6rem;color:var(--ink)}
+.stat .lbl{font-family:'IBM Plex Mono',monospace;font-size:.52rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-m);margin-top:.2rem}
+</style>
+</head><body>
+
+<nav class="top-bar">
+  <div class="logo">Doc<span>Chain</span></div>
+  <span class="badge">MVP · 25 Apps</span>
+</nav>
+
+<section class="hero">
+  <div class="hero-eyebrow">The Serverless Application Platform</div>
+  <h1>Every app you depend on. <em>None of the&nbsp;dependency.</em></h1>
+  <p class="subtitle">25 self-contained HTML applications — no servers, no subscriptions, no vendor lock-in. Each one runs entirely in your browser.</p>
+  <div class="hero-count">
+    <div class="big">25</div>
+    <span class="lbl">Applications · Zero Servers · One Platform</span>
+  </div>
+  <div class="stats">
+    <div class="stat"><div class="val">~40KB</div><div class="lbl">Per App</div></div>
+    <div class="stat"><div class="val">0</div><div class="lbl">Servers Required</div></div>
+    <div class="stat"><div class="val">$0</div><div class="lbl">Per Seat / Month</div></div>
+    <div class="stat"><div class="val">E2E</div><div class="lbl">Encrypted</div></div>
+  </div>
+</section>
+
+<section class="app-section">
+  <div class="section-divider">
+    <span class="line"></span>
+    <span class="label">Launch an App</span>
+    <span class="line"></span>
+  </div>
+  <a href="document-editor.html" class="app-card">
+  <div class="app-emoji">✏️</div>
+  <div class="app-info">
+    <div class="app-title">Document Editor</div>
+    <div class="app-replaces">Replaces Google Docs</div>
+  </div>
+  <div class="app-arrow">→</div>
+</a>
+<a href="spreadsheet.html" class="app-card">
+  <div class="app-emoji">📊</div>
+  <div class="app-info">
+    <div class="app-title">Spreadsheet</div>
+    <div class="app-replaces">Replaces Google Sheets</div>
+  </div>
+  <div class="app-arrow">→</div>
+</a>
+<a href="messenger.html" class="app-card">
+  <div class="app-emoji">💬</div>
+  <div class="app-info">
+    <div class="app-title">Team Messenger</div>
+    <div class="app-replaces">Replaces Slack / WhatsApp</div>
+  </div>
+  <div class="app-arrow">→</div>
+</a>
+<a href="calendar.html" class="app-card">
+  <div class="app-emoji">📅</div>
+  <div class="app-info">
+    <div class="app-title">Calendar</div>
+    <div class="app-replaces">Replaces Google Calendar</div>
+  </div>
+  <div class="app-arrow">→</div>
+</a>
+<a href="email-client.html" class="app-card">
+  <div class="app-emoji">📧</div>
+  <div class="app-info">
+    <div class="app-title">Email Client</div>
+    <div class="app-replaces">Replaces Gmail</div>
+  </div>
+  <div class="app-arrow">→</div>
+</a>
+<a href="video-calls.html" class="app-card">
+  <div class="app-emoji">📹</div>
+  <div class="app-info">
+    <div class="app-title">Video Calls</div>
+    <div class="app-replaces">Replaces Zoom</div>
+  </div>
+  <div class="app-arrow">→</div>
+</a>
+<a href="project-board.html" class="app-card">
+  <div class="app-emoji">📋</div>
+  <div class="app-info">
+    <div class="app-title">Project Board</div>
+    <div class="app-replaces">Replaces Jira / Trello</div>
+  </div>
+  <div class="app-arrow">→</div>
+</a>
+<a href="password-vault.html" class="app-card">
+  <div class="app-emoji">🔐</div>
+  <div class="app-info">
+    <div class="app-title">Password Vault</div>
+    <div class="app-replaces">Replaces 1Password</div>
+  </div>
+  <div class="app-arrow">→</div>
+</a>
+<a href="forum.html" class="app-card">
+  <div class="app-emoji">🗣</div>
+  <div class="app-info">
+    <div class="app-title">Forum</div>
+    <div class="app-replaces">Replaces Reddit</div>
+  </div>
+  <div class="app-arrow">→</div>
+</a>
+<a href="ai-chat.html" class="app-card">
+  <div class="app-emoji">🤖</div>
+  <div class="app-info">
+    <div class="app-title">AI Chat</div>
+    <div class="app-replaces">Replaces ChatGPT</div>
+  </div>
+  <div class="app-arrow">→</div>
+</a>
+<a href="music-player.html" class="app-card">
+  <div class="app-emoji">🎵</div>
+  <div class="app-info">
+    <div class="app-title">Music Player</div>
+    <div class="app-replaces">Replaces Spotify</div>
+  </div>
+  <div class="app-arrow">→</div>
+</a>
+<a href="photo-gallery.html" class="app-card">
+  <div class="app-emoji">📸</div>
+  <div class="app-info">
+    <div class="app-title">Photo Gallery</div>
+    <div class="app-replaces">Replaces Instagram</div>
+  </div>
+  <div class="app-arrow">→</div>
+</a>
+<a href="social-feed.html" class="app-card">
+  <div class="app-emoji">🐦</div>
+  <div class="app-info">
+    <div class="app-title">Social Feed</div>
+    <div class="app-replaces">Replaces Twitter/X</div>
+  </div>
+  <div class="app-arrow">→</div>
+</a>
+<a href="video-library.html" class="app-card">
+  <div class="app-emoji">🎬</div>
+  <div class="app-info">
+    <div class="app-title">Video Library</div>
+    <div class="app-replaces">Replaces YouTube</div>
+  </div>
+  <div class="app-arrow">→</div>
+</a>
+<a href="notes-app.html" class="app-card">
+  <div class="app-emoji">📝</div>
+  <div class="app-info">
+    <div class="app-title">Notes</div>
+    <div class="app-replaces">Replaces Obsidian / Evernote</div>
+  </div>
+  <div class="app-arrow">→</div>
+</a>
+<a href="crm.html" class="app-card">
+  <div class="app-emoji">💼</div>
+  <div class="app-info">
+    <div class="app-title">CRM</div>
+    <div class="app-replaces">Replaces Salesforce</div>
+  </div>
+  <div class="app-arrow">→</div>
+</a>
+<a href="time-tracker.html" class="app-card">
+  <div class="app-emoji">⏱</div>
+  <div class="app-info">
+    <div class="app-title">Time Tracker</div>
+    <div class="app-replaces">Replaces Harvest / Toggl</div>
+  </div>
+  <div class="app-arrow">→</div>
+</a>
+<a href="form-builder.html" class="app-card">
+  <div class="app-emoji">📝</div>
+  <div class="app-info">
+    <div class="app-title">Form Builder</div>
+    <div class="app-replaces">Replaces Google Forms / Typeform</div>
+  </div>
+  <div class="app-arrow">→</div>
+</a>
+<a href="whiteboard.html" class="app-card">
+  <div class="app-emoji">🎨</div>
+  <div class="app-info">
+    <div class="app-title">Whiteboard</div>
+    <div class="app-replaces">Replaces Miro / Excalidraw</div>
+  </div>
+  <div class="app-arrow">→</div>
+</a>
+<a href="presentations.html" class="app-card">
+  <div class="app-emoji">📽</div>
+  <div class="app-info">
+    <div class="app-title">Presentations</div>
+    <div class="app-replaces">Replaces PowerPoint / Canva</div>
+  </div>
+  <div class="app-arrow">→</div>
+</a>
+<a href="file-manager.html" class="app-card">
+  <div class="app-emoji">📁</div>
+  <div class="app-info">
+    <div class="app-title">File Manager</div>
+    <div class="app-replaces">Replaces Google Drive / Dropbox</div>
+  </div>
+  <div class="app-arrow">→</div>
+</a>
+<a href="bookmark-board.html" class="app-card">
+  <div class="app-emoji">📌</div>
+  <div class="app-info">
+    <div class="app-title">Bookmark Board</div>
+    <div class="app-replaces">Replaces Pinterest</div>
+  </div>
+  <div class="app-arrow">→</div>
+</a>
+<a href="storefront.html" class="app-card">
+  <div class="app-emoji">🛒</div>
+  <div class="app-info">
+    <div class="app-title">Storefront</div>
+    <div class="app-replaces">Replaces Shopify / Amazon</div>
+  </div>
+  <div class="app-arrow">→</div>
+</a>
+<a href="scheduling.html" class="app-card">
+  <div class="app-emoji">🗓</div>
+  <div class="app-info">
+    <div class="app-title">Scheduling</div>
+    <div class="app-replaces">Replaces Calendly</div>
+  </div>
+  <div class="app-arrow">→</div>
+</a>
+<a href="todo-list.html" class="app-card">
+  <div class="app-emoji">✅</div>
+  <div class="app-info">
+    <div class="app-title">Todo List</div>
+    <div class="app-replaces">Replaces Todoist</div>
+  </div>
+  <div class="app-arrow">→</div>
+</a>
+
+</section>
+
+<footer class="footer">
+  <div class="footer-logo">Doc<span>Chain</span></div>
+  <p>Peer-to-peer · End-to-end encrypted · Blockchain-anchored audit trails</p>
+  <p style="margin-top:.2rem">docchain.org · docchain@proton.me</p>
+  <div class="colophon">25 applications · 25 HTML files · Zero servers · One platform</div>
+</footer>
+
+</body></html>

@@ -1,0 +1,1314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ecosystem Idea Intake — macOS Platform Suite</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-primary: #0a0a0c;
+  --bg-secondary: #111114;
+  --bg-card: #16161a;
+  --bg-card-hover: #1c1c22;
+  --bg-input: #1e1e24;
+  --border: #2a2a32;
+  --border-hover: #3a3a44;
+  --text-primary: #e8e8ec;
+  --text-secondary: #8888a0;
+  --text-muted: #55556a;
+  --accent: #4a9eff;
+  --accent-dim: #4a9eff22;
+  --green: #34d399;
+  --green-dim: #34d39922;
+  --amber: #fbbf24;
+  --amber-dim: #fbbf2422;
+  --red: #f87171;
+  --red-dim: #f8717122;
+  --purple: #a78bfa;
+  --purple-dim: #a78bfa22;
+  --cyan: #22d3ee;
+  --cyan-dim: #22d3ee22;
+  --orange: #fb923c;
+  --orange-dim: #fb923c22;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Subtle grid texture */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border) 1px, transparent 1px);
+  background-size: 60px 60px;
+  opacity: 0.08;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Header */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--bg-primary);
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.header-inner {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 16px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.logo {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: var(--accent-dim);
+  padding: 6px 12px;
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+}
+
+.header-title {
+  font-family: 'Instrument Serif', serif;
+  font-size: 24px;
+  color: var(--text-primary);
+}
+
+.header-subtitle {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.header-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn:hover { background: var(--bg-card-hover); border-color: var(--border-hover); }
+.btn-primary { background: var(--accent); color: #000; border-color: var(--accent); }
+.btn-primary:hover { background: #5aabff; }
+.btn-sm { padding: 5px 10px; font-size: 12px; }
+.btn-ghost { background: transparent; border-color: transparent; color: var(--text-secondary); }
+.btn-ghost:hover { color: var(--text-primary); background: var(--bg-card); }
+.btn-danger { color: var(--red); }
+.btn-danger:hover { background: var(--red-dim); border-color: var(--red); }
+
+/* Stats Bar */
+.stats-bar {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 12px 32px;
+  display: flex;
+  gap: 24px;
+  border-bottom: 1px solid var(--border);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  overflow-x: auto;
+}
+
+.stat {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.stat-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.stat-label { color: var(--text-muted); }
+.stat-value { color: var(--text-secondary); font-weight: 600; }
+
+/* Tabs */
+.tabs-bar {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 0 32px;
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+}
+
+.tab {
+  padding: 12px 20px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.15s;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tab:hover { color: var(--text-secondary); }
+.tab.active { color: var(--text-primary); border-bottom-color: var(--accent); }
+
+.tab-count {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  background: var(--bg-input);
+  padding: 2px 6px;
+  border-radius: 10px;
+  color: var(--text-muted);
+}
+
+/* Main Content */
+.main {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 24px 32px;
+  position: relative;
+  z-index: 1;
+}
+
+/* Category Sections */
+.category-section {
+  margin-bottom: 32px;
+  animation: fadeUp 0.4s ease;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.category-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  padding: 8px 0;
+}
+
+.category-name {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.category-color {
+  width: 12px;
+  height: 3px;
+  border-radius: 2px;
+}
+
+.category-count {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* Idea Cards */
+.ideas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 12px;
+}
+
+.idea-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.idea-card:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-hover);
+  transform: translateY(-1px);
+}
+
+.idea-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.idea-title {
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--text-primary);
+  line-height: 1.3;
+}
+
+.idea-status {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-brainstorm { background: var(--purple-dim); color: var(--purple); border: 1px solid var(--purple); }
+.status-scoping { background: var(--amber-dim); color: var(--amber); border: 1px solid var(--amber); }
+.status-building { background: var(--accent-dim); color: var(--accent); border: 1px solid var(--accent); }
+.status-shipped { background: var(--green-dim); color: var(--green); border: 1px solid var(--green); }
+.status-parked { background: var(--bg-input); color: var(--text-muted); border: 1px solid var(--border); }
+
+.idea-desc {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-bottom: 12px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.idea-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.idea-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 3px;
+  background: var(--bg-input);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+}
+
+.idea-tag.delivery { border-color: var(--cyan); color: var(--cyan); background: var(--cyan-dim); }
+.idea-tag.priority-high { border-color: var(--red); color: var(--red); background: var(--red-dim); }
+.idea-tag.priority-med { border-color: var(--amber); color: var(--amber); background: var(--amber-dim); }
+.idea-tag.vpn { border-color: var(--green); color: var(--green); background: var(--green-dim); }
+
+/* Add Idea Card */
+.add-idea-card {
+  background: transparent;
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+  padding: 24px 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--text-muted);
+  font-size: 13px;
+  min-height: 100px;
+}
+
+.add-idea-card:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-dim);
+}
+
+/* Modal */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(8px);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.modal-overlay.active { display: flex; }
+
+.modal {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  width: 100%;
+  max-width: 680px;
+  max-height: 85vh;
+  overflow-y: auto;
+  animation: modalIn 0.2s ease;
+}
+
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(0.96) translateY(8px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+.modal-title {
+  font-family: 'Instrument Serif', serif;
+  font-size: 20px;
+}
+
+.modal-body { padding: 24px; }
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-label {
+  display: block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+.form-input,
+.form-select,
+.form-textarea {
+  width: 100%;
+  padding: 10px 14px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-primary);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  transition: border-color 0.15s;
+}
+
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.form-textarea { resize: vertical; min-height: 80px; }
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.form-row-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+}
+
+.checkbox-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  transition: all 0.15s;
+}
+
+.checkbox-item:hover { border-color: var(--border-hover); }
+.checkbox-item.checked { border-color: var(--accent); background: var(--accent-dim); color: var(--accent); }
+
+.checkbox-item input { display: none; }
+
+.modal-footer {
+  display: flex;
+  justify-content: space-between;
+  padding: 16px 24px;
+  border-top: 1px solid var(--border);
+}
+
+/* Workflow Trail */
+.workflow-section {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.workflow-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.workflow-steps {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.workflow-step {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  background: var(--bg-input);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+}
+
+.workflow-step.completed { background: var(--green-dim); color: var(--green); border-color: var(--green); }
+.workflow-step.current { background: var(--accent-dim); color: var(--accent); border-color: var(--accent); }
+.workflow-arrow { color: var(--text-muted); font-size: 10px; }
+
+/* Notes log */
+.notes-log {
+  margin-top: 12px;
+}
+
+.note-entry {
+  padding: 8px 12px;
+  background: var(--bg-input);
+  border-radius: 6px;
+  margin-bottom: 6px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  border-left: 3px solid var(--border);
+}
+
+.note-entry .note-date {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-bottom: 2px;
+}
+
+.add-note-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.add-note-row .form-input { flex: 1; }
+
+/* Search & Filter Bar */
+.filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.search-box {
+  flex: 1;
+  min-width: 200px;
+  position: relative;
+}
+
+.search-box input {
+  width: 100%;
+  padding: 10px 14px 10px 36px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-primary);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+}
+
+.search-box input:focus { outline: none; border-color: var(--accent); }
+
+.search-box .search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.filter-btn {
+  padding: 8px 14px;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.filter-btn:hover { border-color: var(--border-hover); color: var(--text-primary); }
+.filter-btn.active { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+
+/* Export view */
+.export-panel {
+  display: none;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 24px;
+}
+
+.export-panel.active { display: block; }
+
+.export-textarea {
+  width: 100%;
+  min-height: 200px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-primary);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  padding: 12px;
+  resize: vertical;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .header-inner { padding: 12px 16px; }
+  .main { padding: 16px; }
+  .stats-bar { padding: 8px 16px; }
+  .tabs-bar { padding: 0 16px; }
+  .ideas-grid { grid-template-columns: 1fr; }
+  .form-row, .form-row-3 { grid-template-columns: 1fr; }
+  .filter-bar { flex-direction: column; align-items: stretch; }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--border-hover); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <div class="header-left">
+      <div class="logo">INTAKE</div>
+      <div>
+        <div class="header-title">Ecosystem Idea Intake</div>
+        <div class="header-subtitle">Apple macOS Platform Suite — "The Tech We Were Promised in the 90's"</div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="btn" onclick="exportData()" title="Export JSON">⬇ Export</button>
+      <button class="btn" onclick="importData()" title="Import JSON">⬆ Import</button>
+      <button class="btn btn-primary" onclick="openNewIdea()">+ New Idea</button>
+    </div>
+  </div>
+
+  <div class="stats-bar" id="statsBar"></div>
+
+  <div class="tabs-bar" id="tabsBar"></div>
+</div>
+
+<div class="main">
+  <div class="filter-bar">
+    <div class="search-box">
+      <span class="search-icon">⌕</span>
+      <input type="text" id="searchInput" placeholder="Search ideas..." oninput="renderAll()">
+    </div>
+    <button class="filter-btn" data-filter="all" onclick="setStatusFilter('all')">All</button>
+    <button class="filter-btn" data-filter="brainstorm" onclick="setStatusFilter('brainstorm')">Brainstorm</button>
+    <button class="filter-btn" data-filter="scoping" onclick="setStatusFilter('scoping')">Scoping</button>
+    <button class="filter-btn" data-filter="building" onclick="setStatusFilter('building')">Building</button>
+    <button class="filter-btn" data-filter="shipped" onclick="setStatusFilter('shipped')">Shipped</button>
+    <button class="filter-btn" data-filter="parked" onclick="setStatusFilter('parked')">Parked</button>
+  </div>
+
+  <div class="export-panel" id="exportPanel">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text-muted)">JSON DATA</span>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-sm" onclick="copyExport()">Copy</button>
+        <button class="btn btn-sm" onclick="downloadExport()">Download .json</button>
+        <button class="btn btn-sm btn-ghost" onclick="toggleExport()">Close</button>
+      </div>
+    </div>
+    <textarea class="export-textarea" id="exportTextarea" readonly></textarea>
+  </div>
+
+  <div id="content"></div>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModalOutside(event)">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modalTitle">New Idea</div>
+      <button class="btn btn-ghost btn-sm" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Idea Name</label>
+        <input class="form-input" id="fName" placeholder="e.g., P2P Video Calling">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Category</label>
+          <select class="form-select" id="fCategory"></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <select class="form-select" id="fStatus">
+            <option value="brainstorm">Brainstorm</option>
+            <option value="scoping">Scoping</option>
+            <option value="building">Building</option>
+            <option value="shipped">Shipped</option>
+            <option value="parked">Parked</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Description</label>
+        <textarea class="form-textarea" id="fDesc" placeholder="What is this idea? What problem does it solve?"></textarea>
+      </div>
+      <div class="form-row-3">
+        <div class="form-group">
+          <label class="form-label">Priority</label>
+          <select class="form-select" id="fPriority">
+            <option value="">—</option>
+            <option value="high">High</option>
+            <option value="medium">Medium</option>
+            <option value="low">Low</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Complexity</label>
+          <select class="form-select" id="fComplexity">
+            <option value="">—</option>
+            <option value="simple">Simple</option>
+            <option value="moderate">Moderate</option>
+            <option value="complex">Complex</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Rev #</label>
+          <input class="form-input" id="fRev" type="number" min="0" value="0" placeholder="0">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Delivery Targets</label>
+        <div class="checkbox-group" id="fDelivery"></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Tags (comma-separated)</label>
+        <input class="form-input" id="fTags" placeholder="e.g., P2P, VPN, offline-first">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Key Dependencies / Tech</label>
+        <textarea class="form-textarea" id="fDeps" rows="2" placeholder="e.g., WebRTC, VPN tunneling, E2E encryption"></textarea>
+      </div>
+
+      <!-- Workflow -->
+      <div class="workflow-section">
+        <div class="workflow-title">Build Workflow</div>
+        <div class="workflow-steps" id="fWorkflow"></div>
+      </div>
+
+      <!-- Notes -->
+      <div class="workflow-section">
+        <div class="workflow-title">Notes Log</div>
+        <div class="notes-log" id="fNotes"></div>
+        <div class="add-note-row">
+          <input class="form-input" id="fNewNote" placeholder="Add a note...">
+          <button class="btn btn-sm" onclick="addNote()">Add</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <div>
+        <button class="btn btn-danger btn-sm" id="deleteBtn" onclick="deleteIdea()" style="display:none">Delete</button>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="saveIdea()">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="importInput" accept=".json" style="display:none" onchange="handleImport(event)">
+
+<script>
+// ──── DATA MODEL ────
+const CATEGORIES = [
+  { id: 'streaming', name: 'Streaming & Multi Media', color: '#4a9eff' },
+  { id: 'productivity', name: 'Productivity', color: '#34d399' },
+  { id: 'collaboration', name: 'Collaboration / Connection', color: '#a78bfa' },
+  { id: 'entertainment', name: 'Entertainment & Content', color: '#fb923c' },
+  { id: 'tools', name: 'Tools & Utilities', color: '#22d3ee' },
+  { id: 'infrastructure', name: 'Infrastructure & Delivery', color: '#f87171' },
+];
+
+const DELIVERY_TARGETS = [
+  { id: 'micro', label: 'Micro (Laptop)' },
+  { id: 'mobile', label: 'Mobile + Tablet' },
+  { id: 'desktop', label: 'Desktop' },
+  { id: 'private-server', label: 'Private Server' },
+];
+
+const WORKFLOW_STEPS = [
+  'System Prompt',
+  '1st Draft',
+  'HTML File',
+  'Feedback',
+  'Rev Cycle',
+  'Shipped'
+];
+
+const STORAGE_KEY = 'ecosystem-idea-intake-v1';
+
+// ──── SEED DATA ────
+const SEED_IDEAS = [
+  {
+    id: genId(), name: 'P2P Video Call + Chat', category: 'streaming', status: 'brainstorm',
+    description: 'End-to-end encrypted video calling and chat with P2P architecture and VPN tunneling. No centralized servers — all traffic stays private.',
+    priority: 'high', complexity: 'complex', rev: 0,
+    delivery: ['desktop','mobile'], tags: ['P2P','VPN','WebRTC','E2E'],
+    deps: 'WebRTC for peer connection, VPN tunnel layer, STUN/TURN for NAT traversal',
+    workflow: 0, notes: [{date: new Date().toISOString(), text: 'Core streaming piece — build this first'}]
+  },
+  {
+    id: genId(), name: 'P2P Messaging', category: 'streaming', status: 'brainstorm',
+    description: 'Peer-to-peer encrypted messaging. Text, files, media. No cloud storage of messages.',
+    priority: 'high', complexity: 'moderate', rev: 0,
+    delivery: ['desktop','mobile','micro'], tags: ['P2P','VPN','messaging'],
+    deps: 'Signal Protocol or Matrix, local message store', workflow: 0, notes: []
+  },
+  {
+    id: genId(), name: 'P2P Phone', category: 'streaming', status: 'brainstorm',
+    description: 'Voice-only P2P calling with VPN. Lightweight alternative to full video.',
+    priority: 'medium', complexity: 'moderate', rev: 0,
+    delivery: ['desktop','mobile'], tags: ['P2P','VPN','voice'], deps: 'WebRTC audio-only, VPN layer', workflow: 0, notes: []
+  },
+  {
+    id: genId(), name: 'Frame — P2P Photo Sharing', category: 'streaming', status: 'brainstorm',
+    description: 'Peer-to-peer photo sharing with VPN. Share albums privately without cloud hosting. Digital picture frame mode.',
+    priority: 'medium', complexity: 'moderate', rev: 0,
+    delivery: ['desktop','mobile','micro'], tags: ['P2P','VPN','photos','frame'], deps: 'P2P file transfer, image processing, frame display mode', workflow: 0, notes: []
+  },
+  {
+    id: genId(), name: 'Docs', category: 'productivity', status: 'building',
+    description: 'Google Docs clone — standalone HTML word processor with real-time editing, export, and offline-first architecture. Pre-loaded with market reports and GTM strategies.',
+    priority: 'high', complexity: 'complex', rev: 3,
+    delivery: ['desktop','micro'], tags: ['offline-first','docs','editor'],
+    deps: 'ContentEditable or ProseMirror, localStorage', workflow: 3,
+    notes: [{date: new Date().toISOString(), text: 'Already have working prototype with market reports loaded'}]
+  },
+  {
+    id: genId(), name: 'Sheets', category: 'productivity', status: 'building',
+    description: 'Google Sheets clone focused on Excel clipboard interoperability. Formula engine, cell formatting, CSV import/export.',
+    priority: 'high', complexity: 'complex', rev: 2,
+    delivery: ['desktop','micro'], tags: ['offline-first','spreadsheet','Excel'],
+    deps: 'Custom grid engine, formula parser, clipboard API', workflow: 3,
+    notes: [{date: new Date().toISOString(), text: 'Excel clipboard interop is the differentiator'}]
+  },
+  {
+    id: genId(), name: 'Flow — Kanban / WiFi', category: 'productivity', status: 'brainstorm',
+    description: 'Monday.com-style project management. Kanban boards, flow visualization, WiFi-synced between local devices.',
+    priority: 'medium', complexity: 'complex', rev: 0,
+    delivery: ['desktop','mobile'], tags: ['kanban','project-management','Monday.com'],
+    deps: 'Drag-and-drop, local sync protocol, board state management', workflow: 0, notes: []
+  },
+  {
+    id: genId(), name: 'Teams — P2P Message Video', category: 'collaboration', status: 'brainstorm',
+    description: 'Teams/Slack alternative with P2P messaging and video. Channels, threads, video calls — all peer-to-peer.',
+    priority: 'high', complexity: 'complex', rev: 0,
+    delivery: ['desktop','mobile'], tags: ['P2P','Teams','collaboration'],
+    deps: 'Combines P2P messaging + video calling modules, channel management', workflow: 0, notes: []
+  },
+  {
+    id: genId(), name: 'Rail — P2P Connection Hub', category: 'collaboration', status: 'brainstorm',
+    description: 'Connection/networking layer that ties the P2P ecosystem together. Identity, presence, discovery.',
+    priority: 'high', complexity: 'complex', rev: 0,
+    delivery: ['desktop','mobile','private-server'], tags: ['P2P','identity','infrastructure'],
+    deps: 'Distributed identity (DID), mDNS/Bonjour for local discovery, presence protocol', workflow: 0, notes: []
+  },
+  {
+    id: genId(), name: 'News / Newspaper Reader', category: 'entertainment', status: 'brainstorm',
+    description: 'Curated news reader. Aggregates from multiple sources with clean reading experience. Categories: news, gossip, financial.',
+    priority: 'medium', complexity: 'moderate', rev: 0,
+    delivery: ['desktop','mobile','micro'], tags: ['RSS','news','reader'],
+    deps: 'RSS/Atom parser, reading view renderer, category engine', workflow: 0, notes: []
+  },
+  {
+    id: genId(), name: 'Medium / Substack Reader', category: 'entertainment', status: 'brainstorm',
+    description: 'Unified reader for Medium and Substack content. Clean typography, offline reading, subscription management.',
+    priority: 'low', complexity: 'moderate', rev: 0,
+    delivery: ['desktop','mobile'], tags: ['reading','Medium','Substack'],
+    deps: 'Web scraping or API integration, reader mode, bookmark sync', workflow: 0, notes: []
+  },
+  {
+    id: genId(), name: 'YouTube Curation', category: 'entertainment', status: 'brainstorm',
+    description: 'Curated YouTube experience. Build playlists, remove algorithmic noise, focused viewing.',
+    priority: 'low', complexity: 'moderate', rev: 0,
+    delivery: ['desktop','mobile'], tags: ['YouTube','curation','video'],
+    deps: 'YouTube API or embed, playlist management, viewing history', workflow: 0, notes: []
+  },
+  {
+    id: genId(), name: 'PDF Annotator', category: 'tools', status: 'brainstorm',
+    description: 'Work offline PDF annotation tool. Markup, highlight, comment, sign — all without cloud dependency. "Work Offline More."',
+    priority: 'high', complexity: 'moderate', rev: 0,
+    delivery: ['desktop','micro'], tags: ['PDF','offline-first','annotation'],
+    deps: 'pdf.js for rendering, canvas overlay for annotations, local file storage', workflow: 0,
+    notes: [{date: new Date().toISOString(), text: 'Key enabler for "work offline more" philosophy'}]
+  },
+  {
+    id: genId(), name: 'Notion — Local on MacBook', category: 'tools', status: 'building',
+    description: 'Local-first Notion alternative. Block editor with slash commands, AI generation via Azure OpenAI, localStorage persistence. Already in development as Open Intranet.',
+    priority: 'high', complexity: 'complex', rev: 10,
+    delivery: ['desktop','micro'], tags: ['Notion','block-editor','AI','offline-first'],
+    deps: 'Block editor engine, Azure OpenAI integration, localStorage',
+    workflow: 4,
+    notes: [
+      {date: new Date().toISOString(), text: 'Open Intranet v2.4 — 12 block types, slash commands, AI Workshop'},
+      {date: new Date().toISOString(), text: 'Notion-style Pages editor working with full persistence'}
+    ]
+  },
+  {
+    id: genId(), name: 'March Madness Tools', category: 'tools', status: 'brainstorm',
+    description: 'Hosted bracket and analytics tools for March Madness. Seasonal but high-engagement.',
+    priority: 'low', complexity: 'simple', rev: 0,
+    delivery: ['desktop','mobile'], tags: ['sports','brackets','hosted'],
+    deps: 'Bracket visualization, scoring engine, live data feed', workflow: 0, notes: []
+  },
+  {
+    id: genId(), name: 'Intranet / Darpanet Layer', category: 'infrastructure', status: 'scoping',
+    description: 'The foundational network layer — private intranet connecting all apps. Local-first with optional mesh networking. "Information Superhighway" reimagined.',
+    priority: 'high', complexity: 'complex', rev: 0,
+    delivery: ['desktop','private-server'], tags: ['intranet','mesh','infrastructure'],
+    deps: 'mDNS, WireGuard or custom VPN, local DNS, service discovery',
+    workflow: 1,
+    notes: [{date: new Date().toISOString(), text: 'This is the backbone — everything rides on this layer'}]
+  },
+  {
+    id: genId(), name: 'Free Tools Site — Azure + AI', category: 'infrastructure', status: 'scoping',
+    description: 'Public-facing site hosting free HTML tools. Powered by Azure and AI. Lead gen and ecosystem entry point.',
+    priority: 'medium', complexity: 'moderate', rev: 0,
+    delivery: ['desktop','mobile'], tags: ['Azure','AI','site','marketing'],
+    deps: 'Azure Static Web Apps, AI API integration, tool catalog', workflow: 1,
+    notes: [{date: new Date().toISOString(), text: '"Real Business Need" — drives awareness and adoption'}]
+  },
+];
+
+// ──── STATE ────
+let ideas = [];
+let editingId = null;
+let activeTab = 'all';
+let statusFilter = 'all';
+
+function genId() { return 'id_' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36); }
+
+function load() {
+  const stored = localStorage.getItem(STORAGE_KEY);
+  if (stored) {
+    try { ideas = JSON.parse(stored); } catch(e) { ideas = [...SEED_IDEAS]; }
+  } else {
+    ideas = [...SEED_IDEAS];
+    save();
+  }
+}
+
+function save() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(ideas));
+}
+
+// ──── RENDERING ────
+function renderAll() {
+  renderStats();
+  renderTabs();
+  renderContent();
+  renderFilterButtons();
+}
+
+function renderStats() {
+  const total = ideas.length;
+  const statuses = {};
+  ideas.forEach(i => { statuses[i.status] = (statuses[i.status]||0) + 1; });
+  const cats = new Set(ideas.map(i => i.category)).size;
+
+  document.getElementById('statsBar').innerHTML = `
+    <div class="stat"><div class="stat-dot" style="background:var(--text-primary)"></div><span class="stat-label">Total</span><span class="stat-value">${total}</span></div>
+    <div class="stat"><div class="stat-dot" style="background:var(--purple)"></div><span class="stat-label">Brainstorm</span><span class="stat-value">${statuses.brainstorm||0}</span></div>
+    <div class="stat"><div class="stat-dot" style="background:var(--amber)"></div><span class="stat-label">Scoping</span><span class="stat-value">${statuses.scoping||0}</span></div>
+    <div class="stat"><div class="stat-dot" style="background:var(--accent)"></div><span class="stat-label">Building</span><span class="stat-value">${statuses.building||0}</span></div>
+    <div class="stat"><div class="stat-dot" style="background:var(--green)"></div><span class="stat-label">Shipped</span><span class="stat-value">${statuses.shipped||0}</span></div>
+    <div class="stat"><div class="stat-dot" style="background:var(--text-muted)"></div><span class="stat-label">Parked</span><span class="stat-value">${statuses.parked||0}</span></div>
+    <div class="stat"><span class="stat-label">Categories</span><span class="stat-value">${cats}</span></div>
+  `;
+}
+
+function renderTabs() {
+  const counts = { all: ideas.length };
+  CATEGORIES.forEach(c => { counts[c.id] = ideas.filter(i => i.category === c.id).length; });
+
+  let html = `<div class="tab ${activeTab==='all'?'active':''}" onclick="setTab('all')">All Ideas <span class="tab-count">${counts.all}</span></div>`;
+  CATEGORIES.forEach(c => {
+    if (counts[c.id] > 0) {
+      html += `<div class="tab ${activeTab===c.id?'active':''}" onclick="setTab('${c.id}')">${c.name} <span class="tab-count">${counts[c.id]}</span></div>`;
+    }
+  });
+  document.getElementById('tabsBar').innerHTML = html;
+}
+
+function renderFilterButtons() {
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.filter === statusFilter);
+  });
+}
+
+function renderContent() {
+  const search = (document.getElementById('searchInput')?.value || '').toLowerCase();
+  let filtered = ideas.filter(i => {
+    if (activeTab !== 'all' && i.category !== activeTab) return false;
+    if (statusFilter !== 'all' && i.status !== statusFilter) return false;
+    if (search) {
+      const hay = [i.name, i.description, ...(i.tags||[]), i.category, i.status].join(' ').toLowerCase();
+      if (!hay.includes(search)) return false;
+    }
+    return true;
+  });
+
+  const grouped = {};
+  CATEGORIES.forEach(c => { grouped[c.id] = []; });
+  filtered.forEach(i => { if (grouped[i.category]) grouped[i.category].push(i); });
+
+  let html = '';
+  CATEGORIES.forEach(cat => {
+    const items = grouped[cat.id];
+    if (activeTab !== 'all' && activeTab !== cat.id) return;
+    if (items.length === 0 && activeTab !== cat.id) return;
+
+    html += `<div class="category-section">
+      <div class="category-header">
+        <div class="category-name"><div class="category-color" style="background:${cat.color}"></div>${cat.name}</div>
+        <div class="category-count">${items.length} idea${items.length!==1?'s':''}</div>
+      </div>
+      <div class="ideas-grid">`;
+
+    items.forEach(idea => {
+      const tags = (idea.tags||[]).map(t => {
+        let cls = 'idea-tag';
+        if (t.toLowerCase() === 'vpn' || t.toLowerCase() === 'p2p') cls += ' vpn';
+        return `<span class="${cls}">${t}</span>`;
+      }).join('');
+
+      const deliveryTags = (idea.delivery||[]).map(d => {
+        const dt = DELIVERY_TARGETS.find(x => x.id === d);
+        return dt ? `<span class="idea-tag delivery">${dt.label}</span>` : '';
+      }).join('');
+
+      const priorityTag = idea.priority ? `<span class="idea-tag priority-${idea.priority}">${idea.priority}</span>` : '';
+      const revTag = idea.rev > 0 ? `<span class="idea-tag">Rev ${idea.rev}</span>` : '';
+
+      html += `<div class="idea-card" onclick="openEditIdea('${idea.id}')">
+        <div class="idea-card-top">
+          <div class="idea-title">${esc(idea.name)}</div>
+          <div class="idea-status status-${idea.status}">${idea.status}</div>
+        </div>
+        <div class="idea-desc">${esc(idea.description||'')}</div>
+        <div class="idea-meta">${priorityTag}${revTag}${tags}${deliveryTags}</div>
+      </div>`;
+    });
+
+    html += `<div class="add-idea-card" onclick="openNewIdea('${cat.id}')">+ Add idea to ${cat.name}</div>`;
+    html += `</div></div>`;
+  });
+
+  document.getElementById('content').innerHTML = html;
+}
+
+function esc(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+// ──── TABS & FILTERS ────
+function setTab(t) { activeTab = t; renderAll(); }
+function setStatusFilter(f) { statusFilter = f; renderAll(); }
+
+// ──── MODAL ────
+function openNewIdea(cat) {
+  editingId = null;
+  document.getElementById('modalTitle').textContent = 'New Idea';
+  document.getElementById('deleteBtn').style.display = 'none';
+  resetForm();
+  if (cat) document.getElementById('fCategory').value = cat;
+  populateWorkflow(0);
+  renderNotes([]);
+  document.getElementById('modalOverlay').classList.add('active');
+}
+
+function openEditIdea(id) {
+  const idea = ideas.find(i => i.id === id);
+  if (!idea) return;
+  editingId = id;
+  document.getElementById('modalTitle').textContent = 'Edit Idea';
+  document.getElementById('deleteBtn').style.display = '';
+  document.getElementById('fName').value = idea.name;
+  document.getElementById('fCategory').value = idea.category;
+  document.getElementById('fStatus').value = idea.status;
+  document.getElementById('fDesc').value = idea.description || '';
+  document.getElementById('fPriority').value = idea.priority || '';
+  document.getElementById('fComplexity').value = idea.complexity || '';
+  document.getElementById('fRev').value = idea.rev || 0;
+  document.getElementById('fTags').value = (idea.tags||[]).join(', ');
+  document.getElementById('fDeps').value = idea.deps || '';
+  populateDelivery(idea.delivery || []);
+  populateWorkflow(idea.workflow || 0);
+  renderNotes(idea.notes || []);
+  document.getElementById('modalOverlay').classList.add('active');
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('active');
+  editingId = null;
+}
+
+function closeModalOutside(e) {
+  if (e.target === document.getElementById('modalOverlay')) closeModal();
+}
+
+function resetForm() {
+  ['fName','fDesc','fTags','fDeps'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('fCategory').value = CATEGORIES[0].id;
+  document.getElementById('fStatus').value = 'brainstorm';
+  document.getElementById('fPriority').value = '';
+  document.getElementById('fComplexity').value = '';
+  document.getElementById('fRev').value = 0;
+  populateDelivery([]);
+}
+
+function populateDelivery(selected) {
+  document.getElementById('fDelivery').innerHTML = DELIVERY_TARGETS.map(d =>
+    `<label class="checkbox-item ${selected.includes(d.id)?'checked':''}" onclick="this.classList.toggle('checked')">
+      <input type="checkbox" value="${d.id}" ${selected.includes(d.id)?'checked':''}>
+      ${d.label}
+    </label>`
+  ).join('');
+}
+
+function populateWorkflow(step) {
+  document.getElementById('fWorkflow').innerHTML = WORKFLOW_STEPS.map((s, i) => {
+    let cls = 'workflow-step';
+    if (i < step) cls += ' completed';
+    else if (i === step) cls += ' current';
+    return `<span class="${cls}" style="cursor:pointer" onclick="setWorkflowStep(${i})" title="Click to set">${s}</span>` +
+      (i < WORKFLOW_STEPS.length - 1 ? '<span class="workflow-arrow">→</span>' : '');
+  }).join('');
+  document.getElementById('fWorkflow').dataset.step = step;
+}
+
+function setWorkflowStep(step) {
+  populateWorkflow(step);
+}
+
+function renderNotes(notes) {
+  const container = document.getElementById('fNotes');
+  container.innerHTML = (notes||[]).map((n, i) => `
+    <div class="note-entry">
+      <div class="note-date">${new Date(n.date).toLocaleDateString()} ${new Date(n.date).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</div>
+      ${esc(n.text)}
+    </div>
+  `).join('');
+  container.dataset.notes = JSON.stringify(notes||[]);
+}
+
+function addNote() {
+  const input = document.getElementById('fNewNote');
+  const text = input.value.trim();
+  if (!text) return;
+  const notes = JSON.parse(document.getElementById('fNotes').dataset.notes || '[]');
+  notes.push({ date: new Date().toISOString(), text });
+  renderNotes(notes);
+  input.value = '';
+}
+
+function saveIdea() {
+  const name = document.getElementById('fName').value.trim();
+  if (!name) { document.getElementById('fName').focus(); return; }
+
+  const delivery = [...document.querySelectorAll('#fDelivery .checkbox-item.checked input')].map(cb => cb.value);
+  const tags = document.getElementById('fTags').value.split(',').map(t => t.trim()).filter(Boolean);
+  const notes = JSON.parse(document.getElementById('fNotes').dataset.notes || '[]');
+  const workflow = parseInt(document.getElementById('fWorkflow').dataset.step || '0');
+
+  const data = {
+    name,
+    category: document.getElementById('fCategory').value,
+    status: document.getElementById('fStatus').value,
+    description: document.getElementById('fDesc').value,
+    priority: document.getElementById('fPriority').value,
+    complexity: document.getElementById('fComplexity').value,
+    rev: parseInt(document.getElementById('fRev').value) || 0,
+    delivery, tags,
+    deps: document.getElementById('fDeps').value,
+    workflow, notes
+  };
+
+  if (editingId) {
+    const idx = ideas.findIndex(i => i.id === editingId);
+    if (idx >= 0) ideas[idx] = { ...ideas[idx], ...data };
+  } else {
+    ideas.push({ id: genId(), ...data });
+  }
+
+  save();
+  closeModal();
+  renderAll();
+}
+
+function deleteIdea() {
+  if (!editingId) return;
+  if (!confirm('Delete this idea?')) return;
+  ideas = ideas.filter(i => i.id !== editingId);
+  save();
+  closeModal();
+  renderAll();
+}
+
+// ──── EXPORT / IMPORT ────
+function exportData() {
+  const json = JSON.stringify(ideas, null, 2);
+  document.getElementById('exportTextarea').value = json;
+  document.getElementById('exportPanel').classList.add('active');
+}
+
+function toggleExport() {
+  document.getElementById('exportPanel').classList.toggle('active');
+}
+
+function copyExport() {
+  const ta = document.getElementById('exportTextarea');
+  ta.select();
+  document.execCommand('copy');
+  alert('Copied to clipboard');
+}
+
+function downloadExport() {
+  const blob = new Blob([document.getElementById('exportTextarea').value], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'ecosystem-ideas-' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+}
+
+function importData() {
+  document.getElementById('importInput').click();
+}
+
+function handleImport(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    try {
+      const imported = JSON.parse(ev.target.result);
+      if (Array.isArray(imported)) {
+        if (confirm(`Import ${imported.length} ideas? This will replace current data.`)) {
+          ideas = imported;
+          save();
+          renderAll();
+        }
+      }
+    } catch(err) { alert('Invalid JSON file'); }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+// ──── INIT ────
+function init() {
+  // Populate category dropdown
+  document.getElementById('fCategory').innerHTML = CATEGORIES.map(c =>
+    `<option value="${c.id}">${c.name}</option>`
+  ).join('');
+
+  load();
+  renderAll();
+}
+
+init();
+</script>
+</body>
+</html>

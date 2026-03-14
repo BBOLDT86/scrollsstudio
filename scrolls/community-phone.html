@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Open Intranet — A Design Vision for Serverless HTML</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-dark: #08080d;
+  --bg-card: #101018;
+  --bg-card-hover: #16161f;
+  --accent: #e0e0e8;
+  --accent-bright: #ffffff;
+  --mint: #00e599;
+  --mint-dim: rgba(0,229,153,0.12);
+  --mint-glow: rgba(0,229,153,0.25);
+  --text-primary: #d8d8e4;
+  --text-muted: #7e7e96;
+  --text-dim: #4a4a5e;
+  --warm: #f5c542;
+  --warm-dim: rgba(245,197,66,0.12);
+  --coral: #ff6b6b;
+  --blue: #5b8def;
+  --purple: #a78bfa;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg-dark);
+  color: var(--text-primary);
+  overflow: hidden;
+  height: 100vh;
+  width: 100vw;
+}
+
+.deck { position: relative; width: 100%; height: 100vh; }
+
+.slide {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 5vh 8vw;
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+  pointer-events: none;
+  overflow-y: auto;
+  z-index: 1;
+}
+
+.slide.active {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: all;
+}
+
+/* NAV */
+.nav {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 40px;
+  z-index: 100;
+  background: linear-gradient(transparent, rgba(8,8,13,0.96) 40%);
+}
+
+.nav button {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: var(--text-primary);
+  font-family: 'Syne', sans-serif;
+  font-weight: 600;
+  font-size: 13px;
+  padding: 10px 24px;
+  border-radius: 6px;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  transition: all 0.25s ease;
+}
+
+.nav button:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2); }
+.nav button:disabled { opacity: 0.15; cursor: default; }
+.nav button:disabled:hover { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.08); }
+
+.progress-track {
+  flex: 1;
+  max-width: 300px;
+  height: 2px;
+  background: rgba(255,255,255,0.04);
+  border-radius: 2px;
+  margin: 0 24px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--text-dim);
+  border-radius: 2px;
+  transition: width 0.4s ease;
+}
+
+.slide-counter {
+  font-family: 'Syne', sans-serif;
+  font-size: 12px;
+  color: var(--text-dim);
+  letter-spacing: 1px;
+  min-width: 50px;
+  text-align: center;
+}
+
+/* TYPOGRAPHY */
+h1 {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: clamp(2.2rem, 5vw, 4rem);
+  line-height: 1.08;
+  letter-spacing: -1.5px;
+  color: var(--accent-bright);
+  margin-bottom: 24px;
+}
+
+h2 {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: clamp(1.5rem, 3.2vw, 2.4rem);
+  line-height: 1.15;
+  letter-spacing: -0.5px;
+  color: var(--accent-bright);
+  margin-bottom: 20px;
+}
+
+.kicker {
+  font-family: 'Syne', sans-serif;
+  font-weight: 600;
+  font-size: clamp(0.7rem, 1.2vw, 0.82rem);
+  color: var(--text-dim);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
+
+p, li {
+  font-size: clamp(0.88rem, 1.4vw, 1.05rem);
+  line-height: 1.75;
+  color: var(--text-muted);
+  max-width: 720px;
+}
+
+.hl { color: var(--mint); }
+.warm { color: var(--warm); }
+
+/* Quote block */
+.quote-block {
+  border-left: 2px solid var(--text-dim);
+  padding: 16px 0 16px 28px;
+  margin: 24px 0;
+  max-width: 640px;
+}
+
+.quote-block p {
+  font-size: clamp(1rem, 1.8vw, 1.2rem);
+  font-style: italic;
+  color: var(--text-primary);
+  line-height: 1.6;
+}
+
+.quote-block .attr {
+  font-size: 0.82rem;
+  font-style: normal;
+  color: var(--text-dim);
+  margin-top: 8px;
+}
+
+/* Stat Grid */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-top: 24px;
+  width: 100%;
+  max-width: 960px;
+}
+
+.stat-card {
+  background: var(--bg-card);
+  border: 1px solid rgba(255,255,255,0.04);
+  border-radius: 10px;
+  padding: 22px;
+}
+
+.stat-number {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: clamp(1.6rem, 2.8vw, 2.2rem);
+  color: var(--accent-bright);
+  margin-bottom: 4px;
+}
+
+.stat-label {
+  font-size: 0.82rem;
+  color: var(--text-dim);
+  line-height: 1.4;
+}
+
+/* Principle cards */
+.principle-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+  margin-top: 20px;
+  width: 100%;
+  max-width: 1000px;
+}
+
+.principle-card {
+  background: var(--bg-card);
+  border: 1px solid rgba(255,255,255,0.04);
+  border-radius: 10px;
+  padding: 24px;
+}
+
+.principle-card h4 {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--accent-bright);
+  margin-bottom: 8px;
+}
+
+.principle-card p {
+  font-size: 0.82rem;
+  color: var(--text-dim);
+  line-height: 1.55;
+}
+
+.principle-icon {
+  font-size: 1.5rem;
+  margin-bottom: 12px;
+  display: block;
+  opacity: 0.7;
+}
+
+/* Category compact */
+.cat-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  margin-top: 20px;
+  width: 100%;
+  max-width: 1000px;
+}
+
+.cat-item {
+  background: var(--bg-card);
+  border: 1px solid rgba(255,255,255,0.04);
+  border-radius: 8px;
+  padding: 16px 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cat-item .icon { font-size: 1.3rem; opacity: 0.6; }
+.cat-item .label {
+  font-family: 'Syne', sans-serif;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--text-primary);
+}
+
+.cat-item .sub {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  margin-top: 2px;
+}
+
+/* Tier rows */
+.tier-section { margin-top: 20px; width: 100%; max-width: 1000px; }
+
+.tier-header {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 0.75rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 6px 14px;
+  border-radius: 4px;
+  display: inline-block;
+  margin-bottom: 12px;
+}
+
+.t-free { background: var(--mint-dim); color: var(--mint); }
+.t-mid { background: rgba(91,141,239,0.12); color: var(--blue); }
+.t-ent { background: rgba(167,139,250,0.12); color: var(--purple); }
+
+.tier-items {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.tier-item {
+  background: var(--bg-card);
+  border: 1px solid rgba(255,255,255,0.03);
+  border-radius: 6px;
+  padding: 10px 14px;
+  font-size: 0.84rem;
+  color: var(--text-muted);
+  display: flex;
+  gap: 10px;
+}
+
+.tier-item .n {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 0.7rem;
+  color: var(--text-dim);
+  min-width: 20px;
+  padding-top: 2px;
+}
+
+/* Comparison table */
+.compare-table {
+  width: 100%;
+  max-width: 900px;
+  border-collapse: collapse;
+  margin-top: 20px;
+  font-size: clamp(0.72rem, 1.1vw, 0.88rem);
+}
+
+.compare-table th {
+  font-family: 'Syne', sans-serif;
+  font-weight: 600;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-dim);
+  text-align: left;
+  padding: 9px 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.compare-table td {
+  padding: 9px 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+  color: var(--text-muted);
+}
+
+.win { color: var(--mint); font-weight: 500; }
+
+/* Connection visual */
+.connect-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 20px;
+  max-width: 1000px;
+}
+
+.connect-card {
+  flex: 1;
+  min-width: 200px;
+  background: var(--bg-card);
+  border: 1px solid rgba(255,255,255,0.04);
+  border-radius: 10px;
+  padding: 22px;
+  position: relative;
+}
+
+.connect-card h4 {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 0.88rem;
+  color: var(--accent-bright);
+  margin-bottom: 6px;
+}
+
+.connect-card p { font-size: 0.8rem; color: var(--text-dim); line-height: 1.5; }
+
+.connect-card .phase-num {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 2.4rem;
+  color: rgba(255,255,255,0.025);
+  position: absolute;
+  top: 8px;
+  right: 14px;
+}
+
+/* Final slide */
+.slide-final { text-align: center; align-items: center; }
+
+.slide-final::before {
+  content: '';
+  position: absolute;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(255,255,255,0.02) 0%, transparent 70%);
+  top: 35%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.final-box {
+  position: relative;
+  background: var(--bg-card);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 14px;
+  padding: 36px 44px;
+  max-width: 640px;
+  margin-top: 16px;
+}
+
+.final-box p { margin: 0 auto; }
+
+/* Title slide glow */
+.slide-title { justify-content: center; align-items: center; text-align: center; }
+
+.slide-title::before {
+  content: '';
+  position: absolute;
+  width: 700px;
+  height: 700px;
+  background: radial-gradient(circle, rgba(255,255,255,0.018) 0%, transparent 65%);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.slide-title .subtitle {
+  font-size: clamp(0.95rem, 1.8vw, 1.2rem);
+  color: var(--text-muted);
+  font-weight: 300;
+  max-width: 560px;
+  margin: 0 auto;
+  position: relative;
+}
+
+/* Animations */
+.slide.active .anim { animation: fadeUp 0.55s ease forwards; }
+.slide.active .anim:nth-child(2) { animation-delay: 0.08s; }
+.slide.active .anim:nth-child(3) { animation-delay: 0.16s; }
+.slide.active .anim:nth-child(4) { animation-delay: 0.24s; }
+.slide.active .anim:nth-child(5) { animation-delay: 0.32s; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.anim { opacity: 0; }
+
+/* Film grain */
+.deck::after {
+  content: '';
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+}
+
+.nav { z-index: 100; }
+
+@media (max-width: 640px) {
+  .slide { padding: 4vh 5vw 80px; }
+  .stat-grid, .principle-grid, .cat-strip { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .tier-items { grid-template-columns: 1fr; }
+  .nav { padding: 12px 16px; }
+  .connect-row { flex-direction: column; }
+}
+</style>
+</head>
+<body>
+
+<div class="deck">
+
+  <!-- SLIDE 1: Title -->
+  <div class="slide slide-title active" data-slide="0">
+    <div class="kicker anim">A Design Vision</div>
+    <h1 class="anim" style="position:relative;">The Open Intranet</h1>
+    <p class="subtitle anim">Standalone, serverless HTML tools — designed as a coherent ecosystem.<br>The internet Steve Jobs would have wanted.</p>
+  </div>
+
+  <!-- SLIDE 2: The Philosophy -->
+  <div class="slide" data-slide="1">
+    <div class="kicker anim">The Idea</div>
+    <h2 class="anim">Not a Store.<br>An <span class="hl">Ecosystem.</span></h2>
+    <p class="anim">We're not building templates to sell on Etsy. We're building a family of beautifully designed, standalone HTML tools that share a unified design language — each one self-contained, offline-capable, account-free, and connected by nothing but shared branding and a philosophy.</p>
+    <div class="quote-block anim">
+      <p>"Design is not just what it looks like and feels like. Design is how it works."</p>
+      <div class="attr">— Steve Jobs</div>
+    </div>
+    <p class="anim">The goal: own the design layer across an entire class of tools that currently live in ugly spreadsheets, fragmented SaaS, and walled-garden platforms. Monetization comes later. The brand comes first.</p>
+  </div>
+
+  <!-- SLIDE 3: Design Principles -->
+  <div class="slide" data-slide="2">
+    <div class="kicker anim">Design Principles</div>
+    <h2 class="anim">What Makes This <span class="warm">Different</span></h2>
+    <div class="principle-grid anim">
+      <div class="principle-card">
+        <span class="principle-icon">◯</span>
+        <h4>Zero Dependencies</h4>
+        <p>No accounts. No installs. No subscriptions. A single HTML file that opens and works — on any device, offline, forever.</p>
+      </div>
+      <div class="principle-card">
+        <span class="principle-icon">◈</span>
+        <h4>Owned Design Language</h4>
+        <p>Every tool in the ecosystem shares typography, color, motion, and interaction patterns. Recognizable at a glance. Unmistakably ours.</p>
+      </div>
+      <div class="principle-card">
+        <span class="principle-icon">◇</span>
+        <h4>Privacy by Architecture</h4>
+        <p>Data lives on the user's device. No cloud. No telemetry. No "we may share with partners." Local-first by design, not by policy.</p>
+      </div>
+      <div class="principle-card">
+        <span class="principle-icon">▽</span>
+        <h4>Standalone, Then Connected</h4>
+        <p>Each tool is complete on its own. But the ecosystem is designed so that tools can eventually discover and talk to each other — via Doccoin or similar protocol.</p>
+      </div>
+      <div class="principle-card">
+        <span class="principle-icon">□</span>
+        <h4>Interactivity > Static</h4>
+        <p>Full JavaScript. Timers, calculators, live scoring, animations, charts. Things a spreadsheet or PDF can never do.</p>
+      </div>
+      <div class="principle-card">
+        <span class="principle-icon">△</span>
+        <h4>Free at the Point of Use</h4>
+        <p>No paywall on day one. Build the library, build the brand, build the network. Revenue follows reach.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 4: Demand Validation -->
+  <div class="slide" data-slide="3">
+    <div class="kicker anim">Why This Works</div>
+    <h2 class="anim">$4.2B in Proven Demand —<br>For <span class="hl">Worse Versions</span> of This</h2>
+    <p class="anim">The template economy already proved people will pay for pre-built tools that save 30 minutes and look good. What they're buying today is limited by the format. We're removing those limits.</p>
+    <div class="stat-grid anim">
+      <div class="stat-card">
+        <div class="stat-number">$4.2B</div>
+        <div class="stat-label">Digital template market (2024) — growing annually</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">260M</div>
+        <div class="stat-label">Canva monthly users — demand for pre-built design is massive</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">100K+</div>
+        <div class="stat-label">Sales on single Etsy budget template listings</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">$0/mo</div>
+        <div class="stat-label">Cost to run an HTML file vs. $10–$500/mo SaaS</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 5: Format Superiority -->
+  <div class="slide" data-slide="4">
+    <div class="kicker anim">The Format Advantage</div>
+    <h2 class="anim">HTML vs. the Incumbents</h2>
+    <p class="anim">Every existing format forces a tradeoff. HTML doesn't.</p>
+    <table class="compare-table anim">
+      <thead>
+        <tr><th></th><th>Sheets</th><th>Notion</th><th>Canva</th><th>Our HTML</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Account needed</td><td>Google</td><td>Notion</td><td>Canva</td><td class="win">None</td></tr>
+        <tr><td>Offline</td><td>No</td><td>No</td><td>No</td><td class="win">Yes</td></tr>
+        <tr><td>Mobile UX</td><td>Poor</td><td>OK</td><td>Good</td><td class="win">Native-feel</td></tr>
+        <tr><td>Interactivity</td><td>Formulas</td><td>Databases</td><td>Static</td><td class="win">Full JS</td></tr>
+        <tr><td>Data ownership</td><td>Google</td><td>Notion</td><td>Canva</td><td class="win">User's device</td></tr>
+        <tr><td>Ongoing cost</td><td>Free*</td><td>$0–10/mo</td><td>$0–13/mo</td><td class="win">Zero</td></tr>
+        <tr><td>Ecosystem lock-in</td><td>Yes</td><td>Yes</td><td>Yes</td><td class="win">None</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- SLIDE 6: The 8 Verticals -->
+  <div class="slide" data-slide="5">
+    <div class="kicker anim">The Ecosystem Map</div>
+    <h2 class="anim">8 Verticals, One Design System</h2>
+    <p class="anim">Each vertical has proven buyer demand on existing platforms. We're building better tools under a single brand umbrella.</p>
+    <div class="cat-strip anim">
+      <div class="cat-item"><span class="icon">💰</span><div><div class="label">Finance & Budgets</div><div class="sub">#1 digital product category on Etsy</div></div></div>
+      <div class="cat-item"><span class="icon">⚡</span><div><div class="label">Productivity</div><div class="sub">Year-round demand, ADHD niche underserved</div></div></div>
+      <div class="cat-item"><span class="icon">🏢</span><div><div class="label">Small Business Ops</div><div class="sub">Tool-fatigued solopreneurs</div></div></div>
+      <div class="cat-item"><span class="icon">🏋️</span><div><div class="label">Health & Wellness</div><div class="sub">Privacy-sensitive, needs interactivity</div></div></div>
+      <div class="cat-item"><span class="icon">📚</span><div><div class="label">Education</div><div class="sub">Seasonal waves, device-agnostic users</div></div></div>
+      <div class="cat-item"><span class="icon">💍</span><div><div class="label">Events & Planning</div><div class="sub">Replaces $15–$30/mo wedding SaaS</div></div></div>
+      <div class="cat-item"><span class="icon">🏈</span><div><div class="label">Sports & Social</div><div class="sub">Biggest HTML advantage — live interaction</div></div></div>
+      <div class="cat-item"><span class="icon">🏠</span><div><div class="label">Real Estate & Legal</div><div class="sub">Pro audience, high willingness to adopt</div></div></div>
+    </div>
+  </div>
+
+  <!-- SLIDE 7: 30 Tools Across 3 Tiers -->
+  <div class="slide" data-slide="6">
+    <div class="kicker anim">The Library</div>
+    <h2 class="anim">30 Tools, Three Complexity Tiers</h2>
+    <p class="anim">From group-chat utilities to systems that replace enterprise SaaS — all under one design roof.</p>
+
+    <div class="tier-section anim">
+      <div class="tier-header t-free">Viral / Social Tools</div>
+      <div class="tier-items">
+        <div class="tier-item"><span class="n">01</span>Super Bowl Squares</div>
+        <div class="tier-item"><span class="n">02</span>March Madness Bracket</div>
+        <div class="tier-item"><span class="n">03</span>Potluck Signup Board</div>
+        <div class="tier-item"><span class="n">04</span>Rent / Bill Splitter</div>
+        <div class="tier-item"><span class="n">05</span>Baby Pool Betting</div>
+        <div class="tier-item"><span class="n">06</span>Pickup Game Scheduler</div>
+        <div class="tier-item"><span class="n">07</span>Fantasy Draft Board</div>
+        <div class="tier-item"><span class="n">08</span>Chore Rotation Wheel</div>
+        <div class="tier-item"><span class="n">09</span>Wedding RSVP Collector</div>
+        <div class="tier-item"><span class="n">10</span>Concert Lineup Ranker</div>
+      </div>
+
+      <div class="tier-header t-mid">Professional / Subscription Replacements</div>
+      <div class="tier-items">
+        <div class="tier-item"><span class="n">11</span>Freelancer Invoice + Tracker</div>
+        <div class="tier-item"><span class="n">12</span>Open House Lead Capture</div>
+        <div class="tier-item"><span class="n">13</span>Local League Manager</div>
+        <div class="tier-item"><span class="n">14</span>Restaurant Specials Board</div>
+        <div class="tier-item"><span class="n">15</span>Contractor Estimate Builder</div>
+        <div class="tier-item"><span class="n">16</span>Volunteer Coordinator</div>
+        <div class="tier-item"><span class="n">17</span>Short-Term Rental Dashboard</div>
+        <div class="tier-item"><span class="n">18</span>Classroom Gradebook</div>
+        <div class="tier-item"><span class="n">19</span>HOA Maintenance Tracker</div>
+        <div class="tier-item"><span class="n">20</span>Food Truck Route Planner</div>
+      </div>
+
+      <div class="tier-header t-ent">Enterprise-Class Systems</div>
+      <div class="tier-items">
+        <div class="tier-item"><span class="n">21</span>Social Betting Platform</div>
+        <div class="tier-item"><span class="n">22</span>Mortgage Broker Pipeline</div>
+        <div class="tier-item"><span class="n">23</span>RE Portfolio Manager</div>
+        <div class="tier-item"><span class="n">24</span>Legal Practice Mgmt Lite</div>
+        <div class="tier-item"><span class="n">25</span>White-Label Fantasy Engine</div>
+        <div class="tier-item"><span class="n">26</span>Municipal Permit Tracker</div>
+        <div class="tier-item"><span class="n">27</span>Multi-Location Restaurant Ops</div>
+        <div class="tier-item"><span class="n">28</span>Student Loan Repayment Engine</div>
+        <div class="tier-item"><span class="n">29</span>Insurance Claims Dashboard</div>
+        <div class="tier-item"><span class="n">30</span>Conference Command Center</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 8: The Connection Layer -->
+  <div class="slide" data-slide="7">
+    <div class="kicker anim">Future Architecture</div>
+    <h2 class="anim">Standalone First.<br><span class="hl">Connected Later.</span></h2>
+    <p class="anim">Every tool works on its own, forever. But the long game is a protocol layer — Doccoin or similar — that lets standalone HTML documents discover, reference, and transact with each other. An intranet that nobody owns and everybody uses.</p>
+    <div class="connect-row anim">
+      <div class="connect-card">
+        <span class="phase-num">1</span>
+        <h4>Phase: Library</h4>
+        <p>Build 30+ tools under unified branding. Each is a standalone .html file. No backend, no accounts, no dependencies.</p>
+      </div>
+      <div class="connect-card">
+        <span class="phase-num">2</span>
+        <h4>Phase: Recognition</h4>
+        <p>The design language becomes the signal. Users recognize the ecosystem — "this is one of those tools" — before any formal connection exists.</p>
+      </div>
+      <div class="connect-card">
+        <span class="phase-num">3</span>
+        <h4>Phase: Protocol</h4>
+        <p>Doccoin or equivalent: a lightweight protocol that lets HTML documents link, share state, and optionally transact. The intranet emerges from the documents themselves.</p>
+      </div>
+      <div class="connect-card">
+        <span class="phase-num">4</span>
+        <h4>Phase: Monetization</h4>
+        <p>The brand, the library, and the network are the asset. Revenue models — licensing, premium tiers, protocol fees — become available without being forced.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 9: What We Own -->
+  <div class="slide" data-slide="8">
+    <div class="kicker anim">The Asset</div>
+    <h2 class="anim">We Own the <span class="warm">Design Layer</span></h2>
+    <p class="anim">Anyone can build an HTML tool. What we're building is the only coherent, branded ecosystem of them — with a shared design language, a growing library, and a future connection protocol.</p>
+    <div class="principle-grid anim">
+      <div class="principle-card">
+        <h4>Design System</h4>
+        <p>Typography, color, motion, interaction patterns. Consistent across every tool. The "Apple of serverless HTML."</p>
+      </div>
+      <div class="principle-card">
+        <h4>The Library</h4>
+        <p>30+ tools spanning 8 verticals with proven demand. Each validated by billions in existing template market spend.</p>
+      </div>
+      <div class="principle-card">
+        <h4>Brand Gravity</h4>
+        <p>As the library grows, the brand itself becomes the distribution channel. People seek out our tools because they trust the ecosystem.</p>
+      </div>
+      <div class="principle-card">
+        <h4>Network Potential</h4>
+        <p>When standalone tools can discover each other, the ecosystem becomes more valuable than the sum of its parts. That's the real moat.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 10: Close -->
+  <div class="slide slide-final" data-slide="9">
+    <div class="kicker anim">The Thesis</div>
+    <h2 class="anim" style="max-width:600px;">Build the Library.<br>Own the Brand.<br>Connect the <span class="hl">Documents.</span></h2>
+    <div class="final-box anim">
+      <p>The internet was supposed to be a collection of documents that link to each other — readable by anyone, owned by no one, running everywhere. We're building that. One beautifully designed HTML tool at a time.</p>
+      <p style="margin-top:14px;color:var(--text-primary);font-weight:500;">The intranet Jobs would have wanted.</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- NAV -->
+<div class="nav">
+  <button id="prevBtn" disabled>← Prev</button>
+  <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+  <span class="slide-counter" id="slideCounter">1 / 10</span>
+  <button id="nextBtn">Next →</button>
+</div>
+
+<script>
+const slides = document.querySelectorAll('.slide');
+const total = slides.length;
+let current = 0;
+
+const prevBtn = document.getElementById('prevBtn');
+const nextBtn = document.getElementById('nextBtn');
+const counter = document.getElementById('slideCounter');
+const progress = document.getElementById('progressFill');
+
+function goTo(n) {
+  if (n < 0 || n >= total) return;
+  slides[current].classList.remove('active');
+  slides[n].querySelectorAll('.anim').forEach(el => {
+    el.style.animation = 'none';
+    el.offsetHeight;
+    el.style.animation = '';
+  });
+  current = n;
+  slides[current].classList.add('active');
+  prevBtn.disabled = current === 0;
+  nextBtn.disabled = current === total - 1;
+  counter.textContent = `${current + 1} / ${total}`;
+  progress.style.width = `${((current + 1) / total) * 100}%`;
+}
+
+prevBtn.addEventListener('click', () => goTo(current - 1));
+nextBtn.addEventListener('click', () => goTo(current + 1));
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); goTo(current + 1); }
+  if (e.key === 'ArrowLeft') { e.preventDefault(); goTo(current - 1); }
+});
+
+let touchStartX = 0;
+document.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; });
+document.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - touchStartX;
+  if (Math.abs(dx) > 50) { dx < 0 ? goTo(current + 1) : goTo(current - 1); }
+});
+
+goTo(0);
+</script>
+
+</body>
+</html>

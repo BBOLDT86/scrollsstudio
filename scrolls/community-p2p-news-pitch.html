@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Operation Front Page — Guerilla Strategy for the Open Intranet</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f6f5f1;
+  --bg-card: #ffffff;
+  --bg-dark: #1a1a1a;
+  --bg-dark-card: #242424;
+  --border: rgba(0,0,0,0.07);
+  --border-strong: rgba(0,0,0,0.13);
+  --text: #1a1a1a;
+  --text-mid: #4a4a4a;
+  --text-muted: #888888;
+  --text-dim: #b0b0b0;
+  --green: #1a8a5c;
+  --green-bg: rgba(26,138,92,0.07);
+  --blue: #2d6bcf;
+  --blue-bg: rgba(45,107,207,0.06);
+  --warm: #c4723a;
+  --warm-bg: rgba(196,114,58,0.07);
+  --purple: #7c5cbf;
+  --purple-bg: rgba(124,92,191,0.06);
+  --red: #c0392b;
+  --red-bg: rgba(192,57,43,0.06);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* ─── Progress bar ─── */
+.progress-bar {
+  position: fixed; top: 0; left: 0; height: 3px;
+  background: linear-gradient(90deg, var(--warm) 0%, var(--green) 35%, var(--blue) 65%, var(--purple) 100%);
+  width: 0%; z-index: 1000; transition: width 0.1s linear;
+}
+
+/* ─── Navigation ─── */
+.nav {
+  position: fixed; top: 16px; right: 20px; z-index: 900;
+  background: rgba(246,245,241,0.92); backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border); border-radius: 10px;
+  padding: 14px 18px; max-height: calc(100vh - 32px);
+  overflow-y: auto; width: 200px;
+  opacity: 0; transform: translateX(16px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.nav.visible { opacity: 1; transform: translateX(0); }
+.nav-title {
+  font-size: 0.65rem; font-weight: 600; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--text-dim); margin-bottom: 10px;
+}
+.nav a {
+  display: block; font-size: 0.76rem; color: var(--text-muted);
+  text-decoration: none; padding: 4px 0; transition: color 0.2s;
+}
+.nav a:hover { color: var(--warm); }
+.nav a.active { color: var(--warm); font-weight: 500; }
+
+@media (max-width: 1300px) { .nav { display: none; } }
+
+/* ─── Reveal ─── */
+.reveal {
+  opacity: 0; transform: translateY(24px);
+  transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1), transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.reveal.visible { opacity: 1; transform: translateY(0); }
+.reveal:nth-child(2) { transition-delay: 0.05s; }
+.reveal:nth-child(3) { transition-delay: 0.10s; }
+.reveal:nth-child(4) { transition-delay: 0.15s; }
+.reveal:nth-child(5) { transition-delay: 0.20s; }
+.reveal:nth-child(6) { transition-delay: 0.25s; }
+
+/* ─── Typography ─── */
+h1 {
+  font-family: 'Instrument Serif', serif; font-weight: 400;
+  font-size: clamp(2.6rem, 5vw, 4.4rem); line-height: 1.06;
+  letter-spacing: -1.5px; margin-bottom: 20px;
+}
+h2 {
+  font-family: 'Instrument Serif', serif; font-weight: 400;
+  font-size: clamp(1.7rem, 3.2vw, 2.7rem); line-height: 1.1;
+  letter-spacing: -0.5px; margin-bottom: 16px;
+}
+h3 {
+  font-family: 'Instrument Serif', serif; font-weight: 400;
+  font-size: clamp(1.15rem, 1.8vw, 1.5rem); line-height: 1.2;
+  margin-bottom: 8px;
+}
+.kicker {
+  font-weight: 500; font-size: 0.72rem; color: var(--text-muted);
+  letter-spacing: 2.5px; text-transform: uppercase; margin-bottom: 12px;
+}
+p {
+  font-size: clamp(0.9rem, 1.3vw, 1.02rem); line-height: 1.72;
+  color: var(--text-mid); max-width: 640px;
+}
+em.hl { font-family: 'Instrument Serif', serif; font-style: italic; color: var(--text); }
+.code { font-family: 'JetBrains Mono', monospace; font-size: 0.82em; background: rgba(0,0,0,0.04); padding: 2px 6px; border-radius: 3px; }
+.title-rule { width: 48px; height: 1.5px; background: var(--text-dim); margin-bottom: 22px; border: none; }
+
+/* ─── Sections ─── */
+section {
+  min-height: auto; display: flex; flex-direction: column;
+  justify-content: center; padding: 10vh 8vw;
+  position: relative;
+}
+section.hero-section { min-height: 100vh; padding-left: 10vw; }
+
+/* ─── Cards ─── */
+.card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 12px; padding: 24px;
+}
+.card + .card { margin-top: 14px; }
+
+/* ─── Stat row ─── */
+.stat-row { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 22px; max-width: 960px; }
+.stat-card {
+  flex: 1; min-width: 155px; background: var(--bg-card);
+  border: 1px solid var(--border); border-radius: 10px; padding: 18px;
+}
+.stat-num {
+  font-family: 'Instrument Serif', serif;
+  font-size: clamp(1.5rem, 2.4vw, 2rem); margin-bottom: 3px;
+}
+.stat-label { font-size: 0.74rem; color: var(--text-muted); line-height: 1.4; }
+
+/* ─── Grids ─── */
+.pgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin-top: 18px; max-width: 960px; }
+.pcard { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 20px; }
+.pcard h4 { font-family: 'Instrument Serif', serif; font-weight: 400; font-size: 1.02rem; margin-bottom: 5px; }
+.pcard p { font-size: 0.8rem; color: var(--text-muted); line-height: 1.55; max-width: none; }
+.pcard-icon {
+  width: 28px; height: 28px; border-radius: 6px; margin-bottom: 10px;
+  display: flex; align-items: center; justify-content: center; font-size: 0.85rem;
+}
+
+/* ─── Tables ─── */
+.dtable { width: 100%; max-width: 960px; border-collapse: collapse; font-size: 0.86rem; margin-top: 16px; }
+.dtable th {
+  font-weight: 500; font-size: 0.68rem; text-transform: uppercase;
+  letter-spacing: 1px; color: var(--text-dim); text-align: left;
+  padding: 8px 14px; border-bottom: 1px solid var(--border-strong);
+}
+.dtable td { padding: 10px 14px; border-bottom: 1px solid var(--border); color: var(--text-mid); vertical-align: top; }
+.dtable td strong { color: var(--text); }
+
+/* ─── Badges ─── */
+.badge {
+  display: inline-block; padding: 2px 9px; border-radius: 20px;
+  font-size: 0.64rem; font-weight: 600; letter-spacing: 0.4px;
+}
+.badge-green { background: var(--green-bg); color: var(--green); }
+.badge-blue { background: var(--blue-bg); color: var(--blue); }
+.badge-warm { background: var(--warm-bg); color: var(--warm); }
+.badge-purple { background: var(--purple-bg); color: var(--purple); }
+.badge-red { background: var(--red-bg); color: var(--red); }
+
+/* ─── Sprint cards ─── */
+.sprint-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; margin-top: 18px; max-width: 1060px; }
+.sprint-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 12px; padding: 22px; position: relative; overflow: hidden;
+}
+.sprint-card .stripe {
+  position: absolute; top: 0; left: 0; right: 0; height: 3px;
+}
+.sprint-label {
+  font-size: 0.68rem; font-weight: 600; letter-spacing: 1.5px;
+  text-transform: uppercase; color: var(--text-dim); margin-bottom: 6px;
+}
+.sprint-title {
+  font-family: 'Instrument Serif', serif; font-weight: 400;
+  font-size: 1.2rem; margin-bottom: 10px;
+}
+.sprint-list { list-style: none; padding: 0; }
+.sprint-list li {
+  font-size: 0.82rem; color: var(--text-mid); padding: 5px 0;
+  border-bottom: 1px solid var(--border); display: flex; gap: 8px; align-items: flex-start;
+}
+.sprint-list li:last-child { border-bottom: none; }
+.sprint-list li::before { content: '→'; color: var(--text-dim); flex-shrink: 0; font-size: 0.78rem; margin-top: 1px; }
+
+/* ─── Budget bar ─── */
+.budget-bar-wrap { margin-top: 14px; max-width: 700px; }
+.budget-bar {
+  height: 28px; border-radius: 8px; background: var(--border);
+  overflow: hidden; display: flex; position: relative;
+}
+.budget-seg {
+  height: 100%; display: flex; align-items: center; justify-content: center;
+  font-size: 0.62rem; font-weight: 600; color: #fff; letter-spacing: 0.3px;
+  white-space: nowrap; overflow: hidden;
+}
+.budget-legend { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 10px; }
+.budget-legend-item { display: flex; align-items: center; gap: 5px; font-size: 0.76rem; color: var(--text-mid); }
+.budget-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+/* ─── Gantt ─── */
+.gantt-wrap { overflow-x: auto; margin-top: 14px; }
+.gantt {
+  width: 100%; min-width: 760px; border-collapse: separate; border-spacing: 0;
+}
+.gantt thead th {
+  padding: 7px 0; font-size: 0.62rem; font-weight: 600;
+  letter-spacing: 0.5px; text-transform: uppercase; color: var(--text-dim);
+  text-align: center; border-bottom: 1px solid var(--border);
+}
+.gantt thead th:first-child { text-align: left; padding-left: 10px; width: 180px; min-width: 180px; }
+.gantt tbody td {
+  padding: 4px 2px; border-bottom: 1px solid var(--border);
+  position: relative; height: 30px;
+}
+.gantt tbody td:first-child {
+  font-size: 0.74rem; font-weight: 500; color: var(--text);
+  padding-left: 10px; white-space: nowrap;
+}
+.gantt-bar {
+  height: 18px; border-radius: 3px; position: absolute;
+  top: 50%; transform: translateY(-50%); opacity: 0.8;
+}
+
+/* ─── Moat meter ─── */
+.moat-wrap { display: flex; align-items: center; gap: 8px; }
+.moat-track { flex: 1; height: 6px; border-radius: 3px; background: var(--border); overflow: hidden; }
+.moat-fill { height: 100%; border-radius: 3px; }
+.moat-pct { font-size: 0.72rem; font-weight: 600; color: var(--text-muted); min-width: 32px; text-align: right; }
+
+/* ─── Connection flow ─── */
+.flow-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-top: 16px; max-width: 960px; }
+.flow-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 18px; position: relative; }
+.flow-card .step { font-family: 'Instrument Serif', serif; font-size: 2rem; color: var(--border-strong); position: absolute; top: 10px; right: 14px; }
+.flow-card h4 { font-family: 'Instrument Serif', serif; font-weight: 400; font-size: 0.98rem; margin-bottom: 5px; }
+.flow-card p { font-size: 0.78rem; color: var(--text-muted); line-height: 1.5; max-width: none; }
+
+/* ─── Questions list ─── */
+.q-list { list-style: none; margin-top: 12px; max-width: 700px; counter-reset: q; }
+.q-list li {
+  padding: 11px 0; border-bottom: 1px solid var(--border);
+  font-size: 0.9rem; color: var(--text-mid); line-height: 1.55;
+  display: flex; gap: 10px;
+}
+.q-list li::before {
+  counter-increment: q; content: counter(q);
+  font-family: 'Instrument Serif', serif; font-size: 1.1rem;
+  color: var(--text-dim); flex-shrink: 0; min-width: 20px;
+}
+.q-list li strong { color: var(--text); font-weight: 600; }
+
+/* ─── Closing box ─── */
+.final-box {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 12px; padding: 30px 34px; max-width: 580px; margin-top: 14px;
+}
+.final-box p { max-width: none; }
+
+/* ─── Separator ─── */
+.sep { width: 100%; max-width: 960px; height: 1px; background: var(--border); margin: 0 auto; }
+
+/* ─── Footer ─── */
+.footer {
+  padding: 40px 8vw; text-align: center;
+  font-size: 0.74rem; color: var(--text-dim); border-top: 1px solid var(--border);
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 640px) {
+  section { padding: 6vh 5vw; }
+  section.hero-section { padding-left: 5vw; }
+  .stat-row { flex-direction: column; }
+  .pgrid, .sprint-grid, .flow-grid { grid-template-columns: 1fr; }
+  .dtable { font-size: 0.78rem; }
+}
+</style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<!-- NAV -->
+<nav class="nav" id="navEl">
+  <div class="nav-title">Battle Plan</div>
+  <a href="#situation">Situation</a>
+  <a href="#thesis">Thesis</a>
+  <a href="#warchest">War Chest</a>
+  <a href="#forge">The Forge</a>
+  <a href="#workforce">The Workforce</a>
+  <a href="#library">The Library</a>
+  <a href="#sprints">Sprint Plan</a>
+  <a href="#gantt">Timeline</a>
+  <a href="#tactics">Guerilla Tactics</a>
+  <a href="#moat">Moat</a>
+  <a href="#risks">Risks</a>
+  <a href="#questions">Open Questions</a>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- HERO -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<section class="hero-section">
+  <hr class="title-rule reveal">
+  <div class="kicker reveal">Guerilla Strategy · Day Zero · March 13, 2026</div>
+  <h1 class="reveal">Operation<br><em class="hl">Front Page.</em></h1>
+  <p class="reveal" style="font-size:clamp(1rem,1.6vw,1.14rem);color:var(--text-muted);font-weight:300;max-width:520px;line-height:1.65;">Win the front page of the new internet — not by selling, but by building the most useful, most beautiful library of HTML tools anyone has ever seen. Give away the tools. Give away the forge that makes them. Win by being undeniably, recognizably better.</p>
+  <p class="reveal" style="margin-top:16px;font-size:0.82rem;color:var(--text-dim);">Pan Tech Corporation · $45K Azure credit · Humans + AI · No revenue targets. Just build.</p>
+
+  <div class="stat-row reveal">
+    <div class="stat-card"><div class="stat-num" style="color:var(--warm);">$45K</div><div class="stat-label">Azure war chest</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--green);">$0</div><div class="stat-label">Revenue target</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--blue);">∞</div><div class="stat-label">Tools to ship</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--purple);">1</div><div class="stat-label">Design system to rule them</div></div>
+  </div>
+</section>
+
+<div class="sep reveal"></div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- SITUATION -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<section id="situation">
+  <div class="kicker reveal">Situation Assessment</div>
+  <h2 class="reveal">Where we stand,<br><em class="hl">right now.</em></h2>
+  <p class="reveal">It's March 13, 2026. We have a vision document, a handful of working prototypes, $45K in Azure credits, and a thesis that the internet's next chapter looks more like documents than platforms. We're in ideation — nothing is launched, nothing is promised, and that's an advantage. We can move without permission.</p>
+
+  <div class="pgrid reveal">
+    <div class="pcard">
+      <div class="pcard-icon" style="background:var(--green-bg);color:var(--green);">✓</div>
+      <h4>What exists</h4>
+      <p>5–6 working HTML tools (Blocks workspace, PDF markup, spreadsheet, docs editor, Amex benefits tracker). A vision document. A design language that's starting to cohere. The Forge concept (AI prompting workflow).</p>
+    </div>
+    <div class="pcard">
+      <div class="pcard-icon" style="background:var(--warm-bg);color:var(--warm);">○</div>
+      <h4>What doesn't</h4>
+      <p>No catalog site. No Forge app. No design system documentation. No distribution channel. No brand presence. No workflow tools for the team. No formalized build process.</p>
+    </div>
+    <div class="pcard">
+      <div class="pcard-icon" style="background:var(--blue-bg);color:var(--blue);">◈</div>
+      <h4>What we have</h4>
+      <p>$45K Azure credit (AI API + hosting). A team of humans who can work if we build them the right HTML tools. Claude and Azure OpenAI for AI-assisted creation. Deep conviction and zero bureaucracy.</p>
+    </div>
+    <div class="pcard">
+      <div class="pcard-icon" style="background:var(--purple-bg);color:var(--purple);">△</div>
+      <h4>What we're not doing</h4>
+      <p>Not selling anything. Not building a SaaS. Not chasing revenue. Building a library, building a brand, solving real problems. Revenue will emerge from the gravity of the ecosystem — we don't force it.</p>
+    </div>
+  </div>
+</section>
+
+<div class="sep reveal"></div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- THESIS -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<section id="thesis">
+  <div class="kicker reveal">Strategic Thesis</div>
+  <h2 class="reveal">The guerilla bet.</h2>
+  <p class="reveal">The web was documents. Then it became platforms. We're building the case that it should be documents again — but <em class="hl">better designed, more useful, and owned by the person using them.</em></p>
+
+  <p class="reveal" style="margin-top:14px;">Anyone can make an HTML file. AI makes it trivially easy. That's not a threat — it's the thesis. We <em>want</em> everyone making HTML tools. We'll even give them The Forge to do it. But ours will be better — better designed, more thoughtful, more polished, more useful. The same way anyone can take a photo but people still buy from photographers who see differently.</p>
+
+  <p class="reveal" style="margin-top:14px;">The guerilla strategy:</p>
+
+  <div class="pgrid reveal" style="margin-top:14px;">
+    <div class="pcard">
+      <div class="pcard-icon" style="background:var(--warm-bg);color:var(--warm);">1</div>
+      <h4>Build the library</h4>
+      <p>Ship tools that solve real problems. Not demos. Not prototypes. Finished, beautiful, useful tools that someone sends to a friend because they actually help.</p>
+    </div>
+    <div class="pcard">
+      <div class="pcard-icon" style="background:var(--green-bg);color:var(--green);">2</div>
+      <h4>Win by design</h4>
+      <p>One recognizable design system across every tool. When someone opens one, they know it's ours. The brand IS the design language. No logo needed.</p>
+    </div>
+    <div class="pcard">
+      <div class="pcard-icon" style="background:var(--blue-bg);color:var(--blue);">3</div>
+      <h4>Give away the forge</h4>
+      <p>The Forge lets anyone build HTML tools with AI. We give it away. More tools in the ecosystem = more validation of the format. We're not threatened by forks — we're accelerated by them.</p>
+    </div>
+    <div class="pcard">
+      <div class="pcard-icon" style="background:var(--purple-bg);color:var(--purple);">4</div>
+      <h4>Let revenue emerge</h4>
+      <p>Brand recognition → consulting, licensing, premium tools, Doccoin protocol, enterprise deals. Don't force it. Build the gravity first. The money follows the attention.</p>
+    </div>
+  </div>
+</section>
+
+<div class="sep reveal"></div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- WAR CHEST -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<section id="warchest">
+  <div class="kicker reveal">War Chest</div>
+  <h2 class="reveal">$45K in Azure credit.<br><em class="hl">Spend it like it's ammo.</em></h2>
+  <p class="reveal">This isn't a budget — it's a countdown. Every dollar should directly produce a shipped tool, a trained workflow, or a hosted asset. The goal is to convert credit into artifacts before expiration, not to "save" it.</p>
+
+  <div class="budget-bar-wrap reveal">
+    <div class="budget-bar">
+      <div class="budget-seg" style="width:55%;background:var(--warm);">$24,750 — AI API</div>
+      <div class="budget-seg" style="width:20%;background:var(--blue);">$9,000 — Hosting</div>
+      <div class="budget-seg" style="width:15%;background:var(--green);">$6,750 — Compute</div>
+      <div class="budget-seg" style="width:10%;background:var(--purple);">$4,500 — Reserve</div>
+    </div>
+    <div class="budget-legend">
+      <div class="budget-legend-item"><div class="budget-dot" style="background:var(--warm);"></div>AI API calls (~55%)</div>
+      <div class="budget-legend-item"><div class="budget-dot" style="background:var(--blue);"></div>Static hosting (~20%)</div>
+      <div class="budget-legend-item"><div class="budget-dot" style="background:var(--green);"></div>Build compute (~15%)</div>
+      <div class="budget-legend-item"><div class="budget-dot" style="background:var(--purple);"></div>Reserve (~10%)</div>
+    </div>
+  </div>
+
+  <table class="dtable reveal">
+    <thead><tr><th>Line Item</th><th>Allocation</th><th>What It Buys</th><th>Burn Rate</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>Azure OpenAI API</strong></td>
+        <td>~$24,750</td>
+        <td>Forge engine (GPT-4o / GPT-4 Turbo for tool generation), AI features inside shipped tools (BYOK for users, but API-powered during dev/testing), batch generation sprints</td>
+        <td>~$3K–$5K/mo depending on sprint intensity</td>
+      </tr>
+      <tr>
+        <td><strong>Azure Static Web Apps</strong></td>
+        <td>~$9,000</td>
+        <td>Catalog site hosting, tool preview pages, Forge app hosting, CDN for the design system assets. Azure Blob Storage for file downloads.</td>
+        <td>~$200–$400/mo (very cheap, most is static)</td>
+      </tr>
+      <tr>
+        <td><strong>Build Compute</strong></td>
+        <td>~$6,750</td>
+        <td>VM instances for automated testing, CI pipelines, screenshot generation for catalog, batch processing of tool variants</td>
+        <td>~$500–$800/mo, spiky during sprint weeks</td>
+      </tr>
+      <tr>
+        <td><strong>Reserve</strong></td>
+        <td>~$4,500</td>
+        <td>Unexpected Azure services (Cognitive Services for accessibility features, Functions for serverless APIs if needed, etc.)</td>
+        <td>Held until needed</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p class="reveal" style="margin-top:18px;font-size:0.84rem;color:var(--text-dim);">At projected burn rate, $45K sustains 6–9 months of aggressive building. Hosting costs are negligible for static HTML — the majority is AI API calls to generate and iterate tools.</p>
+</section>
+
+<div class="sep reveal"></div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- THE FORGE -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<section id="forge">
+  <div class="kicker reveal">The Creation Engine</div>
+  <h2 class="reveal">The Forge.</h2>
+  <p class="reveal">The Forge is an HTML tool that builds HTML tools. It wraps Claude and Azure OpenAI in a guided workflow — prompting, iteration, quality checks, design system enforcement — so that anyone (team members, community, anyone) can produce tools that meet the Open Intranet standard.</p>
+
+  <p class="reveal" style="margin-top:14px;">Today it's conceptual — a workflow around AI prompting. The guerilla move is to <em class="hl">ship The Forge as one of the first tools in the library.</em> It's both a product and the factory.</p>
+
+  <div class="pgrid reveal" style="margin-top:16px;">
+    <div class="pcard">
+      <div class="pcard-icon" style="background:var(--warm-bg);color:var(--warm);">⚒</div>
+      <h4>V1 — The Prompt Workflow</h4>
+      <p>A single HTML file with a multi-step form: describe your tool → select category → choose design tokens → send to Azure OpenAI API → receive generated HTML → preview → iterate → export. Ships in Week 1–2.</p>
+    </div>
+    <div class="pcard">
+      <div class="pcard-icon" style="background:var(--green-bg);color:var(--green);">⚒</div>
+      <h4>V2 — Design System Enforcer</h4>
+      <p>Automatically applies the Open Intranet design tokens (fonts, colors, spacing, components) to generated output. Quality gate before export: accessibility checks, mobile preview, offline test. Ships Month 2.</p>
+    </div>
+    <div class="pcard">
+      <div class="pcard-icon" style="background:var(--blue-bg);color:var(--blue);">⚒</div>
+      <h4>V3 — Community Forge</h4>
+      <p>Users can submit their Forge creations to the catalog. Peer review. Quality score. The Forge becomes the on-ramp for community contributions. Ships Month 3–4.</p>
+    </div>
+    <div class="pcard">
+      <div class="pcard-icon" style="background:var(--purple-bg);color:var(--purple);">⚒</div>
+      <h4>The Strategic Move</h4>
+      <p>By giving away The Forge, we <em>invite</em> competition. More people building HTML tools = more validation of the format = bigger market for us to be the best in. The Forge is a market-maker, not just a product.</p>
+    </div>
+  </div>
+</section>
+
+<div class="sep reveal"></div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- THE WORKFORCE -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<section id="workforce">
+  <div class="kicker reveal">The Operating Model</div>
+  <h2 class="reveal">Humans + AI,<br>guided by <em class="hl">HTML tools.</em></h2>
+  <p class="reveal">We don't have a dev team. We have something better for this stage: humans who can operate AI through purpose-built HTML interfaces. The tools we build for the library are the same tools we use to run the operation. The HTML files ARE the management layer.</p>
+
+  <table class="dtable reveal">
+    <thead><tr><th>Internal Tool</th><th>Who Uses It</th><th>What It Does</th><th>Priority</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>The Forge</strong></td>
+        <td>Everyone</td>
+        <td>Generates new HTML tools via guided AI prompting workflow</td>
+        <td><span class="badge badge-warm">Week 1</span></td>
+      </tr>
+      <tr>
+        <td><strong>Build Tracker</strong></td>
+        <td>Team lead</td>
+        <td>Kanban board tracking every tool from concept → built → tested → cataloged. localStorage persistence.</td>
+        <td><span class="badge badge-warm">Week 1</span></td>
+      </tr>
+      <tr>
+        <td><strong>Quality Gate</strong></td>
+        <td>QA / reviewer</td>
+        <td>Checklist tool: mobile responsive? Dark mode? Offline? Export works? Design tokens applied? Accessibility? One-click pass/fail per tool.</td>
+        <td><span class="badge badge-green">Week 2</span></td>
+      </tr>
+      <tr>
+        <td><strong>Catalog Manager</strong></td>
+        <td>Curator</td>
+        <td>Manage the index of all published tools — name, category, description, screenshot, download link. Exports JSON for the catalog site.</td>
+        <td><span class="badge badge-green">Week 2</span></td>
+      </tr>
+      <tr>
+        <td><strong>Content Planner</strong></td>
+        <td>Marketing</td>
+        <td>Editorial calendar for social posts, demo videos, blog content. Tied to tool release schedule.</td>
+        <td><span class="badge badge-blue">Week 3</span></td>
+      </tr>
+      <tr>
+        <td><strong>Feedback Collector</strong></td>
+        <td>Anyone sharing tools</td>
+        <td>Embeddable feedback form — drop into any tool, collects usage notes, feature requests, bug reports to localStorage or simple API.</td>
+        <td><span class="badge badge-blue">Week 3</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p class="reveal" style="margin-top:16px;font-size:0.84rem;color:var(--text-muted);">Every internal tool doubles as a library tool. The Build Tracker is a kanban board anyone can use. The Quality Gate is a checklist app. The Content Planner is an editorial calendar. We're building the library by building the operation.</p>
+</section>
+
+<div class="sep reveal"></div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- THE LIBRARY -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<section id="library">
+  <div class="kicker reveal">The Library</div>
+  <h2 class="reveal">What we're building.</h2>
+  <p class="reveal">Not an app store. Not a SaaS catalog. A <em class="hl">library</em> — the way a public library works. Tools people need, beautifully designed, free to use, organized by what they solve. We build the ones people use most. Community builds the long tail.</p>
+
+  <table class="dtable reveal">
+    <thead><tr><th>Category</th><th>Example Tools</th><th>Why It Wins the Front Page</th><th>Sprint</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>Productivity</strong></td>
+        <td>Blocks workspace, Docs editor, Secure Sheets, Kanban board, PDF markup</td>
+        <td>These are the "wait, this works offline with no account?" tools that convert skeptics</td>
+        <td><span class="badge badge-warm">Sprint 1</span></td>
+      </tr>
+      <tr>
+        <td><strong>Personal Finance</strong></td>
+        <td>Budget planner, credit card benefits tracker, mortgage comparison, bill splitter</td>
+        <td>High-emotion, high-sharing. People text these to friends. Seasonal spikes (tax time, New Year)</td>
+        <td><span class="badge badge-warm">Sprint 1</span></td>
+      </tr>
+      <tr>
+        <td><strong>Life & Household</strong></td>
+        <td>Address book, chore rotation, contact hub, photo slideshow, e-cards</td>
+        <td>Replace things people currently use 3 different apps for. Simple enough to share with anyone</td>
+        <td><span class="badge badge-green">Sprint 2</span></td>
+      </tr>
+      <tr>
+        <td><strong>Group & Social</strong></td>
+        <td>Trip planner, potluck signup, wedding RSVP, baby pool, concert ranker</td>
+        <td>Viral by nature — every use is an invitation. Group chat link = organic distribution</td>
+        <td><span class="badge badge-green">Sprint 2</span></td>
+      </tr>
+      <tr>
+        <td><strong>Sports & Games</strong></td>
+        <td>Super Bowl squares, March Madness bracket, fantasy draft board, league manager</td>
+        <td>Seasonal demand spikes create surges. These tools are shared in group chats by definition</td>
+        <td><span class="badge badge-blue">Sprint 3</span></td>
+      </tr>
+      <tr>
+        <td><strong>Professional</strong></td>
+        <td>Freelancer invoice, contractor estimate, real estate lead capture, gradebook</td>
+        <td>People will pay for better versions. Pro category seeds future premium tools without gating basics</td>
+        <td><span class="badge badge-blue">Sprint 3</span></td>
+      </tr>
+      <tr>
+        <td><strong>Creative & Media</strong></td>
+        <td>Presentation builder, blog engine, design tool (DROP), RSS curator, photo gallery</td>
+        <td>These showcase the format's ceiling — "this is JUST an HTML file?"</td>
+        <td><span class="badge badge-purple">Sprint 4</span></td>
+      </tr>
+      <tr>
+        <td><strong>Developer & Platform</strong></td>
+        <td>The Forge, design system starter kit, component library, WebRTC P2P tools</td>
+        <td>Developers are the amplifier audience. They share, fork, extend, and write about tools</td>
+        <td><span class="badge badge-purple">Sprint 4</span></td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<div class="sep reveal"></div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- SPRINT PLAN -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<section id="sprints">
+  <div class="kicker reveal">Sprint Plan</div>
+  <h2 class="reveal">From zero to<br><em class="hl">front page.</em></h2>
+  <p class="reveal">Not phases. Sprints. Every sprint has a deliverable that's shippable on its own. We don't wait for completeness — we ship, share, learn, ship again. The library grows in public.</p>
+
+  <div class="sprint-grid reveal">
+
+    <div class="sprint-card">
+      <div class="stripe" style="background:var(--red);"></div>
+      <div class="sprint-label" style="color:var(--red);">Day 0–3 · March 13–16</div>
+      <div class="sprint-title">Ignition</div>
+      <ul class="sprint-list">
+        <li>Finalize this strategy doc — make it the operating agreement</li>
+        <li>Set up Azure Static Web App + Blob Storage for hosting</li>
+        <li>Register domain (openintranet.com or equivalent)</li>
+        <li>Build Forge V1 — the prompt workflow tool (HTML file with Azure OpenAI API)</li>
+        <li>Inventory existing tools — what's shippable today vs. needs polish</li>
+        <li>Define the design system tokens in a single CSS file / HTML reference sheet</li>
+      </ul>
+    </div>
+
+    <div class="sprint-card">
+      <div class="stripe" style="background:var(--warm);"></div>
+      <div class="sprint-label" style="color:var(--warm);">Week 1–2 · March 17–30</div>
+      <div class="sprint-title">First Wave</div>
+      <ul class="sprint-list">
+        <li>Polish 5 existing tools to design system standard (Blocks, Sheets, Docs, PDF, Amex)</li>
+        <li>Build 3 new high-shareability tools (budget planner, bill splitter, trip planner)</li>
+        <li>Build internal ops tools (Build Tracker, Quality Gate)</li>
+        <li>Ship Forge V1 — team uses it to build everything else</li>
+        <li>Create catalog site skeleton — minimal, beautiful, just lists the tools with download links</li>
+        <li>First social post: "We're building a library of free HTML tools. Here's the first 8."</li>
+      </ul>
+    </div>
+
+    <div class="sprint-card">
+      <div class="stripe" style="background:var(--green);"></div>
+      <div class="sprint-label" style="color:var(--green);">Week 3–6 · March 31 – April 27</div>
+      <div class="sprint-title">Critical Mass</div>
+      <ul class="sprint-list">
+        <li>Ship 8–12 more tools across Life, Social, and Sports categories</li>
+        <li>Build Catalog Manager + publish full catalog site with search, categories, previews</li>
+        <li>Forge V2 — design system enforcer, quality gates built in</li>
+        <li>Launch GitHub repo — open source the library</li>
+        <li>Build Content Planner + begin weekly "tool drop" social cadence</li>
+        <li>Target: 15–20 tools live on catalog site by end of Sprint 2</li>
+      </ul>
+    </div>
+
+    <div class="sprint-card">
+      <div class="stripe" style="background:var(--blue);"></div>
+      <div class="sprint-label" style="color:var(--blue);">Week 7–12 · April 28 – June 8</div>
+      <div class="sprint-title">Amplification</div>
+      <ul class="sprint-list">
+        <li>Ship professional tools (invoicing, estimates, gradebook, lead capture)</li>
+        <li>Ship sports/games tools timed to upcoming seasons</li>
+        <li>Hacker News "Show HN" post — the library + The Forge</li>
+        <li>YouTube demo videos — 15-second screen recordings of each tool</li>
+        <li>Forge V3 — community submissions pipeline</li>
+        <li>Target: 30+ tools, GitHub stars, organic sharing momentum</li>
+      </ul>
+    </div>
+
+    <div class="sprint-card">
+      <div class="stripe" style="background:var(--purple);"></div>
+      <div class="sprint-label" style="color:var(--purple);">Month 4–6 · June – August</div>
+      <div class="sprint-title">Ecosystem</div>
+      <ul class="sprint-list">
+        <li>Accept first community tool submissions via The Forge</li>
+        <li>Publish design system starter kit — let anyone build in the ecosystem</li>
+        <li>Begin exploring Doccoin / document connection protocol</li>
+        <li>Assess what "premium" looks like — advanced features, not gated basics</li>
+        <li>Target: 50+ tools (mix of internal + community), recognizable brand</li>
+      </ul>
+    </div>
+
+    <div class="sprint-card">
+      <div class="stripe" style="background:var(--text-dim);"></div>
+      <div class="sprint-label">Month 7–12 · Sept 2026 – March 2027</div>
+      <div class="sprint-title">Gravity</div>
+      <ul class="sprint-list">
+        <li>Library is self-sustaining — community contributes faster than core team</li>
+        <li>Brand is established — "the Open Intranet design" is recognizable</li>
+        <li>Revenue channels emerge naturally: premium tools, consulting, licensing, Doccoin</li>
+        <li>Explore partnerships with schools, nonprofits, local governments (high-impact, low-revenue)</li>
+        <li>Begin next strategic planning cycle based on what we've learned</li>
+      </ul>
+    </div>
+
+  </div>
+</section>
+
+<div class="sep reveal"></div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- GANTT -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<section id="gantt">
+  <div class="kicker reveal">Timeline</div>
+  <h2 class="reveal">12-month Gantt.</h2>
+  <p class="reveal">Color-coded by workstream. Sprint intensity is heaviest in months 1–3 when we're converting Azure credit into artifacts at maximum rate.</p>
+
+  <div class="card reveal" style="max-width:1060px;overflow:hidden;">
+    <div class="gantt-wrap">
+      <table class="gantt">
+        <thead>
+          <tr>
+            <th>Workstream</th>
+            <th>Mar</th><th>Apr</th><th>May</th><th>Jun</th>
+            <th>Jul</th><th>Aug</th><th>Sep</th><th>Oct</th>
+            <th>Nov</th><th>Dec</th><th>Jan</th><th>Feb</th>
+          </tr>
+        </thead>
+        <tbody id="gantt-body"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<div class="sep reveal"></div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- GUERILLA TACTICS -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<section id="tactics">
+  <div class="kicker reveal">Guerilla Tactics</div>
+  <h2 class="reveal">How we win<br><em class="hl">the front page.</em></h2>
+  <p class="reveal">We're not buying ads. We're not doing PR. We're making things so useful and so beautiful that people share them because they can't help it. Every tactic is free or near-free.</p>
+
+  <table class="dtable reveal">
+    <thead><tr><th>Tactic</th><th>How It Works</th><th>Cost</th><th>When</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>The Group Chat Bomb</strong></td>
+        <td>Build tools that are inherently social — trip planners, bill splitters, brackets, RSVP collectors. Every use is an invitation. Every group chat link is organic reach.</td>
+        <td>$0</td>
+        <td>Sprint 1–2</td>
+      </tr>
+      <tr>
+        <td><strong>The "Wait, This Is Free?"</strong></td>
+        <td>Ship tools that look like $10/mo SaaS products. Budget planners, invoice generators, CRM tools. The shock of quality-for-free creates word of mouth.</td>
+        <td>$0</td>
+        <td>Ongoing</td>
+      </tr>
+      <tr>
+        <td><strong>Seasonal Drops</strong></td>
+        <td>Time tool releases to demand: tax tools in March, wedding tools in May/June, fantasy draft in August, holiday tools in November, New Year budgets in January.</td>
+        <td>$0</td>
+        <td>Calendar-synced</td>
+      </tr>
+      <tr>
+        <td><strong>The 15-Second Demo</strong></td>
+        <td>Every tool gets a screen recording showing it working. No narration, no intro. Just the tool solving the problem. Post natively on Twitter/X, TikTok, LinkedIn.</td>
+        <td>$0</td>
+        <td>Sprint 2+</td>
+      </tr>
+      <tr>
+        <td><strong>Show HN + Product Hunt</strong></td>
+        <td>Launch the library (not a single tool) with the narrative: "We built 30+ free HTML tools that work offline. Here's the source." Developer audience amplifies.</td>
+        <td>$0</td>
+        <td>Sprint 3</td>
+      </tr>
+      <tr>
+        <td><strong>The Forge as Trojan Horse</strong></td>
+        <td>Give away the tool-builder. Anyone who uses The Forge and shares their creation is implicitly marketing the ecosystem. Every forged tool points back to the library.</td>
+        <td>API cost only</td>
+        <td>Sprint 2+</td>
+      </tr>
+      <tr>
+        <td><strong>Design System as Credential</strong></td>
+        <td>Publish the design system as a standalone resource. Developers adopt the tokens and patterns. The visual language spreads beyond our tools.</td>
+        <td>$0</td>
+        <td>Sprint 4</td>
+      </tr>
+      <tr>
+        <td><strong>Problem-First Content</strong></td>
+        <td>"Tired of paying $10/mo for a budget tracker? Here's a free one that works offline." Every post leads with the problem, links to the tool. SEO + social.</td>
+        <td>$0</td>
+        <td>Sprint 2+</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<div class="sep reveal"></div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- MOAT -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<section id="moat">
+  <div class="kicker reveal">Defensibility</div>
+  <h2 class="reveal">What's defensible<br>when anyone can <em class="hl">build.</em></h2>
+  <p class="reveal">The code isn't the moat. Individual HTML files are trivially replicable. We know this. We embrace it. The moat is everything <em>around</em> the code.</p>
+
+  <table class="dtable reveal">
+    <thead><tr><th style="width:22%">Layer</th><th style="width:35%">Description</th><th style="width:18%">Durability</th><th style="width:25%">Strength</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>Single HTML Files</strong></td>
+        <td>Anyone can copy or generate equivalent files with AI</td>
+        <td><span class="badge badge-red">Weak</span></td>
+        <td><div class="moat-wrap"><div class="moat-track"><div class="moat-fill" style="width:10%;background:var(--red);"></div></div><div class="moat-pct">10%</div></div></td>
+      </tr>
+      <tr>
+        <td><strong>Design System</strong></td>
+        <td>Unified visual language across 50+ tools — recognizable, cohesive, professional. Harder to replicate than it looks because it requires sustained taste</td>
+        <td><span class="badge badge-warm">Medium</span></td>
+        <td><div class="moat-wrap"><div class="moat-track"><div class="moat-fill" style="width:65%;background:var(--warm);"></div></div><div class="moat-pct">65%</div></div></td>
+      </tr>
+      <tr>
+        <td><strong>Curated Library</strong></td>
+        <td>Not just tools but the <em>right</em> tools, organized, tested, documented. Quality gate + editorial judgment</td>
+        <td><span class="badge badge-warm">Medium</span></td>
+        <td><div class="moat-wrap"><div class="moat-track"><div class="moat-fill" style="width:60%;background:var(--warm);"></div></div><div class="moat-pct">60%</div></div></td>
+      </tr>
+      <tr>
+        <td><strong>The Forge + Ecosystem</strong></td>
+        <td>A tool that builds tools + community submissions pipeline. Network effects: more builders → more tools → more users → more builders</td>
+        <td><span class="badge badge-green">Strong</span></td>
+        <td><div class="moat-wrap"><div class="moat-track"><div class="moat-fill" style="width:75%;background:var(--green);"></div></div><div class="moat-pct">75%</div></div></td>
+      </tr>
+      <tr>
+        <td><strong>Brand + First Mover</strong></td>
+        <td>"The Open Intranet" as recognized category. If we move fast enough, we define what this is — and everyone else is compared to us</td>
+        <td><span class="badge badge-green">Strong</span></td>
+        <td><div class="moat-wrap"><div class="moat-track"><div class="moat-fill" style="width:80%;background:var(--green);"></div></div><div class="moat-pct">80%</div></div></td>
+      </tr>
+      <tr>
+        <td><strong>Doccoin Protocol</strong></td>
+        <td>If we ship a document connection layer before anyone else, we own the protocol. Documents that discover + transact with each other = platform-level moat</td>
+        <td><span class="badge badge-green">Strong</span></td>
+        <td><div class="moat-wrap"><div class="moat-track"><div class="moat-fill" style="width:90%;background:var(--green);"></div></div><div class="moat-pct">90%</div></div></td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<div class="sep reveal"></div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- RISKS -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<section id="risks">
+  <div class="kicker reveal">Risk Register</div>
+  <h2 class="reveal">What could kill us.</h2>
+
+  <table class="dtable reveal">
+    <thead><tr><th>Risk</th><th>Severity</th><th>Likelihood</th><th>Mitigation</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>Azure credits expire before we ship enough</strong></td>
+        <td><span class="badge badge-red">High</span></td>
+        <td><span class="badge badge-warm">Medium</span></td>
+        <td>Sprint discipline. Track credit burn weekly. Prioritize high-shareability tools first. Don't over-engineer — ship and iterate.</td>
+      </tr>
+      <tr>
+        <td><strong>AI tool quality ceiling</strong> — generated tools feel generic</td>
+        <td><span class="badge badge-red">High</span></td>
+        <td><span class="badge badge-warm">Medium</span></td>
+        <td>The Forge + human curation. AI generates the 80%, humans add the 20% that makes it feel crafted. Never ship without QA pass.</td>
+      </tr>
+      <tr>
+        <td><strong>Nobody cares</strong> — the idea doesn't resonate</td>
+        <td><span class="badge badge-red">High</span></td>
+        <td><span class="badge badge-warm">Medium</span></td>
+        <td>Ship tools that solve real problems, not conceptual ones. If the budget planner helps someone, they don't need to care about the philosophy. Lead with utility.</td>
+      </tr>
+      <tr>
+        <td><strong>LLM copycats saturate the space</strong></td>
+        <td><span class="badge badge-warm">Medium</span></td>
+        <td><span class="badge badge-red">High</span></td>
+        <td>This is the thesis — we WANT more HTML tools. Compete on curation, design, and ecosystem. Scattered repos don't compete with a coherent library.</td>
+      </tr>
+      <tr>
+        <td><strong>Data loss from localStorage</strong></td>
+        <td><span class="badge badge-warm">Medium</span></td>
+        <td><span class="badge badge-warm">Medium</span></td>
+        <td>Every tool includes export (JSON/CSV). Prompt users to save. Add File System Access API where supported. Consider optional Azure Blob sync (BYOK).</td>
+      </tr>
+      <tr>
+        <td><strong>Team burns out before reaching critical mass</strong></td>
+        <td><span class="badge badge-warm">Medium</span></td>
+        <td><span class="badge badge-warm">Medium</span></td>
+        <td>The Forge reduces per-tool effort. Set realistic sprint targets. Celebrate shipped tools. The library grows even at 2–3 tools/week.</td>
+      </tr>
+      <tr>
+        <td><strong>Browser restrictions tighten</strong> — localStorage, CORS, etc.</td>
+        <td><span class="badge badge-blue">Low</span></td>
+        <td><span class="badge badge-blue">Low</span></td>
+        <td>Browser trend is toward MORE capability (File System Access, WebGPU, etc.). Maintain fallbacks. Monitor changelogs.</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<div class="sep reveal"></div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- OPEN QUESTIONS -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<section id="questions">
+  <div class="kicker reveal">Open Questions</div>
+  <h2 class="reveal">What I need<br><em class="hl">from you.</em></h2>
+  <p class="reveal">These are the decisions and inputs that will sharpen the plan. None of them block Day 0 work — but answering them in Week 1 will shape everything that follows.</p>
+
+  <ol class="q-list reveal">
+    <li><strong>Domain:</strong> What's the brand name and domain? "Open Intranet"? Something else? This needs to lock before the catalog site ships.</li>
+    <li><strong>Azure credit timeline:</strong> When exactly do the credits expire? This determines sprint intensity and whether we need to front-load AI API spend.</li>
+    <li><strong>Existing tools inventory:</strong> Can you share the actual HTML files you've built so far? I need to assess what's shippable today vs. needs redesign to match the design system.</li>
+    <li><strong>Team capacity:</strong> How many humans are available, how many hours/week, and what's their comfort level with the AI-guided workflow? This sizes the sprint targets.</li>
+    <li><strong>The Forge — API key model:</strong> Does Forge V1 use YOUR Azure OpenAI key (you eat the cost) or BYOK? BYOK = zero cost but higher friction. Your key = faster adoption but burns credits.</li>
+    <li><strong>Catalog hosting:</strong> Azure Static Web Apps is the obvious play with your credits. Any preference for GitHub Pages, Cloudflare Pages, or other? Static hosting is cheap/free everywhere.</li>
+    <li><strong>Design system authority:</strong> Is the design language from the Open Intranet vision doc (Instrument Serif, warm paper tones, green/blue/warm accents) the locked direction? Or is it still evolving?</li>
+    <li><strong>Doccoin timeline:</strong> Is the document connection protocol something we actively design in Month 3–4, or is it a future-state vision for Year 2+?</li>
+    <li><strong>Revenue philosophy:</strong> "No revenue targets" — but are there any expenses beyond Azure credit? Domains, other subscriptions, contractor payments? Or is this truly $0 cash outlay?</li>
+    <li><strong>Legal / IP:</strong> Are the tools MIT-licensed? Creative Commons? Proprietary with free use? This affects community contributions and forking behavior.</li>
+  </ol>
+</section>
+
+<div class="sep reveal"></div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- CLOSING -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<section>
+  <hr class="title-rule reveal">
+  <h2 class="reveal" style="max-width:500px;">Build the library.<br>Win by design.<br>Own the <em class="hl">front page.</em></h2>
+  <div class="final-box reveal">
+    <p>The strategy isn't complicated. Build things people actually need. Make them more beautiful than anyone expects. Give them away. Let the world copy the format. Be so far ahead in quality and curation that copying individual tools doesn't matter — because the library, the design, and the ecosystem are the product.</p>
+    <p style="margin-top:12px;">We don't need permission. We don't need funding. We have $45K in Azure credit, AI tools, a team, and a thesis.</p>
+    <p style="margin-top:12px;color:var(--text);font-weight:500;font-family:'Instrument Serif',serif;font-style:italic;font-size:1.08rem;">Day zero is today.</p>
+  </div>
+  <div style="height:10vh;"></div>
+</section>
+
+<div class="footer">
+  Operation Front Page — Guerilla Strategy for the Open Intranet · Pan Tech Corporation · March 13, 2026 · Day Zero
+</div>
+
+<script>
+// ─── Progress bar ───
+const progressBar = document.getElementById('progressBar');
+function updateProgress() {
+  const scrollTop = window.scrollY;
+  const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+  const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+  progressBar.style.width = progress + '%';
+}
+window.addEventListener('scroll', updateProgress, { passive: true });
+
+// ─── Scroll-triggered reveal ───
+const reveals = document.querySelectorAll('.reveal');
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) entry.target.classList.add('visible');
+  });
+}, { threshold: 0.1, rootMargin: '0px 0px -30px 0px' });
+reveals.forEach(el => observer.observe(el));
+
+// ─── Nav visibility ───
+const navEl = document.getElementById('navEl');
+const heroSection = document.querySelector('.hero-section');
+const heroObs = new IntersectionObserver(entries => {
+  entries.forEach(e => navEl.classList.toggle('visible', !e.isIntersecting));
+}, { threshold: 0 });
+heroObs.observe(heroSection);
+
+// ─── Nav active state ───
+const navLinks = navEl.querySelectorAll('a');
+const sectionEls = document.querySelectorAll('section[id]');
+const secObs = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      navLinks.forEach(l => l.classList.remove('active'));
+      const active = navEl.querySelector(`a[href="#${entry.target.id}"]`);
+      if (active) active.classList.add('active');
+    }
+  });
+}, { rootMargin: '-20% 0px -70% 0px' });
+sectionEls.forEach(s => secObs.observe(s));
+
+// ─── Gantt chart ───
+const ganttData = [
+  { name: 'Ignition (Day 0–3)', start: 0, end: 0.5, color: '#c0392b' },
+  { name: 'Forge V1', start: 0, end: 1, color: '#c4723a' },
+  { name: 'Design System Tokens', start: 0, end: 1, color: '#c4723a' },
+  { name: 'Tool Polish (existing 5)', start: 0.5, end: 1.5, color: '#c4723a' },
+  { name: 'New Tools — Sprint 1', start: 1, end: 2, color: '#c4723a' },
+  { name: 'Catalog Site Build', start: 1.5, end: 3, color: '#1a8a5c' },
+  { name: 'New Tools — Sprint 2', start: 2, end: 4, color: '#1a8a5c' },
+  { name: 'Forge V2', start: 2, end: 3, color: '#1a8a5c' },
+  { name: 'GitHub Repo Launch', start: 3, end: 3.5, color: '#1a8a5c' },
+  { name: 'Content + Social Cadence', start: 2, end: 8, color: '#2d6bcf' },
+  { name: 'New Tools — Sprint 3', start: 3, end: 5, color: '#2d6bcf' },
+  { name: 'Show HN / Product Hunt', start: 4, end: 5, color: '#2d6bcf' },
+  { name: 'Forge V3 — Community', start: 4, end: 6, color: '#7c5cbf' },
+  { name: 'Design System Starter Kit', start: 5, end: 7, color: '#7c5cbf' },
+  { name: 'Community Submissions', start: 6, end: 12, color: '#7c5cbf' },
+  { name: 'Doccoin Protocol R&D', start: 6, end: 10, color: '#888' },
+  { name: 'Revenue Channel Exploration', start: 8, end: 12, color: '#888' },
+];
+
+const ganttBody = document.getElementById('gantt-body');
+const totalMonths = 12;
+
+ganttData.forEach(item => {
+  const tr = document.createElement('tr');
+  const tdName = document.createElement('td');
+  tdName.textContent = item.name;
+  tr.appendChild(tdName);
+
+  for (let m = 0; m < totalMonths; m++) {
+    const td = document.createElement('td');
+    td.style.position = 'relative';
+    const mStart = Math.floor(item.start);
+    const mEnd = Math.ceil(item.end);
+    if (m >= mStart && m < mEnd) {
+      const bar = document.createElement('div');
+      bar.className = 'gantt-bar';
+      bar.style.background = item.color;
+      if (m === mStart && m === mEnd - 1) {
+        bar.style.left = '3px'; bar.style.right = '3px'; bar.style.borderRadius = '3px';
+      } else if (m === mStart) {
+        bar.style.left = '3px'; bar.style.right = '0'; bar.style.borderRadius = '3px 0 0 3px';
+      } else if (m === mEnd - 1) {
+        bar.style.left = '0'; bar.style.right = '3px'; bar.style.borderRadius = '0 3px 3px 0';
+      } else {
+        bar.style.left = '0'; bar.style.right = '0'; bar.style.borderRadius = '0';
+      }
+      td.appendChild(bar);
+    }
+    tr.appendChild(td);
+  }
+  ganttBody.appendChild(tr);
+});
+</script>
+</body>
+</html>

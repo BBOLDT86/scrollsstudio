@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Project Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=Crimson+Pro:ital,wght@0,300;0,400;0,500;1,300;1,400&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --white: #ffffff;
+  --bg: #f5f5f7;
+  --bg-hover: #ececee;
+  --surface: #ffffff;
+  --border: rgba(0,0,0,0.06);
+  --border-strong: rgba(0,0,0,0.1);
+  --text: #1d1d1f;
+  --text-secondary: #6e6e73;
+  --text-tertiary: #aeaeb2;
+  --text-quaternary: #c7c7cc;
+  --blue: #0071e3;
+  --blue-hover: #0077ED;
+  --blue-bg: rgba(0,113,227,0.06);
+  --green: #34c759;
+  --green-bg: rgba(52,199,89,0.08);
+  --amber: #ff9f0a;
+  --amber-bg: rgba(255,159,10,0.08);
+  --red: #ff3b30;
+  --red-bg: rgba(255,59,48,0.06);
+  --purple: #af52de;
+  --purple-bg: rgba(175,82,222,0.08);
+  --radius: 14px;
+  --radius-sm: 10px;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02);
+  --shadow: 0 4px 20px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04);
+  --shadow-lg: 0 12px 40px rgba(0,0,0,0.1), 0 2px 8px rgba(0,0,0,0.04);
+  --transition: 0.2s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Sora', -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--text-quaternary); border-radius: 4px; }
+
+/* ===== TOPBAR ===== */
+.topbar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  height: 52px;
+  background: rgba(255,255,255,0.72);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 24px;
+}
+.topbar-left { display: flex; align-items: center; gap: 14px; }
+
+.app-name-input {
+  font-family: 'Sora', sans-serif;
+  font-size: 13px; font-weight: 600;
+  letter-spacing: -0.01em; color: var(--text);
+  background: transparent;
+  border: 1.5px solid transparent;
+  border-radius: 8px; padding: 5px 10px;
+  outline: none; transition: var(--transition);
+  min-width: 160px; max-width: 320px;
+}
+.app-name-input:hover { background: var(--bg); }
+.app-name-input:focus { background: var(--white); border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-bg); }
+
+.topbar-right { display: flex; align-items: center; gap: 10px; }
+
+.airgap-pill {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 11px; font-weight: 500; letter-spacing: 0.02em;
+  padding: 5px 14px; border-radius: 100px;
+  cursor: pointer; transition: var(--transition); user-select: none;
+}
+.airgap-pill.online { background: var(--green-bg); color: #248a3d; }
+.airgap-pill.offline { background: var(--red-bg); color: var(--red); }
+.airgap-pill:hover { opacity: 0.8; }
+.airgap-dot { width: 6px; height: 6px; border-radius: 50%; }
+.airgap-pill.online .airgap-dot { background: var(--green); }
+.airgap-pill.offline .airgap-dot { background: var(--red); animation: blink 1.4s infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+.user-pill {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--surface); border: 1px solid var(--border-strong);
+  border-radius: 100px; padding: 4px 6px 4px 14px;
+}
+.user-pill select {
+  font-family: 'Sora', sans-serif; font-size: 11px; font-weight: 500;
+  color: var(--text); background: transparent; border: none; outline: none;
+  cursor: pointer; -webkit-appearance: none; padding-right: 14px;
+  background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%236e6e73' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 0 center;
+}
+.avatar-dot {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--blue), #64d2ff);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 700; color: white;
+}
+
+/* ===== LAYOUT ===== */
+.layout { display: flex; margin-top: 52px; min-height: calc(100vh - 52px); }
+
+/* ===== SIDEBAR ===== */
+.sidebar {
+  width: 252px; min-width: 252px;
+  position: fixed; top: 52px; bottom: 0; left: 0;
+  background: rgba(255,255,255,0.5); backdrop-filter: blur(10px);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; z-index: 50;
+}
+.sidebar-header {
+  padding: 20px 16px 8px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.sidebar-label {
+  font-size: 11px; font-weight: 600; color: var(--text-tertiary);
+  text-transform: uppercase; letter-spacing: 0.06em;
+}
+.btn-icon {
+  width: 26px; height: 26px;
+  display: flex; align-items: center; justify-content: center;
+  border: none; background: transparent; border-radius: 8px;
+  color: var(--blue); font-size: 18px; cursor: pointer; transition: var(--transition);
+}
+.btn-icon:hover { background: var(--blue-bg); }
+
+.project-list { flex: 1; overflow-y: auto; padding: 6px 10px; }
+
+.project-item {
+  padding: 10px 12px; border-radius: var(--radius-sm);
+  cursor: pointer; transition: var(--transition); margin-bottom: 1px;
+}
+.project-item:hover { background: rgba(0,0,0,0.03); }
+.project-item.active { background: var(--white); box-shadow: var(--shadow-sm); }
+.project-item-name { font-size: 13px; font-weight: 600; color: var(--text); letter-spacing: -0.01em; }
+.project-item-meta { font-size: 11px; color: var(--text-tertiary); margin-top: 2px; }
+.project-item-actions { display: none; gap: 4px; margin-top: 6px; }
+.project-item:hover .project-item-actions { display: flex; }
+
+.micro-btn {
+  font-family: 'Sora', sans-serif; font-size: 10px; font-weight: 500;
+  padding: 2px 10px; border-radius: 6px;
+  border: 1px solid var(--border-strong); background: var(--white);
+  color: var(--text-secondary); cursor: pointer; transition: var(--transition);
+}
+.micro-btn:hover { background: var(--bg); color: var(--text); }
+.micro-btn.danger:hover { color: var(--red); border-color: rgba(255,59,48,0.2); background: var(--red-bg); }
+
+.sidebar-footer {
+  padding: 12px 16px; border-top: 1px solid var(--border);
+  display: flex; flex-direction: column; gap: 6px;
+}
+.sidebar-btn {
+  width: 100%; padding: 8px 12px; background: transparent;
+  border: 1px solid var(--border-strong); border-radius: var(--radius-sm);
+  font-family: 'Sora', sans-serif; font-size: 11px; font-weight: 500;
+  color: var(--text-secondary); cursor: pointer; transition: var(--transition); text-align: center;
+}
+.sidebar-btn:hover { background: var(--white); color: var(--text); box-shadow: var(--shadow-sm); }
+
+/* ===== MAIN ===== */
+.main { flex: 1; margin-left: 252px; padding: 36px 48px; max-width: 1060px; }
+
+/* ===== PROJECT HEADER ===== */
+.project-header { margin-bottom: 32px; }
+.project-name-editable {
+  font-family: 'Sora', sans-serif; font-size: 32px; font-weight: 800;
+  letter-spacing: -0.03em; color: var(--text);
+  background: transparent; border: 2px solid transparent;
+  border-radius: var(--radius-sm); padding: 4px 10px; margin: -4px -10px;
+  outline: none; width: 100%; transition: var(--transition);
+}
+.project-name-editable:hover { background: var(--white); }
+.project-name-editable:focus { background: var(--white); border-color: var(--blue); box-shadow: 0 0 0 4px var(--blue-bg); }
+
+.project-meta-row { display: flex; align-items: center; gap: 8px; margin-top: 8px; padding-left: 10px; }
+.meta-pill {
+  font-size: 11px; font-weight: 500; padding: 3px 12px;
+  border-radius: 100px; background: var(--bg); color: var(--text-secondary);
+}
+.meta-pill.priority-high { background: var(--blue-bg); color: var(--blue); }
+.meta-pill.priority-medium { background: var(--amber-bg); color: #c27800; }
+.meta-divider { width: 3px; height: 3px; border-radius: 50%; background: var(--text-quaternary); }
+
+/* ===== TABS ===== */
+.tabs { display: flex; gap: 0; margin-bottom: 32px; border-bottom: 1px solid var(--border); }
+.tab {
+  padding: 12px 20px; font-size: 13px; font-weight: 500;
+  color: var(--text-tertiary); cursor: pointer;
+  border-bottom: 2px solid transparent; transition: var(--transition);
+  user-select: none; letter-spacing: -0.01em;
+}
+.tab:hover { color: var(--text-secondary); }
+.tab.active { color: var(--text); border-bottom-color: var(--text); }
+.tab-count {
+  font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 400;
+  background: var(--bg); padding: 1px 7px; border-radius: 100px;
+  margin-left: 6px; color: var(--text-tertiary); vertical-align: 1px;
+}
+.tab.active .tab-count { background: var(--text); color: var(--white); }
+
+/* ===== SECTIONS ===== */
+.section { display: none; }
+.section.active { display: block; animation: fadeUp 0.35s ease; }
+@keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+
+/* ===== OVERVIEW ===== */
+.stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 28px; }
+.stat-card {
+  background: var(--surface); border-radius: var(--radius); padding: 20px;
+  box-shadow: var(--shadow-sm); border: 1px solid var(--border); transition: var(--transition);
+}
+.stat-card:hover { box-shadow: var(--shadow); transform: translateY(-1px); }
+.stat-label { font-size: 11px; font-weight: 500; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 8px; }
+.stat-value { font-size: 28px; font-weight: 800; letter-spacing: -0.03em; color: var(--text); }
+.stat-value.small { font-size: 15px; font-weight: 600; letter-spacing: -0.01em; }
+
+.field-card {
+  background: var(--surface); border-radius: var(--radius); padding: 24px;
+  box-shadow: var(--shadow-sm); border: 1px solid var(--border); margin-bottom: 14px;
+}
+.field-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-tertiary); margin-bottom: 12px; }
+.field-textarea {
+  width: 100%; min-height: 90px; background: var(--bg);
+  border: 1.5px solid transparent; border-radius: var(--radius-sm);
+  padding: 14px 16px; font-family: 'Crimson Pro', Georgia, serif;
+  font-size: 16px; line-height: 1.7; color: var(--text);
+  resize: vertical; outline: none; transition: var(--transition);
+}
+.field-textarea::placeholder { color: var(--text-quaternary); font-style: italic; }
+.field-textarea:hover { border-color: var(--border-strong); }
+.field-textarea:focus { background: var(--white); border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-bg); }
+
+/* ===== CONTACTS ===== */
+.section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.section-subtitle { font-size: 12px; color: var(--text-tertiary); }
+
+.btn-filled {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 8px 18px; background: var(--blue); color: var(--white);
+  border: none; border-radius: 100px;
+  font-family: 'Sora', sans-serif; font-size: 12px; font-weight: 600;
+  cursor: pointer; transition: var(--transition); letter-spacing: -0.01em;
+}
+.btn-filled:hover { background: var(--blue-hover); transform: scale(1.02); }
+.btn-filled:active { transform: scale(0.98); }
+
+.contact-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 12px; }
+.contact-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 20px; transition: var(--transition);
+}
+.contact-card:hover { box-shadow: var(--shadow); border-color: var(--border-strong); }
+.contact-card-name { font-size: 15px; font-weight: 700; letter-spacing: -0.02em; }
+.contact-card-role { font-size: 12px; color: var(--text-secondary); margin-top: 1px; }
+.contact-badge {
+  display: inline-block; font-size: 10px; font-weight: 600;
+  letter-spacing: 0.03em; text-transform: uppercase;
+  padding: 3px 10px; border-radius: 100px; margin-top: 10px;
+}
+.badge-economic { background: var(--green-bg); color: #1a7a34; }
+.badge-technical { background: var(--purple-bg); color: #8b3fc1; }
+.badge-commercial { background: var(--amber-bg); color: #9a6600; }
+.badge-other { background: var(--bg); color: var(--text-tertiary); }
+.contact-info { margin-top: 12px; font-family: 'Crimson Pro', serif; font-size: 14px; color: var(--text-secondary); line-height: 1.8; }
+.contact-card-actions { display: flex; gap: 6px; margin-top: 14px; opacity: 0; transition: var(--transition); }
+.contact-card:hover .contact-card-actions { opacity: 1; }
+
+/* ===== ACTIVITY ===== */
+.composer {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 20px; margin-bottom: 24px; box-shadow: var(--shadow-sm);
+}
+.composer-row { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+.composer select, .composer input[type="text"] {
+  font-family: 'Sora', sans-serif; font-size: 12px; color: var(--text);
+  background: var(--bg); border: 1.5px solid transparent;
+  border-radius: var(--radius-sm); padding: 8px 14px; outline: none; transition: var(--transition);
+}
+.composer select:focus, .composer input[type="text"]:focus { background: var(--white); border-color: var(--blue); }
+.composer textarea {
+  width: 100%; min-height: 72px; background: var(--bg);
+  border: 1.5px solid transparent; border-radius: var(--radius-sm);
+  padding: 14px 16px; font-family: 'Crimson Pro', Georgia, serif;
+  font-size: 15px; line-height: 1.65; color: var(--text);
+  resize: vertical; outline: none; transition: var(--transition);
+}
+.composer textarea::placeholder { color: var(--text-quaternary); font-style: italic; }
+.composer textarea:hover { border-color: var(--border-strong); }
+.composer textarea:focus { background: var(--white); border-color: var(--blue); }
+.composer-footer { display: flex; justify-content: flex-end; margin-top: 12px; }
+
+.timeline { position: relative; padding-left: 24px; }
+.timeline::before {
+  content: ''; position: absolute; left: 7px; top: 8px; bottom: 8px;
+  width: 1.5px; background: var(--border-strong); border-radius: 1px;
+}
+.note-item {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 18px 20px; margin-bottom: 10px;
+  position: relative; transition: var(--transition);
+}
+.note-item:hover { box-shadow: var(--shadow-sm); }
+.note-item::before {
+  content: ''; position: absolute; left: -21px; top: 22px;
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--white); border: 2px solid var(--text-quaternary);
+}
+.note-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.note-author { font-size: 12px; font-weight: 700; color: var(--blue); letter-spacing: -0.01em; }
+.note-date { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-tertiary); }
+.note-type {
+  font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em;
+  padding: 2px 10px; border-radius: 100px; background: var(--bg); color: var(--text-tertiary);
+}
+.note-subject { font-weight: 600; font-size: 14px; margin-bottom: 4px; letter-spacing: -0.01em; }
+.note-body { font-family: 'Crimson Pro', Georgia, serif; font-size: 15px; line-height: 1.7; color: var(--text-secondary); white-space: pre-wrap; }
+.note-delete { position: absolute; top: 16px; right: 16px; opacity: 0; transition: var(--transition); }
+.note-item:hover .note-delete { opacity: 1; }
+
+/* ===== QUOTES ===== */
+.quotes-table {
+  width: 100%; border-collapse: separate; border-spacing: 0;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow-sm);
+}
+.quotes-table th {
+  font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;
+  color: var(--text-tertiary); text-align: left; padding: 14px 16px;
+  background: var(--bg); border-bottom: 1px solid var(--border);
+}
+.quotes-table td { font-size: 13px; color: var(--text-secondary); padding: 14px 16px; border-bottom: 1px solid var(--border); }
+.quotes-table tr:last-child td { border-bottom: none; }
+.quotes-table tbody tr:hover td { background: rgba(0,113,227,0.02); }
+.status-pill {
+  font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em;
+  padding: 3px 12px; border-radius: 100px; display: inline-block;
+}
+.status-draft { background: var(--bg); color: var(--text-tertiary); }
+.status-submitted { background: var(--amber-bg); color: #9a6600; }
+.status-won { background: var(--green-bg); color: #1a7a34; }
+.status-lost { background: var(--red-bg); color: var(--red); }
+
+/* ===== MODAL ===== */
+.modal-backdrop {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(0,0,0,0.25); backdrop-filter: blur(8px);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+}
+.modal-backdrop.open { opacity: 1; pointer-events: auto; }
+.modal {
+  background: var(--white); border-radius: 20px; padding: 32px;
+  width: 440px; max-width: 92vw; max-height: 85vh; overflow-y: auto;
+  box-shadow: var(--shadow-lg); transform: scale(0.96);
+  transition: transform 0.25s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+.modal-backdrop.open .modal { transform: scale(1); }
+.modal-title { font-size: 20px; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 24px; }
+.form-group { margin-bottom: 16px; }
+.form-label { display: block; font-size: 11px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; letter-spacing: 0.02em; }
+.form-input, .form-select {
+  width: 100%; padding: 10px 14px; background: var(--bg);
+  border: 1.5px solid transparent; border-radius: var(--radius-sm);
+  font-family: 'Sora', sans-serif; font-size: 13px; color: var(--text);
+  outline: none; transition: var(--transition);
+}
+.form-input:focus, .form-select:focus { background: var(--white); border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-bg); }
+.modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 28px; }
+.btn-ghost {
+  padding: 9px 20px; background: transparent; border: 1px solid var(--border-strong);
+  border-radius: 100px; font-family: 'Sora', sans-serif; font-size: 12px; font-weight: 600;
+  color: var(--text-secondary); cursor: pointer; transition: var(--transition);
+}
+.btn-ghost:hover { background: var(--bg); color: var(--text); }
+
+/* ===== EMPTY ===== */
+.empty-state { text-align: center; padding: 72px 20px; }
+.empty-icon {
+  width: 56px; height: 56px; border-radius: 16px; background: var(--bg);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 16px; font-size: 24px;
+}
+.empty-title { font-size: 16px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 4px; }
+.empty-sub { font-size: 13px; color: var(--text-tertiary); }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .sidebar { display: none; }
+  .main { margin-left: 0; padding: 24px 20px; }
+  .stats-row { grid-template-columns: 1fr 1fr; }
+  .contact-grid { grid-template-columns: 1fr; }
+}
+.main { animation: mainIn 0.5s ease both; }
+@keyframes mainIn { from{opacity:0} to{opacity:1} }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <input class="app-name-input" id="appNameInput" value="Project Intelligence" spellcheck="false"
+           onchange="saveAppName(this.value)" onblur="saveAppName(this.value)">
+  </div>
+  <div class="topbar-right">
+    <div class="airgap-pill online" id="airgapPill" onclick="toggleAirgap()" title="Toggle air-gap mode">
+      <div class="airgap-dot"></div>
+      <span id="airgapText">Web Enrichment</span>
+    </div>
+    <div class="user-pill">
+      <select id="userSelect" onchange="setUser(this.value)">
+        <option value="Thomas">Thomas</option>
+        <option value="Author">Author</option>
+        <option value="Brad">Brad</option>
+      </select>
+      <div class="avatar-dot" id="avatarDot">T</div>
+    </div>
+  </div>
+</div>
+
+<div class="layout">
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <span class="sidebar-label">Projects</span>
+      <button class="btn-icon" onclick="openModal('addProjectModal')" title="New project">+</button>
+    </div>
+    <div class="project-list" id="projectList"></div>
+    <div class="sidebar-footer">
+      <button class="sidebar-btn" onclick="exportAll()">Export JSON</button>
+      <button class="sidebar-btn" onclick="document.getElementById('importFile').click()">Import JSON</button>
+      <input type="file" id="importFile" accept=".json" style="display:none" onchange="handleImport(event)">
+    </div>
+  </div>
+
+  <div class="main" id="mainContent">
+    <div id="emptyState">
+      <div class="empty-state">
+        <div class="empty-icon">◇</div>
+        <div class="empty-title">No project selected</div>
+        <div class="empty-sub">Create or select a project to begin</div>
+      </div>
+    </div>
+
+    <div id="projectView" style="display:none">
+      <div class="project-header">
+        <input class="project-name-editable" id="projNameInput" spellcheck="false"
+               onchange="saveField('name',this.value);renderSidebar()"
+               onblur="saveField('name',this.value);renderSidebar()">
+        <div class="project-meta-row" id="metaRow"></div>
+      </div>
+
+      <div class="tabs">
+        <div class="tab active" data-tab="overview" onclick="switchTab('overview')">Overview</div>
+        <div class="tab" data-tab="contacts" onclick="switchTab('contacts')">Contacts <span class="tab-count" id="cntContacts">0</span></div>
+        <div class="tab" data-tab="activity" onclick="switchTab('activity')">Activity <span class="tab-count" id="cntNotes">0</span></div>
+        <div class="tab" data-tab="quotes" onclick="switchTab('quotes')">Quotes <span class="tab-count" id="cntQuotes">0</span></div>
+      </div>
+
+      <div class="section active" id="sec-overview">
+        <div class="stats-row">
+          <div class="stat-card"><div class="stat-label">Contacts</div><div class="stat-value" id="sContacts">0</div></div>
+          <div class="stat-card"><div class="stat-label">Activity</div><div class="stat-value" id="sNotes">0</div></div>
+          <div class="stat-card"><div class="stat-label">Quotes</div><div class="stat-value" id="sQuotes">0</div></div>
+          <div class="stat-card"><div class="stat-label">Status</div><div class="stat-value small" id="sStatus">—</div></div>
+        </div>
+        <div class="field-card">
+          <div class="field-label">Project Summary</div>
+          <textarea class="field-textarea" id="fSummary" placeholder="Scope, location, estimated value, timeline..." onchange="saveField('summary',this.value)"></textarea>
+        </div>
+        <div class="field-card">
+          <div class="field-label">Tactical Strategy</div>
+          <textarea class="field-textarea" id="fStrategy" placeholder="How do we win this? Key relationships, our angle, path to becoming the SME..." onchange="saveField('strategy',this.value)"></textarea>
+        </div>
+        <div class="field-card">
+          <div class="field-label">Competitive Intelligence</div>
+          <textarea class="field-textarea" id="fCompetitive" placeholder="Known competitors, their relationships, strengths and weaknesses..." onchange="saveField('competitive',this.value)"></textarea>
+        </div>
+      </div>
+
+      <div class="section" id="sec-contacts">
+        <div class="section-header">
+          <div class="section-subtitle">Economic · Technical · Commercial buyers</div>
+          <button class="btn-filled" onclick="openModal('addContactModal')">+ Add Contact</button>
+        </div>
+        <div class="contact-grid" id="contactGrid"></div>
+      </div>
+
+      <div class="section" id="sec-activity">
+        <div class="composer">
+          <div class="composer-row">
+            <select id="noteType" style="min-width:130px">
+              <option value="Call Note">Call Note</option>
+              <option value="Visit Summary">Visit Summary</option>
+              <option value="Email Follow-up">Email Follow-up</option>
+              <option value="Intel Update">Intel Update</option>
+              <option value="Change Order">Change Order</option>
+              <option value="General">General</option>
+            </select>
+            <input type="text" id="noteSubject" placeholder="Subject (optional)" style="flex:1;min-width:140px">
+          </div>
+          <textarea id="noteBody" placeholder="Log a call note, visit summary, or intelligence update..."></textarea>
+          <div class="composer-footer">
+            <button class="btn-filled" onclick="addNote()">Add Entry</button>
+          </div>
+        </div>
+        <div class="timeline" id="timeline"></div>
+      </div>
+
+      <div class="section" id="sec-quotes">
+        <div class="section-header">
+          <div class="section-subtitle">Bids, quotes, and change orders</div>
+          <button class="btn-filled" onclick="openModal('addQuoteModal')">+ Add Quote</button>
+        </div>
+        <div id="quotesWrap"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modals -->
+<div class="modal-backdrop" id="addProjectModal"><div class="modal">
+  <div class="modal-title">New Project</div>
+  <div class="form-group"><label class="form-label">Name</label><input class="form-input" id="npName" placeholder="Commonwealth LNG"></div>
+  <div class="form-group"><label class="form-label">Sector</label><select class="form-select" id="npSector"><option>LNG</option><option>Petrochemical</option><option>Refining</option><option>Power Generation</option><option>Midstream</option><option>Other</option></select></div>
+  <div class="form-group"><label class="form-label">Status</label><select class="form-select" id="npStatus"><option>Pre-RFQ</option><option>RFQ Active</option><option>Bid Submitted</option><option>Awarded</option><option>In Execution</option><option>Monitoring</option></select></div>
+  <div class="form-group"><label class="form-label">Priority</label><select class="form-select" id="npPriority"><option>High — Company Changer</option><option>Medium</option><option>Low — Watchlist</option></select></div>
+  <div class="modal-actions"><button class="btn-ghost" onclick="closeModal('addProjectModal')">Cancel</button><button class="btn-filled" onclick="addProject()">Create</button></div>
+</div></div>
+
+<div class="modal-backdrop" id="addContactModal"><div class="modal">
+  <div class="modal-title">Add Contact</div>
+  <div class="form-group"><label class="form-label">Full Name</label><input class="form-input" id="acName" placeholder="Jane Smith"></div>
+  <div class="form-group"><label class="form-label">Title / Role</label><input class="form-input" id="acRole" placeholder="VP Engineering"></div>
+  <div class="form-group"><label class="form-label">Company</label><input class="form-input" id="acCompany" placeholder="Commonwealth LNG"></div>
+  <div class="form-group"><label class="form-label">Buyer Type</label><select class="form-select" id="acType"><option value="economic">Economic Buyer</option><option value="technical">Technical Buyer</option><option value="commercial">Commercial Buyer</option><option value="other">Other / Influencer</option></select></div>
+  <div class="form-group"><label class="form-label">Email</label><input class="form-input" id="acEmail" placeholder="jane@example.com"></div>
+  <div class="form-group"><label class="form-label">Phone</label><input class="form-input" id="acPhone" placeholder="+1 555-123-4567"></div>
+  <div class="form-group"><label class="form-label">Notes</label><input class="form-input" id="acNotes" placeholder="Met at PCIC 2024, key decision maker"></div>
+  <div class="modal-actions"><button class="btn-ghost" onclick="closeModal('addContactModal')">Cancel</button><button class="btn-filled" onclick="addContact()">Add</button></div>
+</div></div>
+
+<div class="modal-backdrop" id="editContactModal"><div class="modal">
+  <div class="modal-title">Edit Contact</div>
+  <div class="form-group"><label class="form-label">Full Name</label><input class="form-input" id="ecName"></div>
+  <div class="form-group"><label class="form-label">Title / Role</label><input class="form-input" id="ecRole"></div>
+  <div class="form-group"><label class="form-label">Company</label><input class="form-input" id="ecCompany"></div>
+  <div class="form-group"><label class="form-label">Buyer Type</label><select class="form-select" id="ecType"><option value="economic">Economic Buyer</option><option value="technical">Technical Buyer</option><option value="commercial">Commercial Buyer</option><option value="other">Other / Influencer</option></select></div>
+  <div class="form-group"><label class="form-label">Email</label><input class="form-input" id="ecEmail"></div>
+  <div class="form-group"><label class="form-label">Phone</label><input class="form-input" id="ecPhone"></div>
+  <div class="form-group"><label class="form-label">Notes</label><input class="form-input" id="ecNotes"></div>
+  <input type="hidden" id="ecId">
+  <div class="modal-actions"><button class="btn-ghost" onclick="closeModal('editContactModal')">Cancel</button><button class="btn-filled" onclick="saveContact()">Save</button></div>
+</div></div>
+
+<div class="modal-backdrop" id="addQuoteModal"><div class="modal">
+  <div class="modal-title">Add Quote</div>
+  <div class="form-group"><label class="form-label">Description</label><input class="form-input" id="aqDesc" placeholder="MCC lineup for Train 1 & 2"></div>
+  <div class="form-group"><label class="form-label">Value ($)</label><input class="form-input" id="aqValue" placeholder="2,500,000"></div>
+  <div class="form-group"><label class="form-label">Submitted To</label><input class="form-input" id="aqTo" placeholder="Bechtel Engineering"></div>
+  <div class="form-group"><label class="form-label">Status</label><select class="form-select" id="aqStatus"><option value="draft">Draft</option><option value="submitted">Submitted</option><option value="won">Won</option><option value="lost">Lost</option></select></div>
+  <div class="form-group"><label class="form-label">Notes</label><input class="form-input" id="aqNotes" placeholder="Revision 2, includes CO-003"></div>
+  <div class="modal-actions"><button class="btn-ghost" onclick="closeModal('addQuoteModal')">Cancel</button><button class="btn-filled" onclick="addQuote()">Add</button></div>
+</div></div>
+
+<script>
+const SK='bd_intel_v3';
+function load(){try{const r=localStorage.getItem(SK);if(r)return JSON.parse(r)}catch(e){}return{projects:[],activeId:null,user:'Thomas',airgapped:false,appName:'Project Intelligence'}}
+function save(){localStorage.setItem(SK,JSON.stringify(S))}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
+let S=load();
+
+if(!S.projects.length){
+  const id=uid();
+  S.projects.push({id,name:'Commonwealth LNG',sector:'LNG',status:'Pre-RFQ',priority:'High — Company Changer',summary:'',strategy:'Engage end users and engineering firms 1–2 years before RFQ. Position as the subject matter expert before competitors know the project is live. Mirror Entergy playbook.',competitive:'',contacts:[],notes:[],quotes:[],createdAt:new Date().toISOString()});
+  S.activeId=id; save();
+}
+
+function cur(){return S.projects.find(p=>p.id===S.activeId)}
+
+function render(){
+  renderSidebar(); renderProject(); renderAirgap();
+  document.getElementById('userSelect').value=S.user||'Thomas';
+  document.getElementById('avatarDot').textContent=(S.user||'T')[0];
+  document.getElementById('appNameInput').value=S.appName||'Project Intelligence';
+  document.title=S.appName||'Project Intelligence';
+}
+
+function renderSidebar(){
+  document.getElementById('projectList').innerHTML=S.projects.map(p=>`
+    <div class="project-item ${p.id===S.activeId?'active':''}" onclick="selectProject('${p.id}')">
+      <div class="project-item-name">${esc(p.name)}</div>
+      <div class="project-item-meta">${esc(p.sector)} · ${esc(p.status)}</div>
+      <div class="project-item-actions"><button class="micro-btn danger" onclick="event.stopPropagation();deleteProject('${p.id}')">Delete</button></div>
+    </div>`).join('');
+}
+
+function renderProject(){
+  const p=cur();
+  if(!p){document.getElementById('emptyState').style.display='';document.getElementById('projectView').style.display='none';return}
+  document.getElementById('emptyState').style.display='none';
+  document.getElementById('projectView').style.display='';
+  document.getElementById('projNameInput').value=p.name;
+  const pc=p.priority.includes('High')?'priority-high':p.priority.includes('Medium')?'priority-medium':'';
+  document.getElementById('metaRow').innerHTML=`<span class="meta-pill">${esc(p.sector)}</span><span class="meta-divider"></span><span class="meta-pill ${pc}">${esc(p.priority)}</span><span class="meta-divider"></span><span class="meta-pill">${esc(p.status)}</span>`;
+  document.getElementById('fSummary').value=p.summary||'';
+  document.getElementById('fStrategy').value=p.strategy||'';
+  document.getElementById('fCompetitive').value=p.competitive||'';
+  const nc=(p.contacts||[]).length,nn=(p.notes||[]).length,nq=(p.quotes||[]).length;
+  document.getElementById('sContacts').textContent=nc;
+  document.getElementById('sNotes').textContent=nn;
+  document.getElementById('sQuotes').textContent=nq;
+  document.getElementById('sStatus').textContent=p.status;
+  document.getElementById('cntContacts').textContent=nc;
+  document.getElementById('cntNotes').textContent=nn;
+  document.getElementById('cntQuotes').textContent=nq;
+  renderContacts(); renderTimeline(); renderQuotes();
+}
+
+function renderContacts(){
+  const p=cur(),el=document.getElementById('contactGrid');
+  if(!p||!p.contacts||!p.contacts.length){el.innerHTML='<div class="empty-state"><div class="empty-icon">👤</div><div class="empty-title">No contacts yet</div><div class="empty-sub">Add your first contact to get started</div></div>';return}
+  el.innerHTML=p.contacts.map(c=>{
+    const bc=c.type==='economic'?'badge-economic':c.type==='technical'?'badge-technical':c.type==='commercial'?'badge-commercial':'badge-other';
+    const bl=c.type==='economic'?'Economic':c.type==='technical'?'Technical':c.type==='commercial'?'Commercial':'Other';
+    return`<div class="contact-card"><div class="contact-card-name">${esc(c.name)}</div><div class="contact-card-role">${esc(c.role||'')}${c.company?' · '+esc(c.company):''}</div><span class="contact-badge ${bc}">${bl}</span><div class="contact-info">${c.email?esc(c.email)+'<br>':''}${c.phone?esc(c.phone)+'<br>':''}${c.notes?esc(c.notes):''}</div><div class="contact-card-actions"><button class="micro-btn" onclick="editContact('${c.id}')">Edit</button><button class="micro-btn danger" onclick="deleteContact('${c.id}')">Remove</button></div></div>`
+  }).join('');
+}
+
+function renderTimeline(){
+  const p=cur(),el=document.getElementById('timeline');
+  if(!p||!p.notes||!p.notes.length){el.innerHTML='<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-title">No activity yet</div><div class="empty-sub">Log your first call note or update</div></div>';return}
+  el.innerHTML=[...p.notes].sort((a,b)=>new Date(b.date)-new Date(a.date)).map(n=>`
+    <div class="note-item">
+      <div class="note-delete"><button class="micro-btn danger" onclick="deleteNote('${n.id}')">Delete</button></div>
+      <div class="note-header"><span class="note-author">${esc(n.author)}</span><span class="note-date">${fmtDate(n.date)}</span><span class="note-type">${esc(n.type)}</span></div>
+      ${n.subject?'<div class="note-subject">'+esc(n.subject)+'</div>':''}
+      <div class="note-body">${esc(n.body)}</div>
+    </div>`).join('');
+}
+
+function renderQuotes(){
+  const p=cur(),el=document.getElementById('quotesWrap');
+  if(!p||!p.quotes||!p.quotes.length){el.innerHTML='<div class="empty-state"><div class="empty-icon">📄</div><div class="empty-title">No quotes tracked</div><div class="empty-sub">Add bids, quotes, and change orders</div></div>';return}
+  const sorted=[...p.quotes].sort((a,b)=>new Date(b.date)-new Date(a.date));
+  el.innerHTML=`<table class="quotes-table"><thead><tr><th>Date</th><th>Description</th><th>Value</th><th>To</th><th>Status</th><th>Notes</th><th></th></tr></thead><tbody>${sorted.map(q=>`<tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px;white-space:nowrap">${fmtDate(q.date)}</td><td style="font-weight:600;color:var(--text)">${esc(q.desc)}</td><td style="font-family:'JetBrains Mono',monospace">${q.value?'$'+esc(q.value):'—'}</td><td>${esc(q.to||'—')}</td><td><span class="status-pill status-${q.status}">${esc(q.status)}</span></td><td style="font-size:12px;color:var(--text-tertiary)">${esc(q.notes||'')}</td><td><button class="micro-btn danger" onclick="deleteQuote('${q.id}')">×</button></td></tr>`).join('')}</tbody></table>`;
+}
+
+function renderAirgap(){
+  const pill=document.getElementById('airgapPill'),txt=document.getElementById('airgapText');
+  if(S.airgapped){pill.className='airgap-pill offline';txt.textContent='Air-Gapped'}
+  else{pill.className='airgap-pill online';txt.textContent='Web Enrichment'}
+}
+
+// Actions
+function selectProject(id){S.activeId=id;save();switchTab('overview');render()}
+function addProject(){
+  const name=document.getElementById('npName').value.trim();if(!name)return;
+  const p={id:uid(),name,sector:document.getElementById('npSector').value,status:document.getElementById('npStatus').value,priority:document.getElementById('npPriority').value,summary:'',strategy:'',competitive:'',contacts:[],notes:[],quotes:[],createdAt:new Date().toISOString()};
+  S.projects.push(p);S.activeId=p.id;save();closeModal('addProjectModal');document.getElementById('npName').value='';render();
+}
+function deleteProject(id){if(!confirm('Delete this project and all data?'))return;S.projects=S.projects.filter(p=>p.id!==id);if(S.activeId===id)S.activeId=S.projects[0]?.id||null;save();render()}
+function saveField(k,v){const p=cur();if(!p)return;p[k]=v;save()}
+function saveAppName(v){S.appName=v.trim()||'Project Intelligence';save();document.title=S.appName}
+function setUser(u){S.user=u;save();document.getElementById('avatarDot').textContent=u[0]}
+
+function addContact(){
+  const p=cur();if(!p)return;const name=document.getElementById('acName').value.trim();if(!name)return;
+  p.contacts=p.contacts||[];
+  p.contacts.push({id:uid(),name,role:document.getElementById('acRole').value.trim(),company:document.getElementById('acCompany').value.trim(),type:document.getElementById('acType').value,email:document.getElementById('acEmail').value.trim(),phone:document.getElementById('acPhone').value.trim(),notes:document.getElementById('acNotes').value.trim()});
+  save();closeModal('addContactModal');['acName','acRole','acCompany','acEmail','acPhone','acNotes'].forEach(id=>document.getElementById(id).value='');render();
+}
+function editContact(cid){
+  const p=cur();if(!p)return;const c=p.contacts.find(x=>x.id===cid);if(!c)return;
+  document.getElementById('ecId').value=c.id;document.getElementById('ecName').value=c.name;document.getElementById('ecRole').value=c.role||'';document.getElementById('ecCompany').value=c.company||'';document.getElementById('ecType').value=c.type||'other';document.getElementById('ecEmail').value=c.email||'';document.getElementById('ecPhone').value=c.phone||'';document.getElementById('ecNotes').value=c.notes||'';
+  openModal('editContactModal');
+}
+function saveContact(){
+  const p=cur();if(!p)return;const id=document.getElementById('ecId').value;const c=p.contacts.find(x=>x.id===id);if(!c)return;
+  c.name=document.getElementById('ecName').value.trim();c.role=document.getElementById('ecRole').value.trim();c.company=document.getElementById('ecCompany').value.trim();c.type=document.getElementById('ecType').value;c.email=document.getElementById('ecEmail').value.trim();c.phone=document.getElementById('ecPhone').value.trim();c.notes=document.getElementById('ecNotes').value.trim();
+  save();closeModal('editContactModal');render();
+}
+function deleteContact(cid){const p=cur();if(!p)return;p.contacts=p.contacts.filter(c=>c.id!==cid);save();render()}
+
+function addNote(){
+  const p=cur();if(!p)return;const body=document.getElementById('noteBody').value.trim();if(!body)return;
+  p.notes=p.notes||[];p.notes.push({id:uid(),type:document.getElementById('noteType').value,subject:document.getElementById('noteSubject').value.trim(),body,author:S.user||'Thomas',date:new Date().toISOString()});
+  save();document.getElementById('noteBody').value='';document.getElementById('noteSubject').value='';render();
+}
+function deleteNote(nid){const p=cur();if(!p)return;p.notes=p.notes.filter(n=>n.id!==nid);save();render()}
+
+function addQuote(){
+  const p=cur();if(!p)return;const desc=document.getElementById('aqDesc').value.trim();if(!desc)return;
+  p.quotes=p.quotes||[];p.quotes.push({id:uid(),desc,value:document.getElementById('aqValue').value.trim(),to:document.getElementById('aqTo').value.trim(),status:document.getElementById('aqStatus').value,notes:document.getElementById('aqNotes').value.trim(),date:new Date().toISOString()});
+  save();closeModal('addQuoteModal');['aqDesc','aqValue','aqTo','aqNotes'].forEach(id=>document.getElementById(id).value='');render();
+}
+function deleteQuote(qid){const p=cur();if(!p)return;p.quotes=p.quotes.filter(q=>q.id!==qid);save();render()}
+
+function toggleAirgap(){
+  if(!S.airgapped){if(!confirm('ACTIVATE AIR-GAP MODE?\n\nThis signals proprietary data has been entered.\nWeb enrichment will be disabled.\n\nThis is intended to be permanent.'))return}
+  S.airgapped=!S.airgapped;save();renderAirgap();
+}
+
+function exportAll(){
+  const blob=new Blob([JSON.stringify(S,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download=`intel-export-${new Date().toISOString().slice(0,10)}.json`;a.click();URL.revokeObjectURL(a.href);
+}
+function handleImport(e){
+  const f=e.target.files[0];if(!f)return;const r=new FileReader();
+  r.onload=function(ev){try{const d=JSON.parse(ev.target.result);if(d.projects&&confirm(`Import ${d.projects.length} project(s)? This replaces all current data.`)){S=d;save();render()}}catch(err){alert('Invalid JSON file.')}};
+  r.readAsText(f);e.target.value='';
+}
+
+function switchTab(tab){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===tab));
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  const el=document.getElementById('sec-'+tab);if(el)el.classList.add('active');
+}
+
+function openModal(id){document.getElementById(id).classList.add('open')}
+function closeModal(id){document.getElementById(id).classList.remove('open')}
+document.querySelectorAll('.modal-backdrop').forEach(m=>{m.addEventListener('click',function(e){if(e.target===this)this.classList.remove('open')})});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.modal-backdrop.open').forEach(m=>m.classList.remove('open'))});
+
+function esc(s){if(!s)return'';const d=document.createElement('div');d.textContent=s;return d.innerHTML}
+function fmtDate(iso){if(!iso)return'';const d=new Date(iso);return d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})+' '+d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})}
+
+render();
+</script>
+</body>
+</html>

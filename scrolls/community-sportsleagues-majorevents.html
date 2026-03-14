@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Crazy 8s — March Madness Bracket</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{--bg:#f6f5f1;--card:#fff;--border:#e5e2dd;--text:#1a1a1a;--muted:#888;--dim:#b0b0b0;--green:#1a8a5c;--blue:#2d6bcf;--warm:#c4723a;--purple:#7c5cbf;--red:#c43a3a;--green-bg:rgba(26,138,92,.07);--blue-bg:rgba(45,107,207,.06);--warm-bg:rgba(196,114,58,.07);--purple-bg:rgba(124,92,191,.06)}
+html,body{height:100%;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain}
+body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro','Helvetica Neue',sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.4;-webkit-font-smoothing:antialiased;padding:0 0 80px}
+
+header{padding:16px 16px 12px;border-bottom:1px solid var(--border);background:var(--card);position:sticky;top:0;z-index:50}
+header h1{font-size:18px;font-weight:700;letter-spacing:-.3px}
+header p{font-size:11px;color:var(--muted);margin-top:2px}
+
+.tabs{display:flex;gap:0;border-bottom:1px solid var(--border);background:var(--card);overflow-x:auto;-webkit-overflow-scrolling:touch;padding:0 12px}
+.tabs::-webkit-scrollbar{display:none}
+.tab{padding:10px 14px;font-size:12px;font-weight:600;color:var(--muted);border:none;background:none;cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;transition:all .2s}
+.tab.active{color:var(--warm);border-bottom-color:var(--warm)}
+
+.panel{display:none;padding:12px}
+.panel.active{display:block}
+
+/* Bracket */
+.bracket-round{margin-bottom:16px}
+.round-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:8px;padding:0 4px}
+.matchup{background:var(--card);border:1px solid var(--border);border-radius:10px;margin-bottom:6px;overflow:hidden}
+.matchup-team{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;cursor:pointer;transition:background .15s}
+.matchup-team:first-child{border-bottom:1px solid var(--border)}
+.matchup-team:active{background:rgba(0,0,0,.03)}
+.matchup-team.winner{background:var(--green-bg);font-weight:600}
+.matchup-team.eliminated{opacity:.4;text-decoration:line-through}
+.seed{font-size:10px;font-weight:700;color:var(--muted);width:20px;flex-shrink:0}
+.team-name{flex:1;font-size:13px}
+.pick-indicator{font-size:14px;color:var(--green)}
+
+/* Standings */
+.player-row{display:flex;align-items:center;gap:10px;padding:12px;background:var(--card);border:1px solid var(--border);border-radius:10px;margin-bottom:6px}
+.player-rank{font-size:18px;font-weight:800;color:var(--dim);width:28px;text-align:center}
+.player-rank.first{color:var(--warm)}
+.player-info{flex:1}
+.player-name{font-size:14px;font-weight:600}
+.player-correct{font-size:11px;color:var(--muted)}
+.player-pts{font-size:18px;font-weight:700;color:var(--green)}
+
+/* Settings */
+.field-group{margin-bottom:14px}
+.field-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:6px}
+.field-input{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;background:var(--card);color:var(--text);outline:none}
+.field-input:focus{border-color:var(--blue)}
+.btn{display:inline-flex;align-items:center;justify-content:center;padding:10px 18px;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:opacity .15s}
+.btn:active{opacity:.7}
+.btn-primary{background:var(--warm);color:#fff}
+.btn-outline{background:none;border:1px solid var(--border);color:var(--text)}
+.btn-danger{background:var(--red);color:#fff}
+.btn-sm{padding:7px 12px;font-size:12px}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+
+.empty-state{text-align:center;padding:40px 20px;color:var(--muted);font-size:13px}
+
+/* Toast */
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(60px);background:var(--text);color:#fff;padding:10px 20px;border-radius:20px;font-size:12px;font-weight:500;opacity:0;transition:all .3s ease;z-index:999;pointer-events:none}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+
+/* Save bar */
+.save-bar{position:fixed;bottom:0;left:0;right:0;padding:12px 16px;background:var(--card);border-top:1px solid var(--border);display:flex;gap:8px;z-index:60}
+.save-bar .btn{flex:1}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🏀 Crazy 8s — March Madness</h1>
+  <p id="headerSub">Set up your pool below</p>
+</header>
+
+<div class="tabs">
+  <button class="tab active" onclick="showTab('bracket')">Bracket</button>
+  <button class="tab" onclick="showTab('standings')">Standings</button>
+  <button class="tab" onclick="showTab('players')">Players</button>
+  <button class="tab" onclick="showTab('settings')">Setup</button>
+</div>
+
+<div class="panel active" id="panel-bracket"></div>
+<div class="panel" id="panel-standings"></div>
+<div class="panel" id="panel-players"></div>
+<div class="panel" id="panel-settings">
+  <div class="field-group">
+    <div class="field-label">Pool Name</div>
+    <input class="field-input" id="poolName" placeholder="e.g. Office Pool 2026" value="">
+  </div>
+  <div class="field-group">
+    <div class="field-label">Add Player</div>
+    <div style="display:flex;gap:6px">
+      <input class="field-input" id="newPlayer" placeholder="Name" style="flex:1">
+      <button class="btn btn-primary btn-sm" onclick="addPlayer()">Add</button>
+    </div>
+    <div id="playerList" style="margin-top:8px"></div>
+  </div>
+  <div class="field-group">
+    <div class="field-label">Scoring</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+      <div style="font-size:12px;padding:8px;background:var(--card);border:1px solid var(--border);border-radius:8px">R64: <strong>1 pt</strong></div>
+      <div style="font-size:12px;padding:8px;background:var(--card);border:1px solid var(--border);border-radius:8px">R32: <strong>2 pts</strong></div>
+      <div style="font-size:12px;padding:8px;background:var(--card);border:1px solid var(--border);border-radius:8px">Sweet 16: <strong>4 pts</strong></div>
+      <div style="font-size:12px;padding:8px;background:var(--card);border:1px solid var(--border);border-radius:8px">Elite 8: <strong>8 pts</strong></div>
+      <div style="font-size:12px;padding:8px;background:var(--card);border:1px solid var(--border);border-radius:8px">Final 4: <strong>16 pts</strong></div>
+      <div style="font-size:12px;padding:8px;background:var(--card);border:1px solid var(--border);border-radius:8px">Final: <strong>32 pts</strong></div>
+    </div>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-outline" onclick="resetAll()">Reset All</button>
+  </div>
+</div>
+
+<div class="save-bar">
+  <button class="btn btn-outline" onclick="saveState()">💾 Save</button>
+  <button class="btn btn-primary" onclick="shareFile()">📤 Share</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const REGIONS = ['East','West','South','Midwest'];
+const SEEDS_PER_REGION = [1,16,8,9,5,12,4,13,6,11,3,14,7,10,2,15];
+const ROUND_PTS = [1,2,4,8,16,32];
+const ROUND_NAMES = ['Round of 64','Round of 32','Sweet 16','Elite 8','Final Four','Championship'];
+
+const SAMPLE_TEAMS = {
+  East:['UConn','Norfolk St','Marquette','New Mexico','Iowa St','Drake','Tennessee','FAU','Creighton','NC State','Illinois','Morehead St','Oregon','Liberty','Arizona','Colgate'],
+  West:['Houston','Longwood','Purdue','Utah St','Gonzaga','McNeese','Kansas','Samford','Texas Tech','UNC','Duke','Vermont','Baylor','Clemson','Kentucky','Oakland'],
+  South:['Alabama','SIUE','BYU','Duquesne','Auburn','Yale','San Diego St','UAB','Florida','Colorado','Dayton','Nevada','Memphis','Grambling','N Carolina','Wagner'],
+  Midwest:['Purdue','Grambling','Wisconsin','Colgate','Michigan St','Mississippi St','Northwestern','Florida Atlantic','Iowa','Cincinnati','Baylor','Colorado St','Texas','Virginia','Indiana','Kent St']
+};
+
+let state = loadState();
+
+function loadState(){
+  try{const s=localStorage.getItem('crazy8s');if(s)return JSON.parse(s);} catch(e){}
+  return {pool:'',players:[],picks:{},results:{},currentPlayer:null};
+}
+function persist(){localStorage.setItem('crazy8s',JSON.stringify(state))}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2000)}
+
+function showTab(id){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelector(`.tab[onclick*="${id}"]`).classList.add('active');
+  document.getElementById('panel-'+id).classList.add('active');
+  if(id==='bracket')renderBracket();
+  if(id==='standings')renderStandings();
+  if(id==='players')renderPlayers();
+}
+
+function getMatchupKey(region,round,idx){return `${region}-R${round}-M${idx}`}
+
+function renderBracket(){
+  const el=document.getElementById('panel-bracket');
+  if(!state.currentPlayer && state.players.length){
+    state.currentPlayer=state.players[0];
+  }
+  let html='';
+  if(state.players.length>1){
+    html+=`<div style="padding:8px 4px 4px;display:flex;gap:6px;flex-wrap:wrap;align-items:center"><span style="font-size:11px;color:var(--muted);font-weight:600">PICKING FOR:</span>`;
+    state.players.forEach(p=>{
+      const active=p===state.currentPlayer?'background:var(--warm);color:#fff':'background:var(--card);border:1px solid var(--border)';
+      html+=`<button onclick="switchPlayer('${p}')" style="padding:5px 12px;border-radius:20px;font-size:12px;font-weight:600;border:none;cursor:pointer;${active};font-family:inherit">${p}</button>`;
+    });
+    html+=`</div>`;
+  }
+
+  REGIONS.forEach(region=>{
+    html+=`<div style="margin-top:12px"><div style="font-size:13px;font-weight:700;padding:4px;color:var(--warm)">${region} Region</div>`;
+    const teams=SAMPLE_TEAMS[region];
+    // Round of 64 (8 matchups)
+    for(let round=0;round<4;round++){
+      const matchCount=8>>round;
+      const rName=round===0?'Round of 64':round===1?'Round of 32':round===2?'Sweet 16':'Elite 8';
+      html+=`<div class="bracket-round"><div class="round-label">${rName} — ${ROUND_PTS[round]} pt${ROUND_PTS[round]>1?'s':''}</div>`;
+      for(let m=0;m<matchCount;m++){
+        const key=getMatchupKey(region,round,m);
+        const picks=state.currentPlayer?state.picks[state.currentPlayer]||{}:{};
+        const results=state.results;
+        let t1,t2;
+        if(round===0){
+          t1={seed:SEEDS_PER_REGION[m*2],name:teams[m*2]};
+          t2={seed:SEEDS_PER_REGION[m*2+1],name:teams[m*2+1]};
+        } else {
+          const prevKey1=getMatchupKey(region,round-1,m*2);
+          const prevKey2=getMatchupKey(region,round-1,m*2+1);
+          t1=picks[prevKey1]?{seed:'',name:picks[prevKey1]}:{seed:'',name:'TBD'};
+          t2=picks[prevKey2]?{seed:'',name:picks[prevKey2]}:{seed:'',name:'TBD'};
+        }
+        const picked=picks[key]||'';
+        const result=results[key]||'';
+        const t1w=picked===t1.name?'winner':'';
+        const t2w=picked===t2.name?'winner':'';
+        const t1e=result&&result!==t1.name?'eliminated':'';
+        const t2e=result&&result!==t2.name?'eliminated':'';
+        html+=`<div class="matchup">
+          <div class="matchup-team ${t1w} ${t1e}" onclick="pickTeam('${key}','${esc(t1.name)}')">
+            <span class="seed">${t1.seed}</span><span class="team-name">${t1.name}</span>${picked===t1.name?'<span class="pick-indicator">✓</span>':''}
+          </div>
+          <div class="matchup-team ${t2w} ${t2e}" onclick="pickTeam('${key}','${esc(t2.name)}')">
+            <span class="seed">${t2.seed}</span><span class="team-name">${t2.name}</span>${picked===t2.name?'<span class="pick-indicator">✓</span>':''}
+          </div>
+        </div>`;
+      }
+      html+=`</div>`;
+    }
+    html+=`</div>`;
+  });
+  // Final Four
+  html+=`<div style="margin-top:16px;padding:12px;background:var(--warm-bg);border-radius:10px">
+    <div style="font-size:13px;font-weight:700;color:var(--warm);margin-bottom:8px">🏆 Final Four & Championship</div>
+    <div style="font-size:12px;color:var(--muted)">Winners from each region advance here. Pick your champion above!</div>
+  </div>`;
+  el.innerHTML=html;
+}
+
+function esc(s){return s.replace(/'/g,"\\'")}
+
+function switchPlayer(p){state.currentPlayer=p;renderBracket()}
+
+function pickTeam(key,team){
+  if(!state.currentPlayer){toast('Add a player first');return}
+  if(team==='TBD')return;
+  if(!state.picks[state.currentPlayer])state.picks[state.currentPlayer]={};
+  state.picks[state.currentPlayer][key]=team;
+  persist();renderBracket();
+}
+
+function renderStandings(){
+  const el=document.getElementById('panel-standings');
+  if(!state.players.length){el.innerHTML='<div class="empty-state">Add players in Setup tab</div>';return}
+  const scores=state.players.map(p=>{
+    const picks=state.picks[p]||{};
+    const results=state.results;
+    let pts=0,correct=0,total=0;
+    Object.keys(results).forEach(key=>{
+      total++;
+      if(picks[key]===results[key]){
+        const round=parseInt(key.split('-R')[1]);
+        pts+=ROUND_PTS[round]||0;
+        correct++;
+      }
+    });
+    return {name:p,pts,correct,total};
+  }).sort((a,b)=>b.pts-a.pts);
+  let html='';
+  scores.forEach((s,i)=>{
+    html+=`<div class="player-row">
+      <div class="player-rank ${i===0?'first':''}">${i+1}</div>
+      <div class="player-info"><div class="player-name">${s.name}</div><div class="player-correct">${s.correct}/${s.total} correct</div></div>
+      <div class="player-pts">${s.pts}</div>
+    </div>`;
+  });
+  if(!Object.keys(state.results).length)html+=`<div style="text-align:center;padding:16px;font-size:12px;color:var(--muted)">No results entered yet — scores update as games finish</div>`;
+  el.innerHTML=html;
+}
+
+function renderPlayers(){
+  const el=document.getElementById('panel-players');
+  if(!state.players.length){el.innerHTML='<div class="empty-state">No players yet — add them in Setup</div>';return}
+  let html='';
+  state.players.forEach(p=>{
+    const picks=state.picks[p]||{};
+    const count=Object.keys(picks).length;
+    html+=`<div style="display:flex;align-items:center;justify-content:space-between;padding:12px;background:var(--card);border:1px solid var(--border);border-radius:10px;margin-bottom:6px">
+      <div><div style="font-size:14px;font-weight:600">${p}</div><div style="font-size:11px;color:var(--muted)">${count} picks made</div></div>
+      <button class="btn btn-sm btn-outline" onclick="switchPlayer('${esc(p)}');showTab('bracket')">View Picks</button>
+    </div>`;
+  });
+  el.innerHTML=html;
+}
+
+function addPlayer(){
+  const input=document.getElementById('newPlayer');
+  const name=input.value.trim();
+  if(!name)return;
+  if(state.players.includes(name)){toast('Already added');return}
+  state.players.push(name);
+  if(!state.currentPlayer)state.currentPlayer=name;
+  input.value='';
+  persist();renderSettings();toast(name+' added');
+}
+
+function removePlayer(p){
+  state.players=state.players.filter(x=>x!==p);
+  delete state.picks[p];
+  if(state.currentPlayer===p)state.currentPlayer=state.players[0]||null;
+  persist();renderSettings();
+}
+
+function renderSettings(){
+  const list=document.getElementById('playerList');
+  list.innerHTML=state.players.map(p=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:var(--card);border:1px solid var(--border);border-radius:8px;margin-bottom:4px;font-size:13px">
+    <span>${p}</span><button onclick="removePlayer('${esc(p)}')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:16px">&times;</button>
+  </div>`).join('');
+  document.getElementById('poolName').value=state.pool||'';
+}
+
+function saveState(){
+  state.pool=document.getElementById('poolName').value;
+  persist();toast('Saved ✓');
+}
+
+function shareFile(){
+  const blob=new Blob([document.documentElement.outerHTML],{type:'text/html'});
+  const file=new File([blob],'crazy-8s-bracket.html',{type:'text/html'});
+  if(navigator.canShare&&navigator.canShare({files:[file]})){
+    navigator.share({files:[file],title:'Crazy 8s Bracket'});
+  } else {
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=file.name;a.click();
+    toast('File downloaded — send it to your group');
+  }
+}
+
+function resetAll(){if(confirm('Reset everything?')){localStorage.removeItem('crazy8s');state={pool:'',players:[],picks:{},results:{},currentPlayer:null};persist();renderSettings();renderBracket();toast('Reset')}}
+
+// Init
+renderSettings();renderBracket();
+document.getElementById('headerSub').textContent=state.pool||'Set up your pool in Setup tab';
+document.getElementById('poolName').addEventListener('change',()=>{state.pool=document.getElementById('poolName').value;persist();document.getElementById('headerSub').textContent=state.pool});
+</script>
+</body>
+</html>

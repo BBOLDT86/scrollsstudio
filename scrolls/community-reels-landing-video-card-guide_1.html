@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Video Card Kit — Directions</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1612;
+    --paper: #f6f1ea;
+    --accent: #c44b2b;
+    --accent2: #2b6b8a;
+    --muted: #8a7e72;
+    --card: #fffcf7;
+    --border: #e0d6c8;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--paper); color: var(--ink);
+    line-height: 1.65; -webkit-text-size-adjust: 100%;
+    padding: 0 0 80px 0;
+  }
+  .hero {
+    background: linear-gradient(165deg, #1a1612 0%, #2b2420 40%, #3d2e26 100%);
+    color: var(--paper); padding: 60px 28px 50px;
+    position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; top: -40%; left: -20%; width: 140%; height: 180%;
+    background: radial-gradient(ellipse at 30% 50%, rgba(196,75,43,0.15) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 30%, rgba(43,107,138,0.1) 0%, transparent 50%);
+    pointer-events: none;
+  }
+  .hero-label {
+    font-size: 11px; letter-spacing: 3px; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 16px; font-weight: 500;
+  }
+  .hero h1 {
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(36px, 8vw, 52px); font-weight: 400; line-height: 1.1; margin-bottom: 16px;
+  }
+  .hero h1 em { color: var(--accent); font-style: italic; }
+  .hero p { font-size: 15px; color: #b8ad9e; max-width: 440px; font-weight: 300; }
+
+  .content { max-width: 640px; margin: 0 auto; padding: 0 24px; }
+
+  .section { margin-top: 48px; }
+  .section-num {
+    display: inline-block; width: 32px; height: 32px;
+    background: var(--accent); color: white; border-radius: 50%;
+    text-align: center; line-height: 32px; font-size: 14px;
+    font-weight: 600; margin-bottom: 12px;
+  }
+  .section h2 {
+    font-family: 'Instrument Serif', serif;
+    font-size: 26px; font-weight: 400; margin-bottom: 8px; line-height: 1.2;
+  }
+  .section p { font-size: 14.5px; color: #4a4239; margin-bottom: 12px; }
+
+  .card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 14px; padding: 22px 20px; margin: 16px 0; position: relative;
+  }
+  .card.warn { border-left: 4px solid var(--accent); }
+  .card.tip { border-left: 4px solid var(--accent2); }
+  .card-label {
+    font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+    font-weight: 600; margin-bottom: 8px;
+  }
+  .card.warn .card-label { color: var(--accent); }
+  .card.tip .card-label { color: var(--accent2); }
+  .card p { font-size: 13.5px; color: #5a5249; }
+
+  .flow { display: flex; flex-direction: column; gap: 0; margin: 20px 0; }
+  .flow-step {
+    display: flex; align-items: flex-start; gap: 16px;
+    padding: 16px 0; border-bottom: 1px solid var(--border);
+  }
+  .flow-step:last-child { border-bottom: none; }
+  .flow-icon {
+    width: 40px; height: 40px; min-width: 40px;
+    background: linear-gradient(135deg, var(--accent), #d4663a);
+    border-radius: 10px; display: flex; align-items: center;
+    justify-content: center; font-size: 18px; color: white;
+  }
+  .flow-step:nth-child(even) .flow-icon {
+    background: linear-gradient(135deg, var(--accent2), #3a8aaa);
+  }
+  .flow-text h3 { font-size: 14.5px; font-weight: 600; margin-bottom: 3px; }
+  .flow-text p { font-size: 13px; color: var(--muted); margin: 0; }
+
+  .arch-diagram {
+    background: var(--ink); border-radius: 14px;
+    padding: 28px 20px; margin: 20px 0; text-align: center; color: var(--paper);
+  }
+  .arch-diagram .master-node {
+    display: inline-block; background: var(--accent); color: white;
+    padding: 10px 22px; border-radius: 10px; font-weight: 600;
+    font-size: 13px; letter-spacing: 0.5px; margin-bottom: 4px;
+  }
+  .arch-diagram .master-sub {
+    font-size: 11px; color: #8a7e72; margin-bottom: 16px;
+  }
+  .arch-diagram .connector { display: flex; justify-content: center; gap: 4px; margin: 8px 0; }
+  .arch-diagram .dot { width: 4px; height: 4px; background: var(--muted); border-radius: 50%; }
+  .sat-row { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
+  .sat-node {
+    background: var(--accent2); color: white;
+    padding: 8px 14px; border-radius: 8px; font-size: 11px; font-weight: 500;
+  }
+
+  .file-list { margin: 16px 0; }
+  .file-item {
+    display: flex; align-items: center; gap: 14px;
+    padding: 14px 16px; background: var(--card); border: 1px solid var(--border);
+    border-radius: 10px; margin-bottom: 8px;
+  }
+  .file-icon {
+    width: 36px; height: 36px; min-width: 36px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; font-weight: 700;
+  }
+  .file-icon.master { background: #fce8e3; color: var(--accent); }
+  .file-icon.sat { background: #e3f0f6; color: var(--accent2); }
+  .file-name { font-size: 14px; font-weight: 600; }
+  .file-desc { font-size: 12px; color: var(--muted); }
+
+  .limits-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 16px 0; }
+  .limit-box {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 10px; padding: 16px 14px; text-align: center;
+  }
+  .limit-val {
+    font-family: 'Instrument Serif', serif;
+    font-size: 28px; color: var(--accent); line-height: 1; margin-bottom: 4px;
+  }
+  .limit-label {
+    font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px;
+  }
+
+  .split-roles {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 20px 0;
+  }
+  .role-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 14px; padding: 20px 18px;
+  }
+  .role-card h3 { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+  .role-card p { font-size: 12.5px; color: #5a5249; margin: 0; }
+  .role-card .device {
+    display: inline-block; background: #f0e9df; padding: 3px 10px;
+    border-radius: 6px; font-size: 10px; font-weight: 600;
+    color: var(--accent); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px;
+  }
+
+  .faq { margin-top: 48px; }
+  .faq h2 { font-family: 'Instrument Serif', serif; font-size: 26px; margin-bottom: 16px; }
+  .faq-item { border-bottom: 1px solid var(--border); padding: 14px 0; }
+  .faq-q { font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+  .faq-a { font-size: 13.5px; color: #5a5249; }
+
+  .footer {
+    margin-top: 60px; padding-top: 24px; border-top: 1px solid var(--border);
+    text-align: center; font-size: 12px; color: var(--muted);
+  }
+  @media (max-width: 480px) {
+    .split-roles { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div style="position:relative;z-index:1;max-width:640px;margin:0 auto;">
+    <div class="hero-label">Video Card Kit</div>
+    <h1>Full HD <em>video cards</em> via&nbsp;group&nbsp;text</h1>
+    <p>A serverless system for group video greeting cards. Participants record on their phones, the coordinator assembles on a laptop. No apps, no accounts, no servers.</p>
+  </div>
+</div>
+
+<div class="content">
+
+  <!-- HOW IT WORKS -->
+  <div class="section">
+    <div class="section-num">1</div>
+    <h2>How It Works</h2>
+    <p>Two HTML files work together — a <strong>Satellite Recorder</strong> (phones) and a <strong>Master Card Builder</strong> (laptop). Participants record full HD video on their phones, send the file back, and the coordinator loads them all on a laptop to build the final card.</p>
+
+    <div class="split-roles">
+      <div class="role-card">
+        <div class="device">Phones</div>
+        <h3>Satellite Recorder</h3>
+        <p>Each participant opens this to record up to 90 seconds of 1080p video. Generates a self-contained ~30–90 MB HTML file they send back.</p>
+      </div>
+      <div class="role-card">
+        <div class="device">Laptop</div>
+        <h3>Master Card Builder</h3>
+        <p>The coordinator drag-and-drops all satellite files onto this page. Previews the card, then exports a single HTML file to send to the recipient.</p>
+      </div>
+    </div>
+
+    <div class="arch-diagram">
+      <div class="master-node">MASTER CARD (Laptop)</div>
+      <div class="master-sub">drag &amp; drop • preview • export</div>
+      <div class="connector">
+        <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+      </div>
+      <div style="font-size:10px;color:#8a7e72;margin:8px 0;letter-spacing:1px;">SATELLITES — recorded on phones, ~30–90 MB each</div>
+      <div class="sat-row">
+        <div class="sat-node">Sarah.html</div>
+        <div class="sat-node">Mike.html</div>
+        <div class="sat-node">Jess.html</div>
+        <div class="sat-node">Tom.html</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- THE FILES -->
+  <div class="section">
+    <div class="section-num">2</div>
+    <h2>Your Kit — Two Files</h2>
+    <p>You should have received these alongside this guide:</p>
+
+    <div class="file-list">
+      <div class="file-item">
+        <div class="file-icon master">M</div>
+        <div>
+          <div class="file-name">master-card.html</div>
+          <div class="file-desc">Open on your laptop in Chrome/Safari/Edge. Loads satellites via drag-and-drop.</div>
+        </div>
+      </div>
+      <div class="file-item">
+        <div class="file-icon sat">S</div>
+        <div>
+          <div class="file-name">satellite-recorder.html</div>
+          <div class="file-desc">Send to each participant's phone. They record, it creates their ~30–90 MB file.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SPECS -->
+  <div class="section">
+    <div class="section-num">3</div>
+    <h2>Specs &amp; Constraints</h2>
+    <p>Satellites are designed for high quality. The master runs on a laptop to handle the large files comfortably.</p>
+
+    <div class="limits-grid">
+      <div class="limit-box">
+        <div class="limit-val">90s</div>
+        <div class="limit-label">Max clip length</div>
+      </div>
+      <div class="limit-box">
+        <div class="limit-val">1080p</div>
+        <div class="limit-label">Video resolution</div>
+      </div>
+      <div class="limit-box">
+        <div class="limit-val">~90MB</div>
+        <div class="limit-label">Max per satellite</div>
+      </div>
+      <div class="limit-box">
+        <div class="limit-val">8 Mbps</div>
+        <div class="limit-label">Video bitrate</div>
+      </div>
+    </div>
+
+    <div class="card warn">
+      <div class="card-label">File Size Warning</div>
+      <p>Each satellite file can be 30–90 MB. With 8 people, the final card could be 500+ MB. This is too large for iMessage (which caps around 100 MB). <strong>Use AirDrop, Google Drive, Dropbox, or email</strong> to send the final assembled card to the recipient. Individual satellites can be sent back via AirDrop or cloud link — iMessage may compress or reject them above ~100 MB.</p>
+    </div>
+  </div>
+
+  <!-- STEP BY STEP -->
+  <div class="section">
+    <div class="section-num">4</div>
+    <h2>Step-by-Step Flow</h2>
+
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-icon">👤</div>
+        <div class="flow-text">
+          <h3>Coordinator: Text the recorder</h3>
+          <p>Send <strong>satellite-recorder.html</strong> to the group chat. Tell everyone: "Open this, record a video for [Name], then send the file back to me."</p>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="flow-icon">🎬</div>
+        <div class="flow-text">
+          <h3>Each person: Record on your phone</h3>
+          <p>Open the satellite file. Enter your name. Tap record. Speak your message (up to 90 seconds). Tap stop. Review it. Tap "Save &amp; Share" — it creates a file named after you. Send it back via <strong>AirDrop</strong> (fastest) or save to Files and share via cloud link.</p>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="flow-icon">📥</div>
+        <div class="flow-text">
+          <h3>Coordinator: Collect on your laptop</h3>
+          <p>Gather all satellite HTML files into a folder on your laptop. AirDrop directly to your Mac, or download from shared cloud links. You'll have: Sarah.html, Mike.html, etc.</p>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="flow-icon">💻</div>
+        <div class="flow-text">
+          <h3>Coordinator: Build on your laptop</h3>
+          <p>Open <strong>master-card.html</strong> in Chrome or Safari on your laptop. Set the recipient name, occasion, and theme. Then <strong>drag-and-drop</strong> all the satellite files onto the drop zone (or use the file picker). The master reads each one and shows them in a grid.</p>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="flow-icon">👁️</div>
+        <div class="flow-text">
+          <h3>Coordinator: Preview</h3>
+          <p>Click "Preview Card" to see exactly what the recipient will see. Click each video tile to play. Go back and adjust if needed — reorder, remove, or add more files.</p>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="flow-icon">🎁</div>
+        <div class="flow-text">
+          <h3>Coordinator: Export &amp; send</h3>
+          <p>Click "Export Final Card." It downloads a single self-contained HTML file. Send this to the recipient via AirDrop, Google Drive link, Dropbox, or email attachment. They open it in any browser — works forever, no internet needed.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DELIVERY OPTIONS -->
+  <div class="section">
+    <div class="section-num">5</div>
+    <h2>Sending Large Files</h2>
+    <p>Since files are 30–90 MB each (and the final card can be hundreds of MB), here are the best transfer methods:</p>
+
+    <div class="card tip">
+      <div class="card-label">AirDrop (Best for Apple devices)</div>
+      <p>Instant, no size limits, no compression. Works phone→laptop and laptop→phone. The ideal way for participants to return satellite files and for you to send the final card.</p>
+    </div>
+
+    <div class="card tip">
+      <div class="card-label">Cloud Links (Universal)</div>
+      <p>Upload to Google Drive, iCloud Drive, or Dropbox. Share a link. Works across all devices and platforms. Best option if any participants are on Android.</p>
+    </div>
+
+    <div class="card tip">
+      <div class="card-label">Email (Up to ~25 MB)</div>
+      <p>Works for shorter clips (~15–20 seconds). Most email providers cap attachments at 25 MB, but Gmail/Outlook auto-convert to a cloud link for larger files.</p>
+    </div>
+
+    <div class="card warn">
+      <div class="card-label">iMessage Limits</div>
+      <p>iMessage works fine for sending the small <strong>satellite-recorder.html</strong> file (~30 KB) to the group. But the <strong>returned satellite files</strong> (30–90 MB each) and the <strong>final card</strong> may exceed iMessage's ~100 MB limit. Use AirDrop or cloud links for those.</p>
+    </div>
+  </div>
+
+  <!-- TECH NOTES -->
+  <div class="section">
+    <div class="section-num">6</div>
+    <h2>Technical Notes</h2>
+
+    <div class="card">
+      <p><strong>Video encoding:</strong> The recorder captures 1080p at 8 Mbps video / 128 kbps audio using the phone's native MediaRecorder codec (H.264 on iPhone, VP9 on most Android). Video is base64-encoded and embedded directly inside the HTML file.</p>
+    </div>
+    <div class="card">
+      <p><strong>One name, one clip:</strong> The master deduplicates by name. If someone sends two versions, loading the newer file replaces the older one.</p>
+    </div>
+    <div class="card">
+      <p><strong>Self-contained:</strong> Every file — satellite and final card — is a single HTML file with all video data embedded. No internet required to view. No links to expire. Works on any device with a browser.</p>
+    </div>
+    <div class="card">
+      <p><strong>Privacy:</strong> Nothing is uploaded to any server. All processing happens on-device. Videos only exist inside the HTML files on the participants' devices and wherever you choose to store/send them.</p>
+    </div>
+    <div class="card">
+      <p><strong>Browser requirements:</strong> The recorder needs a modern mobile browser (Safari 14+, Chrome 80+). The master works best in Chrome, Safari, Edge, or Firefox on a laptop. The final card plays in any modern browser.</p>
+    </div>
+  </div>
+
+  <!-- FAQ -->
+  <div class="faq">
+    <h2>Common Questions</h2>
+    <div class="faq-item">
+      <div class="faq-q">Can I re-record if I don't like my take?</div>
+      <div class="faq-a">Yes. Hit "Re-record" in the satellite. It replaces your previous clip. Only the latest file you send back counts.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">How long can my clip be?</div>
+      <div class="faq-a">Up to 90 seconds. A 90-second clip at full quality will be roughly 70–90 MB. Shorter clips (15–30s) will be 15–30 MB and easier to transfer.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Does this work on Android?</div>
+      <div class="faq-a">The recorder works on Android Chrome. The sharing flow differs — use your cloud app or messaging app instead of AirDrop. The master and final card work the same on any device.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Why does the master need a laptop?</div>
+      <div class="faq-a">Loading multiple 30–90 MB files in a mobile browser can cause crashes or extreme slowness. A laptop has the memory and processing power to handle hundreds of MB of embedded video comfortably. The drag-and-drop interface is also much easier with a trackpad/mouse.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Can the recipient see who contributed?</div>
+      <div class="faq-a">Yes. Each video shows as a tile with the person's name and optional written message. They tap/click to play each one.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">What if someone's file is corrupted?</div>
+      <div class="faq-a">The master will skip unreadable files and warn you. Have that person re-record and re-send.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">What's the max number of people?</div>
+      <div class="faq-a">Practically 8–10 at full 90-second clips (the final card would be ~700 MB). With shorter 15–30 second clips, you could fit 15–20 people easily. The laptop browser's memory is the bottleneck — 8 GB RAM laptops can handle about 1 GB of embedded video.</div>
+    </div>
+  </div>
+
+  <div class="footer">
+    Video Card Kit — Serverless group video cards<br>
+    Phones record. Laptop assembles. No servers. No apps. Just HTML.
+  </div>
+
+</div>
+</body>
+</html>

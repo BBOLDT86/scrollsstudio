@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Calendar — DocChain</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0A0C14;--bg-s:#10131F;--bg-c:#141829;--bg-ch:#1A1F35;
+  --ink:#F0F2F5;--ink-s:#A8B2C1;--ink-m:#5E6B80;--ink-f:#3A4356;
+  --accent:#3B82F6;--al:rgba(59,130,246,.12);
+  --warm:#F59E0B;--wl:rgba(245,158,11,.1);
+  --ok:#10B981;--ol:rgba(16,185,129,.1);
+  --purple:#8B5CF6;--pl:rgba(139,92,246,.1);
+  --rose:#F43F5E;--rl:rgba(244,63,94,.1);
+  --cyan:#06B6D4;--cl:rgba(6,182,212,.1);
+  --rule:rgba(255,255,255,.06);--r:14px;--rs:8px;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Geist','Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+button{cursor:pointer;font-family:inherit}
+input,textarea,select{font-family:inherit;font-size:inherit}
+
+.dc-topbar{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:.65rem 1.2rem;background:rgba(10,12,20,.92);backdrop-filter:blur(16px);border-bottom:1px solid var(--rule)}
+.dc-topbar .logo{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:.82rem;letter-spacing:.05em;color:var(--ink)}
+.dc-topbar .logo span{color:var(--accent)}
+.dc-topbar .back{font-size:.72rem;color:var(--ink-m);padding:.3rem .7rem;border:1px solid var(--rule);border-radius:6px;transition:all .2s}
+.dc-topbar .back:hover{border-color:var(--accent);color:var(--accent);text-decoration:none}
+.dc-topbar .app-name{font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-m);font-family:'IBM Plex Mono',monospace}
+
+.cal-wrap{max-width:900px;margin:0 auto;padding:1rem}
+.cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
+.cal-header h2{font-size:1.2rem;font-weight:500}
+.cal-header button{background:var(--bg-c);border:1px solid var(--rule);color:var(--ink-s);padding:.4rem .8rem;border-radius:6px;font-size:.78rem}
+.cal-header button:hover{border-color:var(--accent);color:var(--accent)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--rule);border-radius:var(--r);overflow:hidden}
+.cal-day-h{background:var(--bg-c);padding:.4rem;text-align:center;font-size:.65rem;font-family:'IBM Plex Mono',monospace;color:var(--ink-m);text-transform:uppercase;letter-spacing:.1em}
+.cal-day{background:var(--bg-s);min-height:90px;padding:.4rem;font-size:.75rem;cursor:pointer;transition:background .15s}
+.cal-day:hover{background:var(--bg-ch)}
+.cal-day.today{box-shadow:inset 0 2px 0 var(--accent)}
+.cal-day.other{opacity:.35}
+.cal-day .num{font-weight:600;font-size:.72rem;margin-bottom:.3rem}
+.cal-day .ev{background:var(--al);color:var(--accent);padding:.15rem .35rem;border-radius:4px;font-size:.62rem;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cal-day .ev.green{background:var(--ol);color:var(--ok)}
+.cal-day .ev.purple{background:var(--pl);color:var(--purple)}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;align-items:center;justify-content:center}
+.modal-overlay.show{display:flex}
+.modal{background:var(--bg-c);border:1px solid var(--rule);border-radius:var(--r);padding:1.5rem;width:340px;max-width:90vw}
+.modal h3{font-size:.95rem;margin-bottom:1rem}
+.modal input,.modal select{width:100%;background:var(--bg);border:1px solid var(--rule);color:var(--ink);padding:.45rem .6rem;border-radius:6px;margin-bottom:.6rem;font-size:.82rem}
+.modal .btns{display:flex;gap:6px;margin-top:.6rem}
+.modal .btns button{flex:1;padding:.45rem;border-radius:6px;border:1px solid var(--rule);font-size:.78rem}
+.modal .btns .primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+</style>
+</head><body>
+<nav class="dc-topbar">
+  <a href="index.html" class="logo">Doc<span>Chain</span></a>
+  <span class="app-name">Calendar</span>
+  <a href="index.html" class="back">← Hub</a>
+</nav>
+
+<div class="cal-wrap">
+  <div class="cal-header">
+    <button onclick="nav(-1)">← Prev</button>
+    <h2 id="monthLabel"></h2>
+    <button onclick="nav(1)">Next →</button>
+  </div>
+  <div class="cal-grid" id="calGrid"></div>
+</div>
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <h3>Add Event</h3>
+    <input id="evTitle" placeholder="Event title">
+    <input id="evTime" type="time" value="09:00">
+    <select id="evColor"><option value="">Blue</option><option value="green">Green</option><option value="purple">Purple</option></select>
+    <div class="btns">
+      <button onclick="closeModal()">Cancel</button>
+      <button class="primary" onclick="saveEv()">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let curYear=new Date().getFullYear(),curMonth=new Date().getMonth();
+let events=JSON.parse(localStorage.getItem('dc_cal')||'{}');
+let selDate='';
+const DAYS=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+function nav(d){curMonth+=d;if(curMonth>11){curMonth=0;curYear++}if(curMonth<0){curMonth=11;curYear--}render()}
+function render(){
+  document.getElementById('monthLabel').textContent=MONTHS[curMonth]+' '+curYear;
+  const g=document.getElementById('calGrid');
+  let h=DAYS.map(d=>`<div class="cal-day-h">${d}</div>`).join('');
+  const first=new Date(curYear,curMonth,1).getDay();
+  const dim=new Date(curYear,curMonth+1,0).getDate();
+  const prev=new Date(curYear,curMonth,0).getDate();
+  const today=new Date();
+  for(let i=0;i<first;i++){h+=`<div class="cal-day other"><div class="num">${prev-first+1+i}</div></div>`}
+  for(let d=1;d<=dim;d++){
+    const key=`${curYear}-${String(curMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isToday=today.getFullYear()===curYear&&today.getMonth()===curMonth&&today.getDate()===d;
+    const evs=(events[key]||[]).map(e=>`<div class="ev ${e.color||''}">${e.time} ${e.title}</div>`).join('');
+    h+=`<div class="cal-day${isToday?' today':''}" onclick="openModal('${key}')"><div class="num">${d}</div>${evs}</div>`;
+  }
+  const rem=(first+dim)%7;if(rem)for(let i=1;i<=7-rem;i++)h+=`<div class="cal-day other"><div class="num">${i}</div></div>`;
+  g.innerHTML=h;
+}
+function openModal(d){selDate=d;document.getElementById('modal').classList.add('show');document.getElementById('evTitle').value='';document.getElementById('evTitle').focus()}
+function closeModal(){document.getElementById('modal').classList.remove('show')}
+function saveEv(){
+  const t=document.getElementById('evTitle').value.trim();if(!t)return;
+  if(!events[selDate])events[selDate]=[];
+  events[selDate].push({title:t,time:document.getElementById('evTime').value,color:document.getElementById('evColor').value});
+  localStorage.setItem('dc_cal',JSON.stringify(events));closeModal();render();
+}
+render();
+</script>
+</body></html>

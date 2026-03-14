@@ -1,0 +1,1167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>SaaS OS — 132 Apps in One File</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300;1,9..40,400&display=swap" rel="stylesheet">
+<style>
+:root{
+--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:rgba(255,255,255,0.08);
+--text:#f0f2f5;--text-mid:#a0a4b0;--text-dim:#606474;
+--green:#1a8a5c;--blue:#4a7aff;--warm:#c4723a;--purple:#7c5cbf;
+--taskbar-h:48px;--title-h:36px;--radius:12px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{width:100%;height:100%;overflow:hidden;font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;user-select:none;}
+
+/* ─── Desktop ─── */
+#desktop{position:absolute;inset:0;bottom:var(--taskbar-h);overflow:hidden;
+background:var(--bg);
+background-image:
+radial-gradient(circle at 20% 50%,rgba(74,122,255,0.03) 0%,transparent 50%),
+radial-gradient(circle at 80% 20%,rgba(124,92,191,0.03) 0%,transparent 50%),
+repeating-linear-gradient(rgba(255,255,255,0.015) 0 1px,transparent 1px 60px),
+repeating-linear-gradient(90deg,rgba(255,255,255,0.015) 0 1px,transparent 1px 60px);
+}
+
+#iconGrid{position:absolute;inset:12px;display:grid;grid-template-columns:repeat(auto-fill,90px);grid-template-rows:repeat(auto-fill,100px);gap:4px;align-content:start;padding:8px;}
+.icon{display:flex;flex-direction:column;align-items:center;gap:5px;padding:6px 4px;border-radius:10px;cursor:pointer;transition:background .15s;}
+.icon:hover{background:rgba(255,255,255,0.06);}
+.icon.selected{background:rgba(74,122,255,0.15);outline:1px solid rgba(74,122,255,0.3);border-radius:10px;}
+.icon-sq{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:'Instrument Serif',serif;font-size:1.05rem;font-weight:400;color:#fff;letter-spacing:-0.5px;transition:transform .15s;}
+.icon:hover .icon-sq{transform:scale(1.08);}
+.icon-label{font-size:0.66rem;color:var(--text-mid);text-align:center;line-height:1.2;max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
+/* ─── Taskbar ─── */
+#taskbar{position:absolute;bottom:0;left:0;right:0;height:var(--taskbar-h);background:var(--surface);border-top:1px solid var(--border);display:flex;align-items:center;z-index:500;padding:0 12px;}
+#tbStart{width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,var(--blue),var(--purple));display:flex;align-items:center;justify-content:center;cursor:pointer;font-family:'Instrument Serif',serif;font-size:0.8rem;color:#fff;margin-right:12px;transition:transform .15s,box-shadow .15s;flex-shrink:0;}
+#tbStart:hover{transform:scale(1.05);box-shadow:0 0 16px rgba(74,122,255,0.3);}
+#tbApps{display:flex;gap:3px;flex:1;overflow-x:auto;align-items:center;}
+.tb-btn{height:34px;padding:0 12px;display:flex;align-items:center;gap:6px;border-radius:6px;cursor:pointer;font-size:0.72rem;color:var(--text-mid);transition:background .12s;white-space:nowrap;flex-shrink:0;}
+.tb-btn:hover{background:rgba(255,255,255,0.06);}
+.tb-btn.active{background:rgba(255,255,255,0.08);color:var(--text);}
+.tb-btn.active::after{content:'';position:absolute;bottom:-1px;left:30%;right:30%;height:2px;border-radius:1px;}
+.tb-btn .tb-dot{width:6px;height:6px;border-radius:2px;flex-shrink:0;}
+#tbClock{font-size:0.74rem;color:var(--text-dim);margin-left:auto;padding:0 8px;flex-shrink:0;font-variant-numeric:tabular-nums;}
+#tbBell{width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;border-radius:6px;font-size:0.85rem;flex-shrink:0;}
+#tbBell:hover{background:rgba(255,255,255,0.06);}
+
+/* ─── Windows ─── */
+.window{position:absolute;border-radius:var(--radius);border:1px solid var(--border);box-shadow:0 8px 40px rgba(0,0,0,0.4);overflow:hidden;display:flex;flex-direction:column;min-width:400px;min-height:300px;transition:box-shadow .2s;}
+.window.focused{box-shadow:0 12px 60px rgba(0,0,0,0.5);z-index:100;}
+.win-title{height:var(--title-h);display:flex;align-items:center;padding:0 12px;cursor:move;flex-shrink:0;}
+.win-title-text{font-family:'Instrument Serif',serif;font-size:0.88rem;color:#fff;flex:1;margin-left:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.win-controls{display:flex;gap:7px;margin-left:8px;}
+.win-ctrl{width:13px;height:13px;border-radius:50%;cursor:pointer;transition:opacity .12s;opacity:0.7;}
+.win-ctrl:hover{opacity:1;}
+.win-ctrl.close{background:#ff5f57;}
+.win-ctrl.min{background:#febc2e;}
+.win-ctrl.max{background:#28c840;}
+.win-body{flex:1;overflow:auto;position:relative;}
+
+/* Resize handles */
+.win-resize{position:absolute;z-index:2;}
+.win-resize.r{right:-3px;top:10px;bottom:10px;width:6px;cursor:ew-resize;}
+.win-resize.b{bottom:-3px;left:10px;right:10px;height:6px;cursor:ns-resize;}
+.win-resize.rb{right:-3px;bottom:-3px;width:14px;height:14px;cursor:nwse-resize;}
+
+/* ─── App Launcher Overlay ─── */
+#launcher{position:fixed;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);z-index:900;display:none;flex-direction:column;align-items:center;padding:48px 24px 24px;overflow-y:auto;}
+#launcher.open{display:flex;}
+#launcherSearch{width:100%;max-width:480px;padding:12px 20px;border-radius:12px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.06);color:var(--text);font-size:0.95rem;font-family:'DM Sans',sans-serif;outline:none;margin-bottom:20px;transition:border-color .2s;}
+#launcherSearch:focus{border-color:rgba(255,255,255,0.25);}
+#launcherSearch::placeholder{color:var(--text-dim);}
+#catBar{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-bottom:24px;max-width:900px;}
+.cat-btn{padding:5px 14px;border-radius:20px;font-size:0.72rem;font-weight:500;letter-spacing:0.5px;cursor:pointer;border:1px solid rgba(255,255,255,0.1);color:var(--text-dim);background:transparent;transition:all .15s;text-transform:uppercase;}
+.cat-btn:hover{border-color:rgba(255,255,255,0.2);color:var(--text-mid);}
+.cat-btn.active{background:rgba(255,255,255,0.1);border-color:rgba(255,255,255,0.2);color:var(--text);}
+#launcherGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;width:100%;max-width:1100px;}
+.launch-card{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:16px 12px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;transition:all .2s;}
+.launch-card:hover{background:rgba(255,255,255,0.08);border-color:rgba(255,255,255,0.12);transform:translateY(-2px);}
+.launch-sq{width:44px;height:44px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-family:'Instrument Serif',serif;font-size:0.95rem;color:#fff;}
+.launch-name{font-size:0.76rem;color:var(--text);text-align:center;line-height:1.25;font-weight:500;}
+.launch-vendor{font-size:0.62rem;color:var(--text-dim);text-align:center;}
+
+/* ─── Context Menu ─── */
+#ctxMenu{position:fixed;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:4px;z-index:950;display:none;box-shadow:0 8px 30px rgba(0,0,0,0.4);min-width:160px;}
+.ctx-item{padding:7px 14px;font-size:0.78rem;color:var(--text-mid);cursor:pointer;border-radius:5px;transition:background .1s;}
+.ctx-item:hover{background:rgba(255,255,255,0.06);color:var(--text);}
+.ctx-sep{height:1px;background:var(--border);margin:3px 8px;}
+
+/* ─── Shared App Styles ─── */
+.app-sidebar{width:220px;border-right:1px solid var(--border);padding:12px;overflow-y:auto;flex-shrink:0;font-size:0.78rem;}
+.app-sidebar h4{font-family:'Instrument Serif',serif;font-weight:400;font-size:0.9rem;margin-bottom:10px;color:var(--app-text,#f0f2f5);}
+.app-sidebar .si{padding:6px 10px;border-radius:6px;cursor:pointer;margin-bottom:2px;color:var(--app-text-dim,#a0a4b0);transition:background .1s;display:flex;align-items:center;gap:8px;}
+.app-sidebar .si:hover{background:rgba(255,255,255,0.05);}
+.app-sidebar .si.active{background:rgba(255,255,255,0.08);color:var(--app-text,#f0f2f5);}
+.app-sidebar .badge{margin-left:auto;background:var(--app-primary,#4a7aff);color:#fff;font-size:0.6rem;padding:1px 6px;border-radius:10px;font-weight:600;}
+.app-main{flex:1;padding:16px 20px;overflow-y:auto;}
+.app-main h2{font-family:'Instrument Serif',serif;font-weight:400;font-size:1.4rem;margin-bottom:12px;}
+.app-main h3{font-family:'Instrument Serif',serif;font-weight:400;font-size:1.1rem;margin-bottom:8px;}
+
+/* App table */
+.app-table{width:100%;border-collapse:collapse;font-size:0.76rem;}
+.app-table th{text-align:left;padding:8px 10px;border-bottom:1px solid var(--border);color:var(--app-text-dim,#606474);font-weight:500;font-size:0.68rem;text-transform:uppercase;letter-spacing:0.5px;}
+.app-table td{padding:8px 10px;border-bottom:1px solid rgba(255,255,255,0.04);color:var(--app-text,#f0f2f5);}
+.app-table tr:hover td{background:rgba(255,255,255,0.02);}
+
+/* Kanban */
+.kb-board{display:flex;gap:12px;overflow-x:auto;padding-bottom:12px;flex:1;}
+.kb-col{min-width:220px;width:220px;background:rgba(255,255,255,0.03);border-radius:10px;padding:10px;flex-shrink:0;display:flex;flex-direction:column;}
+.kb-col-title{font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--app-text-dim,#606474);margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+.kb-col-count{background:rgba(255,255,255,0.08);padding:1px 6px;border-radius:8px;font-size:0.6rem;}
+.kb-card{background:var(--app-surface,#1a1a24);border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:6px;cursor:grab;font-size:0.78rem;transition:transform .1s,box-shadow .1s;}
+.kb-card:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,0.2);}
+.kb-card .kb-title{font-weight:500;margin-bottom:4px;color:var(--app-text,#f0f2f5);}
+.kb-card .kb-meta{font-size:0.66rem;color:var(--app-text-dim,#606474);display:flex;gap:8px;align-items:center;}
+.kb-label{display:inline-block;padding:1px 6px;border-radius:4px;font-size:0.58rem;font-weight:600;margin-right:4px;}
+
+/* Charts (SVG) */
+.chart-container{background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:10px;padding:16px;}
+.chart-container h4{font-family:'Instrument Serif',serif;font-weight:400;font-size:0.9rem;margin-bottom:12px;}
+.metric-card{background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:10px;padding:14px 16px;}
+.metric-val{font-family:'Instrument Serif',serif;font-size:1.6rem;line-height:1;}
+.metric-label{font-size:0.7rem;color:var(--app-text-dim,#606474);margin-top:4px;}
+.metric-delta{font-size:0.68rem;font-weight:600;margin-top:4px;}
+.metric-delta.up{color:#1a8a5c;}
+.metric-delta.down{color:#e55;;}
+
+/* Forms */
+.app-input{width:100%;padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:rgba(255,255,255,0.04);color:var(--app-text,#f0f2f5);font-size:0.82rem;font-family:'DM Sans',sans-serif;outline:none;transition:border-color .2s;}
+.app-input:focus{border-color:var(--app-primary,#4a7aff);}
+.app-btn{padding:7px 16px;border-radius:8px;border:none;background:var(--app-primary,#4a7aff);color:#fff;font-size:0.76rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:opacity .15s;}
+.app-btn:hover{opacity:0.85;}
+
+/* Chat */
+.chat-msg{display:flex;gap:10px;padding:8px 0;}
+.chat-avatar{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:0.68rem;font-weight:600;color:#fff;flex-shrink:0;}
+.chat-bubble{flex:1;}
+.chat-user{font-size:0.76rem;font-weight:600;color:var(--app-text,#f0f2f5);margin-bottom:2px;}
+.chat-time{font-size:0.6rem;color:var(--app-text-dim,#606474);margin-left:8px;font-weight:400;}
+.chat-text{font-size:0.82rem;color:var(--app-text-mid,#a0a4b0);line-height:1.55;}
+.chat-reactions{display:flex;gap:4px;margin-top:4px;}
+.chat-react{padding:2px 6px;border-radius:10px;font-size:0.66rem;background:rgba(255,255,255,0.06);border:1px solid var(--border);cursor:pointer;}
+
+/* Status badges */
+.status{display:inline-block;padding:2px 8px;border-radius:6px;font-size:0.64rem;font-weight:600;text-transform:uppercase;letter-spacing:0.3px;}
+.status.green{background:rgba(26,138,92,0.15);color:#1a8a5c;}
+.status.yellow{background:rgba(254,188,46,0.15);color:#febc2e;}
+.status.red{background:rgba(235,0,40,0.15);color:#ff5f57;}
+.status.blue{background:rgba(74,122,255,0.15);color:#4a7aff;}
+.status.purple{background:rgba(124,92,191,0.15);color:#a78bfa;}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:6px;height:6px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:3px;}
+
+/* ─── Responsive ─── */
+@media(max-width:768px){
+#iconGrid{grid-template-columns:repeat(auto-fill,78px);grid-template-rows:repeat(auto-fill,90px);}
+.window{min-width:320px!important;min-height:240px!important;}
+#launcherGrid{grid-template-columns:repeat(auto-fill,minmax(110px,1fr));}
+.app-sidebar{width:160px;}
+}
+</style>
+</head>
+<body>
+<div id="desktop"><div id="iconGrid"></div></div>
+<div id="taskbar">
+<div id="tbStart" title="App Launcher">S</div>
+<div id="tbApps"></div>
+<div id="tbClock"></div>
+<div id="tbBell">🔔</div>
+</div>
+<div id="launcher">
+<input id="launcherSearch" placeholder="Search 132 apps by name, vendor, or category…" autocomplete="off" spellcheck="false">
+<div id="catBar"></div>
+<div id="launcherGrid"></div>
+</div>
+<div id="ctxMenu"></div>
+
+<script>
+/* ═══════ PRODUCT REGISTRY ═══════ */
+const P=[
+{n:"Salesforce CRM",v:"Salesforce",a:"AT-01",p:"#00A1E0",ac:"#032D60",c:"CRM",s:"salesforce_crm",i:"SC"},
+{n:"HubSpot CRM",v:"HubSpot",a:"AT-01",p:"#FF7A59",ac:"#33475B",c:"CRM",s:"hubspot_crm",i:"HC"},
+{n:"Zoho CRM",v:"Zoho",a:"AT-01",p:"#E42527",ac:"#2B2B2B",c:"CRM",s:"zoho_crm",i:"ZC"},
+{n:"Pipedrive",v:"Pipedrive",a:"AT-01",p:"#017737",ac:"#1B1B1B",c:"CRM",s:"pipedrive",i:"PI"},
+{n:"Freshsales",v:"Freshworks",a:"AT-01",p:"#F26522",ac:"#1C1C1C",c:"CRM",s:"freshsales",i:"FR"},
+{n:"Zendesk",v:"Zendesk",a:"AT-01",p:"#03363D",ac:"#78A300",c:"CRM",s:"zendesk",i:"ZE"},
+{n:"Intercom",v:"Intercom",a:"AT-01",p:"#6AFDEF",ac:"#1F1F1F",c:"CRM",s:"intercom",i:"IN"},
+{n:"Salesforce Service Cloud",v:"Salesforce",a:"AT-01",p:"#1B96FF",ac:"#032D60",c:"CRM",s:"salesforce_service_cloud",i:"SS"},
+{n:"Notion",v:"Notion Labs",a:"AT-03",p:"#000000",ac:"#E6E6E4",c:"Project",s:"notion",i:"NO"},
+{n:"Trello",v:"Atlassian",a:"AT-02",p:"#0052CC",ac:"#DFE1E6",c:"Project",s:"trello",i:"TR"},
+{n:"Asana",v:"Asana",a:"AT-02",p:"#F06A6A",ac:"#1E1F21",c:"Project",s:"asana",i:"AS"},
+{n:"ClickUp",v:"ClickUp",a:"AT-02",p:"#7B68EE",ac:"#292D34",c:"Project",s:"clickup",i:"CL"},
+{n:"Monday.com",v:"monday.com",a:"AT-02",p:"#6161FF",ac:"#323338",c:"Project",s:"mondaycom",i:"MC"},
+{n:"Basecamp",v:"37signals",a:"AT-02",p:"#1D6CE2",ac:"#F4EFEB",c:"Project",s:"basecamp",i:"BA"},
+{n:"Linear",v:"Linear",a:"AT-24",p:"#5E6AD2",ac:"#191A23",c:"Project",s:"linear",i:"LI"},
+{n:"Wrike",v:"Citrix",a:"AT-02",p:"#08CF65",ac:"#0E2138",c:"Project",s:"wrike",i:"WR"},
+{n:"Confluence",v:"Atlassian",a:"AT-03",p:"#1868DB",ac:"#172B4D",c:"Project",s:"confluence",i:"CO"},
+{n:"Airtable",v:"Airtable",a:"AT-02",p:"#18BFFF",ac:"#333333",c:"Project",s:"airtable",i:"AI"},
+{n:"Miro",v:"Miro",a:"AT-08",p:"#FFD02F",ac:"#050038",c:"Design",s:"miro",i:"MI"},
+{n:"Adobe Creative Cloud",v:"Adobe",a:"AT-08",p:"#FF0000",ac:"#2C2C2C",c:"Design",s:"adobe_creative_cloud",i:"AC"},
+{n:"Canva",v:"Canva",a:"AT-08",p:"#00C4CC",ac:"#0D1117",c:"Design",s:"canva",i:"CA"},
+{n:"Figma",v:"Figma",a:"AT-08",p:"#A259FF",ac:"#1E1E1E",c:"Design",s:"figma",i:"FI"},
+{n:"InVision",v:"InVision",a:"AT-08",p:"#FF3366",ac:"#1C1C24",c:"Design",s:"invision",i:"IN"},
+{n:"Google Workspace",v:"Google",a:"AT-04",p:"#4285F4",ac:"#202124",c:"Cloud",s:"google_workspace",i:"GW"},
+{n:"Microsoft 365",v:"Microsoft",a:"AT-04",p:"#D83B01",ac:"#201F1E",c:"Cloud",s:"microsoft_365",i:"M3"},
+{n:"AWS",v:"Amazon",a:"AT-04",p:"#FF9900",ac:"#232F3E",c:"Cloud",s:"aws",i:"AW"},
+{n:"Microsoft Azure",v:"Microsoft",a:"AT-04",p:"#0078D4",ac:"#1B1A19",c:"Cloud",s:"microsoft_azure",i:"MA"},
+{n:"Google Cloud",v:"Google",a:"AT-04",p:"#4285F4",ac:"#202124",c:"Cloud",s:"google_cloud",i:"GC"},
+{n:"MongoDB Atlas",v:"MongoDB",a:"AT-04",p:"#00ED64",ac:"#001E2B",c:"Cloud",s:"mongodb_atlas",i:"MA"},
+{n:"Cloudflare",v:"Cloudflare",a:"AT-04",p:"#F48120",ac:"#1A1A1A",c:"Cloud",s:"cloudflare",i:"CL"},
+{n:"ServiceNow",v:"ServiceNow",a:"AT-04",p:"#62D84E",ac:"#293E40",c:"Cloud",s:"servicenow",i:"SE"},
+{n:"Microsoft Teams",v:"Microsoft",a:"AT-05",p:"#6264A7",ac:"#201F1E",c:"Comms",s:"microsoft_teams",i:"MT"},
+{n:"Zoom",v:"Zoom Video",a:"AT-06",p:"#2D8CFF",ac:"#0E71EB",c:"Comms",s:"zoom",i:"ZO"},
+{n:"Slack",v:"Salesforce",a:"AT-05",p:"#4A154B",ac:"#1A1D21",c:"Comms",s:"slack",i:"SL"},
+{n:"Webex",v:"Cisco",a:"AT-06",p:"#07C160",ac:"#121212",c:"Comms",s:"webex",i:"WE"},
+{n:"Google Meet",v:"Google",a:"AT-06",p:"#00897B",ac:"#202124",c:"Comms",s:"google_meet",i:"GM"},
+{n:"Discord",v:"Discord",a:"AT-05",p:"#5865F2",ac:"#36393F",c:"Comms",s:"discord",i:"DI"},
+{n:"RingCentral",v:"RingCentral",a:"AT-05",p:"#0684BD",ac:"#212121",c:"Comms",s:"ringcentral",i:"RI"},
+{n:"Loom",v:"Atlassian",a:"AT-06",p:"#625DF5",ac:"#1A1A2E",c:"Comms",s:"loom",i:"LO"},
+{n:"Calendly",v:"Calendly",a:"AT-07",p:"#006BFF",ac:"#1A1A2E",c:"Comms",s:"calendly",i:"CA"},
+{n:"Mailchimp",v:"Intuit",a:"AT-09",p:"#FFE01B",ac:"#241C15",c:"Marketing",s:"mailchimp",i:"MA"},
+{n:"Klaviyo",v:"Klaviyo",a:"AT-09",p:"#1B1B1B",ac:"#00D4AA",c:"Marketing",s:"klaviyo",i:"KL"},
+{n:"SEMrush",v:"Semrush",a:"AT-10",p:"#FF622D",ac:"#1E1E2F",c:"Marketing",s:"semrush",i:"SE"},
+{n:"Ahrefs",v:"Ahrefs",a:"AT-10",p:"#1E6FFF",ac:"#1A202C",c:"Marketing",s:"ahrefs",i:"AH"},
+{n:"Moz",v:"Moz",a:"AT-10",p:"#1A8FFF",ac:"#2A3544",c:"Marketing",s:"moz",i:"MO"},
+{n:"ConvertKit",v:"Kit",a:"AT-09",p:"#FB6970",ac:"#111827",c:"Marketing",s:"convertkit",i:"CO"},
+{n:"Hootsuite",v:"Hootsuite",a:"AT-10",p:"#143059",ac:"#E8E8E8",c:"Marketing",s:"hootsuite",i:"HO"},
+{n:"Buffer",v:"Buffer",a:"AT-10",p:"#168EEA",ac:"#F5F5F5",c:"Marketing",s:"buffer",i:"BU"},
+{n:"Sprout Social",v:"Sprout Social",a:"AT-10",p:"#59C9A5",ac:"#1E2F36",c:"Marketing",s:"sprout_social",i:"SS"},
+{n:"ActiveCampaign",v:"ActiveCampaign",a:"AT-09",p:"#356AE6",ac:"#1F2937",c:"Marketing",s:"activecampaign",i:"AC"},
+{n:"Braze",v:"Braze",a:"AT-09",p:"#000000",ac:"#C1FF00",c:"Marketing",s:"braze",i:"BR"},
+{n:"SurveyMonkey",v:"Momentive",a:"AT-10",p:"#00BF6F",ac:"#333333",c:"Marketing",s:"surveymonkey",i:"SU"},
+{n:"Typeform",v:"Typeform",a:"AT-10",p:"#262627",ac:"#8ED1D0",c:"Marketing",s:"typeform",i:"TY"},
+{n:"QuickBooks Online",v:"Intuit",a:"AT-11",p:"#2CA01C",ac:"#333333",c:"Finance",s:"quickbooks_online",i:"QO"},
+{n:"Xero",v:"Xero",a:"AT-11",p:"#13B5EA",ac:"#1A1A1A",c:"Finance",s:"xero",i:"XE"},
+{n:"FreshBooks",v:"FreshBooks",a:"AT-11",p:"#0075DD",ac:"#2D3038",c:"Finance",s:"freshbooks",i:"FR"},
+{n:"Stripe",v:"Stripe",a:"AT-12",p:"#635BFF",ac:"#0A2540",c:"Finance",s:"stripe",i:"ST"},
+{n:"Square",v:"Block",a:"AT-12",p:"#006AFF",ac:"#1A1A1A",c:"Finance",s:"square",i:"SQ"},
+{n:"Bill.com",v:"Bill Holdings",a:"AT-11",p:"#00C4B3",ac:"#1A1A1A",c:"Finance",s:"billcom",i:"BC"},
+{n:"Brex",v:"Brex",a:"AT-12",p:"#F5A623",ac:"#0D0D0D",c:"Finance",s:"brex",i:"BR"},
+{n:"Expensify",v:"Expensify",a:"AT-11",p:"#0185FF",ac:"#1A1A1A",c:"Finance",s:"expensify",i:"EX"},
+{n:"Gusto Payroll",v:"Gusto",a:"AT-11",p:"#F45D48",ac:"#1F2937",c:"Finance",s:"gusto_payroll",i:"GP"},
+{n:"Plaid",v:"Plaid",a:"AT-12",p:"#000000",ac:"#00D09C",c:"Finance",s:"plaid",i:"PL"},
+{n:"Toast POS",v:"Toast",a:"AT-12",p:"#FF4C00",ac:"#1A1A1A",c:"Finance",s:"toast_pos",i:"TP"},
+{n:"DocuSign",v:"DocuSign",a:"AT-11",p:"#FFCC22",ac:"#130032",c:"Finance",s:"docusign",i:"DO"},
+{n:"Workday HCM",v:"Workday",a:"AT-13",p:"#005CB9",ac:"#1A1A1A",c:"HR",s:"workday_hcm",i:"WH"},
+{n:"BambooHR",v:"BambooHR",a:"AT-13",p:"#73C41D",ac:"#333333",c:"HR",s:"bamboohr",i:"BA"},
+{n:"ADP Workforce Now",v:"ADP",a:"AT-13",p:"#D0271D",ac:"#1A1A1A",c:"HR",s:"adp_workforce_now",i:"AW"},
+{n:"Rippling",v:"Rippling",a:"AT-13",p:"#FED130",ac:"#1A1A1A",c:"HR",s:"rippling",i:"RI"},
+{n:"Deel",v:"Deel",a:"AT-13",p:"#15357A",ac:"#E6F0FF",c:"HR",s:"deel",i:"DE"},
+{n:"Lattice",v:"Lattice",a:"AT-13",p:"#6C47FF",ac:"#F5F3FF",c:"HR",s:"lattice",i:"LA"},
+{n:"Dayforce",v:"Dayforce",a:"AT-13",p:"#5C2D91",ac:"#1A1A1A",c:"HR",s:"dayforce",i:"DA"},
+{n:"CrowdStrike Falcon",v:"CrowdStrike",a:"AT-15",p:"#EB0028",ac:"#1A1A1A",c:"Security",s:"crowdstrike_falcon",i:"CF"},
+{n:"Okta",v:"Okta",a:"AT-15",p:"#007DC1",ac:"#1D1D1D",c:"Security",s:"okta",i:"OK"},
+{n:"Zscaler",v:"Zscaler",a:"AT-15",p:"#049FD9",ac:"#1A1A1A",c:"Security",s:"zscaler",i:"ZS"},
+{n:"1Password",v:"1Password",a:"AT-14",p:"#0572EC",ac:"#1A1A1A",c:"Security",s:"1password",i:"1P"},
+{n:"LastPass",v:"LastPass",a:"AT-14",p:"#D32D27",ac:"#2C2C2C",c:"Security",s:"lastpass",i:"LA"},
+{n:"Wiz",v:"Wiz",a:"AT-15",p:"#00E5BA",ac:"#1A1A1A",c:"Security",s:"wiz",i:"WI"},
+{n:"SentinelOne",v:"SentinelOne",a:"AT-15",p:"#7B2FBE",ac:"#1A1A1A",c:"Security",s:"sentinelone",i:"SE"},
+{n:"Palo Alto Prisma",v:"Palo Alto Networks",a:"AT-15",p:"#FA582D",ac:"#1A1A1A",c:"Security",s:"palo_alto_prisma",i:"PA"},
+{n:"ChatGPT",v:"OpenAI",a:"AT-16",p:"#10A37F",ac:"#343541",c:"AI",s:"chatgpt",i:"CH"},
+{n:"Claude",v:"Anthropic",a:"AT-16",p:"#D4A27F",ac:"#2D2B28",c:"AI",s:"claude",i:"CL"},
+{n:"Gemini",v:"Google",a:"AT-16",p:"#8E75B2",ac:"#1E1F20",c:"AI",s:"gemini",i:"GE"},
+{n:"Copilot",v:"Microsoft / GitHub",a:"AT-18",p:"#000000",ac:"#79C0FF",c:"AI",s:"copilot",i:"CO"},
+{n:"Grammarly",v:"Grammarly",a:"AT-19",p:"#15C39A",ac:"#0D0D0D",c:"AI",s:"grammarly",i:"GR"},
+{n:"Jasper AI",v:"Jasper",a:"AT-19",p:"#5B24EA",ac:"#1A1A1A",c:"AI",s:"jasper_ai",i:"JA"},
+{n:"Midjourney",v:"Midjourney",a:"AT-17",p:"#FFFFFF",ac:"#000000",c:"AI",s:"midjourney",i:"MI"},
+{n:"Perplexity",v:"Perplexity AI",a:"AT-16",p:"#20808D",ac:"#191A1A",c:"AI",s:"perplexity",i:"PE"},
+{n:"Runway ML",v:"Runway",a:"AT-17",p:"#6C63FF",ac:"#0F0F0F",c:"AI",s:"runway_ml",i:"RM"},
+{n:"Cursor",v:"Anysphere",a:"AT-18",p:"#000000",ac:"#00E5FF",c:"AI",s:"cursor",i:"CU"},
+{n:"Tableau",v:"Salesforce",a:"AT-20",p:"#E97627",ac:"#1A1A1A",c:"Analytics",s:"tableau",i:"TA"},
+{n:"Power BI",v:"Microsoft",a:"AT-20",p:"#F2C811",ac:"#1A1A1A",c:"Analytics",s:"power_bi",i:"PB"},
+{n:"Looker",v:"Google",a:"AT-20",p:"#4285F4",ac:"#1A1A1A",c:"Analytics",s:"looker",i:"LO"},
+{n:"Datadog",v:"Datadog",a:"AT-20",p:"#632CA6",ac:"#1A1A1A",c:"Analytics",s:"datadog",i:"DA"},
+{n:"Mixpanel",v:"Mixpanel",a:"AT-20",p:"#7856FF",ac:"#1A1A1A",c:"Analytics",s:"mixpanel",i:"MI"},
+{n:"Amplitude",v:"Amplitude",a:"AT-20",p:"#1D2B45",ac:"#00AEEF",c:"Analytics",s:"amplitude",i:"AM"},
+{n:"Google Analytics",v:"Google",a:"AT-20",p:"#E37400",ac:"#1A1A1A",c:"Analytics",s:"google_analytics",i:"GA"},
+{n:"Hotjar",v:"Contentsquare",a:"AT-20",p:"#FD3A5C",ac:"#2D3038",c:"Analytics",s:"hotjar",i:"HO"},
+{n:"Splunk",v:"Cisco",a:"AT-20",p:"#000000",ac:"#65A637",c:"Analytics",s:"splunk",i:"SP"},
+{n:"Snowflake",v:"Snowflake",a:"AT-20",p:"#29B5E8",ac:"#1A1A1A",c:"Analytics",s:"snowflake",i:"SN"},
+{n:"Databricks",v:"Databricks",a:"AT-20",p:"#FF3621",ac:"#1A1A1A",c:"Analytics",s:"databricks",i:"DA"},
+{n:"Shopify",v:"Shopify",a:"AT-21",p:"#96BF48",ac:"#1A1A1A",c:"E-Com",s:"shopify",i:"SH"},
+{n:"BigCommerce",v:"BigCommerce",a:"AT-21",p:"#34313F",ac:"#6C5CE7",c:"E-Com",s:"bigcommerce",i:"BI"},
+{n:"Wix",v:"Wix",a:"AT-21",p:"#0C6EFC",ac:"#1A1A1A",c:"E-Com",s:"wix",i:"WI"},
+{n:"Squarespace",v:"Squarespace",a:"AT-21",p:"#000000",ac:"#FFFFFF",c:"E-Com",s:"squarespace",i:"SQ"},
+{n:"WooCommerce",v:"Automattic",a:"AT-21",p:"#96588A",ac:"#1A1A1A",c:"E-Com",s:"woocommerce",i:"WO"},
+{n:"GitHub",v:"Microsoft",a:"AT-22",p:"#F0F6FC",ac:"#0D1117",c:"Dev",s:"github",i:"GI"},
+{n:"GitLab",v:"GitLab",a:"AT-22",p:"#FC6D26",ac:"#171321",c:"Dev",s:"gitlab",i:"GI"},
+{n:"Jira",v:"Atlassian",a:"AT-24",p:"#0052CC",ac:"#172B4D",c:"Dev",s:"jira",i:"JI"},
+{n:"Bitbucket",v:"Atlassian",a:"AT-22",p:"#2684FF",ac:"#172B4D",c:"Dev",s:"bitbucket",i:"BI"},
+{n:"Postman",v:"Postman",a:"AT-23",p:"#FF6C37",ac:"#1A1A1A",c:"Dev",s:"postman",i:"PO"},
+{n:"JFrog Artifactory",v:"JFrog",a:"AT-22",p:"#40BE46",ac:"#222222",c:"Dev",s:"jfrog_artifactory",i:"JA"},
+{n:"CircleCI",v:"CircleCI",a:"AT-22",p:"#343434",ac:"#04AA51",c:"Dev",s:"circleci",i:"CI"},
+{n:"Vercel",v:"Vercel",a:"AT-22",p:"#000000",ac:"#FFFFFF",c:"Dev",s:"vercel",i:"VE"},
+{n:"Supabase",v:"Supabase",a:"AT-22",p:"#3ECF8E",ac:"#1C1C1C",c:"Dev",s:"supabase",i:"SU"},
+{n:"Netlify",v:"Netlify",a:"AT-22",p:"#00C7B7",ac:"#0E1E25",c:"Dev",s:"netlify",i:"NE"},
+{n:"Zapier",v:"Zapier",a:"AT-23",p:"#FF4A00",ac:"#1A1A1A",c:"Dev",s:"zapier",i:"ZA"},
+{n:"Make",v:"Make",a:"AT-23",p:"#6D00CC",ac:"#1A1A1A",c:"Dev",s:"make",i:"MA"},
+{n:"n8n",v:"n8n",a:"AT-23",p:"#EA4B71",ac:"#1A1A1A",c:"Dev",s:"n8n",i:"N8"},
+{n:"Twilio",v:"Twilio",a:"AT-23",p:"#F22F46",ac:"#121C2D",c:"Dev",s:"twilio",i:"TW"},
+{n:"PagerDuty",v:"PagerDuty",a:"AT-24",p:"#06AC38",ac:"#1A1A1A",c:"Dev",s:"pagerduty",i:"PA"},
+{n:"Dropbox",v:"Dropbox",a:"AT-25",p:"#0061FF",ac:"#1E1919",c:"Storage",s:"dropbox",i:"DR"},
+{n:"Google Drive",v:"Google",a:"AT-25",p:"#0F9D58",ac:"#202124",c:"Storage",s:"google_drive",i:"GD"},
+{n:"OneDrive",v:"Microsoft",a:"AT-25",p:"#0078D4",ac:"#1B1A19",c:"Storage",s:"onedrive",i:"ON"},
+{n:"Box",v:"Box",a:"AT-25",p:"#0061D5",ac:"#222222",c:"Storage",s:"box",i:"BO"},
+{n:"NetSuite",v:"Oracle",a:"AT-26",p:"#C74634",ac:"#1A1A1A",c:"ERP",s:"netsuite",i:"NE"},
+{n:"SAP S/4HANA Cloud",v:"SAP",a:"AT-26",p:"#0FAAFF",ac:"#354A5F",c:"ERP",s:"sap_s_4hana_cloud",i:"SS"},
+{n:"Dynamics 365",v:"Microsoft",a:"AT-26",p:"#002050",ac:"#D83B01",c:"ERP",s:"dynamics_365",i:"D3"},
+{n:"Netflix",v:"Netflix",a:"AT-27",p:"#E50914",ac:"#141414",c:"Streaming",s:"netflix",i:"NE"},
+{n:"Spotify",v:"Spotify",a:"AT-27",p:"#1DB954",ac:"#191414",c:"Streaming",s:"spotify",i:"SP"},
+{n:"Coursera",v:"Coursera",a:"AT-28",p:"#0056D2",ac:"#1F1F1F",c:"Education",s:"coursera",i:"CO"},
+{n:"Udemy Business",v:"Udemy",a:"AT-28",p:"#A435F0",ac:"#1C1D1F",c:"Education",s:"udemy_business",i:"UB"},
+];
+const CATS=['All', 'CRM', 'Project', 'Cloud', 'Comms', 'Design', 'Marketing', 'Finance', 'HR', 'Security', 'AI', 'Analytics', 'E-Com', 'Dev', 'Storage', 'ERP', 'Streaming', 'Education'];
+
+
+/* ═══════ UTILITY ═══════ */
+function lum(hex){hex=hex.replace('#','');let r=parseInt(hex.substring(0,2),16)/255,g=parseInt(hex.substring(2,4),16)/255,b=parseInt(hex.substring(4,6),16)/255;function lin(c){return c<=0.04045?c/12.92:Math.pow((c+0.055)/1.055,2.4)}return 0.2126*lin(r)+0.7152*lin(g)+0.0722*lin(b)}
+function isDark(hex){return lum(hex)<0.5}
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const rng=mulberry32(42);
+function rndName(){const f=['Alex','Sam','Jordan','Morgan','Taylor','Casey','Riley','Jamie','Quinn','Avery','Cameron','Drew','Blake','Charlie','Pat','Dana','Lee','Robin','Sky','Sage'];const l=['Chen','Kim','Patel','Garcia','Smith','Lopez','Wang','Johnson','Brown','Davis','Wilson','Moore','Clark','Lewis','Young','Hall','Allen','Scott','Hill','Reed'];return f[Math.floor(rng()*f.length)]+' '+l[Math.floor(rng()*l.length)]}
+function rndCompany(){const c=['Acme Corp','Globex','Initech','Vortex','Pinnacle','Summit','Apex','Nova','Zenith','Orbit','Pulse','Signal','Forge','Drift','Slate','Prism','Vector','Atlas','Core','Helix'];return c[Math.floor(rng()*c.length)]}
+function rndEmail(n){return n.toLowerCase().replace(' ','.')+'@'+rndCompany().toLowerCase().replace(' ','')+'.com'}
+function rndAmount(){return Math.floor(rng()*50000+5000)}
+function rndDate(daysBack){const d=new Date();d.setDate(d.getDate()-Math.floor(rng()*daysBack));return d.toISOString().split('T')[0]}
+function fmtCurrency(n){return '$'+n.toLocaleString()}
+function generateSparkline(w,h,pts,color){let d='';const vals=[];for(let i=0;i<pts;i++)vals.push(rng());const mn=Math.min(...vals),mx=Math.max(...vals),range=mx-mn||1;vals.forEach((v,i)=>{const x=(i/(pts-1))*w,y=h-((v-mn)/range)*h*0.8-h*0.1;d+=(i===0?'M':'L')+x.toFixed(1)+','+y.toFixed(1)});return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"><path d="${d}" fill="none" stroke="${color}" stroke-width="1.5" stroke-linecap="round"/></svg>`}
+function generateBarChart(w,h,data,color){const barW=w/data.length*0.7,gap=w/data.length*0.3,mx=Math.max(...data);let svg='';data.forEach((v,i)=>{const bh=(v/mx)*h*0.85,x=i*(barW+gap)+gap/2,y=h-bh;svg+=`<rect x="${x}" y="${y}" width="${barW}" height="${bh}" rx="3" fill="${color}" opacity="0.8"/>`});return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">${svg}</svg>`}
+
+/* ═══════ WINDOW MANAGER ═══════ */
+let windows=[],nextZ=10,activeWin=null,winOffset=0;
+const var_taskbar=48;
+function openApp(product){
+  // Check if already open
+  let existing=windows.find(w=>w.product.s===product.s);
+  if(existing){focusWin(existing.el);return}
+
+  const isDk=isDark(product.ac);
+  const textColor=isDk?'#f0f2f5':'#1a1a1a';
+  const textDim=isDk?'rgba(240,242,245,0.5)':'rgba(26,26,26,0.5)';
+  const textMid=isDk?'#a0a4b0':'#4a4a4a';
+  const surfaceColor=isDk?'rgba(255,255,255,0.03)':'rgba(0,0,0,0.03)';
+  const borderColor=isDk?'rgba(255,255,255,0.08)':'rgba(0,0,0,0.08)';
+
+  const w=document.createElement('div');
+  w.className='window focused';
+  const dw=Math.min(900,window.innerWidth-100);
+  const dh=Math.min(600,window.innerHeight-120);
+  const ox=(winOffset%5)*30;
+  const left=Math.max(10,Math.floor((window.innerWidth-dw)/2)+ox);
+  const top=Math.max(10,Math.floor((window.innerHeight-var_taskbar-dh)/2)+ox);
+  w.style.cssText=`left:${left}px;top:${top}px;width:${dw}px;height:${dh}px;z-index:${++nextZ};`;
+  w.style.setProperty('--app-primary',product.p);
+  w.style.setProperty('--app-accent',product.ac);
+  w.style.setProperty('--app-text',textColor);
+  w.style.setProperty('--app-text-mid',textMid);
+  w.style.setProperty('--app-text-dim',textDim);
+  w.style.setProperty('--app-surface',surfaceColor);
+  w.style.setProperty('--app-border',borderColor);
+  winOffset++;
+
+  w.innerHTML=`
+    <div class="win-title" style="background:${product.p}">
+      <div style="width:22px;height:22px;border-radius:6px;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-family:'Instrument Serif',serif;font-size:0.68rem;color:#fff;">${product.i}</div>
+      <span class="win-title-text">${product.n}</span>
+      <div class="win-controls">
+        <div class="win-ctrl min" title="Minimize"></div>
+        <div class="win-ctrl max" title="Maximize"></div>
+        <div class="win-ctrl close" title="Close"></div>
+      </div>
+    </div>
+    <div class="win-body" style="background:${product.ac};color:${textColor}"></div>
+    <div class="win-resize r"></div>
+    <div class="win-resize b"></div>
+    <div class="win-resize rb"></div>`;
+
+  document.getElementById('desktop').appendChild(w);
+  const wObj={el:w,product:product,minimized:false,maximized:false,prevStyle:null};
+  windows.push(wObj);
+
+  // Title bar drag
+  const titleBar=w.querySelector('.win-title');
+  setupDrag(w,titleBar);
+  // Resize
+  setupResize(w);
+  // Controls
+  w.querySelector('.close').onclick=(e)=>{e.stopPropagation();closeWin(wObj)};
+  w.querySelector('.min').onclick=(e)=>{e.stopPropagation();minimizeWin(wObj)};
+  w.querySelector('.max').onclick=(e)=>{e.stopPropagation();maximizeWin(wObj)};
+  w.onmousedown=()=>focusWin(w);
+
+  // Render app content
+  const body=w.querySelector('.win-body');
+  renderApp(body,product);
+
+  // Add to taskbar
+  addTaskbarBtn(wObj);
+  focusWin(w);
+  closeLauncher();
+}
+
+function focusWin(el){
+  document.querySelectorAll('.window').forEach(w=>w.classList.remove('focused'));
+  el.classList.add('focused');
+  el.style.zIndex=++nextZ;
+  activeWin=el;
+  // Update taskbar
+  document.querySelectorAll('.tb-btn').forEach(b=>b.classList.remove('active'));
+  const wObj=windows.find(w=>w.el===el);
+  if(wObj){const btn=document.querySelector(`.tb-btn[data-slug="${wObj.product.s}"]`);if(btn)btn.classList.add('active')}
+}
+
+function closeWin(wObj){
+  wObj.el.remove();
+  windows=windows.filter(w=>w!==wObj);
+  const btn=document.querySelector(`.tb-btn[data-slug="${wObj.product.s}"]`);
+  if(btn)btn.remove();
+}
+
+function minimizeWin(wObj){
+  wObj.minimized=true;
+  wObj.el.style.display='none';
+}
+
+function maximizeWin(wObj){
+  if(wObj.maximized){
+    wObj.el.style.cssText=wObj.prevStyle;
+    wObj.maximized=false;
+  }else{
+    wObj.prevStyle=wObj.el.style.cssText;
+    wObj.el.style.left='0';wObj.el.style.top='0';
+    wObj.el.style.width='100%';wObj.el.style.height=`calc(100vh - ${var_taskbar}px)`;
+    wObj.el.style.borderRadius='0';
+    wObj.maximized=true;
+  }
+  wObj.el.style.zIndex=++nextZ;
+}
+
+function addTaskbarBtn(wObj){
+  const btn=document.createElement('div');
+  btn.className='tb-btn active';
+  btn.dataset.slug=wObj.product.s;
+  btn.innerHTML=`<span class="tb-dot" style="background:${wObj.product.p}"></span>${wObj.product.n}`;
+  btn.onclick=()=>{
+    if(wObj.minimized){wObj.minimized=false;wObj.el.style.display='flex';focusWin(wObj.el)}
+    else if(wObj.el.classList.contains('focused')){minimizeWin(wObj)}
+    else{focusWin(wObj.el)}
+  };
+  document.getElementById('tbApps').appendChild(btn);
+  document.querySelectorAll('.tb-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function setupDrag(win,handle){
+  let sx,sy,sl,st;
+  handle.onmousedown=function(e){
+    if(e.target.classList.contains('win-ctrl'))return;
+    e.preventDefault();
+    sx=e.clientX;sy=e.clientY;sl=win.offsetLeft;st=win.offsetTop;
+    function move(e){win.style.left=(sl+e.clientX-sx)+'px';win.style.top=Math.max(0,st+e.clientY-sy)+'px'}
+    function up(){document.removeEventListener('mousemove',move);document.removeEventListener('mouseup',up)}
+    document.addEventListener('mousemove',move);document.addEventListener('mouseup',up);
+  };
+}
+
+function setupResize(win){
+  win.querySelectorAll('.win-resize').forEach(h=>{
+    h.onmousedown=function(e){
+      e.preventDefault();e.stopPropagation();
+      const isR=h.classList.contains('r')||h.classList.contains('rb');
+      const isB=h.classList.contains('b')||h.classList.contains('rb');
+      const sw=win.offsetWidth,sh=win.offsetHeight,sx=e.clientX,sy=e.clientY;
+      function move(e){
+        if(isR)win.style.width=Math.max(400,sw+e.clientX-sx)+'px';
+        if(isB)win.style.height=Math.max(300,sh+e.clientY-sy)+'px';
+      }
+      function up(){document.removeEventListener('mousemove',move);document.removeEventListener('mouseup',up)}
+      document.addEventListener('mousemove',move);document.addEventListener('mouseup',up);
+    };
+  });
+}
+
+/* ═══════ DESKTOP ICONS ═══════ */
+function buildIcons(){
+  const grid=document.getElementById('iconGrid');
+  grid.innerHTML='';
+  P.forEach(p=>{
+    const ic=document.createElement('div');
+    ic.className='icon';
+    ic.innerHTML=`<div class="icon-sq" style="background:${p.p}">${p.i}</div><div class="icon-label">${p.n}</div>`;
+    ic.ondblclick=()=>openApp(p);
+    ic.onclick=(e)=>{document.querySelectorAll('.icon').forEach(i=>i.classList.remove('selected'));ic.classList.add('selected')};
+    grid.appendChild(ic);
+  });
+}
+
+/* ═══════ APP LAUNCHER ═══════ */
+let currentCat='All';
+function buildLauncher(){
+  const bar=document.getElementById('catBar');
+  CATS.forEach(c=>{
+    const b=document.createElement('button');
+    b.className='cat-btn'+(c==='All'?' active':'');
+    b.textContent=c;
+    b.onclick=()=>{currentCat=c;document.querySelectorAll('.cat-btn').forEach(x=>x.classList.remove('active'));b.classList.add('active');filterLauncher()};
+    bar.appendChild(b);
+  });
+  filterLauncher();
+}
+function filterLauncher(){
+  const q=document.getElementById('launcherSearch').value.toLowerCase();
+  const grid=document.getElementById('launcherGrid');
+  grid.innerHTML='';
+  P.filter(p=>{
+    const matchCat=currentCat==='All'||p.c===currentCat;
+    const matchQ=!q||p.n.toLowerCase().includes(q)||p.v.toLowerCase().includes(q)||p.c.toLowerCase().includes(q);
+    return matchCat&&matchQ;
+  }).forEach(p=>{
+    const card=document.createElement('div');
+    card.className='launch-card';
+    card.innerHTML=`<div class="launch-sq" style="background:${p.p}">${p.i}</div><div class="launch-name">${p.n}</div><div class="launch-vendor">${p.v}</div>`;
+    card.onclick=()=>openApp(p);
+    grid.appendChild(card);
+  });
+}
+function openLauncher(){document.getElementById('launcher').classList.add('open');document.getElementById('launcherSearch').focus()}
+function closeLauncher(){document.getElementById('launcher').classList.remove('open');document.getElementById('launcherSearch').value='';currentCat='All';document.querySelectorAll('.cat-btn').forEach((b,i)=>{b.classList.toggle('active',i===0)})}
+document.getElementById('tbStart').onclick=()=>{document.getElementById('launcher').classList.contains('open')?closeLauncher():openLauncher()};
+document.getElementById('launcherSearch').oninput=filterLauncher;
+document.getElementById('launcher').onclick=(e)=>{if(e.target.id==='launcher')closeLauncher()};
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeLauncher()});
+
+/* ═══════ CONTEXT MENU ═══════ */
+const ctxMenu=document.getElementById('ctxMenu');
+document.getElementById('desktop').addEventListener('contextmenu',e=>{
+  e.preventDefault();
+  ctxMenu.style.display='block';
+  ctxMenu.style.left=e.clientX+'px';
+  ctxMenu.style.top=e.clientY+'px';
+  ctxMenu.innerHTML=`<div class="ctx-item" onclick="buildIcons();ctxMenu.style.display='none'">Arrange Icons</div><div class="ctx-item" onclick="location.reload()">Refresh</div><div class="ctx-sep"></div><div class="ctx-item" onclick="alert('SaaS OS v1.0\n132 Apps • 28 Archetypes\nZero Dependencies');ctxMenu.style.display='none'">About SaaS OS</div>`;
+});
+document.addEventListener('click',()=>ctxMenu.style.display='none');
+
+/* ═══════ CLOCK ═══════ */
+function updateClock(){const d=new Date();document.getElementById('tbClock').textContent=d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}
+updateClock();setInterval(updateClock,30000);
+
+/* ═══════ ARCHETYPE RENDERERS ═══════ */
+function renderApp(container,product){
+  const at=product.a;
+  const renderers={
+    'AT-01':renderCRM,'AT-02':renderKanban,'AT-03':renderWiki,'AT-04':renderCloudDash,
+    'AT-05':renderChat,'AT-06':renderMeeting,'AT-07':renderCalendar,'AT-08':renderCanvas,
+    'AT-09':renderEmailBuilder,'AT-10':renderMarketingDash,'AT-11':renderInvoicing,'AT-12':renderPOS,
+    'AT-13':renderHR,'AT-14':renderVault,'AT-15':renderThreatDash,'AT-16':renderAIChat,
+    'AT-17':renderImageGen,'AT-18':renderCodeAssist,'AT-19':renderWritingAssist,'AT-20':renderAnalytics,
+    'AT-21':renderStorefront,'AT-22':renderCodeRepo,'AT-23':renderAPITest,'AT-24':renderIssueTracker,
+    'AT-25':renderFileManager,'AT-26':renderERP,'AT-27':renderMediaPlayer,'AT-28':renderLMS
+  };
+  (renderers[at]||renderGeneric)(container,product);
+}
+
+/* ── AT-01: CRM ── */
+function renderCRM(c,p){
+  const contacts=Array.from({length:18},(_,i)=>{const n=rndName();return{name:n,company:rndCompany(),email:rndEmail(n),phone:'('+Math.floor(rng()*900+100)+') '+Math.floor(rng()*900+100)+'-'+Math.floor(rng()*9000+1000),status:['Active','Lead','Prospect','Inactive'][Math.floor(rng()*4)],value:rndAmount()}});
+  const stages=['Lead','Qualified','Proposal','Negotiation','Closed Won'];
+  const deals=Array.from({length:12},(_,i)=>({name:rndCompany()+' Deal',value:rndAmount(),stage:stages[Math.floor(rng()*5)],contact:contacts[Math.floor(rng()*contacts.length)].name}));
+  let view='pipeline';
+  function render(){
+    const totalRev=deals.filter(d=>d.stage==='Closed Won').reduce((s,d)=>s+d.value,0);
+    const winRate=deals.length?Math.round(deals.filter(d=>d.stage==='Closed Won').length/deals.length*100):0;
+    c.innerHTML=`<div style="display:flex;height:100%">
+      <div class="app-sidebar">
+        <h4>☰ ${p.n}</h4>
+        <div class="si ${view==='dashboard'?'active':''}" onclick="this.closest('.win-body').__view='dashboard';this.closest('.win-body').__render()">📊 Dashboard</div>
+        <div class="si ${view==='pipeline'?'active':''}" onclick="this.closest('.win-body').__view='pipeline';this.closest('.win-body').__render()">🔄 Pipeline</div>
+        <div class="si ${view==='contacts'?'active':''}" onclick="this.closest('.win-body').__view='contacts';this.closest('.win-body').__render()">👥 Contacts<span class="badge">${contacts.length}</span></div>
+      </div>
+      <div class="app-main">
+        ${view==='dashboard'?`
+          <h2>Dashboard</h2>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:16px">
+            <div class="metric-card"><div class="metric-val">${fmtCurrency(totalRev)}</div><div class="metric-label">Revenue Won</div><div class="metric-delta up">↑ 12%</div></div>
+            <div class="metric-card"><div class="metric-val">${deals.length}</div><div class="metric-label">Active Deals</div><div class="metric-delta up">↑ 3</div></div>
+            <div class="metric-card"><div class="metric-val">${winRate}%</div><div class="metric-label">Win Rate</div></div>
+            <div class="metric-card"><div class="metric-val">${contacts.length}</div><div class="metric-label">Contacts</div></div>
+          </div>
+          <div class="chart-container"><h4>Revenue by Stage</h4>${generateBarChart(400,120,stages.map(s=>deals.filter(d=>d.stage===s).reduce((a,d)=>a+d.value,0)),p.p)}</div>
+        `:view==='pipeline'?`
+          <h2>Pipeline</h2>
+          <div class="kb-board">${stages.map(s=>{
+            const sd=deals.filter(d=>d.stage===s);
+            return `<div class="kb-col"><div class="kb-col-title">${s}<span class="kb-col-count">${sd.length}</span></div>${sd.map(d=>`<div class="kb-card"><div class="kb-title">${d.name}</div><div class="kb-meta"><span>${fmtCurrency(d.value)}</span><span>${d.contact}</span></div></div>`).join('')}</div>`
+          }).join('')}</div>
+        `:`
+          <h2>Contacts</h2>
+          <input class="app-input" placeholder="Search contacts…" style="max-width:300px;margin-bottom:12px">
+          <table class="app-table"><thead><tr><th>Name</th><th>Company</th><th>Email</th><th>Status</th><th>Value</th></tr></thead><tbody>${contacts.map(ct=>`<tr><td style="font-weight:500">${ct.name}</td><td>${ct.company}</td><td style="color:var(--app-text-dim)">${ct.email}</td><td><span class="status ${ct.status==='Active'?'green':ct.status==='Lead'?'blue':'purple'}">${ct.status}</span></td><td>${fmtCurrency(ct.value)}</td></tr>`).join('')}</tbody></table>
+        `}
+      </div>
+    </div>`;
+    c.__view=view;c.__render=()=>{view=c.__view;render()};
+  }
+  render();
+}
+
+/* ── AT-02: Kanban ── */
+function renderKanban(c,p){
+  const cols=['To Do','In Progress','Review','Done'];
+  const labels=[{name:'Feature',color:'#7B68EE'},{name:'Bug',color:'#ff5f57'},{name:'Design',color:'#00C4CC'}];
+  const cards=Array.from({length:24},(_,i)=>({id:i,title:['Redesign homepage','Fix login bug','API docs update','New onboarding flow','Performance audit','Mobile layout','Database migration','User testing','Search feature','Dark mode','Export CSV','Email templates','Payment flow','Analytics widget','Chat integration','File upload','Notification system','Role permissions','Dashboard v2','Landing page','SSO setup','Webhook handler','Caching layer','Error handling'][i%24],col:cols[Math.floor(rng()*4)],label:labels[Math.floor(rng()*3)],assignee:rndName().split(' ')[0]}));
+  c.innerHTML=`<div style="display:flex;height:100%">
+    <div class="app-sidebar"><h4>☰ Boards</h4><div class="si active">📋 Sprint Board</div><div class="si">📝 Backlog</div><div class="si">✅ Completed</div><hr style="border:none;border-top:1px solid var(--border);margin:8px 0"><div class="si">⚙️ Settings</div></div>
+    <div style="flex:1;padding:12px;overflow-x:auto;display:flex;flex-direction:column">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;flex-shrink:0"><h2 style="font-family:'Instrument Serif',serif;font-size:1.3rem;margin:0">Sprint Board</h2><span style="font-size:0.72rem;color:var(--app-text-dim)">${cards.length} tasks</span></div>
+      <div class="kb-board">${cols.map(col=>{
+        const cc=cards.filter(cd=>cd.col===col);
+        return `<div class="kb-col"><div class="kb-col-title">${col}<span class="kb-col-count">${cc.length}</span></div>${cc.map(cd=>`<div class="kb-card"><div style="margin-bottom:4px"><span class="kb-label" style="background:${cd.label.color}22;color:${cd.label.color}">${cd.label.name}</span></div><div class="kb-title">${cd.title}</div><div class="kb-meta"><span>👤 ${cd.assignee}</span></div></div>`).join('')}</div>`}).join('')}</div>
+    </div>
+  </div>`;
+}
+
+/* ── AT-03: Wiki/Notes ── */
+function renderWiki(c,p){
+  const pages=[{title:'Getting Started',icon:'📖',content:'Welcome to your workspace. Use the sidebar to navigate between pages. Click the + button to create new pages.\n\nThis is a block-based editor. Each paragraph is a block that can be reordered.'},
+    {title:'Meeting Notes',icon:'📝',content:'## Q1 Planning\n\nAttendees: Team leads\n\n- Review OKRs\n- Budget allocation\n- Hiring plan for Q2\n\n> Action: Follow up with finance by Friday'},
+    {title:'Project Roadmap',icon:'🗺️',content:'### Phase 1: Foundation\n- Core infrastructure\n- Authentication system\n- Basic UI components\n\n### Phase 2: Features\n- Dashboard\n- Reporting\n- Integrations'},
+    {title:'API Documentation',icon:'⚡',content:'### Endpoints\n\n`GET /api/users` - List all users\n`POST /api/users` - Create user\n`GET /api/users/:id` - Get user by ID\n\n### Authentication\nAll requests require Bearer token in Authorization header.'}];
+  let sel=0;
+  function render(){
+    c.innerHTML=`<div style="display:flex;height:100%">
+      <div class="app-sidebar"><h4>${p.i} ${p.n}</h4>
+        <div style="padding:4px 0"><input class="app-input" placeholder="🔍 Search…" style="font-size:0.72rem;padding:6px 10px;margin-bottom:8px"></div>
+        ${pages.map((pg,i)=>`<div class="si ${i===sel?'active':''}" onclick="this.closest('.win-body').__sel=${i};this.closest('.win-body').__render()">${pg.icon} ${pg.title}</div>`).join('')}
+        <div class="si" style="color:var(--app-primary);margin-top:8px">+ New Page</div>
+      </div>
+      <div class="app-main">
+        <div style="font-size:0.72rem;color:var(--app-text-dim);margin-bottom:8px">${p.n} / ${pages[sel].title}</div>
+        <h2>${pages[sel].icon} ${pages[sel].title}</h2>
+        <div style="font-size:0.88rem;line-height:1.7;color:var(--app-text-mid);white-space:pre-wrap;margin-top:12px">${pages[sel].content.replace(/###\s(.+)/g,'<h3 style="font-family:Instrument Serif,serif;margin:16px 0 8px">$1</h3>').replace(/##\s(.+)/g,'<h2 style="font-family:Instrument Serif,serif;margin:16px 0 8px;font-size:1.2rem">$1</h2>').replace(/`([^`]+)`/g,'<code style="background:rgba(255,255,255,0.06);padding:2px 6px;border-radius:4px;font-size:0.82rem">$1</code>').replace(/^- (.+)/gm,'<div style="padding-left:16px">• $1</div>').replace(/^> (.+)/gm,'<div style="border-left:3px solid var(--app-primary);padding-left:12px;color:var(--app-text-dim);font-style:italic">$1</div>')}</div>
+      </div>
+    </div>`;
+    c.__sel=sel;c.__render=()=>{sel=c.__sel;render()};
+  }
+  render();
+}
+
+/* ── AT-04: Cloud Dashboard ── */
+function renderCloudDash(c,p){
+  const services=['Compute','Storage','Database','Networking','CDN','Functions','Containers','ML/AI','Queue','Auth','DNS','Monitoring'];
+  const sdata=services.map(s=>({name:s,status:rng()>0.15?'healthy':rng()>0.5?'degraded':'outage',uptime:(99+rng()).toFixed(2)+'%',load:Math.floor(rng()*80+10)}));
+  c.innerHTML=`<div style="display:flex;height:100%">
+    <div class="app-sidebar"><h4>☁️ ${p.n}</h4><div class="si active">📊 Overview</div><div class="si">🖥️ Compute</div><div class="si">💾 Storage</div><div class="si">🔔 Alerts</div><div class="si">💰 Billing</div><div class="si">🌍 Regions</div></div>
+    <div class="app-main">
+      <h2>Service Health</h2>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin-bottom:20px">
+        ${sdata.map(s=>`<div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:10px;padding:12px;border-left:3px solid ${s.status==='healthy'?'#1a8a5c':s.status==='degraded'?'#febc2e':'#ff5f57'}"><div style="font-size:0.78rem;font-weight:500;margin-bottom:4px">${s.name}</div><div style="font-size:0.66rem;color:var(--app-text-dim)">${s.uptime} uptime</div><div style="margin-top:4px"><span class="status ${s.status==='healthy'?'green':s.status==='degraded'?'yellow':'red'}">${s.status}</span></div></div>`).join('')}
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px">
+        <div class="chart-container"><h4>CPU Usage</h4>${generateSparkline(200,60,20,p.p)}<div style="font-size:0.72rem;color:var(--app-text-dim);margin-top:6px">Avg: ${Math.floor(rng()*40+30)}%</div></div>
+        <div class="chart-container"><h4>Memory</h4>${generateSparkline(200,60,20,'#1a8a5c')}<div style="font-size:0.72rem;color:var(--app-text-dim);margin-top:6px">Avg: ${Math.floor(rng()*30+40)}%</div></div>
+        <div class="chart-container"><h4>Network I/O</h4>${generateSparkline(200,60,20,'#c4723a')}<div style="font-size:0.72rem;color:var(--app-text-dim);margin-top:6px">${Math.floor(rng()*500+100)} MB/s</div></div>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ── AT-05: Chat ── */
+function renderChat(c,p){
+  const users=[{name:'Alice Chen',color:'#E55',status:'online'},{name:'Bob Kim',color:'#4a7aff',status:'online'},{name:'Carol Davis',color:'#1a8a5c',status:'away'},{name:'Dan Moore',color:'#c4723a',status:'offline'}];
+  const channels=['# general','# engineering','# design','# random','# announcements'];
+  const msgs=[
+    {user:users[0],text:'Hey team! Just pushed the new auth changes 🎉',time:'10:23 AM',reactions:['👍 3','🎉 2']},
+    {user:users[1],text:'Nice work! I\'ll review the PR this afternoon.',time:'10:25 AM',reactions:['👍 1']},
+    {user:users[2],text:'Can someone check the staging deploy? Seeing some 502s.',time:'10:31 AM',reactions:['👀 2']},
+    {user:users[3],text:'On it. Looks like the new config wasn\'t applied to the LB.',time:'10:33 AM',reactions:[]},
+    {user:users[0],text:'Great catch. Let me update the deployment script.',time:'10:35 AM',reactions:['🙏 1']},
+    {user:users[1],text:'Also — team standup moved to 2pm today. Calendar invite updated.',time:'10:40 AM',reactions:['👍 4']},
+  ];
+  c.innerHTML=`<div style="display:flex;height:100%">
+    <div class="app-sidebar" style="width:200px">
+      <h4 style="display:flex;align-items:center;gap:6px">${p.i} ${p.n}</h4>
+      <div style="font-size:0.66rem;color:var(--app-text-dim);text-transform:uppercase;letter-spacing:1px;margin:12px 0 6px;font-weight:600">Channels</div>
+      ${channels.map((ch,i)=>`<div class="si ${i===0?'active':''}">${ch}${i<2?'<span class="badge">'+(Math.floor(rng()*8+1))+'</span>':''}</div>`).join('')}
+      <div style="font-size:0.66rem;color:var(--app-text-dim);text-transform:uppercase;letter-spacing:1px;margin:12px 0 6px;font-weight:600">Direct Messages</div>
+      ${users.map(u=>`<div class="si"><span style="width:8px;height:8px;border-radius:50%;background:${u.status==='online'?'#1a8a5c':u.status==='away'?'#febc2e':'#606474'};flex-shrink:0"></span>${u.name.split(' ')[0]}</div>`).join('')}
+    </div>
+    <div style="flex:1;display:flex;flex-direction:column">
+      <div style="padding:10px 16px;border-bottom:1px solid var(--border);font-size:0.82rem;font-weight:500;display:flex;align-items:center;gap:8px"><span style="font-size:1rem">#</span> general <span style="font-size:0.68rem;color:var(--app-text-dim);margin-left:auto">4 members • 12 pinned</span></div>
+      <div style="flex:1;overflow-y:auto;padding:12px 16px">
+        ${msgs.map(m=>`<div class="chat-msg"><div class="chat-avatar" style="background:${m.user.color}">${m.user.name[0]}</div><div class="chat-bubble"><div class="chat-user">${m.user.name}<span class="chat-time">${m.time}</span></div><div class="chat-text">${m.text}</div>${m.reactions.length?`<div class="chat-reactions">${m.reactions.map(r=>`<span class="chat-react">${r}</span>`).join('')}</div>`:''}</div></div>`).join('')}
+      </div>
+      <div style="padding:10px 16px;border-top:1px solid var(--border);display:flex;gap:8px">
+        <input class="app-input" placeholder="Message #general" style="flex:1">
+        <button class="app-btn" style="background:${p.p}">Send</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ── AT-06: Meeting ── */
+function renderMeeting(c,p){
+  const participants=[{name:'You',speaking:true},{name:'Sarah Park',speaking:false},{name:'Mike Chen',speaking:false},{name:'Ava Brown',speaking:false}];
+  c.innerHTML=`<div style="display:flex;flex-direction:column;height:100%;background:#111">
+    <div style="padding:8px 16px;display:flex;align-items:center;font-size:0.78rem;color:#aaa;border-bottom:1px solid rgba(255,255,255,0.08)"><span style="font-weight:500;color:#fff">Team Standup</span><span style="margin-left:12px">⏱ 00:14:23</span><span style="margin-left:auto;color:#ff5f57">● REC</span></div>
+    <div style="flex:1;display:grid;grid-template-columns:repeat(2,1fr);gap:8px;padding:12px">
+      ${participants.map(pt=>`<div style="background:#1a1a1a;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;border:2px solid ${pt.speaking?'#febc2e':'transparent'};position:relative">
+        <div style="width:64px;height:64px;border-radius:50%;background:${p.p};display:flex;align-items:center;justify-content:center;font-size:1.4rem;color:#fff;font-family:'Instrument Serif',serif">${pt.name[0]}</div>
+        <div style="font-size:0.82rem;color:#fff">${pt.name}</div>
+        <div style="position:absolute;bottom:12px;right:12px;font-size:0.7rem;color:#888">${pt.speaking?'🔊':'🔇'}</div>
+      </div>`).join('')}
+    </div>
+    <div style="padding:12px;display:flex;justify-content:center;gap:10px;background:#0a0a0a;border-top:1px solid rgba(255,255,255,0.08)">
+      <button style="width:44px;height:44px;border-radius:50%;border:none;background:#333;color:#fff;cursor:pointer;font-size:1rem" title="Mute">🎤</button>
+      <button style="width:44px;height:44px;border-radius:50%;border:none;background:#333;color:#fff;cursor:pointer;font-size:1rem" title="Camera">📷</button>
+      <button style="width:44px;height:44px;border-radius:50%;border:none;background:#333;color:#fff;cursor:pointer;font-size:1rem" title="Share">🖥️</button>
+      <button style="width:44px;height:44px;border-radius:50%;border:none;background:#333;color:#fff;cursor:pointer;font-size:1rem" title="Chat">💬</button>
+      <button style="width:44px;height:44px;border-radius:50%;border:none;background:#ff5f57;color:#fff;cursor:pointer;font-size:1rem" title="Leave">📞</button>
+    </div>
+  </div>`;
+}
+
+/* ── AT-07: Calendar ── */
+function renderCalendar(c,p){
+  const now=new Date(),year=now.getFullYear(),month=now.getMonth();
+  const firstDay=new Date(year,month,1).getDay(),daysInMonth=new Date(year,month+1,0).getDate();
+  const monthNames=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const events={3:{title:'Team Standup',color:p.p},7:{title:'Sprint Review',color:'#1a8a5c'},12:{title:'Client Call',color:'#c4723a'},15:{title:'Launch Day',color:'#ff5f57'},20:{title:'Workshop',color:'#7c5cbf'},25:{title:'Retrospective',color:'#4a7aff'}};
+  let cells='';
+  for(let i=0;i<firstDay;i++)cells+='<div style="padding:6px"></div>';
+  for(let d=1;d<=daysInMonth;d++){
+    const isToday=d===now.getDate();
+    const ev=events[d];
+    cells+=`<div style="padding:6px;border-radius:8px;min-height:60px;background:${isToday?'rgba(74,122,255,0.1)':'rgba(255,255,255,0.02)'};border:1px solid ${isToday?'rgba(74,122,255,0.3)':'var(--border)'};cursor:pointer;transition:background .1s" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='${isToday?'rgba(74,122,255,0.1)':'rgba(255,255,255,0.02)'}' ">
+      <div style="font-size:0.72rem;font-weight:${isToday?'700':'400'};color:${isToday?p.p:'var(--app-text)'};margin-bottom:4px">${d}</div>
+      ${ev?`<div style="font-size:0.6rem;padding:2px 4px;border-radius:3px;background:${ev.color}22;color:${ev.color};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${ev.title}</div>`:''}
+    </div>`;
+  }
+  c.innerHTML=`<div style="display:flex;height:100%">
+    <div class="app-sidebar"><h4>📅 ${p.n}</h4><div class="si active">📆 Month</div><div class="si">📋 Week</div><div class="si">📌 Day</div><hr style="border:none;border-top:1px solid var(--border);margin:8px 0"><div class="si">⚙️ Settings</div></div>
+    <div class="app-main">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px"><h2 style="margin:0">${monthNames[month]} ${year}</h2></div>
+      <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:1px;font-size:0.68rem;color:var(--app-text-dim);margin-bottom:4px">${['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(d=>`<div style="text-align:center;padding:4px;font-weight:500">${d}</div>`).join('')}</div>
+      <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px">${cells}</div>
+    </div>
+  </div>`;
+}
+
+/* ── AT-08: Canvas ── */
+function renderCanvas(c,p){
+  c.innerHTML=`<div style="display:flex;height:100%">
+    <div style="width:48px;background:rgba(255,255,255,0.03);border-right:1px solid var(--border);display:flex;flex-direction:column;align-items:center;padding:8px 0;gap:4px">
+      ${['🔲','⭕','➖','↗️','📝','🟨','✏️','🖱️'].map((t,i)=>`<div style="width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:8px;cursor:pointer;font-size:0.9rem;background:${i===0?'rgba(255,255,255,0.08)':'transparent'};transition:background .1s" onmouseover="this.style.background='rgba(255,255,255,0.06)'" onmouseout="this.style.background='${i===0?'rgba(255,255,255,0.08)':'transparent'}'">${t}</div>`).join('')}
+    </div>
+    <div style="flex:1;position:relative;overflow:hidden;background:repeating-linear-gradient(rgba(255,255,255,0.03) 0 1px,transparent 1px 20px),repeating-linear-gradient(90deg,rgba(255,255,255,0.03) 0 1px,transparent 1px 20px)">
+      <div style="position:absolute;left:100px;top:80px;width:160px;height:100px;background:${p.p}22;border:2px solid ${p.p};border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--app-text);font-size:0.82rem;cursor:move">Header Section</div>
+      <div style="position:absolute;left:320px;top:60px;width:140px;height:80px;background:rgba(26,138,92,0.15);border:2px solid #1a8a5c;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.78rem;cursor:move">User Flow</div>
+      <div style="position:absolute;left:140px;top:240px;width:200px;height:120px;background:rgba(254,188,46,0.15);border-radius:4px;padding:10px;font-size:0.76rem;color:#febc2e;cursor:move">📌 Remember to add error states and loading indicators for all async operations.</div>
+      <div style="position:absolute;left:400px;top:200px;width:180px;height:100px;background:rgba(124,92,191,0.15);border:2px solid #7c5cbf;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:0.78rem;cursor:move">API Layer</div>
+    </div>
+    <div style="width:200px;background:rgba(255,255,255,0.02);border-left:1px solid var(--border);padding:12px;font-size:0.76rem">
+      <div style="font-weight:600;margin-bottom:8px">Properties</div>
+      <div style="margin-bottom:6px"><span style="color:var(--app-text-dim)">Fill</span><div style="display:flex;gap:4px;margin-top:4px">${['#ff5f57','#febc2e','#28c840','#4a7aff','#7c5cbf','#fff'].map(co=>`<div style="width:20px;height:20px;border-radius:4px;background:${co};cursor:pointer;border:1px solid rgba(255,255,255,0.1)"></div>`).join('')}</div></div>
+      <div style="margin-bottom:6px"><span style="color:var(--app-text-dim)">Stroke</span><input type="range" style="width:100%;margin-top:4px"></div>
+      <div style="margin-bottom:6px"><span style="color:var(--app-text-dim)">Opacity</span><input type="range" value="80" style="width:100%;margin-top:4px"></div>
+      <div style="font-weight:600;margin:12px 0 8px">Layers</div>
+      <div style="font-size:0.72rem">📦 Header Section<br>⭕ User Flow<br>📌 Sticky Note<br>📦 API Layer</div>
+    </div>
+  </div>`;
+}
+
+/* ── AT-09: Email Builder ── */
+function renderEmailBuilder(c,p){
+  const campaigns=[{name:'Welcome Series',status:'Sent',opens:'42%',clicks:'12%'},{name:'Product Launch',status:'Draft',opens:'-',clicks:'-'},{name:'Newsletter #24',status:'Scheduled',opens:'-',clicks:'-'},{name:'Holiday Sale',status:'Sent',opens:'38%',clicks:'8%'}];
+  c.innerHTML=`<div style="display:flex;height:100%">
+    <div class="app-sidebar"><h4>📧 ${p.n}</h4><div class="si active">📊 Campaigns</div><div class="si">📝 Templates</div><div class="si">👥 Subscribers<span class="badge">2.4k</span></div><div class="si">📈 Analytics</div></div>
+    <div class="app-main">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px"><h2>Campaigns</h2><button class="app-btn" style="background:${p.p}">+ New Campaign</button></div>
+      <table class="app-table"><thead><tr><th>Campaign</th><th>Status</th><th>Opens</th><th>Clicks</th></tr></thead><tbody>${campaigns.map(cp=>`<tr><td style="font-weight:500">${cp.name}</td><td><span class="status ${cp.status==='Sent'?'green':cp.status==='Draft'?'blue':'purple'}">${cp.status}</span></td><td>${cp.opens}</td><td>${cp.clicks}</td></tr>`).join('')}</tbody></table>
+    </div>
+  </div>`;
+}
+
+/* ── AT-10: Marketing Dashboard ── */
+function renderMarketingDash(c,p){
+  c.innerHTML=`<div style="display:flex;height:100%">
+    <div class="app-sidebar"><h4>📈 ${p.n}</h4><div class="si active">📊 Overview</div><div class="si">🔑 Keywords</div><div class="si">🔗 Backlinks</div><div class="si">📱 Social</div><div class="si">🏆 Competitors</div></div>
+    <div class="app-main">
+      <h2>Dashboard</h2>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:16px">
+        <div class="metric-card"><div class="metric-val">72</div><div class="metric-label">Domain Authority</div><div class="metric-delta up">↑ 3</div></div>
+        <div class="metric-card"><div class="metric-val">48.2k</div><div class="metric-label">Organic Traffic</div><div class="metric-delta up">↑ 12%</div></div>
+        <div class="metric-card"><div class="metric-val">1,847</div><div class="metric-label">Keywords Ranked</div><div class="metric-delta up">↑ 156</div></div>
+        <div class="metric-card"><div class="metric-val">3.2k</div><div class="metric-label">Backlinks</div><div class="metric-delta down">↓ 23</div></div>
+      </div>
+      <div class="chart-container"><h4>Organic Traffic (90 days)</h4>${generateSparkline(500,100,30,p.p)}</div>
+    </div>
+  </div>`;
+}
+
+/* ── AT-11: Invoicing ── */
+function renderInvoicing(c,p){
+  const invoices=Array.from({length:8},(_,i)=>({num:'INV-'+(1000+i),client:rndCompany(),amount:rndAmount(),status:['Paid','Sent','Draft','Overdue'][Math.floor(rng()*4)],date:rndDate(60)}));
+  c.innerHTML=`<div style="display:flex;height:100%">
+    <div class="app-sidebar"><h4>💰 ${p.n}</h4><div class="si active">📄 Invoices<span class="badge">${invoices.length}</span></div><div class="si">👥 Clients</div><div class="si">💳 Expenses</div><div class="si">📊 Dashboard</div></div>
+    <div class="app-main">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px"><h2>Invoices</h2><button class="app-btn" style="background:${p.p}">+ New Invoice</button></div>
+      <table class="app-table"><thead><tr><th>#</th><th>Client</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead><tbody>${invoices.map(inv=>`<tr><td style="font-weight:500">${inv.num}</td><td>${inv.client}</td><td>${fmtCurrency(inv.amount)}</td><td><span class="status ${inv.status==='Paid'?'green':inv.status==='Overdue'?'red':inv.status==='Sent'?'blue':'purple'}">${inv.status}</span></td><td style="color:var(--app-text-dim)">${inv.date}</td></tr>`).join('')}</tbody></table>
+    </div>
+  </div>`;
+}
+
+/* ── AT-12: POS ── */
+function renderPOS(c,p){
+  const items=[{name:'Latte',price:4.50,cat:'Drinks'},{name:'Cappuccino',price:5.00,cat:'Drinks'},{name:'Espresso',price:3.50,cat:'Drinks'},{name:'Croissant',price:3.75,cat:'Food'},{name:'Bagel',price:4.25,cat:'Food'},{name:'Muffin',price:3.50,cat:'Food'},{name:'Cookie',price:2.50,cat:'Snacks'},{name:'Brownie',price:3.00,cat:'Snacks'}];
+  c.innerHTML=`<div style="display:flex;height:100%">
+    <div style="flex:1;padding:16px;display:flex;flex-direction:column">
+      <div style="display:flex;gap:8px;margin-bottom:12px">${['All','Drinks','Food','Snacks'].map((t,i)=>`<button style="padding:6px 14px;border-radius:8px;border:1px solid var(--border);background:${i===0?'rgba(255,255,255,0.08)':'transparent'};color:var(--app-text);font-size:0.74rem;cursor:pointer">${t}</button>`).join('')}</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;overflow-y:auto">
+        ${items.map(it=>`<div style="background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center;cursor:pointer;transition:background .1s" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='rgba(255,255,255,0.04)'"><div style="font-size:0.82rem;font-weight:500;margin-bottom:4px">${it.name}</div><div style="font-size:0.88rem;color:${p.p};font-weight:600">$${it.price.toFixed(2)}</div></div>`).join('')}
+      </div>
+    </div>
+    <div style="width:260px;background:rgba(255,255,255,0.02);border-left:1px solid var(--border);padding:16px;display:flex;flex-direction:column">
+      <div style="font-weight:600;font-size:0.82rem;margin-bottom:12px">Current Order</div>
+      <div style="flex:1;font-size:0.78rem;color:var(--app-text-dim)">
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)">Latte x2<span>$9.00</span></div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)">Croissant x1<span>$3.75</span></div>
+      </div>
+      <div style="border-top:1px solid var(--border);padding-top:12px">
+        <div style="display:flex;justify-content:space-between;font-size:0.78rem;margin-bottom:4px"><span>Subtotal</span><span>$12.75</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:0.78rem;margin-bottom:8px;color:var(--app-text-dim)"><span>Tax</span><span>$1.05</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:1.1rem;font-weight:600;font-family:'Instrument Serif',serif;margin-bottom:12px"><span>Total</span><span>$13.80</span></div>
+        <button class="app-btn" style="width:100%;background:${p.p};padding:12px">Charge $13.80</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ── AT-13: HR ── */
+function renderHR(c,p){
+  const depts=['Engineering','Design','Marketing','Sales','HR','Finance'];
+  const employees=Array.from({length:20},(_,i)=>{const n=rndName();return{name:n,title:['Software Engineer','Product Designer','Marketing Manager','Sales Rep','HR Coordinator','Analyst'][Math.floor(rng()*6)],dept:depts[Math.floor(rng()*6)],location:['New York','San Francisco','London','Remote'][Math.floor(rng()*4)],startDate:rndDate(1000)}});
+  c.innerHTML=`<div style="display:flex;height:100%">
+    <div class="app-sidebar"><h4>👥 ${p.n}</h4><div class="si active">📋 Directory</div><div class="si">🏢 Org Chart</div><div class="si">🏖️ Time Off</div><div class="si">📝 Onboarding</div><div class="si">📊 Reports</div></div>
+    <div class="app-main">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px"><h2>Employee Directory</h2><input class="app-input" placeholder="Search employees…" style="max-width:220px"></div>
+      <div style="display:flex;gap:6px;margin-bottom:12px">${depts.map(d=>`<span style="padding:3px 10px;border-radius:12px;font-size:0.68rem;border:1px solid var(--border);cursor:pointer;color:var(--app-text-dim)">${d}</span>`).join('')}</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px">${employees.slice(0,12).map(emp=>`<div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:10px;padding:14px;display:flex;gap:10px;align-items:center">
+        <div style="width:36px;height:36px;border-radius:50%;background:${p.p};display:flex;align-items:center;justify-content:center;font-size:0.72rem;color:#fff;font-weight:600;flex-shrink:0">${emp.name[0]}${emp.name.split(' ')[1][0]}</div>
+        <div><div style="font-size:0.82rem;font-weight:500">${emp.name}</div><div style="font-size:0.68rem;color:var(--app-text-dim)">${emp.title} · ${emp.dept}</div></div>
+      </div>`).join('')}</div>
+    </div>
+  </div>`;
+}
+
+/* ── AT-14: Password Vault ── */
+function renderVault(c,p){
+  const entries=[{site:'Google',user:'john@gmail.com',cat:'Login'},{site:'GitHub',user:'johndev',cat:'Login'},{site:'AWS Console',user:'admin@company.com',cat:'Login'},{site:'Visa ****4242',user:'John Smith',cat:'Card'},{site:'API Key - Stripe',user:'sk_live_****',cat:'Note'},{site:'Wi-Fi Password',user:'HomeNetwork',cat:'Note'}];
+  c.innerHTML=`<div style="display:flex;height:100%">
+    <div class="app-sidebar"><h4>🔒 ${p.n}</h4><div class="si active">🔑 All Items<span class="badge">${entries.length}</span></div><div class="si">🌐 Logins</div><div class="si">💳 Cards</div><div class="si">📝 Secure Notes</div><hr style="border:none;border-top:1px solid var(--border);margin:8px 0"><div class="si">🎲 Generator</div></div>
+    <div class="app-main">
+      <input class="app-input" placeholder="🔍 Search vault…" style="max-width:300px;margin-bottom:16px">
+      ${entries.map(e=>`<div style="display:flex;align-items:center;gap:12px;padding:10px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s;border-radius:8px" onmouseover="this.style.background='rgba(255,255,255,0.03)'" onmouseout="this.style.background='transparent'">
+        <div style="width:36px;height:36px;border-radius:8px;background:${p.p}22;display:flex;align-items:center;justify-content:center;font-size:0.85rem">${e.cat==='Login'?'🌐':e.cat==='Card'?'💳':'📝'}</div>
+        <div style="flex:1"><div style="font-size:0.82rem;font-weight:500">${e.site}</div><div style="font-size:0.7rem;color:var(--app-text-dim)">${e.user}</div></div>
+        <div style="font-size:0.7rem;color:var(--app-text-dim);cursor:pointer">📋 Copy</div>
+      </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+/* ── AT-15: Threat Dashboard ── */
+function renderThreatDash(c,p){
+  const threats=[{type:'Malware Detected',severity:'Critical',asset:'web-server-01',status:'Active'},{type:'Brute Force Attempt',severity:'High',asset:'auth-service',status:'Investigating'},{type:'Suspicious Login',severity:'Medium',asset:'admin-panel',status:'Active'},{type:'Port Scan',severity:'Low',asset:'firewall-edge',status:'Resolved'},{type:'Data Exfiltration',severity:'Critical',asset:'db-primary',status:'Investigating'}];
+  c.innerHTML=`<div style="display:flex;height:100%">
+    <div class="app-sidebar"><h4>🛡️ ${p.n}</h4><div class="si active">📊 Overview</div><div class="si">⚠️ Threats<span class="badge" style="background:#ff5f57">${threats.filter(t=>t.status!=='Resolved').length}</span></div><div class="si">📋 Audit Log</div><div class="si">✅ Compliance</div><div class="si">🖥️ Assets</div></div>
+    <div class="app-main">
+      <h2>Threat Overview</h2>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:16px">
+        <div class="metric-card"><div class="metric-val" style="color:#ff5f57">2</div><div class="metric-label">Critical</div></div>
+        <div class="metric-card"><div class="metric-val" style="color:#febc2e">1</div><div class="metric-label">High</div></div>
+        <div class="metric-card"><div class="metric-val" style="color:#4a7aff">1</div><div class="metric-label">Medium</div></div>
+        <div class="metric-card"><div class="metric-val" style="color:#1a8a5c">1</div><div class="metric-label">Low</div></div>
+      </div>
+      <table class="app-table"><thead><tr><th>Type</th><th>Severity</th><th>Asset</th><th>Status</th></tr></thead><tbody>${threats.map(t=>`<tr><td style="font-weight:500">${t.type}</td><td><span class="status ${t.severity==='Critical'?'red':t.severity==='High'?'yellow':t.severity==='Medium'?'blue':'green'}">${t.severity}</span></td><td style="font-family:monospace;font-size:0.72rem">${t.asset}</td><td><span class="status ${t.status==='Resolved'?'green':t.status==='Active'?'red':'purple'}">${t.status}</span></td></tr>`).join('')}</tbody></table>
+    </div>
+  </div>`;
+}
+
+/* ── AT-16: AI Chat ── */
+function renderAIChat(c,p){
+  const convos=['New conversation','Explain quantum computing','Write a Python script','Summarize this article','Help with SQL query'];
+  const msgs=[{role:'user',text:'What is the difference between REST and GraphQL?'},{role:'assistant',text:'**REST** and **GraphQL** are both approaches to building APIs, but they differ in several key ways:\n\n**REST** uses multiple endpoints (e.g., `/users`, `/posts`) with fixed data structures. Each endpoint returns a predetermined set of fields.\n\n**GraphQL** uses a single endpoint where the client specifies exactly what data it needs through a query language. This solves over-fetching and under-fetching issues common in REST.\n\nKey differences:\n• **Data fetching**: REST may require multiple requests; GraphQL gets everything in one\n• **Flexibility**: GraphQL lets clients request exact fields needed\n• **Caching**: REST has simpler caching via HTTP; GraphQL requires custom solutions'}];
+  c.innerHTML=`<div style="display:flex;height:100%">
+    <div class="app-sidebar" style="width:200px"><h4>${p.i} ${p.n}</h4>
+      <button class="app-btn" style="width:100%;background:${p.p};margin-bottom:12px;font-size:0.72rem">+ New Chat</button>
+      ${convos.map((cv,i)=>`<div class="si ${i===0?'active':''}" style="font-size:0.72rem">${cv}</div>`).join('')}
+    </div>
+    <div style="flex:1;display:flex;flex-direction:column">
+      <div style="padding:8px 16px;border-bottom:1px solid var(--border);font-size:0.76rem;display:flex;align-items:center;gap:8px"><span style="font-weight:500">${p.n}</span><select style="background:rgba(255,255,255,0.06);border:1px solid var(--border);color:var(--app-text);border-radius:6px;padding:3px 8px;font-size:0.7rem;margin-left:auto"><option>Default</option><option>Creative</option><option>Precise</option></select></div>
+      <div style="flex:1;overflow-y:auto;padding:16px 24px">
+        ${msgs.map(m=>`<div style="max-width:700px;margin:0 auto 16px;${m.role==='user'?'text-align:right':''}">
+          <div style="display:inline-block;text-align:left;padding:12px 16px;border-radius:${m.role==='user'?'16px 16px 4px 16px':'16px 16px 16px 4px'};background:${m.role==='user'?p.p+'22':'rgba(255,255,255,0.04)'};font-size:0.85rem;line-height:1.65;max-width:85%;color:var(--app-text-mid)">${m.text.replace(/\n/g,'<br>').replace(/\*\*(.+?)\*\*/g,'<strong style="color:var(--app-text)">$1</strong>').replace(/• /g,'<br>• ')}</div>
+        </div>`).join('')}
+      </div>
+      <div style="padding:12px 24px;border-top:1px solid var(--border);display:flex;gap:8px;max-width:800px;margin:0 auto;width:100%">
+        <input class="app-input" placeholder="Send a message…" style="flex:1">
+        <button class="app-btn" style="background:${p.p}">Send</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ── AT-17: Image Gen ── */
+function renderImageGen(c,p){
+  const gradients=['linear-gradient(135deg,#667eea,#764ba2)','linear-gradient(135deg,#f093fb,#f5576c)','linear-gradient(135deg,#4facfe,#00f2fe)','linear-gradient(135deg,#43e97b,#38f9d7)','linear-gradient(135deg,#fa709a,#fee140)','linear-gradient(135deg,#a18cd1,#fbc2eb)'];
+  c.innerHTML=`<div style="display:flex;height:100%">
+    <div style="flex:1;padding:16px;display:flex;flex-direction:column">
+      <textarea class="app-input" style="height:80px;resize:none;margin-bottom:10px" placeholder="Describe the image you want to create…"></textarea>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">${['Photorealistic','Anime','Oil Painting','3D Render','Pixel Art'].map((s,i)=>`<button style="padding:5px 12px;border-radius:8px;border:1px solid ${i===0?p.p:'var(--border)'};background:${i===0?p.p+'22':'transparent'};color:${i===0?p.p:'var(--app-text-dim)'};font-size:0.7rem;cursor:pointer">${s}</button>`).join('')}</div>
+      <div style="flex:1;display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;overflow-y:auto">
+        ${gradients.map((g,i)=>`<div style="aspect-ratio:1;border-radius:10px;background:${g};cursor:pointer;position:relative;overflow:hidden;transition:transform .2s" onmouseover="this.style.transform='scale(1.03)'" onmouseout="this.style.transform='scale(1)'"><div style="position:absolute;bottom:0;left:0;right:0;padding:8px;background:linear-gradient(transparent,rgba(0,0,0,0.7));font-size:0.68rem;color:#fff">Generation ${i+1}</div></div>`).join('')}
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ── AT-18: Code Assistant ── */
+function renderCodeAssist(c,p){
+  c.innerHTML=`<div style="display:flex;height:100%">
+    <div style="width:200px;background:rgba(255,255,255,0.02);border-right:1px solid var(--border);padding:8px;font-size:0.72rem">
+      <div style="font-weight:600;margin-bottom:8px;color:var(--app-text-dim)">EXPLORER</div>
+      <div style="color:var(--app-text-mid);cursor:pointer">📁 src/<br>&nbsp;&nbsp;📁 components/<br>&nbsp;&nbsp;&nbsp;&nbsp;📄 App.tsx<br>&nbsp;&nbsp;&nbsp;&nbsp;📄 Header.tsx<br>&nbsp;&nbsp;&nbsp;&nbsp;📄 Sidebar.tsx<br>&nbsp;&nbsp;📁 utils/<br>&nbsp;&nbsp;&nbsp;&nbsp;📄 api.ts<br>&nbsp;&nbsp;&nbsp;&nbsp;📄 helpers.ts<br>&nbsp;&nbsp;📄 index.ts<br>📄 package.json<br>📄 tsconfig.json</div>
+    </div>
+    <div style="flex:1;display:flex;flex-direction:column">
+      <div style="display:flex;border-bottom:1px solid var(--border)"><div style="padding:8px 16px;font-size:0.74rem;border-bottom:2px solid ${p.p};color:var(--app-text)">App.tsx</div><div style="padding:8px 16px;font-size:0.74rem;color:var(--app-text-dim)">Header.tsx</div></div>
+      <div style="flex:1;overflow:auto;font-family:monospace;font-size:0.78rem;padding:12px;line-height:1.7;color:var(--app-text-mid)">
+        <span style="color:#888"> 1</span> <span style="color:#c678dd">import</span> React <span style="color:#c678dd">from</span> <span style="color:#98c379">'react'</span>;<br>
+        <span style="color:#888"> 2</span> <span style="color:#c678dd">import</span> { Header } <span style="color:#c678dd">from</span> <span style="color:#98c379">'./Header'</span>;<br>
+        <span style="color:#888"> 3</span><br>
+        <span style="color:#888"> 4</span> <span style="color:#c678dd">const</span> <span style="color:#61afef">App</span> = () =&gt; {<br>
+        <span style="color:#888"> 5</span> &nbsp;&nbsp;<span style="color:#c678dd">const</span> [<span style="color:#e06c75">count</span>, <span style="color:#e06c75">setCount</span>] = <span style="color:#61afef">useState</span>(<span style="color:#d19a66">0</span>);<br>
+        <span style="color:#888"> 6</span><br>
+        <span style="color:#888"> 7</span> &nbsp;&nbsp;<span style="color:#c678dd">return</span> (<br>
+        <span style="color:#888"> 8</span> &nbsp;&nbsp;&nbsp;&nbsp;&lt;<span style="color:#e06c75">div</span>&gt;<br>
+        <span style="color:#888"> 9</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;<span style="color:#e06c75">Header</span> <span style="color:#d19a66">title</span>=<span style="color:#98c379">"Dashboard"</span> /&gt;<br>
+        <span style="color:#888">10</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#5c6370;font-style:italic">// AI suggestion: add error boundary</span><br>
+        <span style="color:#888">11</span> &nbsp;&nbsp;&nbsp;&nbsp;&lt;/<span style="color:#e06c75">div</span>&gt;<br>
+        <span style="color:#888">12</span> &nbsp;&nbsp;);<br>
+        <span style="color:#888">13</span> };<br>
+      </div>
+      <div style="padding:4px 12px;border-top:1px solid var(--border);font-size:0.66rem;color:var(--app-text-dim);display:flex;gap:16px"><span>TypeScript</span><span>Ln 5, Col 12</span><span style="margin-left:auto">AI: Ready</span></div>
+    </div>
+  </div>`;
+}
+
+/* ── AT-19: Writing Assistant ── */
+function renderWritingAssist(c,p){
+  c.innerHTML=`<div style="display:flex;height:100%">
+    <div style="flex:1;padding:24px 32px;overflow-y:auto;max-width:700px;margin:0 auto">
+      <div style="display:flex;gap:6px;margin-bottom:16px;border-bottom:1px solid var(--border);padding-bottom:10px">${['B','I','U','H1','H2','—','≡','<>'].map(b=>`<button style="width:30px;height:28px;border:1px solid var(--border);border-radius:5px;background:transparent;color:var(--app-text-mid);cursor:pointer;font-size:0.72rem;font-weight:${b==='B'?'700':'400'};font-style:${b==='I'?'italic':'normal'}">${b}</button>`).join('')}<select style="margin-left:auto;background:rgba(255,255,255,0.06);border:1px solid var(--border);color:var(--app-text);border-radius:6px;padding:3px 8px;font-size:0.7rem"><option>Professional</option><option>Casual</option><option>Academic</option></select></div>
+      <div contenteditable="true" style="font-size:0.92rem;line-height:1.75;color:var(--app-text-mid);outline:none;min-height:300px">
+        <p>The quarterly report demonstrates significant growth across all product lines. Revenue increased by 23% compared to the previous quarter, driven primarily by <span style="border-bottom:2px wavy #15C39A">expansion</span> in the enterprise segment.</p>
+        <p style="margin-top:12px">Our team has <span style="border-bottom:2px wavy #E55">successfully implemented</span> the new onboarding process, reducing time-to-value by 40%. Customer satisfaction scores reached an all-time high of 94%.</p>
+      </div>
+    </div>
+    <div style="width:240px;background:rgba(255,255,255,0.02);border-left:1px solid var(--border);padding:14px;font-size:0.76rem;overflow-y:auto">
+      <div style="font-weight:600;margin-bottom:10px">Suggestions</div>
+      <div style="padding:8px;border-radius:8px;background:rgba(21,195,154,0.08);border-left:3px solid #15C39A;margin-bottom:8px;font-size:0.72rem"><strong style="color:#15C39A">Clarity</strong><br>"expansion" → "growth"<div style="margin-top:4px"><button class="app-btn" style="font-size:0.66rem;padding:3px 10px;background:${p.p}">Fix</button></div></div>
+      <div style="padding:8px;border-radius:8px;background:rgba(235,85,85,0.08);border-left:3px solid #E55;margin-bottom:8px;font-size:0.72rem"><strong style="color:#E55">Conciseness</strong><br>"successfully implemented" → "implemented"<div style="margin-top:4px"><button class="app-btn" style="font-size:0.66rem;padding:3px 10px;background:${p.p}">Fix</button></div></div>
+      <hr style="border:none;border-top:1px solid var(--border);margin:12px 0">
+      <div style="font-size:0.72rem;color:var(--app-text-dim)">📊 Words: 62 · Readability: 68</div>
+    </div>
+  </div>`;
+}
+
+/* ── AT-20: Analytics Dashboard ── */
+function renderAnalytics(c,p){
+  c.innerHTML=`<div style="padding:16px 20px;height:100%;overflow-y:auto">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px"><h2 style="font-family:'Instrument Serif',serif;font-size:1.4rem;margin:0">${p.n} Dashboard</h2>
+      <div style="margin-left:auto;display:flex;gap:4px">${['7d','30d','90d','YTD'].map((t,i)=>`<button style="padding:4px 12px;border-radius:6px;border:1px solid ${i===1?p.p:'var(--border)'};background:${i===1?p.p+'22':'transparent'};color:${i===1?p.p:'var(--app-text-dim)'};font-size:0.68rem;cursor:pointer">${t}</button>`).join('')}</div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:16px">
+      <div class="metric-card"><div class="metric-val">24.8k</div><div class="metric-label">Active Users</div><div class="metric-delta up">↑ 14%</div>${generateSparkline(120,30,12,p.p)}</div>
+      <div class="metric-card"><div class="metric-val">$182k</div><div class="metric-label">Revenue</div><div class="metric-delta up">↑ 8%</div>${generateSparkline(120,30,12,'#1a8a5c')}</div>
+      <div class="metric-card"><div class="metric-val">3.2%</div><div class="metric-label">Conversion</div><div class="metric-delta down">↓ 0.4%</div>${generateSparkline(120,30,12,'#c4723a')}</div>
+      <div class="metric-card"><div class="metric-val">4m 32s</div><div class="metric-label">Avg Session</div><div class="metric-delta up">↑ 12s</div>${generateSparkline(120,30,12,'#7c5cbf')}</div>
+    </div>
+    <div style="display:grid;grid-template-columns:2fr 1fr;gap:10px">
+      <div class="chart-container"><h4>Traffic Overview</h4>${generateSparkline(450,120,30,p.p)}</div>
+      <div class="chart-container"><h4>Top Pages</h4><div style="font-size:0.76rem;color:var(--app-text-mid)">/dashboard — 4.2k<br>/settings — 2.8k<br>/reports — 2.1k<br>/users — 1.9k<br>/billing — 1.4k</div></div>
+    </div>
+  </div>`;
+}
+
+/* ── AT-21: Storefront ── */
+function renderStorefront(c,p){
+  const products=Array.from({length:8},(_,i)=>({name:['Wireless Headphones','Smart Watch','Laptop Stand','USB-C Hub','Mechanical Keyboard','Monitor Light','Desk Mat','Webcam'][i],price:Math.floor(rng()*200+29.99),img:['linear-gradient(135deg,#667eea,#764ba2)','linear-gradient(135deg,#f093fb,#f5576c)','linear-gradient(135deg,#4facfe,#00f2fe)','linear-gradient(135deg,#43e97b,#38f9d7)','linear-gradient(135deg,#fa709a,#fee140)','linear-gradient(135deg,#a18cd1,#fbc2eb)','linear-gradient(135deg,#fbc2eb,#a6c1ee)','linear-gradient(135deg,#ffecd2,#fcb69f)'][i]}));
+  c.innerHTML=`<div style="padding:16px 20px;height:100%;overflow-y:auto">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px"><h2 style="font-family:'Instrument Serif',serif;font-size:1.4rem;margin:0">${p.n} Store</h2><div style="font-size:0.78rem;color:var(--app-text-dim)">🛒 Cart (2)</div></div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px">
+      ${products.map(pr=>`<div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:12px;overflow:hidden;cursor:pointer;transition:transform .2s" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='translateY(0)'">
+        <div style="height:140px;background:${pr.img}"></div>
+        <div style="padding:12px"><div style="font-size:0.82rem;font-weight:500;margin-bottom:4px">${pr.name}</div><div style="font-size:0.92rem;font-weight:600;color:${p.p};font-family:'Instrument Serif',serif">$${pr.price}</div>
+        <button class="app-btn" style="width:100%;margin-top:8px;background:${p.p};font-size:0.7rem;padding:6px">Add to Cart</button></div>
+      </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+/* ── AT-22: Code Repo ── */
+function renderCodeRepo(c,p){
+  const files=[{name:'src/',type:'dir'},{name:'components/',type:'dir',indent:1},{name:'App.tsx',type:'file',indent:2,msg:'feat: add dashboard layout'},{name:'Header.tsx',type:'file',indent:2,msg:'fix: responsive nav'},{name:'utils/',type:'dir',indent:1},{name:'api.ts',type:'file',indent:2,msg:'refactor: error handling'},{name:'README.md',type:'file',msg:'docs: update setup guide'},{name:'package.json',type:'file',msg:'chore: bump dependencies'}];
+  c.innerHTML=`<div style="display:flex;height:100%">
+    <div class="app-sidebar"><h4>${p.i} ${p.n}</h4><div class="si active">📁 Code</div><div class="si">📝 Commits</div><div class="si">🔀 PRs<span class="badge">3</span></div><div class="si">🔄 CI/CD</div><div class="si">📋 Issues</div></div>
+    <div class="app-main">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px"><select style="background:rgba(255,255,255,0.06);border:1px solid var(--border);color:var(--app-text);border-radius:6px;padding:5px 10px;font-size:0.76rem"><option>main</option><option>develop</option><option>feature/auth</option></select><span style="font-size:0.72rem;color:var(--app-text-dim)">23 commits · 3 branches</span></div>
+      <table class="app-table"><thead><tr><th>Name</th><th>Last commit</th><th>Date</th></tr></thead><tbody>${files.map(f=>`<tr><td style="padding-left:${(f.indent||0)*20+10}px"><span style="margin-right:6px">${f.type==='dir'?'📁':'📄'}</span>${f.name}</td><td style="color:var(--app-text-dim);font-size:0.72rem">${f.msg||''}</td><td style="color:var(--app-text-dim);font-size:0.72rem">${rndDate(30)}</td></tr>`).join('')}</tbody></table>
+    </div>
+  </div>`;
+}
+
+/* ── AT-23: API Testing ── */
+function renderAPITest(c,p){
+  c.innerHTML=`<div style="display:flex;height:100%">
+    <div class="app-sidebar" style="width:200px"><h4>📡 ${p.n}</h4><div style="font-size:0.66rem;color:var(--app-text-dim);margin-bottom:6px;font-weight:600">COLLECTIONS</div>
+      <div class="si active"><span style="color:#1a8a5c;font-weight:600;font-size:0.66rem;margin-right:4px">GET</span> /users</div>
+      <div class="si"><span style="color:#febc2e;font-weight:600;font-size:0.66rem;margin-right:4px">POST</span> /users</div>
+      <div class="si"><span style="color:#4a7aff;font-weight:600;font-size:0.66rem;margin-right:4px">PUT</span> /users/:id</div>
+      <div class="si"><span style="color:#ff5f57;font-weight:600;font-size:0.66rem;margin-right:4px">DEL</span> /users/:id</div>
+      <div class="si"><span style="color:#1a8a5c;font-weight:600;font-size:0.66rem;margin-right:4px">GET</span> /posts</div>
+    </div>
+    <div style="flex:1;display:flex;flex-direction:column;padding:12px">
+      <div style="display:flex;gap:8px;margin-bottom:12px">
+        <select style="background:rgba(255,255,255,0.06);border:1px solid var(--border);color:#1a8a5c;border-radius:8px;padding:7px 10px;font-size:0.78rem;font-weight:600"><option>GET</option><option>POST</option><option>PUT</option><option>DELETE</option></select>
+        <input class="app-input" value="https://api.example.com/users" style="flex:1">
+        <button class="app-btn" style="background:${p.p}">Send</button>
+      </div>
+      <div style="display:flex;gap:12px;margin-bottom:8px;font-size:0.72rem;color:var(--app-text-dim)">${['Params','Headers','Body','Auth'].map((t,i)=>`<span style="cursor:pointer;padding-bottom:4px;${i===0?`border-bottom:2px solid ${p.p};color:var(--app-text)`:''}">${t}</span>`).join('')}</div>
+      <div style="flex:1;background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:8px;padding:12px;font-family:monospace;font-size:0.76rem;overflow:auto;color:var(--app-text-mid)">
+        <div style="color:var(--app-text-dim);margin-bottom:8px">Status: <span style="color:#1a8a5c">200 OK</span> · 142ms</div>
+        <pre style="margin:0">{
+  "data": [
+    { "id": 1, "name": "Alice Chen", "role": "admin" },
+    { "id": 2, "name": "Bob Kim", "role": "user" },
+    { "id": 3, "name": "Carol Davis", "role": "user" }
+  ],
+  "total": 3,
+  "page": 1
+}</pre>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ── AT-24: Issue Tracker ── */
+function renderIssueTracker(c,p){
+  const cols=['Backlog','To Do','In Progress','In Review','Done'];
+  const issues=Array.from({length:20},(_,i)=>({key:p.n.substring(0,3).toUpperCase()+'-'+(100+i),title:['Auth token refresh','Dashboard loading','Mobile responsive','API rate limiting','Search indexing','Cache invalidation','Email notifications','PDF export','User permissions','Webhook retry','Dark mode toggle','File upload limit','SSO integration','Data migration','Audit logging','Error tracking','Load balancing','CI pipeline','Test coverage','Documentation'][i],priority:['Critical','High','Medium','Low'][Math.floor(rng()*4)],col:cols[Math.floor(rng()*5)],points:Math.floor(rng()*8+1),assignee:rndName().split(' ')[0]}));
+  c.innerHTML=`<div style="display:flex;height:100%">
+    <div class="app-sidebar"><h4>🎯 ${p.n}</h4><div class="si active">📋 Sprint Board</div><div class="si">📦 Backlog</div><div class="si">📊 Burndown</div><div class="si">🔍 My Issues</div></div>
+    <div style="flex:1;padding:12px;overflow-x:auto;display:flex;flex-direction:column">
+      <h2 style="font-family:'Instrument Serif',serif;font-size:1.2rem;margin:0 0 12px">Sprint 14</h2>
+      <div class="kb-board">${cols.map(col=>{
+        const ci=issues.filter(is=>is.col===col);
+        return `<div class="kb-col"><div class="kb-col-title">${col}<span class="kb-col-count">${ci.length}</span></div>${ci.map(is=>`<div class="kb-card"><div style="display:flex;align-items:center;gap:4px;margin-bottom:4px"><span style="font-size:0.6rem;color:${is.priority==='Critical'?'#ff5f57':is.priority==='High'?'#febc2e':'var(--app-text-dim)'}">●</span><span style="font-size:0.64rem;color:var(--app-text-dim)">${is.key}</span></div><div class="kb-title">${is.title}</div><div class="kb-meta"><span>👤 ${is.assignee}</span><span style="background:rgba(255,255,255,0.08);padding:1px 5px;border-radius:4px">${is.points}pt</span></div></div>`).join('')}</div>`}).join('')}</div>
+    </div>
+  </div>`;
+}
+
+/* ── AT-25: File Manager ── */
+function renderFileManager(c,p){
+  const files=[{name:'Documents',type:'folder',size:'-',mod:'Mar 10, 2026'},{name:'Images',type:'folder',size:'-',mod:'Mar 8, 2026'},{name:'Projects',type:'folder',size:'-',mod:'Mar 11, 2026'},{name:'Q4-Report.pdf',type:'pdf',size:'2.4 MB',mod:'Mar 7, 2026'},{name:'Budget-2026.xlsx',type:'xlsx',size:'847 KB',mod:'Mar 5, 2026'},{name:'Presentation.pptx',type:'pptx',size:'12.1 MB',mod:'Mar 1, 2026'},{name:'notes.md',type:'md',size:'4 KB',mod:'Mar 9, 2026'},{name:'photo-001.jpg',type:'img',size:'3.2 MB',mod:'Feb 28, 2026'}];
+  const icons={folder:'📁',pdf:'📕',xlsx:'📊',pptx:'📙',md:'📝',img:'🖼️'};
+  c.innerHTML=`<div style="display:flex;height:100%">
+    <div class="app-sidebar"><h4>📂 ${p.n}</h4><div class="si active">🏠 My Files</div><div class="si">⭐ Starred</div><div class="si">🕐 Recent</div><div class="si">🗑️ Trash</div><hr style="border:none;border-top:1px solid var(--border);margin:8px 0"><div style="padding:6px 10px"><div style="font-size:0.68rem;color:var(--app-text-dim);margin-bottom:4px">Storage</div><div style="height:4px;background:rgba(255,255,255,0.06);border-radius:2px;overflow:hidden"><div style="height:100%;width:42%;background:${p.p};border-radius:2px"></div></div><div style="font-size:0.62rem;color:var(--app-text-dim);margin-top:3px">6.3 GB of 15 GB used</div></div></div>
+    <div class="app-main">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:12px;font-size:0.78rem;color:var(--app-text-dim)"><span style="cursor:pointer;color:var(--app-text)">My Files</span></div>
+      <table class="app-table"><thead><tr><th>Name</th><th>Size</th><th>Modified</th></tr></thead><tbody>${files.map(f=>`<tr style="cursor:pointer"><td style="font-weight:500"><span style="margin-right:8px">${icons[f.type]||'📄'}</span>${f.name}</td><td style="color:var(--app-text-dim)">${f.size}</td><td style="color:var(--app-text-dim)">${f.mod}</td></tr>`).join('')}</tbody></table>
+    </div>
+  </div>`;
+}
+
+/* ── AT-26: ERP ── */
+function renderERP(c,p){
+  c.innerHTML=`<div style="display:flex;flex-direction:column;height:100%">
+    <div style="display:flex;border-bottom:1px solid var(--border);padding:0 12px">${['Dashboard','Finance','Inventory','Procurement','HR'].map((t,i)=>`<div style="padding:10px 16px;font-size:0.78rem;cursor:pointer;border-bottom:2px solid ${i===0?p.p:'transparent'};color:${i===0?'var(--app-text)':'var(--app-text-dim)'}">${t}</div>`).join('')}</div>
+    <div style="flex:1;padding:16px 20px;overflow-y:auto">
+      <h2 style="font-family:'Instrument Serif',serif;font-size:1.3rem;margin-bottom:16px">Business Overview</h2>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:16px">
+        <div class="metric-card"><div class="metric-val">${fmtCurrency(Math.floor(rng()*2000000+500000))}</div><div class="metric-label">Revenue MTD</div><div class="metric-delta up">↑ 7%</div></div>
+        <div class="metric-card"><div class="metric-val">${Math.floor(rng()*500+100)}</div><div class="metric-label">Open Orders</div></div>
+        <div class="metric-card"><div class="metric-val">${fmtCurrency(Math.floor(rng()*5000000+1000000))}</div><div class="metric-label">Inventory Value</div></div>
+        <div class="metric-card"><div class="metric-val">${Math.floor(rng()*200+50)}</div><div class="metric-label">Headcount</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="chart-container"><h4>Monthly Revenue</h4>${generateBarChart(280,100,[...Array(6)].map(()=>Math.floor(rng()*100+50)),p.p)}</div>
+        <div class="chart-container"><h4>Cash Flow</h4>${generateSparkline(280,100,20,'#1a8a5c')}</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ── AT-27: Media Player ── */
+function renderMediaPlayer(c,p){
+  const gradients=['linear-gradient(135deg,#1a1a2e,#16213e)','linear-gradient(135deg,#2d1b69,#11998e)','linear-gradient(135deg,#c31432,#240b36)','linear-gradient(135deg,#0f2027,#2c5364)','linear-gradient(135deg,#373b44,#4286f4)','linear-gradient(135deg,#834d9b,#d04ed6)'];
+  const items=['Trending Now','Recently Played','Your Mix','New Releases'].map(cat=>({cat,items:Array.from({length:6},(_,i)=>({title:['Midnight Drive','Ocean Waves','City Lights','Mountain Echo','Solar Flare','Crystal Rain','Deep Blue','Neon Dreams','Wild Hearts','Frozen Lake','Golden Hour','Electric Storm'][i%12],sub:cat==='Trending Now'?'2.4M plays':'By '+rndName().split(' ')[0],grad:gradients[i%6]}))}));
+  c.innerHTML=`<div style="display:flex;flex-direction:column;height:100%;background:#0a0a0f">
+    <div style="flex:1;overflow-y:auto;padding:16px 20px">
+      ${items.map(section=>`<div style="margin-bottom:20px"><h3 style="font-family:'Instrument Serif',serif;font-size:1.1rem;margin-bottom:10px;color:#fff">${section.cat}</h3>
+        <div style="display:flex;gap:10px;overflow-x:auto;padding-bottom:8px">${section.items.map(it=>`<div style="min-width:140px;cursor:pointer;transition:transform .2s" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'"><div style="width:140px;height:140px;border-radius:8px;background:${it.grad};margin-bottom:6px"></div><div style="font-size:0.78rem;font-weight:500;color:#fff">${it.title}</div><div style="font-size:0.66rem;color:#888">${it.sub}</div></div>`).join('')}</div></div>`).join('')}
+    </div>
+    <div style="height:64px;background:#111;border-top:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;padding:0 16px;gap:12px">
+      <div style="width:40px;height:40px;border-radius:6px;background:linear-gradient(135deg,#667eea,#764ba2);flex-shrink:0"></div>
+      <div style="flex-shrink:0"><div style="font-size:0.78rem;color:#fff">Midnight Drive</div><div style="font-size:0.66rem;color:#888">Artist Name</div></div>
+      <div style="flex:1;display:flex;align-items:center;justify-content:center;gap:16px">
+        <span style="cursor:pointer;color:#888">⏮</span>
+        <div style="width:36px;height:36px;border-radius:50%;background:${p.p};display:flex;align-items:center;justify-content:center;cursor:pointer;color:#fff;font-size:0.9rem">▶</div>
+        <span style="cursor:pointer;color:#888">⏭</span>
+      </div>
+      <div style="width:80px;height:3px;background:rgba(255,255,255,0.1);border-radius:2px"><div style="width:35%;height:100%;background:${p.p};border-radius:2px"></div></div>
+      <span style="font-size:0.66rem;color:#888">1:23 / 3:45</span>
+    </div>
+  </div>`;
+}
+
+/* ── AT-28: LMS ── */
+function renderLMS(c,p){
+  const courses=[{title:'Full-Stack Web Development',instructor:'Sarah Park',rating:4.8,students:'12.4k',level:'Intermediate',progress:65},{title:'Machine Learning Fundamentals',instructor:'Mike Chen',rating:4.9,students:'8.7k',level:'Advanced',progress:30},{title:'UI/UX Design Masterclass',instructor:'Ava Brown',rating:4.7,students:'15.2k',level:'Beginner',progress:0},{title:'Cloud Architecture',instructor:'Dan Moore',rating:4.6,students:'6.1k',level:'Advanced',progress:0}];
+  c.innerHTML=`<div style="display:flex;height:100%">
+    <div class="app-sidebar"><h4>🎓 ${p.n}</h4><div class="si active">📚 Catalog</div><div class="si">📖 My Courses</div><div class="si">🏆 Certificates</div><div class="si">📊 Progress</div></div>
+    <div class="app-main">
+      <h2>Course Catalog</h2>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;margin-top:12px">
+        ${courses.map(cr=>`<div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:12px;overflow:hidden;cursor:pointer;transition:transform .2s" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+          <div style="height:100px;background:linear-gradient(135deg,${p.p}88,${p.p}22);display:flex;align-items:center;justify-content:center;font-size:2rem">📚</div>
+          <div style="padding:12px"><div style="font-size:0.84rem;font-weight:500;margin-bottom:4px">${cr.title}</div>
+          <div style="font-size:0.7rem;color:var(--app-text-dim);margin-bottom:6px">${cr.instructor} · ⭐ ${cr.rating} · ${cr.students} students</div>
+          <div style="display:flex;align-items:center;gap:6px"><span class="status ${cr.level==='Beginner'?'green':cr.level==='Intermediate'?'blue':'purple'}">${cr.level}</span>
+          ${cr.progress>0?`<div style="flex:1;height:3px;background:rgba(255,255,255,0.06);border-radius:2px"><div style="width:${cr.progress}%;height:100%;background:${p.p};border-radius:2px"></div></div><span style="font-size:0.64rem;color:var(--app-text-dim)">${cr.progress}%</span>`:''}</div></div>
+        </div>`).join('')}
+      </div>
+    </div>
+  </div>`;
+}
+
+/* Fallback renderer */
+function renderGeneric(c,p){
+  c.innerHTML=`<div style="display:flex;align-items:center;justify-content:center;height:100%;flex-direction:column;gap:12px">
+    <div style="width:64px;height:64px;border-radius:16px;background:${p.p};display:flex;align-items:center;justify-content:center;font-family:'Instrument Serif',serif;font-size:1.5rem;color:#fff">${p.i}</div>
+    <div style="font-family:'Instrument Serif',serif;font-size:1.4rem">${p.n}</div>
+    <div style="font-size:0.82rem;color:var(--app-text-dim)">${p.v} · ${p.a}</div>
+  </div>`;
+}
+
+/* ═══════ INIT ═══════ */
+buildIcons();
+buildLauncher();
+</script>
+</body>
+</html>

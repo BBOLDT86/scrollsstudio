@@ -1,0 +1,1949 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Open Intranet — Build Workspace</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,300;1,9..40,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f4f3ef;
+  --bg-deep: #eae9e4;
+  --bg-card: #ffffff;
+  --bg-card-hover: #fafaf8;
+  --border: rgba(0,0,0,0.06);
+  --border-strong: rgba(0,0,0,0.12);
+  --border-focus: rgba(0,0,0,0.22);
+  --text: #1a1a1a;
+  --text-mid: #4a4a4a;
+  --text-muted: #888;
+  --text-dim: #b0b0b0;
+  --green: #1a8a5c;
+  --green-bg: rgba(26,138,92,0.07);
+  --green-light: rgba(26,138,92,0.12);
+  --blue: #2d6bcf;
+  --blue-bg: rgba(45,107,207,0.06);
+  --blue-light: rgba(45,107,207,0.12);
+  --warm: #c4723a;
+  --warm-bg: rgba(196,114,58,0.07);
+  --warm-light: rgba(196,114,58,0.12);
+  --purple: #7c5cbf;
+  --purple-bg: rgba(124,92,191,0.06);
+  --purple-light: rgba(124,92,191,0.12);
+  --red: #d04040;
+  --red-bg: rgba(208,64,64,0.07);
+  --sidebar-w: 240px;
+  --header-h: 56px;
+  --radius: 10px;
+  --radius-sm: 6px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'DM Sans', -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  height: 100vh; width: 100vw;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  font-size: 14px;
+}
+
+/* ── LAYOUT ── */
+.app { display: flex; height: 100vh; }
+
+.sidebar {
+  width: var(--sidebar-w); min-width: var(--sidebar-w);
+  background: #1a1a1a;
+  color: #fff;
+  display: flex; flex-direction: column;
+  border-right: 1px solid rgba(255,255,255,0.04);
+  z-index: 50;
+}
+
+.sidebar-brand {
+  padding: 20px 22px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.sidebar-brand h1 {
+  font-family: 'Instrument Serif', serif;
+  font-weight: 400; font-size: 1.15rem;
+  letter-spacing: -0.3px; line-height: 1.2;
+}
+.sidebar-brand .sub {
+  font-size: 0.68rem; color: rgba(255,255,255,0.35);
+  letter-spacing: 2px; text-transform: uppercase;
+  margin-top: 4px; font-weight: 500;
+}
+
+.sidebar-nav { flex: 1; padding: 12px 10px; overflow-y: auto; }
+.sidebar-nav::-webkit-scrollbar { width: 0; }
+
+.nav-section-label {
+  font-size: 0.62rem; text-transform: uppercase;
+  letter-spacing: 2px; color: rgba(255,255,255,0.25);
+  padding: 16px 12px 6px; font-weight: 600;
+}
+
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 12px; border-radius: 7px;
+  cursor: pointer; transition: all 0.15s;
+  font-size: 0.82rem; color: rgba(255,255,255,0.55);
+  font-weight: 400; position: relative;
+}
+.nav-item:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.85); }
+.nav-item.active { background: rgba(255,255,255,0.1); color: #fff; font-weight: 500; }
+.nav-item .icon { width: 18px; text-align: center; font-size: 0.9rem; opacity: 0.7; flex-shrink: 0; }
+.nav-item.active .icon { opacity: 1; }
+.nav-item .badge {
+  margin-left: auto; background: var(--warm);
+  color: #fff; font-size: 0.6rem; font-weight: 700;
+  padding: 1px 6px; border-radius: 8px; min-width: 18px; text-align: center;
+}
+
+.sidebar-footer {
+  padding: 14px 22px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  font-size: 0.7rem; color: rgba(255,255,255,0.2);
+}
+
+/* ── MAIN ── */
+.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+.header {
+  height: var(--header-h); min-height: var(--header-h);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 28px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+.header-left { display: flex; align-items: center; gap: 14px; }
+.header-left h2 {
+  font-family: 'Instrument Serif', serif;
+  font-weight: 400; font-size: 1.2rem;
+  letter-spacing: -0.3px;
+}
+.header-left .page-desc {
+  font-size: 0.76rem; color: var(--text-muted);
+  padding-left: 14px; border-left: 1px solid var(--border-strong);
+}
+
+.header-actions { display: flex; align-items: center; gap: 8px; }
+
+.btn {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.78rem; font-weight: 500;
+  padding: 7px 14px; border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--bg-card); color: var(--text);
+  cursor: pointer; transition: all 0.15s;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.btn:hover { border-color: var(--border-strong); box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+.btn-primary {
+  background: var(--text); color: #fff; border-color: var(--text);
+}
+.btn-primary:hover { background: #333; }
+.btn-sm { padding: 5px 10px; font-size: 0.72rem; }
+.btn-ghost { background: transparent; border-color: transparent; }
+.btn-ghost:hover { background: rgba(0,0,0,0.04); border-color: transparent; }
+
+.content { flex: 1; overflow-y: auto; padding: 24px 28px 40px; }
+.content::-webkit-scrollbar { width: 6px; }
+.content::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 3px; }
+
+/* ── VIEWS ── */
+.view { display: none; }
+.view.active { display: block; }
+
+/* ── DASHBOARD ── */
+.dash-greeting {
+  margin-bottom: 28px;
+}
+.dash-greeting h2 {
+  font-family: 'Instrument Serif', serif;
+  font-weight: 400; font-size: 1.8rem;
+  letter-spacing: -0.5px; margin-bottom: 4px;
+}
+.dash-greeting p { color: var(--text-muted); font-size: 0.88rem; }
+
+.metrics-row {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 14px; margin-bottom: 28px;
+}
+.metric-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 20px;
+  transition: border-color 0.2s;
+}
+.metric-card:hover { border-color: var(--border-strong); }
+.metric-label { font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1.5px; font-weight: 500; margin-bottom: 8px; }
+.metric-value {
+  font-family: 'Instrument Serif', serif;
+  font-size: 2rem; line-height: 1; margin-bottom: 4px;
+}
+.metric-sub { font-size: 0.74rem; color: var(--text-dim); }
+.metric-sub .up { color: var(--green); font-weight: 600; }
+.metric-sub .down { color: var(--red); font-weight: 600; }
+
+.dash-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); overflow: hidden;
+}
+.card-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 20px; border-bottom: 1px solid var(--border);
+}
+.card-header h3 {
+  font-family: 'Instrument Serif', serif;
+  font-weight: 400; font-size: 1rem;
+}
+.card-body { padding: 16px 20px; }
+
+/* ── SPRINT BOARD ── */
+.sprint-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 20px;
+}
+.sprint-header h2 {
+  font-family: 'Instrument Serif', serif;
+  font-weight: 400; font-size: 1.4rem;
+}
+.sprint-meta {
+  display: flex; align-items: center; gap: 16px;
+  font-size: 0.78rem; color: var(--text-muted);
+}
+.sprint-meta .sprint-dates { display: flex; align-items: center; gap: 6px; }
+.sprint-progress-bar {
+  width: 120px; height: 4px; background: var(--border);
+  border-radius: 2px; overflow: hidden;
+}
+.sprint-progress-fill { height: 100%; background: var(--green); border-radius: 2px; transition: width 0.4s; }
+
+.board {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 12px; min-height: 500px;
+}
+.board-col {
+  background: var(--bg-deep); border-radius: var(--radius);
+  padding: 12px; display: flex; flex-direction: column;
+}
+.col-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 6px 4px 12px; font-size: 0.72rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-muted);
+}
+.col-header .count {
+  background: var(--bg-card); border: 1px solid var(--border);
+  width: 22px; height: 22px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.68rem; font-weight: 700; color: var(--text-mid);
+}
+.col-cards { flex: 1; display: flex; flex-direction: column; gap: 8px; min-height: 60px; }
+
+.sprint-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 8px; padding: 14px;
+  cursor: grab; transition: all 0.15s;
+  position: relative;
+}
+.sprint-card:hover { border-color: var(--border-strong); box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+.sprint-card.dragging { opacity: 0.5; transform: rotate(2deg); }
+.sprint-card-title { font-weight: 500; font-size: 0.84rem; margin-bottom: 6px; line-height: 1.35; }
+.sprint-card-desc { font-size: 0.74rem; color: var(--text-muted); line-height: 1.45; margin-bottom: 10px; }
+.sprint-card-footer { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+.card-tag {
+  font-size: 0.62rem; font-weight: 600; letter-spacing: 0.5px;
+  padding: 2px 8px; border-radius: 4px; text-transform: uppercase;
+}
+.tag-app { background: var(--blue-bg); color: var(--blue); }
+.tag-design { background: var(--purple-bg); color: var(--purple); }
+.tag-infra { background: var(--warm-bg); color: var(--warm); }
+.tag-docs { background: var(--green-bg); color: var(--green); }
+.tag-bug { background: var(--red-bg); color: var(--red); }
+
+.card-priority {
+  width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+}
+.priority-high { background: var(--red); }
+.priority-med { background: var(--warm); }
+.priority-low { background: var(--green); }
+
+.card-points {
+  font-size: 0.66rem; font-weight: 700; color: var(--text-dim);
+  background: var(--bg); padding: 1px 6px; border-radius: 3px;
+}
+
+/* Drop zone highlight */
+.board-col.drag-over { background: rgba(45,107,207,0.06); }
+.board-col.drag-over .col-cards { outline: 2px dashed rgba(45,107,207,0.25); outline-offset: -2px; border-radius: 6px; }
+
+/* ── APP LIBRARY ── */
+.library-controls {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 20px; gap: 12px; flex-wrap: wrap;
+}
+.search-box {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 7px 12px;
+  flex: 1; max-width: 320px;
+}
+.search-box input {
+  border: none; outline: none; background: transparent;
+  font-family: inherit; font-size: 0.82rem; color: var(--text);
+  width: 100%;
+}
+.search-box input::placeholder { color: var(--text-dim); }
+
+.filter-pills { display: flex; gap: 6px; }
+.pill {
+  font-size: 0.72rem; font-weight: 500; padding: 5px 12px;
+  border-radius: 20px; border: 1px solid var(--border);
+  background: var(--bg-card); color: var(--text-muted);
+  cursor: pointer; transition: all 0.15s;
+}
+.pill:hover { border-color: var(--border-strong); color: var(--text-mid); }
+.pill.active { background: var(--text); color: #fff; border-color: var(--text); }
+
+.app-table {
+  width: 100%; border-collapse: collapse;
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); overflow: hidden;
+}
+.app-table thead th {
+  font-size: 0.68rem; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 1.5px; color: var(--text-dim);
+  text-align: left; padding: 12px 16px;
+  border-bottom: 1px solid var(--border-strong);
+  background: var(--bg);
+}
+.app-table tbody tr { transition: background 0.1s; cursor: pointer; }
+.app-table tbody tr:hover { background: var(--bg-card-hover); }
+.app-table tbody td {
+  padding: 12px 16px; border-bottom: 1px solid var(--border);
+  font-size: 0.82rem; color: var(--text-mid);
+}
+.app-table .app-name { font-weight: 500; color: var(--text); }
+.status-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  display: inline-block; margin-right: 6px;
+}
+.status-live { background: var(--green); }
+.status-dev { background: var(--blue); }
+.status-design { background: var(--purple); }
+.status-planned { background: var(--text-dim); }
+.status-blocked { background: var(--red); }
+
+/* ── UPDATE LOG ── */
+.update-timeline { max-width: 760px; }
+.update-item {
+  display: flex; gap: 16px; padding: 18px 0;
+  border-bottom: 1px solid var(--border);
+  position: relative;
+}
+.update-date {
+  min-width: 80px; font-size: 0.72rem; color: var(--text-dim);
+  padding-top: 3px; font-variant-numeric: tabular-nums;
+}
+.update-content { flex: 1; }
+.update-content h4 {
+  font-weight: 600; font-size: 0.88rem; margin-bottom: 4px;
+}
+.update-content p {
+  font-size: 0.8rem; color: var(--text-muted); line-height: 1.55;
+  max-width: none;
+}
+.update-type {
+  font-size: 0.62rem; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 1px; padding: 2px 8px; border-radius: 3px;
+  margin-bottom: 6px; display: inline-block;
+}
+.type-release { background: var(--green-bg); color: var(--green); }
+.type-sprint { background: var(--blue-bg); color: var(--blue); }
+.type-decision { background: var(--purple-bg); color: var(--purple); }
+.type-blocker { background: var(--red-bg); color: var(--red); }
+.type-design { background: var(--warm-bg); color: var(--warm); }
+
+/* ── ROADMAP ── */
+.roadmap-lanes { display: flex; flex-direction: column; gap: 18px; }
+.roadmap-quarter {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); overflow: hidden;
+}
+.quarter-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+}
+.quarter-header h3 {
+  font-family: 'Instrument Serif', serif;
+  font-weight: 400; font-size: 1.05rem;
+}
+.quarter-header .q-stats {
+  display: flex; gap: 12px; font-size: 0.72rem; color: var(--text-muted);
+}
+.quarter-body { padding: 16px 20px; }
+.quarter-body.collapsed { display: none; }
+
+.roadmap-items { display: flex; flex-direction: column; gap: 8px; }
+.roadmap-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 14px; border-radius: 7px;
+  background: var(--bg); border: 1px solid var(--border);
+  transition: border-color 0.15s;
+}
+.roadmap-item:hover { border-color: var(--border-strong); }
+.roadmap-item .ri-name { flex: 1; font-size: 0.84rem; font-weight: 500; }
+.roadmap-item .ri-category { font-size: 0.68rem; color: var(--text-muted); min-width: 90px; }
+.roadmap-item .ri-status {
+  font-size: 0.66rem; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.5px; padding: 2px 8px; border-radius: 3px;
+}
+
+/* ── MODAL ── */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+  z-index: 1000; display: none; align-items: center; justify-content: center;
+  backdrop-filter: blur(2px);
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--bg-card); border-radius: 12px;
+  width: 560px; max-width: 92vw; max-height: 85vh;
+  overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+}
+.modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 24px; border-bottom: 1px solid var(--border);
+}
+.modal-header h3 {
+  font-family: 'Instrument Serif', serif;
+  font-weight: 400; font-size: 1.15rem;
+}
+.modal-close {
+  width: 28px; height: 28px; border-radius: 6px;
+  border: none; background: transparent; cursor: pointer;
+  font-size: 1.1rem; color: var(--text-muted);
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s;
+}
+.modal-close:hover { background: var(--bg); }
+.modal-body { padding: 20px 24px; }
+.modal-footer {
+  display: flex; justify-content: flex-end; gap: 8px;
+  padding: 14px 24px; border-top: 1px solid var(--border);
+}
+
+.form-group { margin-bottom: 16px; }
+.form-label { display: block; font-size: 0.74rem; font-weight: 600; color: var(--text-mid); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1px; }
+.form-input, .form-select, .form-textarea {
+  width: 100%; padding: 9px 12px; border: 1px solid var(--border);
+  border-radius: var(--radius-sm); font-family: inherit;
+  font-size: 0.84rem; color: var(--text); background: var(--bg);
+  transition: border-color 0.15s;
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  outline: none; border-color: var(--border-focus);
+}
+.form-textarea { min-height: 80px; resize: vertical; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 1024px) {
+  .metrics-row { grid-template-columns: repeat(2, 1fr); }
+  .board { grid-template-columns: repeat(2, 1fr); }
+  .dash-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 768px) {
+  .sidebar { display: none; }
+  .board { grid-template-columns: 1fr; }
+  .metrics-row { grid-template-columns: 1fr 1fr; }
+}
+
+/* ── AI WORKSHOP ── */
+.ws-layout { display: flex; flex-direction: column; gap: 16px; }
+.ws-config {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 18px 20px;
+}
+.ws-config-row { display: flex; gap: 12px; align-items: flex-start; }
+.ws-config-row + .ws-config-row { margin-top: 12px; }
+.ws-panels { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.ws-panel {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); overflow: hidden; display: flex; flex-direction: column;
+}
+.ws-panel-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 18px; border-bottom: 1px solid var(--border);
+  background: var(--bg);
+}
+.ws-panel-title {
+  font-size: 0.72rem; text-transform: uppercase;
+  letter-spacing: 1.5px; color: var(--text-muted); font-weight: 600;
+}
+.ws-panel-body { padding: 16px 18px; flex: 1; }
+.ws-file-count { font-size: 0.72rem; color: var(--text-dim); }
+.ws-drop {
+  border: 2px dashed var(--border-strong);
+  border-radius: var(--radius); padding: 28px 20px;
+  text-align: center; cursor: pointer; transition: all 0.2s;
+}
+.ws-drop:hover { border-color: var(--green); background: var(--green-bg); }
+.ws-drop-icon { font-size: 1.6rem; color: var(--text-dim); margin-bottom: 6px; }
+.ws-drop-text { font-size: 0.84rem; color: var(--text-mid); font-weight: 500; }
+.ws-drop-hint { font-size: 0.72rem; color: var(--text-dim); margin-top: 4px; }
+.ws-file-list { margin-top: 12px; }
+.ws-file-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 12px; border-radius: var(--radius-sm);
+  border: 1px solid var(--border); margin-bottom: 6px;
+  font-size: 0.82rem; transition: border-color 0.15s;
+}
+.ws-file-item:hover { border-color: var(--border-strong); }
+.ws-file-item.active { border-color: var(--green); background: var(--green-bg); }
+.ws-file-item-name { font-weight: 500; color: var(--text); cursor: pointer; flex: 1; }
+.ws-file-item-size { font-size: 0.7rem; color: var(--text-dim); margin: 0 10px; }
+.ws-file-item-remove {
+  background: none; border: none; cursor: pointer;
+  color: var(--text-dim); font-size: 0.9rem; padding: 0 4px;
+  transition: color 0.15s;
+}
+.ws-file-item-remove:hover { color: var(--red); }
+.ws-code-preview {
+  margin-top: 12px; max-height: 180px; overflow: auto;
+  background: var(--bg); border-radius: var(--radius-sm);
+  padding: 12px; font-size: 0.72rem; line-height: 1.55;
+  color: var(--text-muted); white-space: pre-wrap; word-break: break-all;
+  font-family: 'DM Sans', monospace; border: 1px solid var(--border);
+}
+.ws-sys-prompt {
+  width: 100%; min-height: 70px; padding: 10px 12px;
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); font-family: 'DM Sans', sans-serif;
+  font-size: 0.78rem; color: var(--text-mid); resize: vertical;
+  margin-bottom: 10px; line-height: 1.5;
+}
+.ws-sys-prompt:focus { border-color: var(--border-focus); outline: none; }
+.ws-query {
+  width: 100%; min-height: 220px; padding: 14px;
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); font-family: 'DM Sans', sans-serif;
+  font-size: 0.86rem; color: var(--text); resize: vertical;
+  line-height: 1.65;
+}
+.ws-query:focus { border-color: var(--border-focus); outline: none; }
+.ws-query::placeholder { color: var(--text-dim); }
+.ws-action-bar {
+  display: flex; align-items: center; gap: 12px;
+}
+.ws-status {
+  flex: 1; font-size: 0.78rem; color: var(--text-muted);
+  text-align: right;
+}
+.ws-status.processing { color: var(--blue); font-weight: 500; }
+.ws-status.error { color: var(--red); font-weight: 500; }
+.ws-status.success { color: var(--green); font-weight: 500; }
+.ws-output { display: flex; gap: 14px; }
+.ws-preview-frame {
+  width: 100%; min-height: 500px; border: none;
+  background: #fff; border-radius: 0 0 var(--radius) var(--radius);
+}
+.ws-output-code {
+  min-height: 500px; max-height: 600px; overflow: auto;
+  padding: 16px; font-size: 0.76rem; font-family: 'DM Sans', monospace;
+  white-space: pre-wrap; line-height: 1.55; color: var(--text-mid);
+  margin: 0; background: var(--bg);
+}
+.ws-history-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 0; border-bottom: 1px solid var(--border);
+  font-size: 0.8rem; cursor: pointer;
+}
+.ws-history-item:hover { color: var(--green); }
+.ws-history-item:last-child { border-bottom: none; }
+.ws-history-time { font-size: 0.7rem; color: var(--text-dim); min-width: 60px; }
+.ws-history-prompt { flex: 1; color: var(--text-mid); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ws-history-action { color: var(--blue); font-size: 0.72rem; font-weight: 500; }
+
+@media (max-width: 1024px) {
+  .ws-panels { grid-template-columns: 1fr; }
+}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.animate-in { animation: fadeUp 0.35s ease forwards; }
+.animate-in:nth-child(2) { animation-delay: 0.04s; }
+.animate-in:nth-child(3) { animation-delay: 0.08s; }
+.animate-in:nth-child(4) { animation-delay: 0.12s; }
+
+/* ── ACTIVITY FEED ── */
+.activity-item {
+  display: flex; gap: 10px; padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.78rem; color: var(--text-muted);
+}
+.activity-item:last-child { border-bottom: none; }
+.activity-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  margin-top: 6px; flex-shrink: 0;
+}
+.activity-item strong { color: var(--text-mid); font-weight: 500; }
+.activity-time { font-size: 0.68rem; color: var(--text-dim); margin-top: 2px; }
+
+/* ── BURNDOWN CHART ── */
+.chart-area {
+  position: relative; height: 180px;
+  margin-top: 10px;
+}
+.chart-svg { width: 100%; height: 100%; }
+.chart-line { fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.chart-area-fill { opacity: 0.08; }
+.chart-dot { r: 3; }
+.chart-gridline { stroke: var(--border); stroke-width: 1; stroke-dasharray: 3 3; }
+.chart-label { font-size: 10px; fill: var(--text-dim); font-family: 'DM Sans', sans-serif; }
+
+/* ── VELOCITY BAR ── */
+.velocity-bars { display: flex; align-items: flex-end; gap: 6px; height: 120px; margin-top: 16px; }
+.v-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; justify-content: flex-end; }
+.v-bar {
+  width: 100%; border-radius: 4px 4px 0 0;
+  transition: height 0.5s ease;
+}
+.v-bar-label { font-size: 0.62rem; color: var(--text-dim); }
+.v-bar-value { font-size: 0.68rem; font-weight: 600; color: var(--text-mid); }
+
+/* ── NOTES PANEL ── */
+.notes-area {
+  width: 100%; min-height: 300px; padding: 16px;
+  border: 1px solid var(--border); border-radius: var(--radius);
+  background: var(--bg-card); font-family: 'DM Sans', sans-serif;
+  font-size: 0.86rem; color: var(--text); line-height: 1.65;
+  resize: vertical; outline: none;
+}
+.notes-area:focus { border-color: var(--border-focus); }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <h1>Open Intranet</h1>
+      <div class="sub">Build Workspace</div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Overview</div>
+      <div class="nav-item active" data-view="dashboard">
+        <span class="icon">◐</span> Dashboard
+      </div>
+      <div class="nav-item" data-view="sprint">
+        <span class="icon">▣</span> Sprint Board
+        <span class="badge">3</span>
+      </div>
+
+      <div class="nav-section-label">Product</div>
+      <div class="nav-item" data-view="library">
+        <span class="icon">◇</span> App Library
+      </div>
+      <div class="nav-item" data-view="roadmap">
+        <span class="icon">▬</span> Roadmap
+      </div>
+
+      <div class="nav-section-label">Build</div>
+      <div class="nav-item" data-view="workshop">
+        <span class="icon">⬡</span> AI Workshop
+      </div>
+
+      <div class="nav-section-label">Team</div>
+      <div class="nav-item" data-view="updates">
+        <span class="icon">◉</span> Update Log
+        <span class="badge">2</span>
+      </div>
+      <div class="nav-item" data-view="notes">
+        <span class="icon">☰</span> Working Notes
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      v0.2 — AI Workshop + serverless workspace<br>
+      Data persists in localStorage
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+    <header class="header">
+      <div class="header-left">
+        <h2 id="pageTitle">Dashboard</h2>
+        <span class="page-desc" id="pageDesc">Sprint 4 · Week 2 of 3</span>
+      </div>
+      <div class="header-actions">
+        <button class="btn" onclick="exportData()">↓ Export</button>
+        <button class="btn btn-primary" id="primaryAction" onclick="openNewCardModal()">+ New Card</button>
+      </div>
+    </header>
+
+    <div class="content">
+      <!-- ═══ DASHBOARD ═══ -->
+      <div class="view active" id="view-dashboard">
+        <div class="dash-greeting animate-in">
+          <h2>Good <span id="greeting-time">morning</span></h2>
+          <p>Here's where the Open Intranet build stands.</p>
+        </div>
+
+        <div class="metrics-row">
+          <div class="metric-card animate-in">
+            <div class="metric-label">Apps in Library</div>
+            <div class="metric-value" id="metric-apps">0</div>
+            <div class="metric-sub"><span class="up" id="metric-apps-live">0 live</span> · <span id="metric-apps-dev">0 in dev</span></div>
+          </div>
+          <div class="metric-card animate-in">
+            <div class="metric-label">Sprint Velocity</div>
+            <div class="metric-value" id="metric-velocity">0</div>
+            <div class="metric-sub">pts / sprint avg</div>
+          </div>
+          <div class="metric-card animate-in">
+            <div class="metric-label">Cards This Sprint</div>
+            <div class="metric-value" id="metric-cards">0</div>
+            <div class="metric-sub"><span id="metric-done">0</span> done · <span id="metric-remaining">0</span> remaining</div>
+          </div>
+          <div class="metric-card animate-in">
+            <div class="metric-label">Updates This Week</div>
+            <div class="metric-value" id="metric-updates">0</div>
+            <div class="metric-sub">Last: <span id="metric-last-update">—</span></div>
+          </div>
+        </div>
+
+        <div class="dash-grid">
+          <div class="card animate-in">
+            <div class="card-header">
+              <h3>Sprint Burndown</h3>
+              <span style="font-size:0.72rem;color:var(--text-dim)" id="burndown-sprint-label">Sprint 4</span>
+            </div>
+            <div class="card-body">
+              <div class="chart-area" id="burndown-chart"></div>
+            </div>
+          </div>
+          <div class="card animate-in">
+            <div class="card-header">
+              <h3>Velocity History</h3>
+              <span style="font-size:0.72rem;color:var(--text-dim)">Last 6 sprints</span>
+            </div>
+            <div class="card-body">
+              <div class="velocity-bars" id="velocity-chart"></div>
+            </div>
+          </div>
+          <div class="card animate-in">
+            <div class="card-header">
+              <h3>Recent Activity</h3>
+            </div>
+            <div class="card-body" id="activity-feed"></div>
+          </div>
+          <div class="card animate-in">
+            <div class="card-header">
+              <h3>Blockers & Risks</h3>
+            </div>
+            <div class="card-body" id="blockers-feed"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ SPRINT BOARD ═══ -->
+      <div class="view" id="view-sprint">
+        <div class="sprint-header">
+          <div>
+            <h2 id="sprint-name">Sprint 4</h2>
+            <div class="sprint-meta">
+              <span class="sprint-dates" id="sprint-dates">Mar 3 – Mar 21</span>
+              <div class="sprint-progress-bar"><div class="sprint-progress-fill" id="sprint-progress"></div></div>
+              <span id="sprint-pts-label">0 / 0 pts</span>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-sm" onclick="openSprintSettingsModal()">⚙ Sprint Settings</button>
+            <button class="btn btn-sm btn-primary" onclick="openNewCardModal()">+ Add Card</button>
+          </div>
+        </div>
+        <div class="board" id="sprint-board">
+          <div class="board-col" data-status="backlog">
+            <div class="col-header">Backlog <span class="count" data-count="backlog">0</span></div>
+            <div class="col-cards" data-status="backlog"></div>
+          </div>
+          <div class="board-col" data-status="in-progress">
+            <div class="col-header">In Progress <span class="count" data-count="in-progress">0</span></div>
+            <div class="col-cards" data-status="in-progress"></div>
+          </div>
+          <div class="board-col" data-status="review">
+            <div class="col-header">Review <span class="count" data-count="review">0</span></div>
+            <div class="col-cards" data-status="review"></div>
+          </div>
+          <div class="board-col" data-status="done">
+            <div class="col-header">Done <span class="count" data-count="done">0</span></div>
+            <div class="col-cards" data-status="done"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ APP LIBRARY ═══ -->
+      <div class="view" id="view-library">
+        <div class="library-controls">
+          <div class="search-box">
+            <span style="color:var(--text-dim)">⌕</span>
+            <input type="text" placeholder="Search apps…" id="app-search" oninput="renderLibrary()">
+          </div>
+          <div class="filter-pills" id="lib-filters">
+            <span class="pill active" data-filter="all">All</span>
+            <span class="pill" data-filter="live">Live</span>
+            <span class="pill" data-filter="dev">In Dev</span>
+            <span class="pill" data-filter="design">Design</span>
+            <span class="pill" data-filter="planned">Planned</span>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="openNewAppModal()">+ Add App</button>
+        </div>
+        <table class="app-table">
+          <thead>
+            <tr>
+              <th>App Name</th>
+              <th>Category</th>
+              <th>Status</th>
+              <th>Sprint</th>
+              <th>File Size</th>
+              <th>Last Updated</th>
+            </tr>
+          </thead>
+          <tbody id="app-table-body"></tbody>
+        </table>
+      </div>
+
+      <!-- ═══ ROADMAP ═══ -->
+      <div class="view" id="view-roadmap">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+          <h2 style="font-family:'Instrument Serif',serif;font-weight:400;font-size:1.4rem;">Product Roadmap</h2>
+          <button class="btn btn-sm btn-primary" onclick="openNewRoadmapModal()">+ Add Item</button>
+        </div>
+        <div class="roadmap-lanes" id="roadmap-lanes"></div>
+      </div>
+
+      <!-- ═══ UPDATES ═══ -->
+      <div class="view" id="view-updates">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+          <h2 style="font-family:'Instrument Serif',serif;font-weight:400;font-size:1.4rem;">Update Log</h2>
+          <button class="btn btn-sm btn-primary" onclick="openNewUpdateModal()">+ Post Update</button>
+        </div>
+        <div class="update-timeline" id="update-timeline"></div>
+      </div>
+
+      <!-- ═══ AI WORKSHOP ═══ -->
+      <div class="view" id="view-workshop">
+        <div class="ws-layout">
+
+          <!-- Config Bar -->
+          <div class="ws-config">
+            <div class="ws-config-row">
+              <div class="form-group" style="flex:2">
+                <label class="form-label">Azure OpenAI Endpoint</label>
+                <input class="form-input" id="ws-endpoint" type="text" placeholder="https://your-resource.cognitiveservices.azure.com">
+              </div>
+              <div class="form-group" style="flex:1">
+                <label class="form-label">API Key</label>
+                <input class="form-input" id="ws-apikey" type="password" placeholder="••••••••">
+              </div>
+            </div>
+            <div class="ws-config-row">
+              <div class="form-group" style="flex:1">
+                <label class="form-label">Model / Deployment</label>
+                <input class="form-input" id="ws-model" type="text" placeholder="gpt-5">
+              </div>
+              <div class="form-group" style="flex:1">
+                <label class="form-label">API Version</label>
+                <select class="form-select" id="ws-apiversion">
+                  <option value="2025-04-01-preview">2025-04-01-preview</option>
+                  <option value="2025-03-01-preview">2025-03-01-preview</option>
+                </select>
+              </div>
+              <div class="form-group" style="flex:0 0 auto;align-self:flex-end;">
+                <button class="btn btn-primary btn-sm" onclick="wseSaveConfig()">Save Config</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Two Column Workspace -->
+          <div class="ws-panels">
+
+            <!-- Left: Source Files -->
+            <div class="ws-panel">
+              <div class="ws-panel-header">
+                <span class="ws-panel-title">⬡ Source Files</span>
+                <span class="ws-file-count" id="ws-file-count">0 files</span>
+              </div>
+              <div class="ws-panel-body">
+                <div class="ws-drop" id="wsDropZone" onclick="document.getElementById('wsFileInput').click()">
+                  <div class="ws-drop-icon">⊞</div>
+                  <div class="ws-drop-text">Drop HTML files here or click to browse</div>
+                  <div class="ws-drop-hint">Accepts .html and .htm files</div>
+                  <input type="file" id="wsFileInput" accept=".html,.htm" multiple style="display:none">
+                </div>
+                <div class="ws-file-list" id="wsFileList"></div>
+                <div class="ws-code-preview" id="wsCodePreview" style="display:none"></div>
+              </div>
+            </div>
+
+            <!-- Right: Instructions -->
+            <div class="ws-panel">
+              <div class="ws-panel-header">
+                <span class="ws-panel-title">◉ Instructions</span>
+                <button class="btn btn-ghost btn-sm" onclick="wseToggleSysPrompt()">System Prompt ▾</button>
+              </div>
+              <div class="ws-panel-body">
+                <textarea class="ws-sys-prompt" id="wsSysPrompt" style="display:none">You are an expert HTML developer. The user will provide MULTIPLE HTML files and instructions. They may reference files by name (example: "make pageA.html use the styling from layout.html"). Return ONLY the complete modified HTML for the main requested file unless the user explicitly asks for multiple files. Output raw HTML only — no markdown fences, no explanations.</textarea>
+                <textarea class="ws-query" id="wsQuery" placeholder="Describe the changes you want…&#10;&#10;Examples:&#10;• Redesign the header to match dashboard.html&#10;• Add a dark mode toggle&#10;• Merge the sidebar from nav.html into index.html&#10;• Fix the mobile layout breakpoints"></textarea>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Action Bar -->
+          <div class="ws-action-bar">
+            <button class="btn" onclick="wseClearAll()">Clear All</button>
+            <div class="ws-status" id="wsStatus"></div>
+            <button class="btn btn-primary" id="wsSendBtn" onclick="wseSend()" disabled>
+              ▶ Send to Azure AI
+            </button>
+          </div>
+
+          <!-- Output Section -->
+          <div class="ws-output" id="wsOutput" style="display:none">
+            <div class="ws-panel" style="flex:1">
+              <div class="ws-panel-header">
+                <span class="ws-panel-title">Output</span>
+                <div style="display:flex;gap:6px;">
+                  <button class="btn btn-sm" id="wsToggleView" onclick="wseToggleOutput()">◇ Code</button>
+                  <button class="btn btn-sm" onclick="wseCopyOutput()">⊡ Copy</button>
+                  <button class="btn btn-sm btn-primary" onclick="wseDownloadOutput()">↓ Download</button>
+                </div>
+              </div>
+              <div class="ws-panel-body" style="padding:0">
+                <iframe class="ws-preview-frame" id="wsPreviewFrame"></iframe>
+                <pre class="ws-output-code" id="wsOutputCode" style="display:none"></pre>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sprint History -->
+          <div class="ws-history" id="wsHistory" style="display:none">
+            <div class="ws-panel">
+              <div class="ws-panel-header">
+                <span class="ws-panel-title">Sprint History</span>
+                <button class="btn btn-ghost btn-sm" onclick="wseClearHistory()">Clear</button>
+              </div>
+              <div class="ws-panel-body">
+                <div id="wsHistoryList"></div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ═══ NOTES ═══ -->
+      <div class="view" id="view-notes">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+          <h2 style="font-family:'Instrument Serif',serif;font-weight:400;font-size:1.4rem;">Working Notes</h2>
+          <span style="font-size:0.74rem;color:var(--text-dim)">Auto-saves on edit</span>
+        </div>
+        <textarea class="notes-area" id="working-notes" placeholder="Architecture decisions, meeting notes, design rationale — anything the team needs to remember.
+
+Use this as a persistent scratchpad. Everything saves automatically."></textarea>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL ═══ -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modal-title">New Card</h3>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-footer" id="modal-footer"></div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+// DATA LAYER — localStorage persistence
+// ═══════════════════════════════════════════
+const STORE_KEY = 'oi_workspace_v1';
+
+const DEFAULT_DATA = {
+  sprint: {
+    name: 'Sprint 4',
+    number: 4,
+    startDate: '2026-03-03',
+    endDate: '2026-03-21',
+    velocity: [18, 22, 26, 20, 24, 0]
+  },
+  cards: [
+    { id: 'c1', title: 'Budget Planner — core layout & state', desc: 'Build paycheck-by-paycheck budget tool with visual spending categories. localStorage persistence.', status: 'done', tag: 'app', priority: 'high', points: 5, sprint: 4, created: '2026-03-03' },
+    { id: 'c2', title: 'Design system tokens — v2 color update', desc: 'Update CSS custom properties across all apps to align with new brand palette. Audit contrast ratios.', status: 'done', tag: 'design', priority: 'med', points: 3, sprint: 4, created: '2026-03-03' },
+    { id: 'c3', title: 'Wedding RSVP — meal selection logic', desc: 'Dropdown for dietary restrictions, plus-one flow, confirmation screen with edit capability.', status: 'review', tag: 'app', priority: 'high', points: 5, sprint: 4, created: '2026-03-05' },
+    { id: 'c4', title: 'Bill Splitter — recurring splits feature', desc: 'Allow saving split templates for recurring bills. Monthly reminder view.', status: 'in-progress', tag: 'app', priority: 'med', points: 3, sprint: 4, created: '2026-03-06' },
+    { id: 'c5', title: 'Shared nav component spec', desc: 'Define optional header component that can be injected into any app for cross-navigation.', status: 'in-progress', tag: 'infra', priority: 'low', points: 2, sprint: 4, created: '2026-03-07' },
+    { id: 'c6', title: 'Trip Planner — itinerary builder MVP', desc: 'Drag-and-drop day planner, group voting on activities, packing list generator.', status: 'backlog', tag: 'app', priority: 'high', points: 8, sprint: 4, created: '2026-03-04' },
+    { id: 'c7', title: 'QA pass — Budget Planner cross-browser', desc: 'Test Safari, Firefox, Chrome. Fix mobile viewport bugs. Verify offline mode.', status: 'backlog', tag: 'bug', priority: 'med', points: 2, sprint: 4, created: '2026-03-10' },
+    { id: 'c8', title: 'Documentation — app creation guide', desc: 'Write dev guide: file structure, design tokens, testing checklist, submission criteria.', status: 'backlog', tag: 'docs', priority: 'low', points: 3, sprint: 4, created: '2026-03-08' },
+    { id: 'c9', title: 'Super Bowl Squares — auto-randomize', desc: 'Random number assignment, payment tracking, live winner highlighting.', status: 'in-progress', tag: 'app', priority: 'med', points: 5, sprint: 4, created: '2026-03-05' },
+    { id: 'c10', title: 'Chore Rotation — drag UI polish', desc: 'Improve drag-and-drop feel on mobile. Add haptic feedback styling. Fix snap zones.', status: 'review', tag: 'design', priority: 'low', points: 2, sprint: 4, created: '2026-03-09' },
+  ],
+  apps: [
+    { id: 'a1', name: 'Budget Planner', category: 'Life & Household', status: 'live', sprint: 3, size: '48 KB', updated: '2026-03-02' },
+    { id: 'a2', name: 'Chore Rotation', category: 'Life & Household', status: 'live', sprint: 3, size: '32 KB', updated: '2026-03-01' },
+    { id: 'a3', name: 'Contact Info Hub', category: 'Life & Household', status: 'live', sprint: 2, size: '36 KB', updated: '2026-02-18' },
+    { id: 'a4', name: 'Wedding RSVP', category: 'Group & Social', status: 'dev', sprint: 4, size: '52 KB', updated: '2026-03-10' },
+    { id: 'a5', name: 'Bill Splitter', category: 'Group & Social', status: 'dev', sprint: 4, size: '41 KB', updated: '2026-03-11' },
+    { id: 'a6', name: 'Group Trip Planner', category: 'Group & Social', status: 'design', sprint: 4, size: '—', updated: '2026-03-08' },
+    { id: 'a7', name: 'Super Bowl Squares', category: 'Sports & Games', status: 'dev', sprint: 4, size: '38 KB', updated: '2026-03-10' },
+    { id: 'a8', name: 'Potluck Signup', category: 'Group & Social', status: 'live', sprint: 2, size: '28 KB', updated: '2026-02-14' },
+    { id: 'a9', name: 'Address Book', category: 'Life & Household', status: 'live', sprint: 1, size: '34 KB', updated: '2026-01-28' },
+    { id: 'a10', name: 'Photo Slideshow', category: 'Life & Household', status: 'planned', sprint: 5, size: '—', updated: '—' },
+    { id: 'a11', name: 'E-Card Maker', category: 'Life & Household', status: 'planned', sprint: 5, size: '—', updated: '—' },
+    { id: 'a12', name: 'March Madness Bracket', category: 'Sports & Games', status: 'design', sprint: 5, size: '—', updated: '2026-03-06' },
+    { id: 'a13', name: 'Fantasy Draft Board', category: 'Sports & Games', status: 'planned', sprint: 6, size: '—', updated: '—' },
+    { id: 'a14', name: 'Freelancer Invoice', category: 'Professional', status: 'planned', sprint: 6, size: '—', updated: '—' },
+    { id: 'a15', name: 'Pickup Game Scheduler', category: 'Sports & Games', status: 'planned', sprint: 6, size: '—', updated: '—' },
+    { id: 'a16', name: 'Contractor Estimate Builder', category: 'Professional', status: 'planned', sprint: 7, size: '—', updated: '—' },
+    { id: 'a17', name: 'Baby Pool', category: 'Group & Social', status: 'planned', sprint: 5, size: '—', updated: '—' },
+    { id: 'a18', name: 'Concert Lineup Ranker', category: 'Group & Social', status: 'planned', sprint: 6, size: '—', updated: '—' },
+  ],
+  roadmap: [
+    { id: 'r1', name: 'Core Design System v2', quarter: 'Q1 2026', category: 'Infrastructure', status: 'done' },
+    { id: 'r2', name: 'Life & Household Suite (6 apps)', quarter: 'Q1 2026', category: 'Apps', status: 'in-progress' },
+    { id: 'r3', name: 'Group & Social Suite (6 apps)', quarter: 'Q1 2026', category: 'Apps', status: 'in-progress' },
+    { id: 'r4', name: 'Build Workspace (this tool)', quarter: 'Q1 2026', category: 'Infrastructure', status: 'in-progress' },
+    { id: 'r5', name: 'Sports & Games Suite (6 apps)', quarter: 'Q2 2026', category: 'Apps', status: 'planned' },
+    { id: 'r6', name: 'Professional Suite (6 apps)', quarter: 'Q2 2026', category: 'Apps', status: 'planned' },
+    { id: 'r7', name: 'App submission & review process', quarter: 'Q2 2026', category: 'Process', status: 'planned' },
+    { id: 'r8', name: 'Shared nav / cross-link protocol', quarter: 'Q2 2026', category: 'Infrastructure', status: 'planned' },
+    { id: 'r9', name: 'Distribution — Gumroad/Etsy storefront', quarter: 'Q3 2026', category: 'Distribution', status: 'planned' },
+    { id: 'r10', name: 'Doccoin protocol — research & spec', quarter: 'Q3 2026', category: 'Infrastructure', status: 'planned' },
+    { id: 'r11', name: 'Community template submissions', quarter: 'Q3 2026', category: 'Community', status: 'planned' },
+    { id: 'r12', name: 'Seasonal bundles — Back to School', quarter: 'Q3 2026', category: 'Distribution', status: 'planned' },
+    { id: 'r13', name: 'Doccoin v1 — document discovery', quarter: 'Q4 2026', category: 'Infrastructure', status: 'planned' },
+    { id: 'r14', name: '50-app milestone', quarter: 'Q4 2026', category: 'Apps', status: 'planned' },
+    { id: 'r15', name: 'Holiday bundle & marketing push', quarter: 'Q4 2026', category: 'Distribution', status: 'planned' },
+  ],
+  updates: [
+    { id: 'u1', date: '2026-03-12', title: 'Build Workspace v0.1 shipped', body: 'Internal PM tool now live. Sprint board with drag-and-drop, app library tracker, roadmap view, and update log all functional. Data persists in localStorage.', type: 'release' },
+    { id: 'u2', date: '2026-03-10', title: 'Wedding RSVP entering review', body: 'Meal selection, dietary restrictions, and plus-one logic all implemented. Needs QA on mobile Safari before launch.', type: 'sprint' },
+    { id: 'u3', date: '2026-03-08', title: 'Design system v2 tokens finalized', body: 'New color palette locked. All CSS custom properties documented. Migration guide for existing apps written.', type: 'design' },
+    { id: 'u4', date: '2026-03-06', title: 'Decision: No backend for v1', body: 'Confirmed architecture — all apps remain pure HTML/CSS/JS with localStorage. Doccoin protocol research begins Q3. No Firebase, no Supabase.', type: 'decision' },
+    { id: 'u5', date: '2026-03-04', title: 'Sprint 4 kickoff', body: '38 points planned. Focus: Wedding RSVP, Bill Splitter, Super Bowl Squares, plus design system polish. Trip Planner stretch goal.', type: 'sprint' },
+    { id: 'u6', date: '2026-02-28', title: 'Sprint 3 retro — velocity concern', body: 'Delivered 20 of 26 planned points. Trip Planner scoping was too aggressive. Moving to better decomposition for Sprint 4.', type: 'blocker' },
+  ],
+  notes: `# Open Intranet — Working Notes
+
+## Architecture Principles
+- Every app: single .html file, zero dependencies
+- Design tokens via CSS custom properties (--oi-* namespace)
+- localStorage for persistence, no cloud
+- Works offline, works on any device
+
+## Sprint Conventions
+- 3-week sprints
+- Points: 1 (trivial), 2 (small), 3 (medium), 5 (large), 8 (epic — should be decomposed)
+- Review = functional complete, needs QA/polish
+- Done = shipped, tested, documented
+
+## Design Token Namespace
+--oi-bg, --oi-card, --oi-border, --oi-text, --oi-accent-green, etc.
+All apps must import from shared token set.
+
+## File Naming Convention
+oi-[category]-[app-name].html
+Examples: oi-life-budget-planner.html, oi-social-wedding-rsvp.html
+
+## Distribution Strategy
+Phase 1: Free, build brand recognition
+Phase 2: Bundles on Gumroad ($9-19 per suite)
+Phase 3: Seasonal / niche bundles ($12-29)
+`
+};
+
+function loadData() {
+  try {
+    const raw = localStorage.getItem(STORE_KEY);
+    return raw ? JSON.parse(raw) : JSON.parse(JSON.stringify(DEFAULT_DATA));
+  } catch(e) {
+    return JSON.parse(JSON.stringify(DEFAULT_DATA));
+  }
+}
+
+function saveData() {
+  localStorage.setItem(STORE_KEY, JSON.stringify(DATA));
+}
+
+let DATA = loadData();
+
+// ═══════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════
+const viewTitles = {
+  dashboard: ['Dashboard', `Sprint ${DATA.sprint.number} · Week 2 of 3`],
+  sprint: ['Sprint Board', `${DATA.sprint.name} — ${DATA.sprint.startDate} to ${DATA.sprint.endDate}`],
+  library: ['App Library', `${DATA.apps.length} apps tracked`],
+  roadmap: ['Roadmap', `Q1–Q4 2026`],
+  updates: ['Update Log', `${DATA.updates.length} entries`],
+  notes: ['Working Notes', 'Persistent scratchpad'],
+  workshop: ['AI Workshop', 'HTML file + prompt → updated HTML'],
+};
+
+document.querySelectorAll('.nav-item[data-view]').forEach(item => {
+  item.addEventListener('click', () => {
+    const view = item.dataset.view;
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    item.classList.add('active');
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.getElementById('view-' + view).classList.add('active');
+    document.getElementById('pageTitle').textContent = viewTitles[view][0];
+    document.getElementById('pageDesc').textContent = viewTitles[view][1];
+    if (view === 'sprint') renderBoard();
+    if (view === 'library') renderLibrary();
+    if (view === 'roadmap') renderRoadmap();
+    if (view === 'updates') renderUpdates();
+    if (view === 'notes') document.getElementById('working-notes').value = DATA.notes;
+    if (view === 'dashboard') renderDashboard();
+    if (view === 'workshop') wseRenderHistory();
+  });
+});
+
+// ═══════════════════════════════════════════
+// SPRINT BOARD
+// ═══════════════════════════════════════════
+let draggedCard = null;
+
+function renderBoard() {
+  const statuses = ['backlog', 'in-progress', 'review', 'done'];
+  const currentCards = DATA.cards.filter(c => c.sprint === DATA.sprint.number);
+  
+  statuses.forEach(status => {
+    const col = document.querySelector(`.col-cards[data-status="${status}"]`);
+    col.innerHTML = '';
+    const cards = currentCards.filter(c => c.status === status);
+    document.querySelector(`.count[data-count="${status}"]`).textContent = cards.length;
+    
+    cards.forEach(card => {
+      const el = document.createElement('div');
+      el.className = 'sprint-card';
+      el.draggable = true;
+      el.dataset.id = card.id;
+      el.innerHTML = `
+        <div class="sprint-card-title">${esc(card.title)}</div>
+        <div class="sprint-card-desc">${esc(card.desc).slice(0, 90)}${card.desc.length > 90 ? '…' : ''}</div>
+        <div class="sprint-card-footer">
+          <div style="display:flex;gap:6px;align-items:center;">
+            <span class="card-tag tag-${card.tag}">${card.tag}</span>
+            <span class="card-priority priority-${card.priority}"></span>
+          </div>
+          <span class="card-points">${card.points} pts</span>
+        </div>
+      `;
+      el.addEventListener('dragstart', onDragStart);
+      el.addEventListener('dragend', onDragEnd);
+      el.addEventListener('click', () => openEditCardModal(card.id));
+      col.appendChild(el);
+    });
+  });
+
+  // Update sprint progress
+  const total = currentCards.reduce((s, c) => s + c.points, 0);
+  const done = currentCards.filter(c => c.status === 'done').reduce((s, c) => s + c.points, 0);
+  document.getElementById('sprint-progress').style.width = total ? (done / total * 100) + '%' : '0%';
+  document.getElementById('sprint-pts-label').textContent = `${done} / ${total} pts`;
+
+  // Setup drop zones
+  document.querySelectorAll('.board-col').forEach(col => {
+    col.addEventListener('dragover', e => { e.preventDefault(); col.classList.add('drag-over'); });
+    col.addEventListener('dragleave', () => col.classList.remove('drag-over'));
+    col.addEventListener('drop', onDrop);
+  });
+}
+
+function onDragStart(e) {
+  draggedCard = e.target.closest('.sprint-card');
+  draggedCard.classList.add('dragging');
+  e.dataTransfer.effectAllowed = 'move';
+}
+function onDragEnd() {
+  if (draggedCard) draggedCard.classList.remove('dragging');
+  document.querySelectorAll('.board-col').forEach(c => c.classList.remove('drag-over'));
+  draggedCard = null;
+}
+function onDrop(e) {
+  e.preventDefault();
+  const col = e.currentTarget;
+  col.classList.remove('drag-over');
+  if (!draggedCard) return;
+  const cardId = draggedCard.dataset.id;
+  const newStatus = col.dataset.status;
+  const card = DATA.cards.find(c => c.id === cardId);
+  if (card) {
+    card.status = newStatus;
+    saveData();
+    renderBoard();
+  }
+}
+
+// ═══════════════════════════════════════════
+// APP LIBRARY
+// ═══════════════════════════════════════════
+function renderLibrary() {
+  const search = (document.getElementById('app-search')?.value || '').toLowerCase();
+  const activeFilter = document.querySelector('.pill.active')?.dataset.filter || 'all';
+  
+  let apps = DATA.apps;
+  if (search) apps = apps.filter(a => a.name.toLowerCase().includes(search) || a.category.toLowerCase().includes(search));
+  if (activeFilter !== 'all') apps = apps.filter(a => a.status === activeFilter);
+
+  const tbody = document.getElementById('app-table-body');
+  tbody.innerHTML = apps.map(a => `
+    <tr data-app-id="${a.id}">
+      <td class="app-name">${esc(a.name)}</td>
+      <td>${esc(a.category)}</td>
+      <td><span class="status-dot status-${a.status}"></span>${capitalize(a.status)}</td>
+      <td>Sprint ${a.sprint}</td>
+      <td>${a.size}</td>
+      <td>${a.updated}</td>
+    </tr>
+  `).join('');
+}
+
+document.addEventListener('click', e => {
+  if (e.target.closest('.pill')) {
+    document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+    e.target.closest('.pill').classList.add('active');
+    renderLibrary();
+  }
+});
+
+// ═══════════════════════════════════════════
+// ROADMAP
+// ═══════════════════════════════════════════
+function renderRoadmap() {
+  const quarters = [...new Set(DATA.roadmap.map(r => r.quarter))];
+  const container = document.getElementById('roadmap-lanes');
+  container.innerHTML = '';
+  
+  quarters.forEach(q => {
+    const items = DATA.roadmap.filter(r => r.quarter === q);
+    const done = items.filter(r => r.status === 'done').length;
+    const inProg = items.filter(r => r.status === 'in-progress').length;
+    
+    const statusColors = { done: 'var(--green-bg);color:var(--green)', 'in-progress': 'var(--blue-bg);color:var(--blue)', planned: 'var(--bg);color:var(--text-muted)' };
+    const statusLabels = { done: 'Done', 'in-progress': 'Active', planned: 'Planned' };
+    
+    const el = document.createElement('div');
+    el.className = 'roadmap-quarter';
+    el.innerHTML = `
+      <div class="quarter-header" onclick="this.nextElementSibling.classList.toggle('collapsed')">
+        <h3>${q}</h3>
+        <div class="q-stats">
+          <span>${done} done</span>
+          <span>${inProg} active</span>
+          <span>${items.length} total</span>
+        </div>
+      </div>
+      <div class="quarter-body">
+        <div class="roadmap-items">
+          ${items.map(r => `
+            <div class="roadmap-item">
+              <span class="status-dot status-${r.status === 'in-progress' ? 'dev' : r.status === 'done' ? 'live' : 'planned'}"></span>
+              <span class="ri-name">${esc(r.name)}</span>
+              <span class="ri-category">${esc(r.category)}</span>
+              <span class="ri-status" style="background:${statusColors[r.status]}">${statusLabels[r.status]}</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+    container.appendChild(el);
+  });
+}
+
+// ═══════════════════════════════════════════
+// UPDATE LOG
+// ═══════════════════════════════════════════
+function renderUpdates() {
+  const container = document.getElementById('update-timeline');
+  container.innerHTML = DATA.updates.map(u => `
+    <div class="update-item">
+      <div class="update-date">${formatDate(u.date)}</div>
+      <div class="update-content">
+        <span class="update-type type-${u.type}">${u.type}</span>
+        <h4>${esc(u.title)}</h4>
+        <p>${esc(u.body)}</p>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ═══════════════════════════════════════════
+// DASHBOARD
+// ═══════════════════════════════════════════
+function renderDashboard() {
+  // Greeting
+  const h = new Date().getHours();
+  document.getElementById('greeting-time').textContent = h < 12 ? 'morning' : h < 17 ? 'afternoon' : 'evening';
+
+  // Metrics
+  const currentCards = DATA.cards.filter(c => c.sprint === DATA.sprint.number);
+  const doneCards = currentCards.filter(c => c.status === 'done');
+  const liveApps = DATA.apps.filter(a => a.status === 'live');
+  const devApps = DATA.apps.filter(a => a.status === 'dev');
+  const velocities = DATA.sprint.velocity.filter(v => v > 0);
+  const avgVel = velocities.length ? Math.round(velocities.reduce((a,b)=>a+b,0) / velocities.length) : 0;
+  const recentUpdates = DATA.updates.filter(u => {
+    const d = new Date(u.date);
+    const now = new Date();
+    return (now - d) < 7 * 86400000;
+  });
+
+  document.getElementById('metric-apps').textContent = DATA.apps.length;
+  document.getElementById('metric-apps-live').textContent = liveApps.length + ' live';
+  document.getElementById('metric-apps-dev').textContent = devApps.length + ' in dev';
+  document.getElementById('metric-velocity').textContent = avgVel;
+  document.getElementById('metric-cards').textContent = currentCards.length;
+  document.getElementById('metric-done').textContent = doneCards.length;
+  document.getElementById('metric-remaining').textContent = currentCards.length - doneCards.length;
+  document.getElementById('metric-updates').textContent = recentUpdates.length;
+  document.getElementById('metric-last-update').textContent = DATA.updates.length ? formatDate(DATA.updates[0].date) : '—';
+
+  // Burndown
+  renderBurndown(currentCards);
+
+  // Velocity
+  renderVelocity();
+
+  // Activity feed
+  renderActivityFeed();
+
+  // Blockers
+  renderBlockers();
+}
+
+function renderBurndown(cards) {
+  const total = cards.reduce((s, c) => s + c.points, 0);
+  const days = 15; // 3-week sprint workdays
+  const ideal = Array.from({length: days + 1}, (_, i) => total - (total / days) * i);
+  // Simulate actual burndown
+  const actual = [total, total, total-3, total-3, total-5, total-8, total-8, total-10, total-10, total-13];
+  
+  const w = 100, ht = 100;
+  const xStep = w / days;
+  
+  let svg = `<svg class="chart-svg" viewBox="0 0 ${w + 20} ${ht + 20}" preserveAspectRatio="none">`;
+  // Grid lines
+  for (let i = 0; i <= 4; i++) {
+    const y = (ht / 4) * i + 10;
+    svg += `<line x1="10" y1="${y}" x2="${w+10}" y2="${y}" class="chart-gridline"/>`;
+    svg += `<text x="5" y="${y+3}" class="chart-label" text-anchor="end" style="font-size:6px">${Math.round(total - (total/4)*i)}</text>`;
+  }
+  // Ideal line
+  const idealPath = ideal.slice(0, days+1).map((v, i) => `${i === 0 ? 'M' : 'L'}${10 + i * xStep},${10 + ht - (v / total) * ht}`).join(' ');
+  svg += `<path d="${idealPath}" class="chart-line" stroke="var(--text-dim)" stroke-dasharray="4 3"/>`;
+  // Actual line
+  const actualPath = actual.map((v, i) => `${i === 0 ? 'M' : 'L'}${10 + i * xStep},${10 + ht - (v / total) * ht}`).join(' ');
+  svg += `<path d="${actualPath}" class="chart-line" stroke="var(--green)"/>`;
+  actual.forEach((v, i) => {
+    svg += `<circle cx="${10 + i * xStep}" cy="${10 + ht - (v / total) * ht}" r="2" fill="var(--green)" class="chart-dot"/>`;
+  });
+  svg += `</svg>`;
+  document.getElementById('burndown-chart').innerHTML = svg;
+}
+
+function renderVelocity() {
+  const vels = DATA.sprint.velocity;
+  const max = Math.max(...vels, 1);
+  const container = document.getElementById('velocity-chart');
+  const colors = ['var(--text-dim)', 'var(--text-dim)', 'var(--text-dim)', 'var(--text-dim)', 'var(--text-dim)', 'var(--blue)'];
+  container.innerHTML = vels.map((v, i) => `
+    <div class="v-bar-wrap">
+      <div class="v-bar-value">${v || '—'}</div>
+      <div class="v-bar" style="height:${v ? (v/max*80) : 4}px;background:${v ? colors[i] : 'var(--border)'};"></div>
+      <div class="v-bar-label">S${i + DATA.sprint.number - vels.length + 1}</div>
+    </div>
+  `).join('');
+}
+
+function renderActivityFeed() {
+  const feed = document.getElementById('activity-feed');
+  const activities = [
+    { color: 'var(--green)', text: '<strong>Budget Planner</strong> moved to Done', time: '2 hours ago' },
+    { color: 'var(--blue)', text: '<strong>Wedding RSVP</strong> moved to Review', time: '5 hours ago' },
+    { color: 'var(--purple)', text: 'Design tokens v2 <strong>merged</strong>', time: '1 day ago' },
+    { color: 'var(--warm)', text: '<strong>Bill Splitter</strong> — recurring splits started', time: '1 day ago' },
+    { color: 'var(--blue)', text: 'Sprint 4 <strong>kickoff</strong> logged', time: '8 days ago' },
+  ];
+  feed.innerHTML = activities.map(a => `
+    <div class="activity-item">
+      <span class="activity-dot" style="background:${a.color}"></span>
+      <div>
+        <div>${a.text}</div>
+        <div class="activity-time">${a.time}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderBlockers() {
+  const feed = document.getElementById('blockers-feed');
+  const blockers = DATA.cards.filter(c => c.priority === 'high' && c.status !== 'done');
+  if (blockers.length === 0) {
+    feed.innerHTML = '<div style="font-size:0.82rem;color:var(--text-dim);padding:8px 0;">No high-priority items outstanding. Nice.</div>';
+    return;
+  }
+  feed.innerHTML = blockers.map(b => `
+    <div class="activity-item">
+      <span class="activity-dot" style="background:var(--red)"></span>
+      <div>
+        <div><strong>${esc(b.title)}</strong></div>
+        <div class="activity-time">${capitalize(b.status)} · ${b.points} pts</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ═══════════════════════════════════════════
+// MODALS
+// ═══════════════════════════════════════════
+function openModal(title, bodyHTML, footerHTML) {
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-body').innerHTML = bodyHTML;
+  document.getElementById('modal-footer').innerHTML = footerHTML;
+  document.getElementById('modal-overlay').classList.add('open');
+}
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+}
+document.getElementById('modal-overlay').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeModal();
+});
+
+function openNewCardModal() {
+  openModal('New Sprint Card', `
+    <div class="form-group"><label class="form-label">Title</label><input class="form-input" id="f-title" placeholder="What needs to get done?"></div>
+    <div class="form-group"><label class="form-label">Description</label><textarea class="form-textarea" id="f-desc" placeholder="Details, acceptance criteria…"></textarea></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Tag</label><select class="form-select" id="f-tag"><option value="app">App</option><option value="design">Design</option><option value="infra">Infra</option><option value="docs">Docs</option><option value="bug">Bug</option></select></div>
+      <div class="form-group"><label class="form-label">Priority</label><select class="form-select" id="f-priority"><option value="high">High</option><option value="med">Medium</option><option value="low">Low</option></select></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Points</label><select class="form-select" id="f-points"><option value="1">1</option><option value="2">2</option><option value="3" selected>3</option><option value="5">5</option><option value="8">8</option></select></div>
+      <div class="form-group"><label class="form-label">Status</label><select class="form-select" id="f-status"><option value="backlog">Backlog</option><option value="in-progress">In Progress</option><option value="review">Review</option><option value="done">Done</option></select></div>
+    </div>
+  `, `<button class="btn" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="saveNewCard()">Create Card</button>`);
+}
+
+function saveNewCard() {
+  const title = document.getElementById('f-title').value.trim();
+  if (!title) return;
+  DATA.cards.push({
+    id: 'c' + Date.now(),
+    title,
+    desc: document.getElementById('f-desc').value.trim(),
+    status: document.getElementById('f-status').value,
+    tag: document.getElementById('f-tag').value,
+    priority: document.getElementById('f-priority').value,
+    points: parseInt(document.getElementById('f-points').value),
+    sprint: DATA.sprint.number,
+    created: new Date().toISOString().slice(0, 10)
+  });
+  saveData();
+  closeModal();
+  renderBoard();
+  renderDashboard();
+}
+
+function openEditCardModal(cardId) {
+  const card = DATA.cards.find(c => c.id === cardId);
+  if (!card) return;
+  openModal('Edit Card', `
+    <div class="form-group"><label class="form-label">Title</label><input class="form-input" id="f-title" value="${esc(card.title)}"></div>
+    <div class="form-group"><label class="form-label">Description</label><textarea class="form-textarea" id="f-desc">${esc(card.desc)}</textarea></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Tag</label><select class="form-select" id="f-tag">${['app','design','infra','docs','bug'].map(t => `<option value="${t}"${card.tag===t?' selected':''}>${t}</option>`).join('')}</select></div>
+      <div class="form-group"><label class="form-label">Priority</label><select class="form-select" id="f-priority">${['high','med','low'].map(p => `<option value="${p}"${card.priority===p?' selected':''}>${p}</option>`).join('')}</select></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Points</label><select class="form-select" id="f-points">${[1,2,3,5,8].map(p => `<option value="${p}"${card.points===p?' selected':''}>${p}</option>`).join('')}</select></div>
+      <div class="form-group"><label class="form-label">Status</label><select class="form-select" id="f-status">${['backlog','in-progress','review','done'].map(s => `<option value="${s}"${card.status===s?' selected':''}>${s}</option>`).join('')}</select></div>
+    </div>
+  `, `<button class="btn" style="color:var(--red);border-color:var(--red)" onclick="deleteCard('${card.id}')">Delete</button><div style="flex:1"></div><button class="btn" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="saveEditCard('${card.id}')">Save</button>`);
+}
+
+function saveEditCard(id) {
+  const card = DATA.cards.find(c => c.id === id);
+  if (!card) return;
+  card.title = document.getElementById('f-title').value.trim();
+  card.desc = document.getElementById('f-desc').value.trim();
+  card.tag = document.getElementById('f-tag').value;
+  card.priority = document.getElementById('f-priority').value;
+  card.points = parseInt(document.getElementById('f-points').value);
+  card.status = document.getElementById('f-status').value;
+  saveData();
+  closeModal();
+  renderBoard();
+  renderDashboard();
+}
+
+function deleteCard(id) {
+  DATA.cards = DATA.cards.filter(c => c.id !== id);
+  saveData();
+  closeModal();
+  renderBoard();
+  renderDashboard();
+}
+
+function openNewAppModal() {
+  openModal('Add App to Library', `
+    <div class="form-group"><label class="form-label">App Name</label><input class="form-input" id="f-app-name" placeholder="e.g. Mortgage Comparison"></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Category</label><select class="form-select" id="f-app-cat"><option>Life & Household</option><option>Group & Social</option><option>Sports & Games</option><option>Professional</option></select></div>
+      <div class="form-group"><label class="form-label">Status</label><select class="form-select" id="f-app-status"><option value="planned">Planned</option><option value="design">Design</option><option value="dev">In Dev</option><option value="live">Live</option></select></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Target Sprint</label><input class="form-input" id="f-app-sprint" type="number" value="${DATA.sprint.number}"></div>
+      <div class="form-group"><label class="form-label">File Size</label><input class="form-input" id="f-app-size" placeholder="e.g. 42 KB" value="—"></div>
+    </div>
+  `, `<button class="btn" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="saveNewApp()">Add App</button>`);
+}
+
+function saveNewApp() {
+  const name = document.getElementById('f-app-name').value.trim();
+  if (!name) return;
+  DATA.apps.push({
+    id: 'a' + Date.now(),
+    name,
+    category: document.getElementById('f-app-cat').value,
+    status: document.getElementById('f-app-status').value,
+    sprint: parseInt(document.getElementById('f-app-sprint').value),
+    size: document.getElementById('f-app-size').value || '—',
+    updated: new Date().toISOString().slice(0, 10)
+  });
+  saveData();
+  closeModal();
+  renderLibrary();
+  renderDashboard();
+}
+
+function openNewUpdateModal() {
+  openModal('Post Update', `
+    <div class="form-group"><label class="form-label">Title</label><input class="form-input" id="f-up-title" placeholder="What happened?"></div>
+    <div class="form-group"><label class="form-label">Details</label><textarea class="form-textarea" id="f-up-body" placeholder="Context, links, decisions…"></textarea></div>
+    <div class="form-group"><label class="form-label">Type</label><select class="form-select" id="f-up-type"><option value="release">Release</option><option value="sprint">Sprint</option><option value="design">Design</option><option value="decision">Decision</option><option value="blocker">Blocker</option></select></div>
+  `, `<button class="btn" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="saveNewUpdate()">Post</button>`);
+}
+
+function saveNewUpdate() {
+  const title = document.getElementById('f-up-title').value.trim();
+  if (!title) return;
+  DATA.updates.unshift({
+    id: 'u' + Date.now(),
+    date: new Date().toISOString().slice(0, 10),
+    title,
+    body: document.getElementById('f-up-body').value.trim(),
+    type: document.getElementById('f-up-type').value
+  });
+  saveData();
+  closeModal();
+  renderUpdates();
+  renderDashboard();
+}
+
+function openNewRoadmapModal() {
+  openModal('Add Roadmap Item', `
+    <div class="form-group"><label class="form-label">Name</label><input class="form-input" id="f-rm-name" placeholder="e.g. Doccoin v2 — state sharing"></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Quarter</label><select class="form-select" id="f-rm-q"><option>Q1 2026</option><option>Q2 2026</option><option>Q3 2026</option><option>Q4 2026</option></select></div>
+      <div class="form-group"><label class="form-label">Category</label><select class="form-select" id="f-rm-cat"><option>Apps</option><option>Infrastructure</option><option>Distribution</option><option>Process</option><option>Community</option></select></div>
+    </div>
+    <div class="form-group"><label class="form-label">Status</label><select class="form-select" id="f-rm-status"><option value="planned">Planned</option><option value="in-progress">In Progress</option><option value="done">Done</option></select></div>
+  `, `<button class="btn" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="saveNewRoadmapItem()">Add</button>`);
+}
+
+function saveNewRoadmapItem() {
+  const name = document.getElementById('f-rm-name').value.trim();
+  if (!name) return;
+  DATA.roadmap.push({
+    id: 'r' + Date.now(),
+    name,
+    quarter: document.getElementById('f-rm-q').value,
+    category: document.getElementById('f-rm-cat').value,
+    status: document.getElementById('f-rm-status').value
+  });
+  saveData();
+  closeModal();
+  renderRoadmap();
+}
+
+function openSprintSettingsModal() {
+  openModal('Sprint Settings', `
+    <div class="form-group"><label class="form-label">Sprint Name</label><input class="form-input" id="f-sp-name" value="${esc(DATA.sprint.name)}"></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Start Date</label><input class="form-input" id="f-sp-start" type="date" value="${DATA.sprint.startDate}"></div>
+      <div class="form-group"><label class="form-label">End Date</label><input class="form-input" id="f-sp-end" type="date" value="${DATA.sprint.endDate}"></div>
+    </div>
+    <div class="form-group"><label class="form-label">Sprint Number</label><input class="form-input" id="f-sp-num" type="number" value="${DATA.sprint.number}"></div>
+  `, `<button class="btn" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="saveSprintSettings()">Save</button>`);
+}
+
+function saveSprintSettings() {
+  DATA.sprint.name = document.getElementById('f-sp-name').value.trim();
+  DATA.sprint.startDate = document.getElementById('f-sp-start').value;
+  DATA.sprint.endDate = document.getElementById('f-sp-end').value;
+  DATA.sprint.number = parseInt(document.getElementById('f-sp-num').value);
+  saveData();
+  closeModal();
+  renderBoard();
+  renderDashboard();
+}
+
+// ═══════════════════════════════════════════
+// NOTES — auto-save
+// ═══════════════════════════════════════════
+const notesEl = document.getElementById('working-notes');
+notesEl.value = DATA.notes;
+let noteTimer;
+notesEl.addEventListener('input', () => {
+  clearTimeout(noteTimer);
+  noteTimer = setTimeout(() => {
+    DATA.notes = notesEl.value;
+    saveData();
+  }, 500);
+});
+
+// ═══════════════════════════════════════════
+// EXPORT
+// ═══════════════════════════════════════════
+function exportData() {
+  const blob = new Blob([JSON.stringify(DATA, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'oi-workspace-export-' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+// ═══════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════
+function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1).replace('-', ' '); }
+function formatDate(d) {
+  const dt = new Date(d + 'T00:00:00');
+  return dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
+// ═══════════════════════════════════════════
+// AI WORKSHOP
+// ═══════════════════════════════════════════
+const WSE_CONFIG_KEY = 'oi_ws_azure_config';
+const WSE_HISTORY_KEY = 'oi_ws_history';
+let wseFiles = {};
+let wseActiveFile = null;
+let wseOutputHTML = '';
+
+// Load saved config
+(function wseLoadConfig() {
+  try {
+    const cfg = JSON.parse(localStorage.getItem(WSE_CONFIG_KEY) || '{}');
+    if (cfg.endpoint) document.getElementById('ws-endpoint').value = cfg.endpoint;
+    if (cfg.apiKey) document.getElementById('ws-apikey').value = cfg.apiKey;
+    if (cfg.model) document.getElementById('ws-model').value = cfg.model;
+    if (cfg.apiVersion) document.getElementById('ws-apiversion').value = cfg.apiVersion;
+  } catch(e) {}
+})();
+
+function wseSaveConfig() {
+  const cfg = {
+    endpoint: document.getElementById('ws-endpoint').value.trim(),
+    apiKey: document.getElementById('ws-apikey').value.trim(),
+    model: document.getElementById('ws-model').value.trim(),
+    apiVersion: document.getElementById('ws-apiversion').value
+  };
+  localStorage.setItem(WSE_CONFIG_KEY, JSON.stringify(cfg));
+  wseSetStatus('Config saved', 'success');
+}
+
+// File handling
+const wsDropZone = document.getElementById('wsDropZone');
+const wsFileInput = document.getElementById('wsFileInput');
+
+wsDropZone.addEventListener('dragover', e => { e.preventDefault(); wsDropZone.style.borderColor = 'var(--green)'; wsDropZone.style.background = 'var(--green-bg)'; });
+wsDropZone.addEventListener('dragleave', () => { wsDropZone.style.borderColor = ''; wsDropZone.style.background = ''; });
+wsDropZone.addEventListener('drop', e => {
+  e.preventDefault();
+  wsDropZone.style.borderColor = ''; wsDropZone.style.background = '';
+  wseHandleFiles(e.dataTransfer.files);
+});
+wsFileInput.addEventListener('change', e => wseHandleFiles(e.target.files));
+
+function wseHandleFiles(files) {
+  for (const file of files) {
+    if (!file.name.match(/\.html?$/i)) continue;
+    const reader = new FileReader();
+    reader.onload = e => {
+      wseFiles[file.name] = { content: e.target.result, size: file.size };
+      wseRenderFileList();
+      wseUpdateSendState();
+    };
+    reader.readAsText(file);
+  }
+}
+
+function wseRenderFileList() {
+  const list = document.getElementById('wsFileList');
+  const names = Object.keys(wseFiles);
+  document.getElementById('ws-file-count').textContent = names.length + ' file' + (names.length !== 1 ? 's' : '');
+  
+  if (names.length === 0) {
+    list.innerHTML = '';
+    document.getElementById('wsCodePreview').style.display = 'none';
+    wseActiveFile = null;
+    return;
+  }
+
+  list.innerHTML = names.map(name => {
+    const sizeKB = (wseFiles[name].size / 1024).toFixed(1);
+    const isActive = name === wseActiveFile;
+    return `<div class="ws-file-item ${isActive ? 'active' : ''}" data-file="${esc(name)}">
+      <span class="ws-file-item-name" onclick="wsePreviewFile('${esc(name)}')">${esc(name)}</span>
+      <span class="ws-file-item-size">${sizeKB} KB</span>
+      <button class="ws-file-item-remove" onclick="wseRemoveFile('${esc(name)}')" title="Remove">✕</button>
+    </div>`;
+  }).join('');
+
+  // Auto-preview first file if none active
+  if (!wseActiveFile || !wseFiles[wseActiveFile]) {
+    wsePreviewFile(names[0]);
+  }
+}
+
+function wsePreviewFile(name) {
+  wseActiveFile = name;
+  const preview = document.getElementById('wsCodePreview');
+  preview.style.display = 'block';
+  preview.textContent = wseFiles[name].content.substring(0, 2000) + (wseFiles[name].content.length > 2000 ? '\n\n… [truncated]' : '');
+  wseRenderFileList();
+}
+
+function wseRemoveFile(name) {
+  delete wseFiles[name];
+  if (wseActiveFile === name) wseActiveFile = null;
+  wseRenderFileList();
+  wseUpdateSendState();
+}
+
+function wseUpdateSendState() {
+  const hasFiles = Object.keys(wseFiles).length > 0;
+  const hasQuery = document.getElementById('wsQuery').value.trim().length > 0;
+  document.getElementById('wsSendBtn').disabled = !(hasFiles && hasQuery);
+}
+
+document.getElementById('wsQuery').addEventListener('input', wseUpdateSendState);
+
+function wseToggleSysPrompt() {
+  const el = document.getElementById('wsSysPrompt');
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+
+function wseSetStatus(msg, type) {
+  const el = document.getElementById('wsStatus');
+  el.textContent = msg;
+  el.className = 'ws-status' + (type ? ' ' + type : '');
+  if (type !== 'processing') {
+    setTimeout(() => { el.textContent = ''; el.className = 'ws-status'; }, 6000);
+  }
+}
+
+// Azure AI Send
+async function wseSend() {
+  const endpoint = document.getElementById('ws-endpoint').value.trim().replace(/\/+$/, '');
+  const apiKey = document.getElementById('ws-apikey').value.trim();
+  const model = document.getElementById('ws-model').value.trim();
+  const version = document.getElementById('ws-apiversion').value;
+  const query = document.getElementById('wsQuery').value.trim();
+  const sys = document.getElementById('wsSysPrompt').value.trim();
+
+  if (!endpoint || !apiKey || !model) {
+    wseSetStatus('Missing Azure config — fill in endpoint, key, and model', 'error');
+    return;
+  }
+
+  // Build file block
+  let fileBlock = '';
+  for (const [name, obj] of Object.entries(wseFiles)) {
+    fileBlock += `FILE: ${name}\n\`\`\`html\n${obj.content}\n\`\`\`\n\n`;
+  }
+
+  const userMessage = `Here are the project files:\n\n${fileBlock}\nInstructions: ${query}`;
+
+  const body = {
+    model: model,
+    instructions: sys,
+    input: userMessage,
+    max_output_tokens: 16000
+  };
+
+  wseSetStatus('Sending to Azure AI…', 'processing');
+  document.getElementById('wsSendBtn').disabled = true;
+
+  try {
+    const res = await fetch(`${endpoint}/openai/responses?api-version=${version}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'api-key': apiKey },
+      body: JSON.stringify(body)
+    });
+
+    if (!res.ok) {
+      const errText = await res.text();
+      throw new Error(`HTTP ${res.status}: ${errText.substring(0, 200)}`);
+    }
+
+    const data = await res.json();
+
+    let raw = '';
+    if (data.output) {
+      for (const o of data.output) {
+        if (o.content) {
+          for (const c of o.content) {
+            if (c.text) raw += c.text;
+          }
+        }
+      }
+    }
+
+    // Strip markdown fences
+    raw = raw.replace(/^```html?\s*/i, '').replace(/\s*```\s*$/, '').trim();
+
+    wseOutputHTML = raw;
+
+    // Show output
+    document.getElementById('wsOutput').style.display = 'flex';
+    document.getElementById('wsPreviewFrame').srcdoc = wseOutputHTML;
+    document.getElementById('wsOutputCode').textContent = wseOutputHTML;
+
+    wseSetStatus('Done — output ready', 'success');
+
+    // Save to history
+    wseAddHistory(query);
+
+  } catch (e) {
+    wseSetStatus('Error: ' + e.message, 'error');
+  } finally {
+    wseUpdateSendState();
+  }
+}
+
+// Output controls
+let wseShowCode = false;
+function wseToggleOutput() {
+  wseShowCode = !wseShowCode;
+  document.getElementById('wsPreviewFrame').style.display = wseShowCode ? 'none' : 'block';
+  document.getElementById('wsOutputCode').style.display = wseShowCode ? 'block' : 'none';
+  document.getElementById('wsToggleView').textContent = wseShowCode ? '◐ Preview' : '◇ Code';
+}
+
+function wseCopyOutput() {
+  if (!wseOutputHTML) return;
+  navigator.clipboard.writeText(wseOutputHTML).then(() => wseSetStatus('Copied to clipboard', 'success'));
+}
+
+function wseDownloadOutput() {
+  if (!wseOutputHTML) return;
+  const name = wseActiveFile || 'output.html';
+  const outName = name.replace(/\.html?$/i, '') + '_updated.html';
+  const blob = new Blob([wseOutputHTML], { type: 'text/html' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = outName;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function wseClearAll() {
+  wseFiles = {};
+  wseActiveFile = null;
+  wseOutputHTML = '';
+  wseShowCode = false;
+  document.getElementById('wsQuery').value = '';
+  document.getElementById('wsOutput').style.display = 'none';
+  document.getElementById('wsCodePreview').style.display = 'none';
+  wseRenderFileList();
+  wseUpdateSendState();
+  wseSetStatus('Cleared', 'success');
+}
+
+// Sprint History
+function wseAddHistory(prompt) {
+  try {
+    let hist = JSON.parse(localStorage.getItem(WSE_HISTORY_KEY) || '[]');
+    hist.unshift({ time: new Date().toISOString(), prompt: prompt.substring(0, 200), filesUsed: Object.keys(wseFiles) });
+    if (hist.length > 30) hist = hist.slice(0, 30);
+    localStorage.setItem(WSE_HISTORY_KEY, JSON.stringify(hist));
+    wseRenderHistory();
+  } catch(e) {}
+}
+
+function wseRenderHistory() {
+  try {
+    const hist = JSON.parse(localStorage.getItem(WSE_HISTORY_KEY) || '[]');
+    const el = document.getElementById('wsHistory');
+    if (hist.length === 0) { el.style.display = 'none'; return; }
+    el.style.display = 'block';
+    document.getElementById('wsHistoryList').innerHTML = hist.map((h, i) => {
+      const dt = new Date(h.time);
+      const timeStr = dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ' ' + dt.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+      return `<div class="ws-history-item" onclick="wseReplayHistory(${i})">
+        <span class="ws-history-time">${timeStr}</span>
+        <span class="ws-history-prompt">${esc(h.prompt)}</span>
+        <span class="ws-history-action">${h.filesUsed.length} file${h.filesUsed.length !== 1 ? 's' : ''}</span>
+      </div>`;
+    }).join('');
+  } catch(e) {}
+}
+
+function wseReplayHistory(idx) {
+  try {
+    const hist = JSON.parse(localStorage.getItem(WSE_HISTORY_KEY) || '[]');
+    if (hist[idx]) {
+      document.getElementById('wsQuery').value = hist[idx].prompt;
+      wseUpdateSendState();
+    }
+  } catch(e) {}
+}
+
+function wseClearHistory() {
+  localStorage.removeItem(WSE_HISTORY_KEY);
+  wseRenderHistory();
+}
+
+// ═══════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════
+renderDashboard();
+renderBoard();
+</script>
+</body>
+</html>

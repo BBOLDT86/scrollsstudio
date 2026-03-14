@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Open Intranet — A Design Vision</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════
+   APPLE × NAPSTER — WARM LIGHT KEYNOTE
+   ═══════════════════════════════════════ */
+
+:root {
+  --cream: #faf7f2;
+  --cream-deep: #f2ede4;
+  --white: #ffffff;
+  --ink: #1a1612;
+  --ink-mid: #4a4540;
+  --ink-soft: #7a756e;
+  --ink-muted: #a8a29e;
+  --ink-faint: #d4d0ca;
+  --ink-ghost: #e8e4dd;
+  --coral: #e8613c;
+  --coral-glow: rgba(232,97,60,0.08);
+  --coral-deep: #c8482a;
+  --green: #2a8c5a;
+  --green-soft: rgba(42,140,90,0.07);
+  --blue: #3068b8;
+  --blue-soft: rgba(48,104,184,0.07);
+  --warm: #c47030;
+  --warm-soft: rgba(196,112,48,0.07);
+  --purple: #7252b5;
+  --purple-soft: rgba(114,82,181,0.07);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+html {
+  scroll-snap-type: y mandatory;
+  overflow-y: scroll;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  background: var(--cream);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* ─── Film grain overlay ─── */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 180px;
+}
+
+/* ═══ SNAP SLIDES ═══ */
+.slide {
+  height: 100vh;
+  width: 100vw;
+  scroll-snap-align: start;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ═══ TOP HEADER BAR ═══ */
+.header {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 36px;
+  z-index: 200;
+  background: rgba(250,247,242,0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(0,0,0,0.04);
+}
+.header-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.brand-cat {
+  width: 26px; height: 26px;
+  position: relative;
+}
+/* CSS cat silhouette — the Napster nod */
+.brand-cat::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 3px;
+  width: 20px; height: 16px;
+  background: var(--coral);
+  border-radius: 50% 50% 40% 40%;
+}
+.brand-cat::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 2px;
+  width: 0; height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-bottom: 10px solid var(--coral);
+  /* second ear via box-shadow */
+  box-shadow: 14px 0 0 0 var(--coral);
+}
+.brand-text {
+  font-weight: 700;
+  font-size: 0.82rem;
+  letter-spacing: -0.3px;
+  color: var(--ink);
+}
+.header-slide-label {
+  font-size: 0.65rem;
+  font-weight: 500;
+  color: var(--ink-muted);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  transition: opacity 0.3s;
+}
+
+/* ═══ PROGRESS BAR ═══ */
+.progress-track {
+  position: fixed;
+  top: 56px; left: 0; right: 0;
+  height: 2px;
+  background: var(--ink-ghost);
+  z-index: 200;
+}
+.progress-fill {
+  height: 100%;
+  background: var(--coral);
+  width: 0%;
+  transition: width 0.4s cubic-bezier(0.16,1,0.3,1);
+}
+
+/* ═══ SIDE NAVIGATION ═══ */
+.side-nav {
+  position: fixed;
+  right: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  z-index: 200;
+}
+.side-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--ink-faint);
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: all 0.35s cubic-bezier(0.16,1,0.3,1);
+  position: relative;
+}
+.side-dot.active {
+  background: var(--coral);
+  transform: scale(1.5);
+}
+.side-dot.active::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 1px solid var(--coral);
+  opacity: 0.3;
+  animation: pulse-ring 2s ease-out infinite;
+}
+@keyframes pulse-ring {
+  0% { transform: scale(1); opacity: 0.3; }
+  100% { transform: scale(2); opacity: 0; }
+}
+
+/* ═══ SLIDE COUNTER ═══ */
+.counter {
+  position: fixed;
+  bottom: 24px;
+  left: 36px;
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--ink-muted);
+  letter-spacing: 1px;
+  font-variant-numeric: tabular-nums;
+  z-index: 200;
+}
+
+/* ═══ KEYBOARD HINT ═══ */
+.kb-hint {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.62rem;
+  color: var(--ink-faint);
+  letter-spacing: 1px;
+  z-index: 200;
+  transition: opacity 0.5s;
+}
+.kb-hint.faded { opacity: 0; }
+.kb-key {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px; height: 20px;
+  border: 1px solid var(--ink-ghost);
+  border-radius: 4px;
+  font-size: 0.55rem;
+  color: var(--ink-muted);
+}
+
+/* ═══ TYPOGRAPHY ═══ */
+.kicker {
+  font-weight: 600;
+  font-size: 0.68rem;
+  color: var(--coral);
+  letter-spacing: 3.5px;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+h1 {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-weight: 800;
+  font-size: clamp(3.2rem, 7vw, 6rem);
+  line-height: 1.0;
+  letter-spacing: -3px;
+}
+h2 {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-weight: 700;
+  font-size: clamp(2rem, 4.5vw, 3.6rem);
+  line-height: 1.06;
+  letter-spacing: -1.5px;
+}
+.hl {
+  color: var(--coral);
+  font-style: normal;
+}
+.serif-hl {
+  font-family: 'Source Serif 4', serif;
+  font-style: italic;
+  font-weight: 400;
+  color: var(--coral);
+}
+p.deck {
+  font-family: 'Source Serif 4', serif;
+  font-weight: 300;
+  font-size: clamp(1rem, 1.5vw, 1.15rem);
+  color: var(--ink-soft);
+  line-height: 1.75;
+  max-width: 500px;
+  margin-top: 20px;
+}
+
+/* ═══ HERO ═══ */
+.hero-inner {
+  text-align: center;
+  max-width: 760px;
+  position: relative;
+  z-index: 2;
+}
+.hero-inner p.deck { margin-left: auto; margin-right: auto; }
+
+/* Hero decorative rings */
+.hero-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid var(--ink-ghost);
+  pointer-events: none;
+}
+.hero-ring-1 { width: 500px; height: 500px; top: 50%; left: 50%; transform: translate(-50%,-50%); opacity: 0.5; }
+.hero-ring-2 { width: 700px; height: 700px; top: 50%; left: 50%; transform: translate(-50%,-50%); opacity: 0.25; }
+.hero-ring-3 { width: 900px; height: 900px; top: 50%; left: 50%; transform: translate(-50%,-50%); opacity: 0.1; }
+
+/* Hero tagline chip */
+.hero-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--white);
+  border: 1px solid var(--ink-ghost);
+  border-radius: 100px;
+  padding: 8px 20px 8px 12px;
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+  margin-bottom: 28px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.03);
+}
+.chip-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--coral);
+  animation: blink 2s ease-in-out infinite;
+}
+@keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+
+/* ═══ SPLIT LAYOUT ═══ */
+.split-inner {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+}
+.split-text {
+  flex: 1;
+  padding: 0 5vw 0 8vw;
+}
+.split-visual {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+/* ═══ STAT BLOCKS ═══ */
+.stat-strip {
+  display: flex;
+  gap: 16px;
+  margin-top: 28px;
+  flex-wrap: wrap;
+}
+.stat-block {
+  background: var(--white);
+  border: 1px solid var(--ink-ghost);
+  border-radius: 12px;
+  padding: 18px 22px;
+  min-width: 140px;
+  transition: border-color 0.2s;
+}
+.stat-block:hover { border-color: var(--ink-faint); }
+.stat-num {
+  font-weight: 800;
+  font-size: 1.6rem;
+  letter-spacing: -1px;
+  line-height: 1;
+}
+.stat-label {
+  font-size: 0.7rem;
+  color: var(--ink-muted);
+  margin-top: 4px;
+  font-weight: 400;
+}
+
+/* ═══ PILLAR CARDS ═══ */
+.pillar-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  max-width: 420px;
+}
+.pillar-card {
+  background: var(--white);
+  border: 1px solid var(--ink-ghost);
+  border-radius: 12px;
+  padding: 22px;
+  transition: transform 0.3s, border-color 0.2s;
+}
+.pillar-card:hover { transform: translateY(-2px); border-color: var(--ink-faint); }
+.pillar-glyph {
+  width: 36px; height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  margin-bottom: 12px;
+}
+.pillar-card h4 {
+  font-weight: 600;
+  font-size: 0.88rem;
+  margin-bottom: 4px;
+}
+.pillar-card p {
+  font-size: 0.74rem;
+  color: var(--ink-muted);
+  line-height: 1.45;
+}
+
+/* ═══ APP HERO SLIDES ═══ */
+.app-hero {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  position: relative;
+  z-index: 2;
+}
+
+/* App icon — album-cover style */
+.app-icon-wrap {
+  width: 112px; height: 112px;
+  border-radius: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  margin-bottom: 12px;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.04);
+}
+.app-icon-wrap::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 30px;
+  background: inherit;
+  opacity: 0.15;
+  filter: blur(20px);
+  z-index: -1;
+}
+.app-icon-glyph {
+  font-size: 2.8rem;
+  color: white;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));
+}
+/* SVG-based custom logos inside icons */
+.app-icon-svg {
+  width: 48px; height: 48px;
+}
+
+.app-cat {
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  padding: 4px 14px;
+  border-radius: 100px;
+  margin-bottom: 4px;
+}
+.app-name {
+  font-weight: 800;
+  font-size: clamp(2.4rem, 4vw, 3.4rem);
+  letter-spacing: -2px;
+  line-height: 1;
+}
+.app-tagline {
+  font-family: 'Source Serif 4', serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: 1.05rem;
+  color: var(--ink-soft);
+  margin-bottom: 6px;
+}
+.app-desc {
+  font-size: 0.88rem;
+  color: var(--ink-muted);
+  max-width: 420px;
+  line-height: 1.6;
+}
+.app-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 20px;
+  padding: 12px 28px;
+  border-radius: 10px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: white;
+  text-decoration: none;
+  cursor: pointer;
+  border: none;
+  transition: transform 0.25s, box-shadow 0.25s;
+  letter-spacing: -0.2px;
+}
+.app-cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+}
+.app-cta-arrow {
+  transition: transform 0.2s;
+  font-size: 0.9rem;
+}
+.app-cta:hover .app-cta-arrow { transform: translateX(3px); }
+
+/* Background color washes for app slides */
+.app-wash {
+  position: absolute;
+  inset: 0;
+  opacity: 0.5;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ═══ LIBRARY SLIDE ═══ */
+.library-inner {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+}
+.library-text {
+  flex: 0 0 38%;
+  padding: 0 4vw 0 8vw;
+}
+.library-cols {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px 40px;
+  padding-right: 8vw;
+}
+.lib-col h4 {
+  font-weight: 700;
+  font-size: 0.66rem;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1.5px solid var(--ink-ghost);
+}
+.lib-col ul { list-style: none; }
+.lib-col li {
+  font-size: 0.82rem;
+  color: var(--ink-mid);
+  padding: 5px 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: color 0.2s;
+}
+.lib-col li:hover { color: var(--ink); }
+.lib-dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ═══ ROADMAP ═══ */
+.road-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  max-width: 380px;
+  position: relative;
+}
+.road-steps::before {
+  content: '';
+  position: absolute;
+  left: 19px;
+  top: 24px;
+  bottom: 24px;
+  width: 1px;
+  background: var(--ink-ghost);
+}
+.road-step {
+  display: flex;
+  gap: 18px;
+  padding: 16px 0;
+  position: relative;
+}
+.road-num {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  background: var(--white);
+  border: 1.5px solid var(--ink-ghost);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.82rem;
+  color: var(--coral);
+  flex-shrink: 0;
+  z-index: 1;
+}
+.road-content h4 {
+  font-weight: 600;
+  font-size: 0.92rem;
+  margin-bottom: 2px;
+}
+.road-content p {
+  font-size: 0.78rem;
+  color: var(--ink-muted);
+  line-height: 1.5;
+}
+
+/* ═══ CLOSING ═══ */
+.close-inner {
+  text-align: center;
+  max-width: 560px;
+}
+.close-box {
+  background: var(--white);
+  border: 1px solid var(--ink-ghost);
+  border-radius: 16px;
+  padding: 36px 40px;
+  margin-top: 24px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.03);
+}
+.close-box p {
+  font-family: 'Source Serif 4', serif;
+  font-size: 0.95rem;
+  color: var(--ink-soft);
+  line-height: 1.7;
+}
+.close-sig {
+  font-family: 'Source Serif 4', serif;
+  font-style: italic;
+  font-size: 1.1rem;
+  color: var(--coral);
+  margin-top: 16px;
+}
+
+/* ═══ ANIMATIONS ═══ */
+.anim {
+  opacity: 0;
+  transform: translateY(22px);
+  transition: opacity 0.55s cubic-bezier(0.16,1,0.3,1),
+              transform 0.55s cubic-bezier(0.16,1,0.3,1);
+}
+.slide.in-view .anim {
+  opacity: 1;
+  transform: translateY(0);
+}
+.anim-d1 { transition-delay: 0.06s; }
+.anim-d2 { transition-delay: 0.12s; }
+.anim-d3 { transition-delay: 0.18s; }
+.anim-d4 { transition-delay: 0.24s; }
+.anim-d5 { transition-delay: 0.32s; }
+.anim-d6 { transition-delay: 0.40s; }
+
+/* Scale-up for app icons */
+.anim-pop {
+  opacity: 0;
+  transform: scale(0.8) translateY(10px);
+  transition: opacity 0.5s cubic-bezier(0.16,1,0.3,1),
+              transform 0.5s cubic-bezier(0.16,1,0.3,1);
+}
+.slide.in-view .anim-pop {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+}
+
+/* ═══ RESPONSIVE ═══ */
+@media (max-width: 768px) {
+  .header { padding: 0 20px; }
+  .split-inner { flex-direction: column; }
+  .split-text { padding: 0 5vw; flex: none; }
+  .split-visual { flex: none; height: auto; padding: 2vh 5vw; }
+  .library-inner { flex-direction: column; padding: 0 5vw; }
+  .library-text { flex: none; padding: 0; margin-bottom: 20px; }
+  .library-cols { padding-right: 0; gap: 16px 24px; }
+  .pillar-grid { grid-template-columns: 1fr; max-width: 100%; }
+  .stat-strip { flex-direction: column; }
+  .side-nav { right: 12px; }
+  .counter { left: 20px; }
+  h1 { letter-spacing: -2px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ─── HEADER ─── -->
+<div class="header">
+  <div class="header-brand">
+    <div class="brand-cat" aria-hidden="true"></div>
+    <span class="brand-text">Open Intranet</span>
+  </div>
+  <div class="header-slide-label" id="slideLabel">Introduction</div>
+</div>
+
+<!-- ─── PROGRESS ─── -->
+<div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+
+<!-- ─── SIDE NAV ─── -->
+<nav class="side-nav" id="sideNav"></nav>
+
+<!-- ─── COUNTER ─── -->
+<div class="counter" id="counter">01 — 11</div>
+
+<!-- ─── KB HINT ─── -->
+<div class="kb-hint" id="kbHint">
+  <span class="kb-key">↑</span><span class="kb-key">↓</span> <span style="margin-left:2px;">to navigate</span>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+     SLIDE 1 — HERO
+     ═══════════════════════════════════════════ -->
+<div class="slide" data-slide="0" data-label="Introduction">
+  <div class="hero-ring hero-ring-1"></div>
+  <div class="hero-ring hero-ring-2"></div>
+  <div class="hero-ring hero-ring-3"></div>
+  <div class="hero-inner">
+    <div class="hero-chip anim"><div class="chip-dot"></div> Files that work. For everyone.</div>
+    <h1 class="anim anim-d1">The internet as<br><span class="hl">an intranet.</span></h1>
+    <p class="deck anim anim-d2" style="margin-left:auto;margin-right:auto;">Standalone HTML documents — beautifully designed, privately owned, universally accessible. No accounts. No cloud. No subscriptions.</p>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+     SLIDE 2 — THE PROBLEM
+     ═══════════════════════════════════════════ -->
+<div class="slide" data-slide="1" data-label="The Problem">
+  <div class="split-inner">
+    <div class="split-text">
+      <div class="kicker anim">The Problem</div>
+      <h2 class="anim anim-d1">Everything simple<br>became <span class="hl">complicated.</span></h2>
+      <p class="deck anim anim-d2" style="max-width:440px;">Every small, human task got captured by a platform that wants your email, your data, and $10&nbsp;a&nbsp;month. The web was supposed to be <em>documents.</em></p>
+    </div>
+    <div class="split-visual">
+      <div class="stat-strip anim anim-d3" style="flex-direction:column;gap:12px;">
+        <div class="stat-block"><div class="stat-num" style="color:var(--coral)">$4.2B</div><div class="stat-label">Digital template market, 2024</div></div>
+        <div class="stat-block"><div class="stat-num" style="color:var(--blue)">260M</div><div class="stat-label">Canva monthly users</div></div>
+        <div class="stat-block"><div class="stat-num" style="color:var(--green)">100K+</div><div class="stat-label">Sales on single Etsy listing</div></div>
+        <div class="stat-block"><div class="stat-num" style="color:var(--warm)">$0</div><div class="stat-label">Cost to run an HTML file</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+     SLIDE 3 — THE VISION
+     ═══════════════════════════════════════════ -->
+<div class="slide" data-slide="2" data-label="The Vision">
+  <div class="split-inner">
+    <div class="split-text">
+      <div class="kicker anim">The Vision</div>
+      <h2 class="anim anim-d1">One design system.<br>Dozens of <span class="hl">tools.</span><br>Zero dependencies.</h2>
+      <p class="deck anim anim-d2" style="max-width:400px;">A library of standalone HTML tools — each a single file — sharing a unified design language.</p>
+    </div>
+    <div class="split-visual">
+      <div class="pillar-grid anim anim-d3">
+        <div class="pillar-card">
+          <div class="pillar-glyph" style="background:var(--green-soft);color:var(--green);">◯</div>
+          <h4>Runs everywhere</h4>
+          <p>Any browser, any device, works offline</p>
+        </div>
+        <div class="pillar-card">
+          <div class="pillar-glyph" style="background:var(--blue-soft);color:var(--blue);">◈</div>
+          <h4>Owned design</h4>
+          <p>Shared typography, color, motion</p>
+        </div>
+        <div class="pillar-card">
+          <div class="pillar-glyph" style="background:var(--warm-soft);color:var(--warm);">◇</div>
+          <h4>Private by default</h4>
+          <p>Your data stays on your device</p>
+        </div>
+        <div class="pillar-card">
+          <div class="pillar-glyph" style="background:var(--purple-soft);color:var(--purple);">△</div>
+          <h4>Connected later</h4>
+          <p>Standalone first, protocol second</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+     SLIDE 4 — BLOCKS
+     ═══════════════════════════════════════════ -->
+<div class="slide" data-slide="3" data-label="Blocks">
+  <div class="app-wash" style="background:radial-gradient(ellipse at 50% 60%, rgba(114,82,181,0.06) 0%, transparent 70%);"></div>
+  <div class="app-hero">
+    <div class="app-icon-wrap anim-pop" style="background:linear-gradient(140deg,#6235a0,#a78bfa);">
+      <svg class="app-icon-svg" viewBox="0 0 48 48" fill="none"><rect x="6" y="6" width="15" height="15" rx="3" fill="white" opacity="0.9"/><rect x="27" y="6" width="15" height="15" rx="3" fill="white" opacity="0.5"/><rect x="6" y="27" width="15" height="15" rx="3" fill="white" opacity="0.5"/><rect x="27" y="27" width="15" height="15" rx="3" fill="white" opacity="0.3"/></svg>
+    </div>
+    <div class="app-cat anim anim-d1" style="background:var(--purple-soft);color:var(--purple);">Productivity</div>
+    <div class="app-name anim anim-d2">Blocks</div>
+    <div class="app-tagline anim anim-d3">Local-first workspace</div>
+    <p class="app-desc anim anim-d4">A full Notion-style document workspace. Pages, blocks, rich text, databases — running entirely in your browser with no backend.</p>
+    <a class="app-cta anim anim-d5" href="#" style="background:var(--purple);">Launch Blocks <span class="app-cta-arrow">→</span></a>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+     SLIDE 5 — MARKUP
+     ═══════════════════════════════════════════ -->
+<div class="slide" data-slide="4" data-label="Markup">
+  <div class="app-wash" style="background:radial-gradient(ellipse at 50% 60%, rgba(196,112,48,0.06) 0%, transparent 70%);"></div>
+  <div class="app-hero">
+    <div class="app-icon-wrap anim-pop" style="background:linear-gradient(140deg,#b55a18,#f0924a);">
+      <svg class="app-icon-svg" viewBox="0 0 48 48" fill="none"><rect x="10" y="4" width="22" height="30" rx="3" stroke="white" stroke-width="2.5" fill="none" opacity="0.8"/><path d="M16 14h10M16 20h10M16 26h6" stroke="white" stroke-width="2" stroke-linecap="round" opacity="0.6"/><circle cx="34" cy="38" r="8" fill="white" opacity="0.85"/><path d="M31 38l2 2 4-4" stroke="#b55a18" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <div class="app-cat anim anim-d1" style="background:var(--warm-soft);color:var(--warm);">Document Tools</div>
+    <div class="app-name anim anim-d2">Markup</div>
+    <div class="app-tagline anim anim-d3">PDF annotation studio</div>
+    <p class="app-desc anim anim-d4">Annotate, highlight, and comment on PDFs directly in the browser. Export marked-up copies. No Adobe subscription required.</p>
+    <a class="app-cta anim anim-d5" href="#" style="background:var(--warm);">Launch Markup <span class="app-cta-arrow">→</span></a>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+     SLIDE 6 — VAULT
+     ═══════════════════════════════════════════ -->
+<div class="slide" data-slide="5" data-label="Vault">
+  <div class="app-wash" style="background:radial-gradient(ellipse at 50% 60%, rgba(42,140,90,0.06) 0%, transparent 70%);"></div>
+  <div class="app-hero">
+    <div class="app-icon-wrap anim-pop" style="background:linear-gradient(140deg,#1a7048,#3dd68c);">
+      <svg class="app-icon-svg" viewBox="0 0 48 48" fill="none"><rect x="8" y="14" width="32" height="24" rx="4" stroke="white" stroke-width="2.5" fill="none" opacity="0.8"/><circle cx="24" cy="26" r="6" stroke="white" stroke-width="2" fill="none" opacity="0.7"/><rect x="22" y="24" width="4" height="6" rx="1" fill="white" opacity="0.85"/><path d="M16 14V10a8 8 0 0116 0v4" stroke="white" stroke-width="2.5" stroke-linecap="round" fill="none" opacity="0.6"/></svg>
+    </div>
+    <div class="app-cat anim anim-d1" style="background:var(--green-soft);color:var(--green);">Personal Finance</div>
+    <div class="app-name anim anim-d2">Vault</div>
+    <div class="app-tagline anim anim-d3">Benefits intelligence</div>
+    <p class="app-desc anim anim-d4">Interactive credit card benefits tracker. Every perk, deadline, and redemption — searchable, categorized, always offline-ready.</p>
+    <a class="app-cta anim anim-d5" href="#" style="background:var(--green);">Launch Vault <span class="app-cta-arrow">→</span></a>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+     SLIDE 7 — GRID
+     ═══════════════════════════════════════════ -->
+<div class="slide" data-slide="6" data-label="Grid">
+  <div class="app-wash" style="background:radial-gradient(ellipse at 50% 60%, rgba(48,104,184,0.06) 0%, transparent 70%);"></div>
+  <div class="app-hero">
+    <div class="app-icon-wrap anim-pop" style="background:linear-gradient(140deg,#1e52a0,#5b9cf5);">
+      <svg class="app-icon-svg" viewBox="0 0 48 48" fill="none"><rect x="6" y="6" width="36" height="36" rx="4" stroke="white" stroke-width="2" fill="none" opacity="0.5"/><line x1="6" y1="18" x2="42" y2="18" stroke="white" stroke-width="1.5" opacity="0.4"/><line x1="6" y1="30" x2="42" y2="30" stroke="white" stroke-width="1.5" opacity="0.4"/><line x1="18" y1="6" x2="18" y2="42" stroke="white" stroke-width="1.5" opacity="0.4"/><line x1="30" y1="6" x2="30" y2="42" stroke="white" stroke-width="1.5" opacity="0.4"/><rect x="19" y="19" width="10" height="10" rx="1" fill="white" opacity="0.8"/></svg>
+    </div>
+    <div class="app-cat anim anim-d1" style="background:var(--blue-soft);color:var(--blue);">Data &amp; Tracking</div>
+    <div class="app-name anim anim-d2">Grid</div>
+    <div class="app-tagline anim anim-d3">Private spreadsheet</div>
+    <p class="app-desc anim anim-d4">Password-protected spreadsheet that lives on your device. Formulas, formatting, full functionality — zero cloud exposure.</p>
+    <a class="app-cta anim anim-d5" href="#" style="background:var(--blue);">Launch Grid <span class="app-cta-arrow">→</span></a>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+     SLIDE 8 — WRITER
+     ═══════════════════════════════════════════ -->
+<div class="slide" data-slide="7" data-label="Writer">
+  <div class="app-wash" style="background:radial-gradient(ellipse at 50% 60%, rgba(114,82,181,0.05) 0%, transparent 70%);"></div>
+  <div class="app-hero">
+    <div class="app-icon-wrap anim-pop" style="background:linear-gradient(140deg,#5a3a9a,#c084fc);">
+      <svg class="app-icon-svg" viewBox="0 0 48 48" fill="none"><path d="M12 8h24a4 4 0 014 4v24a4 4 0 01-4 4H12a4 4 0 01-4-4V12a4 4 0 014-4z" stroke="white" stroke-width="2" fill="none" opacity="0.5"/><path d="M16 16h16M16 22h16M16 28h10" stroke="white" stroke-width="2.5" stroke-linecap="round" opacity="0.8"/><circle cx="36" cy="36" r="6" fill="white" opacity="0.85"/><path d="M34 36l1.5 1.5 3-3" stroke="#5a3a9a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <div class="app-cat anim anim-d1" style="background:var(--purple-soft);color:var(--purple);">Writing</div>
+    <div class="app-name anim anim-d2">Writer</div>
+    <div class="app-tagline anim anim-d3">Local word processor</div>
+    <p class="app-desc anim anim-d4">Full-featured document editing with toolbars, formatting, and export — running entirely client-side. Your words never leave your machine.</p>
+    <a class="app-cta anim anim-d5" href="#" style="background:var(--purple);">Launch Writer <span class="app-cta-arrow">→</span></a>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+     SLIDE 9 — THE LIBRARY
+     ═══════════════════════════════════════════ -->
+<div class="slide" data-slide="8" data-label="The Library">
+  <div class="library-inner">
+    <div class="library-text">
+      <div class="kicker anim">The Library</div>
+      <h2 class="anim anim-d1">Life, sports &amp;<br><span class="hl">everything<br>between.</span></h2>
+      <p class="deck anim anim-d2" style="max-width:340px;">Household and sports tools as one navigable solution — from holiday cards to fantasy drafts.</p>
+    </div>
+    <div class="library-cols anim anim-d3">
+      <div class="lib-col">
+        <h4 style="color:var(--green);">Life &amp; Household</h4>
+        <ul>
+          <li><div class="lib-dot" style="background:var(--green)"></div>Holiday card tracker</li>
+          <li><div class="lib-dot" style="background:var(--green)"></div>Contact info hub</li>
+          <li><div class="lib-dot" style="background:var(--green)"></div>Budget planner</li>
+          <li><div class="lib-dot" style="background:var(--green)"></div>Chore rotation</li>
+          <li><div class="lib-dot" style="background:var(--green)"></div>Photo slideshow</li>
+        </ul>
+      </div>
+      <div class="lib-col">
+        <h4 style="color:var(--warm);">Sports &amp; Games</h4>
+        <ul>
+          <li><div class="lib-dot" style="background:var(--warm)"></div>Super Bowl squares</li>
+          <li><div class="lib-dot" style="background:var(--warm)"></div>March Madness bracket</li>
+          <li><div class="lib-dot" style="background:var(--warm)"></div>Fantasy draft board</li>
+          <li><div class="lib-dot" style="background:var(--warm)"></div>Poker night tracker</li>
+          <li><div class="lib-dot" style="background:var(--warm)"></div>League manager</li>
+        </ul>
+      </div>
+      <div class="lib-col">
+        <h4 style="color:var(--blue);">Group &amp; Social</h4>
+        <ul>
+          <li><div class="lib-dot" style="background:var(--blue)"></div>Trip planner</li>
+          <li><div class="lib-dot" style="background:var(--blue)"></div>Wedding RSVP</li>
+          <li><div class="lib-dot" style="background:var(--blue)"></div>Bill splitter</li>
+          <li><div class="lib-dot" style="background:var(--blue)"></div>Potluck signup</li>
+          <li><div class="lib-dot" style="background:var(--blue)"></div>Baby pool</li>
+        </ul>
+      </div>
+      <div class="lib-col">
+        <h4 style="color:var(--purple);">Professional</h4>
+        <ul>
+          <li><div class="lib-dot" style="background:var(--purple)"></div>Invoice tracker</li>
+          <li><div class="lib-dot" style="background:var(--purple)"></div>Estimate builder</li>
+          <li><div class="lib-dot" style="background:var(--purple)"></div>Mortgage comparison</li>
+          <li><div class="lib-dot" style="background:var(--purple)"></div>Lead capture</li>
+          <li><div class="lib-dot" style="background:var(--purple)"></div>Gradebook</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+     SLIDE 10 — ROADMAP
+     ═══════════════════════════════════════════ -->
+<div class="slide" data-slide="9" data-label="Roadmap">
+  <div class="split-inner">
+    <div class="split-text">
+      <div class="kicker anim">Future Architecture</div>
+      <h2 class="anim anim-d1">Standalone first.<br><span class="serif-hl">Connected later.</span></h2>
+      <p class="deck anim anim-d2" style="max-width:380px;">Every tool works perfectly alone. The long game is a protocol that lets HTML documents discover each other.</p>
+    </div>
+    <div class="split-visual">
+      <div class="road-steps anim anim-d3">
+        <div class="road-step">
+          <div class="road-num">1</div>
+          <div class="road-content"><h4>Build the library</h4><p>Dozens of tools under unified design. Each a standalone .html file.</p></div>
+        </div>
+        <div class="road-step">
+          <div class="road-num">2</div>
+          <div class="road-content"><h4>Build recognition</h4><p>Design language becomes the signal. People recognize the ecosystem.</p></div>
+        </div>
+        <div class="road-step">
+          <div class="road-num">3</div>
+          <div class="road-content"><h4>Add the protocol</h4><p>Doccoin or equivalent — documents link, reference, and transact.</p></div>
+        </div>
+        <div class="road-step">
+          <div class="road-num">4</div>
+          <div class="road-content"><h4>Revenue emerges</h4><p>Brand, library, and network are the asset. Monetization without force.</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+     SLIDE 11 — CLOSE
+     ═══════════════════════════════════════════ -->
+<div class="slide" data-slide="10" data-label="The Vision">
+  <div class="close-inner">
+    <h2 class="anim">Build the library.<br>Own the design.<br>Connect the <span class="hl">documents.</span></h2>
+    <div class="close-box anim anim-d2">
+      <p>The web was supposed to be documents — readable by anyone, owned by no one, running everywhere. Somewhere along the way it became platforms, logins, and monthly fees.</p>
+      <p style="margin-top:14px;">We're going back. One beautifully designed HTML file at a time.</p>
+      <p class="close-sig">The intranet Jobs would have wanted.</p>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══ JAVASCRIPT ═══ -->
+<script>
+(() => {
+  const slides = document.querySelectorAll('.slide');
+  const nav = document.getElementById('sideNav');
+  const fill = document.getElementById('progressFill');
+  const counter = document.getElementById('counter');
+  const label = document.getElementById('slideLabel');
+  const hint = document.getElementById('kbHint');
+  const total = slides.length;
+  let hasScrolled = false;
+
+  // Build nav dots
+  slides.forEach((_, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'side-dot';
+    btn.setAttribute('aria-label', `Go to slide ${i + 1}`);
+    btn.addEventListener('click', () => slides[i].scrollIntoView({ behavior: 'smooth' }));
+    nav.appendChild(btn);
+  });
+  const dots = nav.querySelectorAll('.side-dot');
+
+  // Intersection observer
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('in-view');
+        const idx = parseInt(entry.target.dataset.slide);
+        
+        // Update nav
+        dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+        
+        // Update progress
+        fill.style.width = ((idx / (total - 1)) * 100) + '%';
+        
+        // Update counter
+        counter.textContent = String(idx + 1).padStart(2, '0') + ' — ' + String(total).padStart(2, '0');
+        
+        // Update label
+        label.textContent = entry.target.dataset.label || '';
+        
+        // Fade hint after first scroll
+        if (idx > 0 && !hasScrolled) {
+          hasScrolled = true;
+          hint.classList.add('faded');
+        }
+      }
+    });
+  }, { threshold: 0.5 });
+
+  slides.forEach(s => obs.observe(s));
+
+  // Keyboard navigation
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === ' ') {
+      const active = [...dots].findIndex(d => d.classList.contains('active'));
+      let target;
+      
+      if ((e.key === 'ArrowDown' || e.key === ' ') && active < total - 1) {
+        target = active + 1;
+      } else if (e.key === 'ArrowUp' && active > 0) {
+        target = active - 1;
+      }
+      
+      if (target !== undefined) {
+        e.preventDefault();
+        slides[target].scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  });
+})();
+</script>
+</body>
+</html>

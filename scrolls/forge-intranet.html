@@ -1,0 +1,1214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FORGE — Open Intranet Builder</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #08090b;
+    --bg-warm: #0c0b09;
+    --surface: #111318;
+    --surface-2: #171a20;
+    --surface-3: #1d2028;
+    --border: #252830;
+    --border-lit: #33363f;
+    --text: #e4e2dc;
+    --text-2: #a09d95;
+    --text-3: #605d55;
+    --fire: #e8922a;
+    --fire-dim: #a06318;
+    --fire-glow: rgba(232,146,42,0.07);
+    --fire-glow-2: rgba(232,146,42,0.14);
+    --ember: #c44b1a;
+    --green: #3d9e6a;
+    --green-dim: rgba(61,158,106,0.12);
+    --red: #c44b4b;
+    --red-dim: rgba(196,75,75,0.12);
+    --blue: #4b7ec4;
+    --r: 5px;
+    --r2: 10px;
+    --r3: 16px;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: 'Outfit', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── Grain Overlay ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* ── Layout ── */
+  .shell {
+    display: grid;
+    grid-template-columns: 480px 1fr;
+    grid-template-rows: auto 1fr;
+    min-height: 100vh;
+  }
+
+  /* ── Top Bar ── */
+  .topbar {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 28px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .logo-mark {
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, var(--fire), var(--ember));
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    color: #fff;
+    font-weight: 700;
+    box-shadow: 0 2px 12px rgba(232,146,42,0.25);
+  }
+  .logo-text {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+  .logo-text span { color: var(--fire); }
+  .logo-sub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--text-3);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .topbar-right { display:flex; gap:8px; align-items:center; }
+  .top-btn {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    color: var(--text-2);
+    padding: 7px 14px;
+    border-radius: var(--r);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .top-btn:hover { border-color: var(--fire-dim); color: var(--fire); }
+  .top-btn.active { background: var(--fire-glow); border-color: var(--fire-dim); color: var(--fire); }
+
+  /* ── Left Panel ── */
+  .left {
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    background: var(--surface);
+    overflow-y: auto;
+  }
+
+  .input-section {
+    padding: 28px;
+    flex-shrink: 0;
+  }
+
+  .section-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--text-3);
+    margin-bottom: 12px;
+  }
+
+  .idea-box {
+    width: 100%;
+    min-height: 160px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--r2);
+    color: var(--text);
+    font-family: 'Outfit', sans-serif;
+    font-size: 15px;
+    line-height: 1.65;
+    padding: 16px 20px;
+    resize: vertical;
+    outline: none;
+    transition: border-color 0.25s;
+  }
+  .idea-box:focus { border-color: var(--fire-dim); }
+  .idea-box::placeholder { color: var(--text-3); }
+
+  /* ── Refinement Toggles ── */
+  .refine-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 14px;
+  }
+  .refine-chip {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    color: var(--text-2);
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    user-select: none;
+  }
+  .refine-chip:hover { border-color: var(--border-lit); }
+  .refine-chip.on {
+    background: var(--fire-glow);
+    border-color: var(--fire-dim);
+    color: var(--fire);
+  }
+
+  /* ── Generate Button ── */
+  .gen-btn {
+    width: 100%;
+    margin-top: 20px;
+    padding: 16px;
+    background: linear-gradient(135deg, var(--fire-dim), var(--ember));
+    border: none;
+    border-radius: var(--r2);
+    color: #fff;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+  .gen-btn:hover { filter: brightness(1.15); transform: translateY(-1px); }
+  .gen-btn:active { transform: translateY(0); }
+  .gen-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    filter: none;
+    transform: none;
+  }
+  .gen-btn .spinner {
+    display: none;
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-right: 10px;
+    vertical-align: middle;
+  }
+  .gen-btn.loading .spinner { display: inline-block; }
+  .gen-btn.loading .btn-text { display: none; }
+  .gen-btn.loading .btn-loading { display: inline; }
+  .btn-loading { display: none; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── History ── */
+  .history-section {
+    flex: 1;
+    border-top: 1px solid var(--border);
+    padding: 20px 28px;
+    overflow-y: auto;
+  }
+  .history-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  .history-item:hover { opacity: 0.8; }
+  .history-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--fire);
+    margin-top: 6px;
+    flex-shrink: 0;
+  }
+  .history-info { flex:1; min-width:0; }
+  .history-name {
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .history-time {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--text-3);
+    margin-top: 2px;
+  }
+  .history-actions {
+    display: flex;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+  .hist-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-3);
+    width: 28px;
+    height: 28px;
+    border-radius: var(--r);
+    cursor: pointer;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+  }
+  .hist-btn:hover { border-color: var(--fire-dim); color: var(--fire); }
+  .hist-btn.del:hover { border-color: var(--red); color: var(--red); }
+
+  .empty-history {
+    text-align: center;
+    padding: 40px 0;
+    color: var(--text-3);
+    font-size: 13px;
+  }
+
+  /* ── Right Panel ── */
+  .right {
+    display: flex;
+    flex-direction: column;
+    background: var(--bg);
+    position: relative;
+  }
+
+  .preview-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 24px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    flex-shrink: 0;
+  }
+  .preview-tabs { display:flex; gap:0; }
+  .preview-tab {
+    padding: 6px 16px;
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-3);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .preview-tab:first-child { border-radius: var(--r) 0 0 var(--r); }
+  .preview-tab:last-child { border-radius: 0 var(--r) var(--r) 0; border-left:none; }
+  .preview-tab.active { background: var(--fire-glow); border-color: var(--fire-dim); color: var(--fire); }
+  .preview-actions { display:flex; gap:6px; }
+  .prev-btn {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    color: var(--text-2);
+    padding: 6px 14px;
+    border-radius: var(--r);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .prev-btn:hover { border-color: var(--fire-dim); color: var(--fire); }
+  .prev-btn.primary {
+    background: var(--fire-dim);
+    border-color: transparent;
+    color: #fff;
+  }
+  .prev-btn.primary:hover { background: var(--fire); }
+
+  .preview-frame {
+    flex: 1;
+    background: #fff;
+    position: relative;
+  }
+  .preview-frame iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    position: absolute;
+    inset: 0;
+  }
+
+  .code-view {
+    flex: 1;
+    display: none;
+    overflow: auto;
+    background: var(--bg);
+  }
+  .code-view pre {
+    padding: 24px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    line-height: 1.7;
+    color: var(--text-2);
+    white-space: pre-wrap;
+    word-break: break-all;
+    tab-size: 2;
+  }
+
+  .welcome-state {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    color: var(--text-3);
+  }
+  .welcome-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+  }
+  .welcome-state h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 400;
+    color: var(--text-2);
+  }
+  .welcome-state p { font-size: 13px; max-width: 360px; text-align: center; line-height: 1.6; }
+
+  /* ── Settings Modal ── */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r3);
+    width: 520px;
+    max-width: 92vw;
+    max-height: 85vh;
+    overflow-y: auto;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+  }
+  .modal-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border);
+  }
+  .modal-head h3 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .modal-close {
+    background: none;
+    border: none;
+    color: var(--text-3);
+    font-size: 18px;
+    cursor: pointer;
+    padding: 4px;
+  }
+  .modal-close:hover { color: var(--text); }
+  .modal-body { padding: 24px; }
+  .field { margin-bottom: 20px; }
+  .field label {
+    display: block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text-3);
+    margin-bottom: 8px;
+  }
+  .field input, .field select {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 10px 14px;
+    border-radius: var(--r);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .field input:focus, .field select:focus { border-color: var(--fire-dim); }
+  .field input::placeholder { color: var(--text-3); }
+  .field .hint {
+    font-size: 11px;
+    color: var(--text-3);
+    margin-top: 6px;
+    line-height: 1.5;
+  }
+  .save-settings-btn {
+    width: 100%;
+    padding: 12px;
+    background: var(--fire-dim);
+    border: none;
+    border-radius: var(--r);
+    color: #fff;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .save-settings-btn:hover { background: var(--fire); }
+
+  /* ── Error Toast ── */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--surface-2);
+    border: 1px solid var(--red);
+    color: var(--text);
+    padding: 14px 20px;
+    border-radius: var(--r2);
+    font-size: 13px;
+    max-width: 420px;
+    z-index: 2000;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    transform: translateY(120%);
+    transition: transform 0.3s ease;
+  }
+  .toast.show { transform: translateY(0); }
+  .toast.success { border-color: var(--green); }
+
+  /* ── Status Indicator ── */
+  .status-line {
+    padding: 10px 28px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-3);
+    border-top: 1px solid var(--border);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 38px;
+  }
+  .status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--text-3);
+  }
+  .status-dot.connected { background: var(--green); }
+  .status-dot.generating { background: var(--fire); animation: pulse 1s infinite; }
+  .status-dot.error { background: var(--red); }
+  @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.4; } }
+
+  /* ── Prompt editor ── */
+  .system-prompt-box {
+    width: 100%;
+    min-height: 120px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    color: var(--text-2);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    line-height: 1.6;
+    padding: 12px 14px;
+    resize: vertical;
+    outline: none;
+  }
+  .system-prompt-box:focus { border-color: var(--fire-dim); }
+
+  /* ── Responsive ── */
+  @media (max-width: 960px) {
+    .shell { grid-template-columns: 1fr; grid-template-rows: auto auto 1fr; }
+    .left { max-height: 50vh; border-right: none; border-bottom: 1px solid var(--border); }
+    .history-section { max-height: 200px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <!-- Top Bar -->
+  <div class="topbar">
+    <div class="logo">
+      <div class="logo-mark">⚒</div>
+      <div>
+        <div class="logo-text"><span>FORGE</span></div>
+        <div class="logo-sub">Open Intranet Builder · Azure OpenAI</div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <button class="top-btn" onclick="openSettings()" id="settingsBtn">⚙ Settings</button>
+      <button class="top-btn" onclick="openPromptEditor()">✎ System Prompt</button>
+    </div>
+  </div>
+
+  <!-- Left Panel -->
+  <div class="left">
+    <div class="input-section">
+      <div class="section-label">Describe Your Build</div>
+      <textarea class="idea-box" id="ideaInput" placeholder="e.g. Rebuild the Sprint Board with improved drag-drop and a card dependency graph...
+
+Or: Add a new Dark Mode toggle to the header that swaps CSS variables...
+
+Or: Generate the full Open Intranet v2.0 from scratch with all 15 views...
+
+Be specific: which modules, what data model changes, what UX behaviors."></textarea>
+
+      <div class="refine-row">
+        <span class="refine-chip on" data-tag="offline" onclick="toggleChip(this)">Offline-Ready</span>
+        <span class="refine-chip on" data-tag="localStorage" onclick="toggleChip(this)">LocalStorage</span>
+        <span class="refine-chip on" data-tag="designSystem" onclick="toggleChip(this)">OI Design System</span>
+        <span class="refine-chip" data-tag="allViews" onclick="toggleChip(this)">All 15 Views</span>
+        <span class="refine-chip" data-tag="pagesEditor" onclick="toggleChip(this)">Pages Editor</span>
+        <span class="refine-chip" data-tag="aiIntegration" onclick="toggleChip(this)">AI Integration</span>
+        <span class="refine-chip" data-tag="dragDrop" onclick="toggleChip(this)">Drag & Drop</span>
+        <span class="refine-chip" data-tag="defaultData" onclick="toggleChip(this)">Default Data</span>
+      </div>
+
+      <button class="gen-btn" id="genBtn" onclick="generate()">
+        <span class="spinner"></span>
+        <span class="btn-text">⚒ Forge Intranet Build</span>
+        <span class="btn-loading">Building Intranet...</span>
+      </button>
+    </div>
+
+    <!-- History -->
+    <div class="history-section">
+      <div class="section-label">Build History</div>
+      <div id="historyList">
+        <div class="empty-history" id="emptyHistory">No intranet builds yet.</div>
+      </div>
+    </div>
+
+    <div class="status-line">
+      <span class="status-dot" id="statusDot"></span>
+      <span id="statusText">Configure Azure endpoint in Settings</span>
+    </div>
+  </div>
+
+  <!-- Right Panel -->
+  <div class="right">
+    <div class="preview-bar" id="previewBar" style="display:none">
+      <div class="preview-tabs">
+        <button class="preview-tab active" onclick="showView('preview',this)">Preview</button>
+        <button class="preview-tab" onclick="showView('code',this)">Code</button>
+      </div>
+      <div class="preview-actions">
+        <button class="prev-btn" onclick="copyCode()">Copy</button>
+        <button class="prev-btn primary" onclick="downloadHTML()">↓ Download .html</button>
+      </div>
+    </div>
+
+    <div class="preview-frame" id="previewFrame" style="display:none">
+      <iframe id="previewIframe" sandbox="allow-scripts allow-modals"></iframe>
+    </div>
+    <div class="code-view" id="codeView"><pre id="codeContent"></pre></div>
+
+    <div class="welcome-state" id="welcomeState">
+      <div class="welcome-icon">⚒</div>
+      <h2>Build the Intranet. Ship the HTML.</h2>
+      <p>Describe what you need — a new module, a full rebuild, a feature addition — and Forge will generate a complete Open Intranet build as a single HTML file, spec-accurate and ready to deploy.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Settings Modal -->
+<div class="modal-overlay" id="settingsModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>Azure OpenAI Settings</h3>
+      <button class="modal-close" onclick="closeSettings()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label>Azure Endpoint</label>
+        <input type="text" id="cfgEndpoint" placeholder="https://your-resource.openai.azure.com" />
+        <div class="hint">Your Azure OpenAI resource URL (no trailing slash)</div>
+      </div>
+      <div class="field">
+        <label>API Key</label>
+        <input type="password" id="cfgApiKey" placeholder="••••••••••••••••" />
+        <div class="hint">Stored locally in your browser only — never transmitted elsewhere</div>
+      </div>
+      <div class="field">
+        <label>Deployment Name</label>
+        <input type="text" id="cfgDeployment" placeholder="gpt-4o" />
+        <div class="hint">The deployment name from Azure AI Studio (e.g. gpt-4o, chat5.3, gpt-4.1)</div>
+      </div>
+      <div class="field">
+        <label>API Version</label>
+        <input type="text" id="cfgApiVersion" placeholder="2024-12-01-preview" />
+        <div class="hint">Azure API version string</div>
+      </div>
+      <button class="save-settings-btn" onclick="saveSettings()">Save Settings</button>
+    </div>
+  </div>
+</div>
+
+<!-- System Prompt Modal -->
+<div class="modal-overlay" id="promptModal">
+  <div class="modal" style="width:640px">
+    <div class="modal-head">
+      <h3>System Prompt</h3>
+      <button class="modal-close" onclick="closePromptEditor()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label>Instructions sent to the model</label>
+        <textarea class="system-prompt-box" id="cfgPrompt" rows="14"></textarea>
+        <div class="hint">Controls how the model generates HTML tools. Edit to change behavior.</div>
+      </div>
+      <button class="save-settings-btn" onclick="savePrompt()">Save Prompt</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════
+// State
+// ═══════════════════════════════════════════
+const KEYS = {
+  endpoint: 'forgei_endpoint',
+  apiKey: 'forgei_apikey',
+  deployment: 'forgei_deployment',
+  apiVersion: 'forgei_apiversion',
+  prompt: 'forgei_system_prompt',
+  history: 'forgei_history',
+};
+
+const DEFAULT_SYSTEM_PROMPT = `You are an expert single-file HTML application builder specializing in the "Open Intranet — Product Manager Workspace" application. You have complete knowledge of this product's architecture, data model, design system, and all 15 modules. Your job is to generate complete, working, single-file HTML builds of this application (or specific modules from it) based on user requests.
+
+CRITICAL OUTPUT RULES:
+1. Output ONLY the HTML code. No markdown, no backticks, no explanation. Start with <!DOCTYPE html> and end with </html>.
+2. Everything — HTML, CSS, JavaScript — must be in ONE file. No external JS dependencies. Only Google Fonts CDN for Instrument Serif and DM Sans.
+3. The application must work completely OFFLINE (except Google Fonts and Azure OpenAI calls when AI features are used).
+4. Use vanilla JavaScript (ES6+). No frameworks, no build step, no bundler.
+
+═══════════════════════════════════════════
+PRODUCT OVERVIEW
+═══════════════════════════════════════════
+
+Open Intranet is a self-contained, single-file HTML application (~2,898 lines) functioning as a comprehensive product manager workspace. It provides 15 integrated views/modules — from sprint management and Kanban boards to a Notion-style page editor with AI content generation — all running entirely in the browser with localStorage persistence.
+
+Target users: Solo product managers, applications engineering teams, indie builders.
+Target deployment: Email as attachment, host on SharePoint, open from local folder.
+
+═══════════════════════════════════════════
+ARCHITECTURE
+═══════════════════════════════════════════
+
+Layout: Fixed sidebar (240px, dark) + header (56px) + scrollable content area.
+Persistence: Two localStorage keys — oi_workspace_v1 (main DATA object), oi_pages_v1 (pages editor state). Third key oi_ws_azure_config for Azure settings.
+State management: Single mutable global DATA object. Mutation pattern: modify DATA → saveData() → render function. Full innerHTML replacement, no virtual DOM.
+View switching: All 15 views in DOM, show/hide with .active class. Each view triggers its render function on activation.
+Modal system: Single #modal-overlay with openModal(title, bodyHTML, footerHTML, cls) / closeModal(). Click-outside-to-dismiss.
+AI integration: Shared callAzureAI(systemPrompt, userMessage, opts) supporting Chat Completions and Responses API formats.
+
+═══════════════════════════════════════════
+CSS DESIGN SYSTEM (44 variables)
+═══════════════════════════════════════════
+
+:root {
+  /* Surfaces */
+  --bg: #f4f3ef;           /* Page background - warm off-white */
+  --bg-card: #ffffff;       /* Card/panel background */
+  --bg-deep: #eae9e4;      /* Inset panels, secondary backgrounds */
+  
+  /* Borders */
+  --border: rgba(0,0,0,0.06);
+  --border-strong: rgba(0,0,0,0.12);
+  --border-focus: rgba(0,0,0,0.22);
+  
+  /* Text hierarchy */
+  --text: #1a1a1a;         /* Primary */
+  --text-mid: ...;          /* Secondary */
+  --text-muted: ...;        /* Tertiary */
+  --text-dim: ...;          /* Quaternary */
+  
+  /* Semantic colors (each with base, -bg, -light variants) */
+  --green: #1a8a5c;        /* Success, live status, done */
+  --blue: #2d6bcf;         /* Active, in-progress, links */
+  --warm: #c4723a;         /* Warnings, orange accents */
+  --purple: #7c5cbf;       /* Design status, special features */
+  --red: #d04040;          /* Errors, high priority, destructive */
+  
+  /* Layout tokens */
+  --sidebar-w: 240px;
+  --header-h: 56px;
+  --radius: 10px;
+  --radius-sm: 6px;
+}
+
+Typography: Instrument Serif for display text (headings, metric values, card headers). DM Sans for body text and UI elements.
+Icons: Unicode glyphs and emoji characters only — no icon library.
+Responsive breakpoints: 1024px (grids 4→2 col), 860px (pages sidebar overlay), 768px (sidebar hidden, single column).
+Animations: CSS-only. Key: aiCardPulse (AI card glow), peMenuIn (slash menu), fadeUp (block appear). Transitions 0.1-0.2s.
+
+═══════════════════════════════════════════
+DATA MODEL (oi_workspace_v1)
+═══════════════════════════════════════════
+
+DATA = {
+  sprint: { name, number, startDate, endDate, velocity: [int x6] },
+  cards: [{ id, title, desc, status (backlog|in-progress|review|done), tag (app|design|infra|docs|bug), priority (high|med|low), points (1|2|3|5|8), sprint, created }],
+  apps: [{ id, name, category, status (live|dev|design|planned), sprint, size, updated }],
+  roadmap: [{ id, name, quarter (Q1-Q4 2026), category, status (done|in-progress|planned) }],
+  updates: [{ id, date, title, body, type (release|sprint|design|decision|blocker) }],
+  notes: "string",
+  features: [{ id, name, module, status, priority, sprint, complexity, added, desc, owner }],
+  autoLog: [{ timestamp, message, type }],
+  version: { major, minor, patch, tag },
+  snapshots: [{ name, data: "serialized DATA", time }]  // max 5
+};
+
+Pages data (oi_pages_v1): [{ id, title, icon (emoji), blocks: [{ id, type, content, checked }] }]
+
+═══════════════════════════════════════════
+NAVIGATION (15 views in 3 sections)
+═══════════════════════════════════════════
+
+OVERVIEW section:
+1. Dashboard — KPI metrics (4 cards), SVG burndown chart, velocity bar chart, activity feed, blockers panel. Time-aware greeting. Default landing view.
+2. Sprint Board — 4-column Kanban (Backlog→In Progress→Review→Done), HTML5 drag-drop, card CRUD modal, AI command bar (create/delete/move/edit cards via natural language).
+3. App Library — Searchable/filterable table of apps. Categories: Life & Household, Group & Social, Sports & Games, Professional. Status: live/dev/design/planned with color dots.
+4. Feature Registry — Sortable feature table with expandable detail rows, search/filter, auto-detect (27 defaults), product roadmap timeline visualization.
+5. Roadmap — Quarterly lanes (Q1-Q4 2026), collapsible, status dots, add-via-modal.
+
+BUILD section:
+6. Pages — Full Notion-style block editor. 13 block types: text, h1, h2, h3, bullet, numbered, todo, quote, callout, code, divider, /ai (generate blocks), /ai-page (generate full page). Features: slash menu (fuzzy filter, keyboard nav), inline format toolbar (bold/italic/underline/strikethrough/code/AI rewrite), block drag-reorder, multi-select (shift+click) with action bar, file attachments, emoji page icons (50 picker), auto-save (500ms debounce), markdown export.
+7. Templates — 12 pre-built page templates in 4 categories: Product (Sprint Retro, PRD, Stakeholder Update, Launch Checklist, Product Brief), Engineering (ADR, Bug Report, Code Review), Design (Design Critique, UI Component Spec), AI-Powered (AI Product Brief, AI Sprint Retro).
+8. Product Discovery — 4-stage AI pipeline: Description → Pain Points → User Stories → Features → Sprint Cards. Send to Board, route to Sprint Engine, or create Pages doc.
+9. Sprint Engine — Select sprint cards + upload/attach HTML source → AI builds features into HTML → preview/download/send to Workshop.
+10. AI Workshop — Upload HTML files + freeform prompt → Azure OpenAI generates updated HTML → iframe preview + code view + download. Multi-file upload, customizable system prompt.
+11. File Workspace — Draggable card canvas for files. Upload any file type, drag to arrange, double-click HTML for preview, send to Workshop.
+
+MANAGE section:
+12. Automation Hub — 6 automations: Auto Changelog, Sprint Auto-Advance, Version Bump, Feature Sync, Data Cleanup, Export Snapshot. All log results with timestamps.
+13. Edit Toolkit — 3 tabs: JSON Editor (select data slice, validate, save), Bulk Actions (card surgery, app surgery, danger zone), Quick Snapshots (save/restore up to 5 named snapshots).
+14. Update Log — Reverse-chronological timeline. Types: release/sprint/design/decision/blocker with distinct color badges. Add via modal.
+15. Working Notes — Auto-saving textarea, 500ms debounce, persists to DATA.notes.
+
+Additional: Header calculator (slide-out panel, standard keypad, expression history, keyboard input).
+
+═══════════════════════════════════════════
+KEY FUNCTIONS
+═══════════════════════════════════════════
+
+Core: loadData(), saveData() — read/write DATA to localStorage
+Dashboard: renderDashboard() — metrics, charts, activity, blockers
+Sprint Board: renderBoard(), aiCommandExecute() — Kanban + AI commands
+Pages: peInit(), peCreateNewPage(), peRenderEditor(), peRenderBlock(block, idx), peOpenSlashMenu(el), peAIGenerate(), peAINewPage(), peAIRewrite()
+AI: callAzureAI(sys, user, opts), getAzureConfig()
+Templates: renderTemplates() — card grid with search/filter
+Discovery: pmRunDiscovery() — 4-stage AI pipeline
+Sprint Engine: seBuild() — cards + HTML → AI → output
+Workshop: wseSend() — files + prompt → AI → output
+Features: frRender(), frAutoPopulate(), frRenderRoadmap()
+Automation: autoGenChangelog(), autoAdvanceSprint(), autoVersionBump(), autoFeatureSync(), autoDataCleanup()
+Toolkit: tkLoadJson(), tkSaveJson(), tkBulkUpdate(), tkSaveSnapshot()
+Shared: exportData(), openModal(), closeModal()
+
+═══════════════════════════════════════════
+DEFAULT DATA (ship with the app)
+═══════════════════════════════════════════
+
+Include rich defaults so the app demonstrates all functionality on first open:
+- 10 sprint cards across all statuses/tags/priorities
+- 19 apps across 4 categories and all statuses
+- 15 roadmap items across Q1-Q4 2026
+- 7 update log entries of various types
+- 27 features covering all modules
+- Velocity history: [18, 22, 26, 20, 24, 0]
+- 12 page templates across 4 categories
+
+═══════════════════════════════════════════
+AZURE OPENAI INTEGRATION
+═══════════════════════════════════════════
+
+Chat Completions URL: {endpoint}/openai/deployments/{model}/chat/completions?api-version={version}
+Responses API URL: {endpoint}/openai/responses?api-version={version}
+
+Config persisted to oi_ws_azure_config. Fields: endpoint, apiKey, deployment, apiFormat (chat|responses), apiVersion.
+Clean markdown fences from JSON responses. Wrap all AI calls in try/catch.
+
+AI Command Bar JSON schema: {"actions":[{"type":"create_card|delete_card|move_card|edit_card","card_id":"...","data":{...}}],"summary":"..."}
+
+═══════════════════════════════════════════
+IMPORTANT IMPLEMENTATION NOTES
+═══════════════════════════════════════════
+
+- Sidebar nav items should have emoji icons and section labels (Overview, Build, Manage)
+- Card tag colors: app=blue, design=purple, infra=warm, docs=green, bug=red
+- Priority indicators: high=red dot, med=orange dot, low=green dot
+- Status colors: live/done=green, dev/in-progress=blue, design=purple, planned=gray
+- Sprint Board AI command bar sits at top of board, sends full card context
+- Pages editor blocks use contenteditable divs, NOT textarea/input
+- Slash menu: triggered by '/' in any block, fuzzy-filtered, keyboard nav (arrow+Enter), 260px floating panel
+- Format toolbar: appears on text selection, dark toolbar, 30x28px buttons
+- Block drag handle appears on hover (left side of block)
+- Multi-select: Shift+click, floating action bar with Copy/Move/Delete
+- Auto-save pages: 500ms debounce via peScheduleSave()
+- Calculator: accessible from header via "⊞ Calc" button, slide-out panel
+- Responsive: at 768px sidebar hides, at 860px pages sidebar becomes overlay, at 1024px grids collapse
+- All animations CSS-only with minimal JS triggers`;
+
+
+let currentCode = '';
+let history = [];
+
+// ═══════════════════════════════════════════
+// Settings
+// ═══════════════════════════════════════════
+function loadSettings() {
+  document.getElementById('cfgEndpoint').value = localStorage.getItem(KEYS.endpoint) || '';
+  document.getElementById('cfgApiKey').value = localStorage.getItem(KEYS.apiKey) || '';
+  document.getElementById('cfgDeployment').value = localStorage.getItem(KEYS.deployment) || 'gpt-4o';
+  document.getElementById('cfgApiVersion').value = localStorage.getItem(KEYS.apiVersion) || '2024-12-01-preview';
+  document.getElementById('cfgPrompt').value = localStorage.getItem(KEYS.prompt) || DEFAULT_SYSTEM_PROMPT;
+  try { history = JSON.parse(localStorage.getItem(KEYS.history) || '[]'); } catch(e) { history = []; }
+  updateStatus();
+  renderHistory();
+}
+
+function saveSettings() {
+  localStorage.setItem(KEYS.endpoint, document.getElementById('cfgEndpoint').value.trim().replace(/\/+$/, ''));
+  localStorage.setItem(KEYS.apiKey, document.getElementById('cfgApiKey').value.trim());
+  localStorage.setItem(KEYS.deployment, document.getElementById('cfgDeployment').value.trim());
+  localStorage.setItem(KEYS.apiVersion, document.getElementById('cfgApiVersion').value.trim());
+  closeSettings();
+  updateStatus();
+  showToast('Settings saved', true);
+}
+
+function savePrompt() {
+  localStorage.setItem(KEYS.prompt, document.getElementById('cfgPrompt').value);
+  closePromptEditor();
+  showToast('System prompt saved', true);
+}
+
+function openSettings() { document.getElementById('settingsModal').classList.add('open'); }
+function closeSettings() { document.getElementById('settingsModal').classList.remove('open'); }
+function openPromptEditor() { document.getElementById('promptModal').classList.add('open'); }
+function closePromptEditor() { document.getElementById('promptModal').classList.remove('open'); }
+
+function getConfig() {
+  return {
+    endpoint: localStorage.getItem(KEYS.endpoint) || '',
+    apiKey: localStorage.getItem(KEYS.apiKey) || '',
+    deployment: localStorage.getItem(KEYS.deployment) || 'gpt-4o',
+    apiVersion: localStorage.getItem(KEYS.apiVersion) || '2024-12-01-preview',
+    prompt: localStorage.getItem(KEYS.prompt) || DEFAULT_SYSTEM_PROMPT,
+  };
+}
+
+function updateStatus() {
+  const cfg = getConfig();
+  const dot = document.getElementById('statusDot');
+  const txt = document.getElementById('statusText');
+  if (cfg.endpoint && cfg.apiKey) {
+    dot.className = 'status-dot connected';
+    txt.textContent = `Connected · ${cfg.deployment} · ${cfg.endpoint.replace('https://','').split('.')[0]}`;
+    document.getElementById('settingsBtn').classList.add('active');
+  } else {
+    dot.className = 'status-dot';
+    txt.textContent = 'Configure Azure endpoint in Settings';
+    document.getElementById('settingsBtn').classList.remove('active');
+  }
+}
+
+// ═══════════════════════════════════════════
+// Chip Toggles
+// ═══════════════════════════════════════════
+function toggleChip(el) { el.classList.toggle('on'); }
+
+function getActiveChips() {
+  return [...document.querySelectorAll('.refine-chip.on')].map(c => c.dataset.tag);
+}
+
+// ═══════════════════════════════════════════
+// Generate
+// ═══════════════════════════════════════════
+async function generate() {
+  const cfg = getConfig();
+  if (!cfg.endpoint || !cfg.apiKey) {
+    openSettings();
+    showToast('Configure your Azure OpenAI endpoint first');
+    return;
+  }
+
+  const idea = document.getElementById('ideaInput').value.trim();
+  if (!idea) {
+    showToast('Describe what you want to build');
+    return;
+  }
+
+  const chips = getActiveChips();
+  let userMsg = idea;
+  if (chips.length) {
+    userMsg += '\n\nAdditional requirements: ' + chips.map(c => {
+      const map = {
+        'offline': 'Must work fully offline with zero external dependencies beyond Google Fonts CDN',
+        'localStorage': 'Persist all data with localStorage (oi_workspace_v1 for main data, oi_pages_v1 for pages editor, oi_ws_azure_config for Azure config)',
+        'designSystem': 'Use the complete Open Intranet CSS design system: 44 CSS variables, Instrument Serif + DM Sans fonts, 5 semantic color families (green/blue/warm/purple/red), warm off-white palette (#f4f3ef bg), 3 responsive breakpoints (768px, 860px, 1024px)',
+        'allViews': 'Include all 15 views: Dashboard, Sprint Board, App Library, Feature Registry, Roadmap, Pages, Templates, Product Discovery, Sprint Engine, AI Workshop, File Workspace, Automation Hub, Edit Toolkit, Update Log, Working Notes — organized in sidebar sections Overview/Build/Manage',
+        'pagesEditor': 'Include the full Notion-style Pages editor with all 13 block types (text, h1-h3, bullet, numbered, todo, quote, callout, code, divider, AI generate, AI new page), slash menu, inline format toolbar, drag-reorder, multi-select',
+        'aiIntegration': 'Include Azure OpenAI integration via callAzureAI() supporting both Chat Completions and Responses API formats, configurable endpoint/key/model/version',
+        'dragDrop': 'Include HTML5 drag-and-drop for Sprint Board Kanban cards and Pages editor block reordering',
+        'defaultData': 'Include rich default data: 10 sprint cards, 19 apps, 15 roadmap items, 7 update log entries, 27 features, 6 velocity history entries, 12 page templates'
+      };
+      return map[c] || c;
+    }).join(', ');
+  }
+
+  const btn = document.getElementById('genBtn');
+  btn.classList.add('loading');
+  btn.disabled = true;
+  setStatus('generating', 'Building Intranet...');
+
+  try {
+    const url = `${cfg.endpoint}/openai/deployments/${cfg.deployment}/chat/completions?api-version=${cfg.apiVersion}`;
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'api-key': cfg.apiKey,
+      },
+      body: JSON.stringify({
+        messages: [
+          { role: 'system', content: cfg.prompt },
+          { role: 'user', content: userMsg }
+        ],
+        max_tokens: 16000,
+        temperature: 0.4,
+      }),
+    });
+
+    if (!res.ok) {
+      const err = await res.text();
+      throw new Error(`Azure API error ${res.status}: ${err.slice(0, 200)}`);
+    }
+
+    const data = await res.json();
+    let content = data.choices?.[0]?.message?.content || '';
+
+    // Strip markdown fences if present
+    content = content.replace(/^```html?\s*\n?/i, '').replace(/\n?```\s*$/i, '').trim();
+
+    // Validate it looks like HTML
+    if (!content.includes('<!DOCTYPE') && !content.includes('<html')) {
+      // Try to find HTML within the response
+      const match = content.match(/<!DOCTYPE[\s\S]*<\/html>/i) || content.match(/<html[\s\S]*<\/html>/i);
+      if (match) content = match[0];
+      else throw new Error('Model did not return valid HTML. Try being more specific.');
+    }
+
+    currentCode = content;
+
+    // Add to history
+    const name = idea.length > 60 ? idea.slice(0, 57) + '...' : idea;
+    history.unshift({ name, code: content, time: new Date().toISOString(), id: Date.now() });
+    if (history.length > 30) history = history.slice(0, 30);
+    localStorage.setItem(KEYS.history, JSON.stringify(history));
+    renderHistory();
+
+    showOutput(content);
+    setStatus('connected', `Done · ${(content.length/1024).toFixed(1)} KB · ${data.usage?.total_tokens || '?'} tokens`);
+
+  } catch (err) {
+    showToast(err.message);
+    setStatus('error', 'Generation failed');
+  } finally {
+    btn.classList.remove('loading');
+    btn.disabled = false;
+  }
+}
+
+// ═══════════════════════════════════════════
+// Output Display
+// ═══════════════════════════════════════════
+function showOutput(code) {
+  document.getElementById('welcomeState').style.display = 'none';
+  document.getElementById('previewBar').style.display = 'flex';
+  document.getElementById('previewFrame').style.display = 'block';
+  document.getElementById('codeView').style.display = 'none';
+
+  const iframe = document.getElementById('previewIframe');
+  iframe.srcdoc = code;
+
+  document.getElementById('codeContent').textContent = code;
+
+  // Reset tabs
+  document.querySelectorAll('.preview-tab').forEach((t,i) => t.classList.toggle('active', i===0));
+}
+
+function showView(view, tab) {
+  document.querySelectorAll('.preview-tab').forEach(t => t.classList.remove('active'));
+  tab.classList.add('active');
+  if (view === 'preview') {
+    document.getElementById('previewFrame').style.display = 'block';
+    document.getElementById('codeView').style.display = 'none';
+  } else {
+    document.getElementById('previewFrame').style.display = 'none';
+    document.getElementById('codeView').style.display = 'block';
+  }
+}
+
+function copyCode() {
+  if (!currentCode) return;
+  navigator.clipboard.writeText(currentCode).then(() => showToast('Copied to clipboard', true));
+}
+
+function downloadHTML() {
+  if (!currentCode) return;
+  const blob = new Blob([currentCode], { type: 'text/html' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  const idea = document.getElementById('ideaInput').value.trim();
+  const slug = idea.slice(0, 40).replace(/[^a-zA-Z0-9]+/g, '-').replace(/-+$/,'').toLowerCase() || 'tool';
+  a.download = slug + '.html';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ═══════════════════════════════════════════
+// History
+// ═══════════════════════════════════════════
+function renderHistory() {
+  const list = document.getElementById('historyList');
+  const empty = document.getElementById('emptyHistory');
+  if (!history.length) {
+    list.innerHTML = '';
+    list.appendChild(empty);
+    return;
+  }
+  list.innerHTML = history.map((h, i) => `
+    <div class="history-item" onclick="loadHistory(${i})">
+      <span class="history-dot"></span>
+      <div class="history-info">
+        <div class="history-name">${esc(h.name)}</div>
+        <div class="history-time">${formatTime(h.time)} · ${(h.code.length/1024).toFixed(1)} KB</div>
+      </div>
+      <div class="history-actions" onclick="event.stopPropagation()">
+        <button class="hist-btn" onclick="downloadHistoryItem(${i})" title="Download">↓</button>
+        <button class="hist-btn del" onclick="deleteHistory(${i})" title="Delete">✕</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function loadHistory(i) {
+  currentCode = history[i].code;
+  showOutput(currentCode);
+}
+
+function downloadHistoryItem(i) {
+  const h = history[i];
+  const blob = new Blob([h.code], { type: 'text/html' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  const slug = h.name.slice(0,40).replace(/[^a-zA-Z0-9]+/g,'-').replace(/-+$/,'').toLowerCase() || 'tool';
+  a.download = slug + '.html';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function deleteHistory(i) {
+  history.splice(i, 1);
+  localStorage.setItem(KEYS.history, JSON.stringify(history));
+  renderHistory();
+}
+
+// ═══════════════════════════════════════════
+// Utils
+// ═══════════════════════════════════════════
+function setStatus(state, text) {
+  document.getElementById('statusDot').className = 'status-dot ' + (state || '');
+  document.getElementById('statusText').textContent = text;
+}
+
+function showToast(msg, success) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast' + (success ? ' success' : '');
+  requestAnimationFrame(() => t.classList.add('show'));
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 4000);
+}
+
+function formatTime(iso) {
+  try {
+    const d = new Date(iso);
+    return d.toLocaleDateString('en-US', { month:'short', day:'numeric' }) + ' ' +
+           d.toLocaleTimeString('en-US', { hour:'numeric', minute:'2-digit' });
+  } catch(e) { return ''; }
+}
+
+function esc(s) {
+  return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// Close modals on overlay click
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); });
+});
+
+// Keyboard shortcuts
+document.addEventListener('keydown', e => {
+  if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') { e.preventDefault(); generate(); }
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
+  }
+});
+
+// Init
+loadSettings();
+</script>
+</body>
+</html>

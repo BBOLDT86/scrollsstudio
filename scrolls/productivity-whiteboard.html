@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Whiteboard — DocChain</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0A0C14;--bg-s:#10131F;--bg-c:#141829;--bg-ch:#1A1F35;
+  --ink:#F0F2F5;--ink-s:#A8B2C1;--ink-m:#5E6B80;--ink-f:#3A4356;
+  --accent:#3B82F6;--al:rgba(59,130,246,.12);
+  --warm:#F59E0B;--wl:rgba(245,158,11,.1);
+  --ok:#10B981;--ol:rgba(16,185,129,.1);
+  --purple:#8B5CF6;--pl:rgba(139,92,246,.1);
+  --rose:#F43F5E;--rl:rgba(244,63,94,.1);
+  --cyan:#06B6D4;--cl:rgba(6,182,212,.1);
+  --rule:rgba(255,255,255,.06);--r:14px;--rs:8px;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Geist','Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+button{cursor:pointer;font-family:inherit}
+input,textarea,select{font-family:inherit;font-size:inherit}
+
+.dc-topbar{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:.65rem 1.2rem;background:rgba(10,12,20,.92);backdrop-filter:blur(16px);border-bottom:1px solid var(--rule)}
+.dc-topbar .logo{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:.82rem;letter-spacing:.05em;color:var(--ink)}
+.dc-topbar .logo span{color:var(--accent)}
+.dc-topbar .back{font-size:.72rem;color:var(--ink-m);padding:.3rem .7rem;border:1px solid var(--rule);border-radius:6px;transition:all .2s}
+.dc-topbar .back:hover{border-color:var(--accent);color:var(--accent);text-decoration:none}
+.dc-topbar .app-name{font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-m);font-family:'IBM Plex Mono',monospace}
+
+.wb-wrap{height:calc(100vh - 44px);display:flex;flex-direction:column}
+.wb-toolbar{display:flex;gap:4px;padding:.4rem .6rem;background:var(--bg-s);border-bottom:1px solid var(--rule);align-items:center;flex-wrap:wrap}
+.wb-toolbar button{background:var(--bg-c);border:1px solid var(--rule);color:var(--ink-s);padding:.3rem .6rem;border-radius:5px;font-size:.75rem;transition:all .15s}
+.wb-toolbar button:hover,.wb-toolbar button.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.wb-toolbar input[type=color]{width:28px;height:28px;border:1px solid var(--rule);border-radius:5px;padding:0;cursor:pointer;background:var(--bg-c)}
+.wb-toolbar input[type=range]{width:80px;accent-color:var(--accent)}
+.wb-toolbar .sep{width:1px;height:20px;background:var(--rule);margin:0 4px}
+canvas{flex:1;cursor:crosshair}
+</style>
+</head><body>
+<nav class="dc-topbar">
+  <a href="index.html" class="logo">Doc<span>Chain</span></a>
+  <span class="app-name">Whiteboard</span>
+  <a href="index.html" class="back">← Hub</a>
+</nav>
+<div class="wb-wrap"><div class="wb-toolbar"><button class="active" onclick="setTool('pen',this)">✏ Pen</button><button onclick="setTool('line',this)">/ Line</button><button onclick="setTool('rect',this)">▭ Rect</button><button onclick="setTool('circle',this)">○ Circle</button><button onclick="setTool('eraser',this)">⌫ Eraser</button><span class="sep"></span><input type="color" id="drawColor" value="#3B82F6"><input type="range" id="drawSize" min="1" max="20" value="3"><span class="sep"></span><button onclick="clearCanvas()">🗑 Clear</button><button onclick="undoLast()">↩ Undo</button></div><canvas id="canvas"></canvas></div>
+<script>const canvas=document.getElementById('canvas'),ctx=canvas.getContext('2d');let tool='pen',drawing=false,lastX=0,lastY=0,history=[];function resize(){canvas.width=canvas.offsetWidth;canvas.height=canvas.offsetHeight}window.addEventListener('resize',resize);resize();function setTool(t,btn){tool=t;document.querySelectorAll('.wb-toolbar button').forEach(b=>b.classList.remove('active'));if(btn)btn.classList.add('active')}canvas.addEventListener('mousedown',e=>{drawing=true;lastX=e.offsetX;lastY=e.offsetY;saveState()});canvas.addEventListener('mousemove',e=>{if(!drawing)return;const col=document.getElementById('drawColor').value;const size=document.getElementById('drawSize').value;ctx.strokeStyle=tool==='eraser'?'#0A0C14':col;ctx.lineWidth=tool==='eraser'?size*3:size;ctx.lineCap='round';ctx.lineJoin='round';if(tool==='pen'||tool==='eraser'){ctx.beginPath();ctx.moveTo(lastX,lastY);ctx.lineTo(e.offsetX,e.offsetY);ctx.stroke()}lastX=e.offsetX;lastY=e.offsetY});canvas.addEventListener('mouseup',e=>{if(!drawing)return;drawing=false;const col=document.getElementById('drawColor').value;const size=document.getElementById('drawSize').value;ctx.strokeStyle=col;ctx.lineWidth=size;if(tool==='rect'){ctx.strokeRect(Math.min(lastX,e.offsetX),Math.min(lastY,e.offsetY),Math.abs(e.offsetX-lastX),Math.abs(e.offsetY-lastY))}else if(tool==='circle'){const rx=Math.abs(e.offsetX-lastX)/2,ry=Math.abs(e.offsetY-lastY)/2;ctx.beginPath();ctx.ellipse(lastX+rx,lastY+ry,rx,ry,0,0,Math.PI*2);ctx.stroke()}else if(tool==='line'){ctx.beginPath();ctx.moveTo(lastX,lastY);ctx.lineTo(e.offsetX,e.offsetY);ctx.stroke()}});function saveState(){history.push(canvas.toDataURL())}function undoLast(){if(history.length<1)return;const img=new Image();img.onload=()=>{ctx.clearRect(0,0,canvas.width,canvas.height);ctx.drawImage(img,0,0)};img.src=history.pop()}function clearCanvas(){saveState();ctx.clearRect(0,0,canvas.width,canvas.height)}</script>
+</body></html>

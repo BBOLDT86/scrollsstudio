@@ -1,0 +1,2100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deliciousness Cookbook</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Source+Sans+3:wght@300;400;600;700&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #faf6f1;
+  --bg-card: #ffffff;
+  --text: #2c2416;
+  --text-muted: #8a7e6f;
+  --accent: #c4693d;
+  --accent-light: #e8a97e;
+  --accent-dark: #9e4a24;
+  --green: #5a7247;
+  --green-light: #e8edd4;
+  --border: #e5ddd3;
+  --shadow: rgba(44, 36, 22, 0.08);
+  --shadow-heavy: rgba(44, 36, 22, 0.15);
+  --tag-bg: #f0ebe4;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Source Sans 3', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─── HEADER ─── */
+.hero {
+  position: relative;
+  padding: 3rem 2rem 2rem;
+  text-align: center;
+  background: linear-gradient(135deg, #2c2416 0%, #4a3928 50%, #3d2e1c 100%);
+  color: #faf6f1;
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0v60M0 30h60' stroke='%23ffffff' stroke-width='0.3' opacity='0.06'/%3E%3C/svg%3E");
+  pointer-events: none;
+}
+.hero h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2.4rem, 6vw, 4rem);
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.25rem;
+  position: relative;
+}
+.hero .subtitle {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  opacity: 0.6;
+  margin-bottom: 1.5rem;
+  position: relative;
+}
+.hero .author {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 1rem;
+  opacity: 0.5;
+  position: relative;
+}
+
+/* ─── NAV / SEARCH ─── */
+.nav-bar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  padding: 0.75rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 12px var(--shadow);
+}
+.search-wrap {
+  flex: 1;
+  max-width: 420px;
+  position: relative;
+}
+.search-wrap svg {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 18px; height: 18px;
+  stroke: var(--text-muted);
+  fill: none;
+  stroke-width: 2;
+}
+.search-wrap input {
+  width: 100%;
+  padding: 0.6rem 0.75rem 0.6rem 2.5rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-family: 'Source Sans 3', sans-serif;
+  background: var(--bg-card);
+  color: var(--text);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.search-wrap input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(196, 105, 61, 0.15);
+}
+.search-wrap input::placeholder { color: var(--text-muted); }
+.recipe-count {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+/* ─── CATEGORY TABS ─── */
+.cat-tabs {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.cat-tabs::-webkit-scrollbar { display: none; }
+.cat-tab {
+  flex-shrink: 0;
+  padding: 0.4rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: var(--bg-card);
+  color: var(--text-muted);
+  user-select: none;
+}
+.cat-tab:hover { border-color: var(--accent-light); color: var(--text); }
+.cat-tab.active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+/* ─── GRID ─── */
+.grid-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+.recipe-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.25rem;
+}
+.recipe-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  position: relative;
+  overflow: hidden;
+}
+.recipe-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 4px;
+  height: 100%;
+  background: var(--accent);
+  transform: scaleY(0);
+  transform-origin: bottom;
+  transition: transform 0.3s ease;
+}
+.recipe-card:hover {
+  border-color: var(--accent-light);
+  box-shadow: 0 8px 30px var(--shadow);
+  transform: translateY(-2px);
+}
+.recipe-card:hover::before { transform: scaleY(1); }
+.recipe-card .card-cat {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 0.4rem;
+}
+.recipe-card h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  line-height: 1.3;
+  margin-bottom: 0.4rem;
+}
+.recipe-card .card-desc {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.recipe-card .card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0.65rem;
+}
+.recipe-card .card-tags span {
+  font-size: 0.68rem;
+  padding: 0.15rem 0.5rem;
+  background: var(--tag-bg);
+  border-radius: 4px;
+  color: var(--text-muted);
+}
+
+/* ─── EMPTY STATE ─── */
+.empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: var(--text-muted);
+}
+.empty-state .icon { font-size: 3rem; margin-bottom: 1rem; opacity: 0.4; }
+.empty-state p { font-size: 1rem; }
+
+/* ─── MODAL ─── */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(44, 36, 22, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 500;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 2rem 1rem;
+  overflow-y: auto;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--bg-card);
+  border-radius: 16px;
+  max-width: 700px;
+  width: 100%;
+  margin: 2rem auto;
+  box-shadow: 0 24px 80px rgba(44, 36, 22, 0.25);
+  animation: modalIn 0.3s ease;
+  position: relative;
+}
+@keyframes modalIn {
+  from { opacity: 0; transform: translateY(20px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.modal-header {
+  padding: 2rem 2rem 1rem;
+  border-bottom: 1px solid var(--border);
+}
+.modal-header .modal-cat {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 0.5rem;
+}
+.modal-header h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.8rem;
+  font-weight: 900;
+  line-height: 1.2;
+}
+.modal-header .modal-desc {
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+.modal-close {
+  position: absolute;
+  top: 1.25rem;
+  right: 1.25rem;
+  width: 36px; height: 36px;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: var(--bg-card);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  color: var(--text-muted);
+  transition: all 0.2s;
+}
+.modal-close:hover { background: var(--tag-bg); color: var(--text); }
+.modal-body {
+  padding: 1.5rem 2rem 2rem;
+}
+.modal-body h4 {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 0.75rem;
+  margin-top: 1.5rem;
+}
+.modal-body h4:first-child { margin-top: 0; }
+.modal-body ul {
+  list-style: none;
+  padding: 0;
+}
+.modal-body ul li {
+  padding: 0.3rem 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  position: relative;
+  padding-left: 1.25rem;
+}
+.modal-body ul li::before {
+  content: '•';
+  position: absolute;
+  left: 0;
+  color: var(--accent-light);
+  font-weight: 700;
+}
+.modal-body ol {
+  padding-left: 0;
+  counter-reset: step;
+  list-style: none;
+}
+.modal-body ol li {
+  padding: 0.5rem 0 0.5rem 2.5rem;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  position: relative;
+  border-bottom: 1px solid var(--tag-bg);
+  counter-increment: step;
+}
+.modal-body ol li:last-child { border-bottom: none; }
+.modal-body ol li::before {
+  content: counter(step);
+  position: absolute;
+  left: 0;
+  top: 0.5rem;
+  width: 1.75rem;
+  height: 1.75rem;
+  background: var(--green-light);
+  color: var(--green);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+.modal-notes {
+  margin-top: 1.5rem;
+  padding: 1rem 1.25rem;
+  background: var(--tag-bg);
+  border-radius: 8px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+  border-left: 3px solid var(--accent-light);
+}
+.modal-notes strong { color: var(--text); }
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 600px) {
+  .hero { padding: 2rem 1.25rem 1.5rem; }
+  .nav-bar { padding: 0.6rem 1rem; }
+  .cat-tabs { padding: 0.6rem 1rem; }
+  .grid-container { padding: 1rem; }
+  .recipe-grid { grid-template-columns: 1fr; }
+  .modal-header, .modal-body { padding-left: 1.25rem; padding-right: 1.25rem; }
+  .modal-header h2 { font-size: 1.4rem; }
+}
+
+/* ─── AI SETTINGS BUTTON ─── */
+.ai-cfg-btn { width: 36px; height: 36px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-card); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; flex-shrink: 0; position: relative; }
+.ai-cfg-btn:hover { border-color: var(--accent-light); background: var(--tag-bg); }
+.ai-cfg-btn svg { width: 18px; height: 18px; stroke: var(--text-muted); fill: none; stroke-width: 2; }
+.ai-cfg-btn.connected::after { content: ''; position: absolute; top: 4px; right: 4px; width: 8px; height: 8px; background: var(--green); border-radius: 50%; border: 2px solid var(--bg-card); }
+
+/* ─── AI COMMAND BAR ─── */
+.ai-bar-wrap { max-width: 1200px; margin: 0 auto; padding: 0.75rem 1.5rem 0; }
+.ai-bar { display: flex; gap: 0.5rem; align-items: center; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 0.5rem 0.5rem 0.5rem 1rem; transition: border-color 0.2s, box-shadow 0.2s; }
+.ai-bar:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(196,105,61,0.1); }
+.ai-bar .ai-icon { flex-shrink: 0; width: 24px; height: 24px; background: linear-gradient(135deg, var(--accent), var(--accent-dark)); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 0.7rem; font-weight: 700; font-family: 'DM Mono', monospace; }
+.ai-bar input { flex: 1; border: none; outline: none; font-size: 0.88rem; font-family: 'Source Sans 3', sans-serif; background: transparent; color: var(--text); min-width: 0; }
+.ai-bar input::placeholder { color: var(--text-muted); }
+.ai-bar button { flex-shrink: 0; padding: 0.45rem 1rem; background: var(--accent); color: #fff; border: none; border-radius: 8px; font-size: 0.8rem; font-weight: 600; font-family: 'Source Sans 3', sans-serif; cursor: pointer; transition: background 0.2s; }
+.ai-bar button:hover { background: var(--accent-dark); }
+.ai-bar button:disabled { background: var(--border); color: var(--text-muted); cursor: not-allowed; }
+.ai-status { max-width: 1200px; margin: 0 auto; padding: 0.25rem 1.5rem 0; font-family: 'DM Mono', monospace; font-size: 0.7rem; color: var(--text-muted); min-height: 1.2rem; }
+.ai-status.error { color: #c0392b; }
+.ai-status.success { color: var(--green); }
+
+/* ─── AI Card Markers ─── */
+.recipe-card.ai-gen { border-color: var(--accent-light); }
+.recipe-card.ai-gen .card-cat::after { content: ' \00b7  AI'; color: var(--green); font-weight: 400; }
+.recipe-card .card-del { position: absolute; top: 8px; right: 8px; width: 24px; height: 24px; border: none; background: rgba(192,57,43,0.08); border-radius: 50%; color: #c0392b; font-size: 0.75rem; cursor: pointer; display: none; align-items: center; justify-content: center; z-index: 2; }
+.recipe-card .card-del:hover { background: rgba(192,57,43,0.18); }
+.recipe-card.ai-gen:hover .card-del { display: flex; }
+
+/* ─── Settings Modal ─── */
+.sett-overlay { display: none; position: fixed; inset: 0; background: rgba(44,36,22,0.5); backdrop-filter: blur(4px); z-index: 600; justify-content: center; align-items: center; padding: 2rem; }
+.sett-overlay.open { display: flex; }
+.sett-modal { background: var(--bg-card); border-radius: 16px; max-width: 480px; width: 100%; box-shadow: 0 24px 80px rgba(44,36,22,0.25); animation: modalIn 0.3s ease; overflow: hidden; }
+.sett-hdr { padding: 1.5rem 1.5rem 1rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.sett-hdr h3 { font-family: 'Playfair Display', serif; font-size: 1.25rem; font-weight: 700; }
+.sett-hdr button { width: 32px; height: 32px; border: 1px solid var(--border); border-radius: 50%; background: var(--bg-card); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1rem; color: var(--text-muted); }
+.sett-hdr button:hover { background: var(--tag-bg); color: var(--text); }
+.sett-body { padding: 1.25rem 1.5rem 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
+.sett-body label { font-family: 'DM Mono', monospace; font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); display: block; margin-bottom: 0.35rem; }
+.sett-body input { width: 100%; padding: 0.6rem 0.75rem; border: 1px solid var(--border); border-radius: 8px; font-size: 0.88rem; font-family: 'Source Sans 3', sans-serif; background: var(--bg); color: var(--text); }
+.sett-body input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(196,105,61,0.12); }
+.sett-body .hint { font-size: 0.72rem; color: var(--text-muted); margin-top: 0.15rem; }
+.sett-acts { display: flex; gap: 0.5rem; justify-content: flex-end; padding: 0 1.5rem 1.5rem; }
+.sett-acts button { padding: 0.5rem 1.25rem; border-radius: 8px; font-size: 0.85rem; font-weight: 600; font-family: 'Source Sans 3', sans-serif; cursor: pointer; border: 1px solid var(--border); }
+.btn-sav { background: var(--accent) !important; color: #fff !important; border-color: var(--accent) !important; }
+.btn-sav:hover { background: var(--accent-dark) !important; }
+.btn-can { background: var(--bg-card); color: var(--text-muted); }
+.btn-can:hover { background: var(--tag-bg); color: var(--text); }
+
+@keyframes aiPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+.ai-thinking { animation: aiPulse 1.2s ease-in-out infinite; }
+
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>Deliciousness</h1>
+  <div class="subtitle">A Plant-Based Cookbook</div>
+  <div class="author">Bradley James Boldt</div>
+</div>
+
+<div class="nav-bar">
+  <div class="search-wrap">
+    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input type="text" id="searchInput" placeholder="Search recipes...">
+  </div>
+  <div class="recipe-count" id="recipeCount"></div>
+  <button class="ai-cfg-btn" id="aiCfgBtn" title="AI Settings">
+    <svg viewBox="0 0 24 24"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="3"/></svg>
+  </button>
+</div>
+
+
+<!-- AI Command Bar -->
+<div class="ai-bar-wrap">
+  <div class="ai-bar">
+    <div class="ai-icon">AI</div>
+    <input type="text" id="aiInput" placeholder='Try: &quot;Add new recipe card for stuffed peppers&quot;' autocomplete="off">
+    <button id="aiSend">Generate</button>
+  </div>
+</div>
+<div class="ai-status" id="aiStatus"></div>
+
+<div class="cat-tabs" id="catTabs"></div>
+
+<div class="grid-container">
+  <div class="recipe-grid" id="recipeGrid"></div>
+  <div class="empty-state" id="emptyState" style="display:none;">
+    <div class="icon">🍃</div>
+    <p>No recipes match your search</p>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" id="modal">
+    <button class="modal-close" id="modalClose">✕</button>
+    <div class="modal-header" id="modalHeader"></div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+
+<!-- AI Settings Modal -->
+<div class="sett-overlay" id="settOverlay">
+  <div class="sett-modal">
+    <div class="sett-hdr">
+      <h3>AI Connection</h3>
+      <button id="settClose">&#10005;</button>
+    </div>
+    <div class="sett-body">
+      <div>
+        <label>Azure OpenAI Base URL</label>
+        <input type="text" id="cfgUrl" placeholder="https://your-resource.openai.azure.com">
+        <div class="hint">e.g. https://mycompany.openai.azure.com</div>
+      </div>
+      <div>
+        <label>API Key</label>
+        <input type="password" id="cfgKey" placeholder="Enter your Azure OpenAI API key">
+      </div>
+      <div>
+        <label>Deployment Name</label>
+        <input type="text" id="cfgDeploy" placeholder="gpt-5" value="gpt-5">
+        <div class="hint">Your GPT model deployment name (e.g. gpt-5, gpt-4o)</div>
+      </div>
+      <div>
+        <label>API Version</label>
+        <input type="text" id="cfgVer" placeholder="2025-01-01-preview" value="2025-01-01-preview">
+      </div>
+    </div>
+    <div class="sett-acts">
+      <button class="btn-can" id="settCancel">Cancel</button>
+      <button class="btn-sav" id="settSave">Save &amp; Connect</button>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<script>
+const RECIPES = [
+  // ─── PANTRY STAPLES ───
+  {
+    title: "Apple Cider Vinegar",
+    category: "Pantry Staples",
+    description: "Great way to use up apple scraps after making apple pie or applesauce.",
+    ingredients: ["Apple scraps to fill 32 oz jar", "About 3 cups of water", "About ¼ cup sugar"],
+    steps: [
+      "Heat water and add sugar to dissolve.",
+      "Place apple scraps in large glass jar.",
+      "Pour water and sugar mixture over apple scraps and cover loosely — ensure water completely covers the apple scraps.",
+      "Let sit for about 2 months.",
+      "Strain liquid from scraps and store in bottle."
+    ],
+    notes: "The amounts are flexible depending on the amount of apple scraps and size jar you are using.",
+    tags: ["fermented", "pantry"]
+  },
+  {
+    title: "Applesauce",
+    category: "Pantry Staples",
+    description: "Simple homemade applesauce with optional flavoring.",
+    ingredients: ["Apples", "Water", "Optional: cinnamon, vanilla, sweetener"],
+    steps: [
+      "Core and peel apples.",
+      "Dice apples into small pieces.",
+      "Heat over low-medium heat in saucepan or skillet.",
+      "Add small amount of water and let simmer for about 15 minutes.",
+      "Mash and add in optional flavoring.",
+      "Store in refrigerator until ready to eat."
+    ],
+    tags: ["quick", "pantry"]
+  },
+  {
+    title: "Flax Egg White Replacement",
+    category: "Pantry Staples",
+    description: "Quick and easy egg replacer. 4 TBSP equals one egg. Let stand 10 minutes for best results.",
+    ingredients: ["3 parts water", "1 part flax seeds"],
+    steps: ["Mix water and flax seeds together.", "Let stand for about 10 minutes before use."],
+    tags: ["egg-free", "quick", "pantry"]
+  },
+  {
+    title: "Eggplant Relish",
+    category: "Pantry Staples",
+    description: "Roasted vegetable spread served warm with bread or crackers.",
+    ingredients: ["1 whole eggplant", "Bell peppers", "Garlic", "Onion", "Carrot"],
+    steps: [
+      "Bake vegetables, tightly covered with foil, for about 40 minutes at 400°F.",
+      "Mash with potato masher.",
+      "Serve warm with bread or crackers."
+    ],
+    tags: ["spread", "appetizer"]
+  },
+  {
+    title: "Vegan Shortening",
+    category: "Pantry Staples",
+    description: "Two-ingredient shortening replacement for baking.",
+    ingredients: ["3 parts coconut oil", "1 part canola, light olive oil, or rice bran oil"],
+    steps: [
+      "Melt the coconut oil in a microwave — get it as close to melting point as possible so it solidifies quickly once mixed.",
+      "Process oil and melted coconut oil in food processor for about 1 minute.",
+      "Freeze for about 1 hour.",
+      "Store in airtight container in the refrigerator for about 3 months or about 2 years tightly sealed in the freezer."
+    ],
+    tags: ["baking", "pantry"]
+  },
+  {
+    title: "Vegan Butter",
+    category: "Pantry Staples",
+    description: "Homemade plant-based butter with a creamy, spreadable texture.",
+    ingredients: ["¼ cup almond milk", "1 tsp rice vinegar", "½ tsp salt", "⅛ tsp turmeric", "¾ cup refined coconut oil", "¼ cup grape seed or sunflower oil"],
+    steps: [
+      "Combine the milk, vinegar, salt and turmeric and sit for 10-15 minutes.",
+      "Heat the coconut oil until melted, let cool briefly and then add to the mixture along with sunflower oil.",
+      "Blend until smooth and thoroughly combined.",
+      "Transfer to container or butter mold, refrigerate to set about 1 hour.",
+      "Store in refrigerator for 3-4 weeks tightly covered. Freeze for up to 6 months."
+    ],
+    tags: ["dairy-free", "pantry"]
+  },
+  {
+    title: "Tofu Mayo",
+    category: "Pantry Staples",
+    description: "Creamy plant-based mayo replacement.",
+    ingredients: ["About 3 oz tofu", "Juice of 1 lime", "Handful of cashews", "Drizzle of olive oil", "Salt and pepper to taste", "Onion and garlic powder to taste", "Oregano, thyme and cumin to taste"],
+    steps: ["Process all ingredients in food processor until smooth, add oil while processing until smooth."],
+    tags: ["condiment", "quick", "pantry"]
+  },
+
+  // ─── BREAD ───
+  {
+    title: "Classic Bialys",
+    category: "Bread",
+    description: "Traditional bialys with onion and poppy seed filling.",
+    ingredients: ["4.75 cups all-purpose flour", "2 tbsp kosher salt", "2 tsp instant yeast", "2 cups room temperature water", "1 tbsp sugar", "3 tbsp extra virgin olive oil", "3 onions, chopped finely", "1 tsp kosher salt", "1 tbsp poppy seeds"],
+    steps: [
+      "Whisk flour, salt and yeast together in bowl of stand mixer. Whisk water and sugar until dissolved.",
+      "Using dough hook on low speed, slowly add water mixture to flour and mix until dough starts to form.",
+      "Increase speed to medium-low and knead until smooth and elastic, about 8 minutes.",
+      "Transfer to well-floured surface, knead to form smooth round ball. Wrap and let rise until doubled.",
+      "Press on dough and deflate. Stretch into 12-inch log, cut into 12 equal pieces.",
+      "Work each piece into a ball, drag into a small circle. Cover and let sit for 30 minutes.",
+      "Cook onions for about 10 minutes on medium heat until softened and golden brown. Stir in poppy seeds off heat.",
+      "Press each dough ball into 5-inch round disks on baking sheet, let rise for 15-20 minutes.",
+      "Preheat oven to 475°F.",
+      "Press each bialy with bottom of measuring cup to create filling space. Divide filling and spoon in.",
+      "Bake until golden brown, about 15-20 minutes, transfer to wire rack."
+    ],
+    tags: ["yeast", "artisan"]
+  },
+  {
+    title: "Semolina Pizza Crust",
+    category: "Bread",
+    description: "Wonderfully crispy and chewy crust using semolina flour. Split recipe in half for thin crust.",
+    ingredients: ["1½ cups 115°F water", "2¼ tsp quick rise yeast", "1 tsp sugar", "1 tbsp olive oil", "½ tsp salt", "1½ cups semolina flour", "1½ cups bread flour"],
+    steps: [
+      "Combine water, yeast, and sugar. Stir and let sit 10 minutes until bubbly.",
+      "Place liquid mixture, olive oil, salt, semolina flour, and bread flour in stand mixer bowl.",
+      "Knead with dough hook on medium-low for about 10 minutes until smooth.",
+      "Cover bowl and let sit for 2 hours until doubled.",
+      "Remove to floured board and shape into a ball. Roll out as desired.",
+      "Split dough into two halves.",
+      "Bake pizzas in 500°F oven with toppings and sauce for about 15-20 minutes."
+    ],
+    tags: ["pizza", "yeast"]
+  },
+  {
+    title: "Flour Tortillas",
+    category: "Bread",
+    description: "Soft homemade flour tortillas — makes 12.",
+    ingredients: ["2.75 cups all-purpose flour", "1.5 tsp salt", "6 tbsp vegetable shortening", "0.75 cup warm water", "1 tsp vegetable oil"],
+    steps: [
+      "Whisk flour and salt together. Rub shortening into flour until mixture resembles coarse meal.",
+      "Stir in warm water with wooden spoon until dough forms. Knead for about 30 seconds.",
+      "Divide into 12 equal parts, roll each into a ball, cover and refrigerate at least 30 min.",
+      "Roll each piece into round tortilla shells.",
+      "Heat oil in skillet over medium heat. Cook tortillas about 1 minute on each side until surface bubbles."
+    ],
+    notes: "Can be made ahead and kept for a few days in the fridge.",
+    tags: ["quick", "flatbread"]
+  },
+  {
+    title: "Potato Dill Sandwich Bread",
+    category: "Bread",
+    description: "Soft sandwich bread enriched with mashed potato and fresh dill.",
+    ingredients: ["1 large potato, peeled and cut into 1-inch pieces", "3 tbsp vegan butter", "3 cups bread flour", "1½ tsp instant yeast", "1½ tsp salt", "2 tbsp minced fresh dill", "1 vegan egg"],
+    steps: [
+      "Place potato in saucepan, cover with 1 inch cold water. Bring to boil, then simmer until tender, about 10 minutes.",
+      "Capture about ¾ cup of potato cooking water and let cool.",
+      "Drain and return potatoes to saucepan on low heat, shake to remove excess water for 30 seconds.",
+      "Mash potatoes. Measure 1 cup for the bread.",
+      "Mix vegan butter with 1 cup mashed potatoes, let cool.",
+      "Whisk flour, yeast and salt in stand mixer. Add potato mixture and combine. Knead with dough hook about 2 minutes.",
+      "Increase speed to medium, knead for about 8 minutes until smooth and elastic.",
+      "Reduce speed, add dill, mix for another minute.",
+      "Transfer to floured surface, knead by hand to form smooth ball.",
+      "Cover and let rise for about 1-1.5 hours until doubled.",
+      "Flour and grease pan, roll dough to fit. Let rise 20-30 minutes.",
+      "Preheat oven to 350°F.",
+      "Brush top with vegan egg, slit top. Bake 45-50 minutes until internal temp reaches 205-210°F.",
+      "Let cool completely on wire rack, about 3 hours."
+    ],
+    tags: ["sandwich", "yeast"]
+  },
+  {
+    title: "Honey Wheat Bread",
+    category: "Bread",
+    description: "Easy artisan bread that beats anything from the store at a fraction of the cost.",
+    ingredients: ["3 cups whole wheat flour", "2 tbsp yeast", "2-3 tbsp sweetener (honey, maple syrup, date puree, coconut sugar)", "2-3 cups warm water", "Handful of steel cut oats"],
+    steps: [
+      "Place about 1 cup of warm water in plastic or wooden bowl.",
+      "Add yeast and desired sweetener, let stand for about 10 minutes.",
+      "Mix in all flour and gradually add rest of water. Stir with wooden spoon until dough forms a ball.",
+      "Let rise until dough has doubled, can be 4-12 hours.",
+      "Turn oven on to 425°F and place closed dutch oven in to preheat for 30-45 minutes.",
+      "Place dough in dutch oven and cook covered for 30 min.",
+      "Remove cover and continue to bake for 10-15 minutes to form crust.",
+      "Remove from oven and let cool."
+    ],
+    notes: "Water should be warm but not hot (about 110°F). Sweetener is optional. About $1/loaf or less.",
+    tags: ["artisan", "dutch oven", "budget"]
+  },
+  {
+    title: "Pumpernickel Artisan Bread",
+    category: "Bread",
+    description: "Dark, rich artisan bread with coffee and molasses.",
+    ingredients: ["¾ tbsp yeast", "2½ tsp salt", "2 tbsp molasses", "1 cup warm coffee", "½ cup warm water", "1½ tbsp cocoa powder", "½ cup rye flour", "2¾ cup whole wheat flour"],
+    steps: [
+      "Add yeast to warm water to activate and let sit for 10 min.",
+      "Add coffee, molasses and water to yeast mixture.",
+      "In large non-metal bowl, sift cocoa, wheat and rye flour together.",
+      "Pour liquid mixture into dry mixture and mix with wooden spoon.",
+      "When mixing with spoon becomes difficult, finish mixing with hands. Kneading is not required.",
+      "Cover loosely and let rise at room temperature for about 2 hours.",
+      "Once risen, place in refrigerator overnight (up to 8 days).",
+      "Wet hands and shape dough, place on floured dish or parchment paper.",
+      "Preheat oven to 400°F, place covered empty dutch oven in oven while preheating for about 20 minutes.",
+      "Place loaf in dutch oven and bake about 40 minutes covered.",
+      "Remove cover and finish baking for about 15 minutes."
+    ],
+    tags: ["artisan", "dutch oven", "rye"]
+  },
+  {
+    title: "French Bread",
+    category: "Bread",
+    description: "Classic french bread baguettes with a crispy crust.",
+    ingredients: ["1 cup warm water", "1 tbsp sugar", "2 tsp yeast", "2½ cups bread flour", "1 tsp salt", "Oil for coating bowl"],
+    steps: [
+      "Put water, sugar, and yeast in stand mixer bowl. Let stand 10 minutes until frothy.",
+      "Add flour in three batches and knead 5-7 minutes on medium speed with dough hook.",
+      "Cover bowl and let rest for 15 minutes.",
+      "Sprinkle dough with salt and knead on medium speed for 1 minute.",
+      "Transfer to oiled bowl, turning to coat. Cover and let rise until doubled.",
+      "Preheat oven to 425°F. Place broiler pan in the bottom of the oven.",
+      "Turn dough out onto lightly floured surface and punch down.",
+      "Divide in half and shape into loaves.",
+      "Slash the top every 2-3 inches with a sharp blade.",
+      "Place in oven. Pour ¾ cup hot water into the broiler pan and shut the door.",
+      "Bake for 20-25 minutes or until golden brown."
+    ],
+    notes: "Use a very sharp blade for slashing — let the blade do the work so you don't deflate the loaves.",
+    tags: ["classic", "yeast"]
+  },
+  {
+    title: "Buttermilk Biscuits",
+    category: "Bread",
+    description: "Makes about 6-7 tender biscuits using spelt and whole wheat flour.",
+    ingredients: ["1 cup spelt flour", "1 cup whole wheat flour", "1 cup plant milk", "Juice of 1 lemon", "½ tsp baking soda", "1 tbsp baking powder", "¾ tsp sea salt", "4 tbsp applesauce"],
+    steps: [
+      "Preheat the oven to 450°F.",
+      "Make vegan buttermilk by combining plant milk with lemon juice.",
+      "Sift together dry ingredients.",
+      "Cut in butter replacement to make crumbly mixture, make well in center.",
+      "Add almond milk ¼ cup at a time into well and mix until tacky and sticky.",
+      "Bake for about 18 minutes and cool."
+    ],
+    notes: "No baking powder? Mix 1 tsp baking soda into the buttermilk mixture. Optional: add blueberries.",
+    tags: ["quick", "no-yeast"]
+  },
+  {
+    title: "Sourdough Bread",
+    category: "Bread",
+    description: "The hardest of the breads to make — takes time, patience, then a little more time and patience.",
+    ingredients: ["Sourdough starter", "2 tbsp yeast", "2-3 tbsp sweetener (optional)", "2-3 cups warm water", "Handful of steel cut oats"],
+    steps: [
+      "Place about 1 cup of warm water in plastic or wooden bowl.",
+      "Add yeast and desired sweetener, let stand for about 10 minutes.",
+      "Mix in all flour and gradually add rest of water. Stir until dough forms a ball.",
+      "Let rise until doubled, can be 4-12 hours.",
+      "Turn oven on to 425°F and place closed dutch oven in to preheat for 30-45 minutes.",
+      "Place dough in dutch oven and cook covered for 30 min.",
+      "Remove cover and continue to bake 10-15 minutes to form crust.",
+      "Remove from oven and let cool."
+    ],
+    notes: "Sourdough starter process takes about a week. Keep in the fridge after and feed weekly to maintain.",
+    tags: ["artisan", "dutch oven", "sourdough"]
+  },
+  {
+    title: "Naan Bread",
+    category: "Bread",
+    description: "Homemade naan done in under an hour. Pair with Black Bean or Garlic Hummus for a quick weeknight dinner.",
+    ingredients: ["3 cups flour", "2 tsp instant yeast", "1 tsp salt", "1 cup warm water", "1 tbsp maple syrup (or date/sugar)", "Olive oil"],
+    steps: [
+      "Mix water, sugar and yeast together and let sit for 10 minutes.",
+      "Add flour to bowl, pour yeast mixture in and mix together.",
+      "Mix until dough forms a ball. Add more flour or water as needed.",
+      "Drizzle olive oil around bowl and cover with a damp towel, let rise about 30 minutes.",
+      "Transfer to floured surface and divide into 8 equal parts.",
+      "Roll out each naan into loosely oval shape.",
+      "Let dough rest while preparing skillet.",
+      "Use cast iron or similar skillet on medium-low heat.",
+      "Prepare skillet with drizzle of olive oil and sprinkle of salt.",
+      "Cook about 2 minutes on each side and serve immediately."
+    ],
+    notes: "Leftovers best saved in the fridge; reheat on skillet before serving. Raw dough does not keep well overnight.",
+    tags: ["quick", "flatbread", "skillet"]
+  },
+  {
+    title: "Mini Sesame Bread",
+    category: "Bread",
+    description: "Quick microwave snack bread.",
+    ingredients: ["½ cup sesame flour", "1 tsp baking powder", "1 tsp oil or vegan butter", "Salt and pepper", "1 tbsp flax meal", "3 tbsp water"],
+    steps: [
+      "Make flax egg: let flax + water combine for 5 minutes.",
+      "Add in remaining ingredients.",
+      "Cook for 90 seconds in microwave."
+    ],
+    tags: ["quick", "snack", "microwave"]
+  },
+  {
+    title: "Homemade Vegan Buns",
+    category: "Bread",
+    description: "Soft homemade hot dog or hamburger buns.",
+    ingredients: ["½ tbsp ground flax seeds", "1 tbsp water", "½ tbsp active dry yeast", "¼ cup warm water", "¼ cup almond milk", "½ tbsp coconut oil (melted)", "½ tbsp vegan sugar", "¼ tsp salt", "1½ cups all-purpose flour"],
+    steps: [
+      "Prepare flax egg: whisk flax seeds and water, set aside.",
+      "Prepare yeast mixture: combine yeast and warm water, let sit until dissolved.",
+      "Mix almond milk, coconut oil, sugar, salt and flax egg, add to yeast mixture.",
+      "Add flour and stir until shaggy dough forms.",
+      "Knead with dough hook for about 10 minutes until smooth and tacky.",
+      "Cover and let rise in warm spot until doubled, about 1 hour.",
+      "Divide dough into 8 pieces and shape into balls.",
+      "Place on cookie sheet and let rise 30-40 minutes until puffy.",
+      "Brush tops with melted coconut oil.",
+      "Preheat oven to 375°F. Bake for 15-18 minutes until golden.",
+      "Let cool at room temperature before slicing."
+    ],
+    tags: ["buns", "yeast"]
+  },
+  {
+    title: "Focaccia Bread",
+    category: "Bread",
+    description: "Oily, golden, craggy focaccia — the reason it's so delicious!",
+    ingredients: ["1¾ cups warm water", "1 package active dry yeast", "1 tbsp sugar", "5 cups all-purpose flour", "1 tbsp kosher salt", "1 cup extra-virgin olive oil, divided", "Olives", "Coarse sea salt"],
+    steps: [
+      "Combine warm water, yeast and sugar. Let sit until bubbly, at least 15 minutes.",
+      "Combine flour, 1 tbsp kosher salt, ½ cup olive oil and yeast mixture in stand mixer on low speed.",
+      "Knead 5-6 minutes on medium until smooth and soft.",
+      "Transfer to floured surface, knead by hand 1-2 times.",
+      "Oil the mixer bowl, return dough, cover and let rise until doubled, at least 1 hour.",
+      "Coat a jelly roll pan with remaining ½ cup olive oil.",
+      "Press dough into pan, turn to coat, stretch to fit. Make finger holes all the way through the dough.",
+      "Let rise until doubled, about 1 hour. Preheat oven to 375°F.",
+      "Sprinkle with coarse sea salt and drizzle oil. Bake 25-30 minutes until golden brown.",
+      "Let cool before cutting and serving."
+    ],
+    notes: "Cook for about 17 minutes at 375°F to avoid overcooking.",
+    tags: ["artisan", "italian"]
+  },
+
+  // ─── SOUPS, SALADS & PASTAS ───
+  {
+    title: "Summer Garden Salad",
+    category: "Soups, Salads & Pastas",
+    description: "Fresh garden salad with pasta and vegetables.",
+    ingredients: ["Cherry tomatoes", "½ red onion", "¼ cup pasta", "Chopped fresh basil", "Salt", "1 whole cucumber"],
+    steps: [
+      "Cook pasta for 6 minutes.",
+      "Chill and run pasta under cold water.",
+      "Combine with chopped vegetables and basil, season with salt."
+    ],
+    tags: ["salad", "quick", "summer"]
+  },
+  {
+    title: "Pinto Bean Soup",
+    category: "Soups, Salads & Pastas",
+    description: "Hearty pinto bean soup with macaroni and fresh basil.",
+    ingredients: ["3 cups pinto beans", "½ red onion", "1 whole cucumber", "1 cup macaroni pasta", "Handful of fresh basil, chopped", "Salt to taste"],
+    steps: [
+      "Soak pinto beans in water for about 4 hours.",
+      "Cook beans in pressure cooker for about 12 minutes on high.",
+      "Cook and chill pasta under cold water.",
+      "Combine and season with basil and salt."
+    ],
+    tags: ["soup", "beans", "pressure cooker"]
+  },
+  {
+    title: "Butternut Squash Soup",
+    category: "Soups, Salads & Pastas",
+    description: "Creamy butternut squash soup with apple cider and warm spices.",
+    ingredients: ["1 tbsp olive oil", "1 small yellow onion, diced", "2 pounds chopped butternut squash", "3 small carrots, chopped", "3-4 cups vegetable broth", "2 cups apple cider or apple juice", "½ tsp curry powder", "¼ tsp cinnamon", "Dash of nutmeg", "½ cup pumpkin puree", "2 tbsp cashew butter", "1 tbsp brown sugar", "Salt to taste"],
+    steps: [
+      "Sauté onion in olive oil until soft.",
+      "Add squash, carrots, broth, apple cider and spices.",
+      "Simmer until squash is tender.",
+      "Add pumpkin puree and cashew butter.",
+      "Blend until smooth. Season with brown sugar and salt to taste."
+    ],
+    notes: "Do NOT use apple cider vinegar — use apple cider or apple juice.",
+    tags: ["soup", "fall", "creamy"]
+  },
+  {
+    title: "Chickpea Salad Sandwiches",
+    category: "Soups, Salads & Pastas",
+    description: "Roasted carrot and shallot bruschetta-style sandwich on baguette.",
+    ingredients: ["Canned chickpeas", "Tofu mayo", "Tomato", "200g shallots", "3 tbsp olive oil", "Handful of mint", "Juice of 1 lime", "Salt and pepper", "1 baguette", "Carrots"],
+    steps: [
+      "Preheat oven to 400°F.",
+      "Peel and cut shallots into strips.",
+      "Peel and slice carrots lengthwise.",
+      "Spread carrots and shallots on baking sheet, season with olive oil and salt.",
+      "Bake for about 25 minutes, remove and cool.",
+      "Finely chop the shallots and carrots.",
+      "Chop mint leaves and add to shallots and carrots.",
+      "Slice and toast baguette, top with carrot mixture and serve."
+    ],
+    tags: ["sandwich", "lunch"]
+  },
+  {
+    title: "Chickpea Crisps",
+    category: "Soups, Salads & Pastas",
+    description: "Baked chickpea flour fries — take some prep but are well worth it!",
+    ingredients: ["220g (2 cups) chickpea flour", "1 tsp truffle salt or salt of choice", "¾ tsp garlic powder", "¾ tsp onion powder", "½ tsp cumin", "4 cups water", "2 tbsp extra virgin olive oil", "Salt and pepper"],
+    steps: [
+      "Prepare a baking dish.",
+      "Combine chickpea flour, salt, garlic powder, onion powder and cumin.",
+      "Bring water to a rolling boil in medium pot.",
+      "Whisk in the chickpea flour until mostly smooth.",
+      "Add oil and continue to whisk until thick. Remove from heat.",
+      "Pour into prepared dish and refrigerate overnight.",
+      "Preheat oven to 400°F.",
+      "Remove from refrigerator and slice into strips.",
+      "Arrange fries on baking sheet so they don't touch.",
+      "Bake 10 min per side — 40 minutes total.",
+      "Serve immediately."
+    ],
+    notes: "You can make chickpea flour in a coffee grinder from dry chickpeas. A cooling rack helps when rotating fries.",
+    tags: ["snack", "gluten-free", "baked"]
+  },
+  {
+    title: "Homemade Pasta",
+    category: "Soups, Salads & Pastas",
+    description: "Whole wheat pasta from scratch using flax eggs.",
+    ingredients: ["3 cups whole wheat flour", "4 tbsp flax meal or flax seeds", "1¼ cup water", "4 tbsp olive oil", "1 tsp salt"],
+    steps: [
+      "Soak flax and water for 10 min in bowl.",
+      "Add flour to mixing bowl.",
+      "Add olive oil and salt.",
+      "Mix with kneading attachment on stand mixer for about 10 minutes.",
+      "Let sit and rise for 30 minutes.",
+      "Roll pasta flat.",
+      "Flour both sides of flat pasta.",
+      "Fold flattened pasta like an accordion, slice along side in strips and unfold.",
+      "Boil for about 6 minutes in water with a small amount of olive oil and salt."
+    ],
+    notes: "Uncooked or cooked pasta keeps well in fridge for about a week.",
+    tags: ["pasta", "from-scratch"]
+  },
+  {
+    title: "French Onion Soup",
+    category: "Soups, Salads & Pastas",
+    description: "Classic French onion soup with caramelized onions and red wine.",
+    ingredients: ["½ cup unsalted butter", "4 onions, sliced", "2 garlic cloves, chopped", "2 bay leaves", "2 fresh thyme sprigs", "Salt and pepper", "1 cup red wine", "3 heaping tbsp flour", "2 quarts broth", "1 baguette, sliced"],
+    steps: [
+      "Melt butter and cook onions slowly until deeply caramelized.",
+      "Add garlic, bay leaves, thyme, salt and pepper.",
+      "Deglaze with red wine and reduce.",
+      "Stir in flour and cook briefly.",
+      "Add broth and simmer until flavors develop.",
+      "Serve with toasted baguette slices."
+    ],
+    tags: ["soup", "french", "comfort"]
+  },
+  {
+    title: "Chickpea and Tomato Rice",
+    category: "Soups, Salads & Pastas",
+    description: "Simple chickpea, tomato and rice dish.",
+    ingredients: ["1 can chickpeas", "Tomato", "Rice", "Olive oil", "Salt"],
+    steps: [
+      "Cook rice as desired.",
+      "Combine chickpeas and diced tomatoes in a skillet with olive oil.",
+      "Cook until heated through.",
+      "Serve over rice and season with salt."
+    ],
+    tags: ["quick", "one-pot", "rice"]
+  },
+
+  // ─── MAIN COURSE ───
+  {
+    title: "Ratatouille Tarts",
+    category: "Main Course",
+    description: "Roasted vegetable ratatouille on tofu spread with bread.",
+    ingredients: ["1 medium eggplant, chopped", "3 yellow squash or zucchini, sliced", "1 large red bell pepper, chopped", "Medium red onion", "Oregano, basil, thyme", "Olive oil, salt and pepper", "1-2 medium tomatoes, de-seeded and chopped", "Block extra firm tofu", "1½ tbsp white miso", "1 tbsp lemon juice", "1 tbsp olive oil", "1 tsp tahini", "¼ tsp salt"],
+    steps: [
+      "Preheat oven to 400°F.",
+      "Spread eggplant, squash, bell pepper and onion on baking sheets. Drizzle olive oil and season.",
+      "Roast 10 min, toss, roast 10 more minutes. Transfer to bowl and add tomatoes.",
+      "Press water out of tofu for about 1 hour.",
+      "Process pressed tofu with miso, lemon juice, olive oil, tahini and salt.",
+      "Scoop tofu mixture onto wax wrap, roll into a log, chill a few hours.",
+      "Bake log at 350°F for 10 min per side until firm. Cool completely.",
+      "Spread tofu mixture on bread and top with ratatouille, serve immediately."
+    ],
+    tags: ["roasted", "vegetables"]
+  },
+  {
+    title: "Quinoa Bowl with Veggies and Hummus",
+    category: "Main Course",
+    description: "Roasted vegetables and garlic hummus over quinoa.",
+    ingredients: ["1 head roasted garlic", "1½ cups cooked chickpeas", "2 tbsp tahini", "2 tbsp lemon juice", "½ cup vegetable broth", "Salt, pepper, paprika", "1 large bunch broccoli", "1 bunch cauliflower", "4 large shallot bulbs", "Dried rosemary, thyme, parsley", "3 cups cooked quinoa"],
+    steps: [
+      "Preheat oven to 425°F.",
+      "Process garlic, chickpeas, tahini, and lemon juice until smooth. Drizzle in broth to desired consistency.",
+      "Spread broccoli, cauliflower and shallots on baking sheet with olive oil. Season as desired.",
+      "Roast vegetables until tender.",
+      "Place quinoa in bowl, cover with veggies and top with hummus.",
+      "Sprinkle paprika, salt and pepper on top."
+    ],
+    tags: ["bowl", "healthy", "protein"]
+  },
+  {
+    title: "Spicy Roasted Cauliflower",
+    category: "Main Course",
+    description: "Whole roasted cauliflower with cumin and coconut oil.",
+    ingredients: ["1 cauliflower head", "Salt and pepper", "Cumin", "Coconut oil"],
+    steps: [
+      "Preheat oven to 425°F.",
+      "Wash and dry cauliflower head, cut away the stem and stalk.",
+      "Heat oil to melt, add in spices, mix thoroughly.",
+      "With cauliflower upside-down, pour most of the oil and spice mixture onto stem. Turn over and brush outside with remaining.",
+      "Bake uncovered for about 30-40 minutes until tender. Serve immediately."
+    ],
+    tags: ["roasted", "simple", "spicy"]
+  },
+  {
+    title: "Vegetable Paella",
+    category: "Main Course",
+    description: "Spanish-style vegetable paella with sofrito base.",
+    ingredients: ["Olive oil", "1 medium onion, chopped", "1 medium bell pepper, diced", "2 garlic cloves, minced", "1 cup crushed tomatoes", "½ tsp pimentón", "½ tsp sea salt", "1 bay leaf", "3½ cups vegetable broth"],
+    steps: [
+      "Preheat oven to 400°F.",
+      "Make sofrito: cook onion, bell pepper and garlic in olive oil.",
+      "Add crushed tomatoes, pimentón, salt and bay leaf.",
+      "Add vegetable broth and bring to simmer.",
+      "Cook until rice is tender and liquid is absorbed."
+    ],
+    tags: ["spanish", "rice", "one-pot"]
+  },
+  {
+    title: "Buffalo Cauliflower Bites",
+    category: "Main Course",
+    description: "Crispy baked cauliflower bites tossed in buffalo sauce.",
+    ingredients: ["1 cauliflower head", "Nutritional yeast", "Flour", "Salt and pepper", "Buffalo sauce", "Cumin", "Coconut oil"],
+    steps: [
+      "Preheat oven to 425°F.",
+      "Wash and dry cauliflower, cut into bite-sized pieces.",
+      "Make batter with flour, nutritional yeast and spices.",
+      "Coat cauliflower pieces in batter.",
+      "Bake for about 30-40 minutes until crispy.",
+      "Toss in buffalo sauce and serve immediately."
+    ],
+    tags: ["appetizer", "spicy", "game-day"]
+  },
+  {
+    title: "Vegetable Lettuce Wraps",
+    category: "Main Course",
+    description: "Quinoa and vegetable filling in lettuce cups with peanut dressing.",
+    ingredients: ["1 head lettuce", "½ cup vegetable broth", "3 cloves garlic", "1 tbsp diced fresh ginger", "½ medium onion, diced", "1 large carrot, grated", "1 celery stalk", "2 tbsp sesame seeds", "¼ cup soy sauce", "2 cups cooked quinoa", "2 tbsp nutritional yeast", "1 tsp thyme", "Salt and pepper", "¼ cup peanut butter", "1 tbsp soy sauce", "½ tsp ginger", "¼ cup plant milk", "¼ cup apple cider vinegar"],
+    steps: [
+      "Wash lettuce leaves, pat dry and set aside.",
+      "In skillet, cook vegetable broth, garlic, ginger, onion, carrot and celery for about 10 minutes.",
+      "Add sesame seeds, soy sauce and cooked quinoa.",
+      "Remove from heat and season with nutritional yeast, thyme, salt and pepper.",
+      "Mix together all ingredients for peanut dressing.",
+      "Take whole leaf of lettuce, add filling and top with peanut sauce."
+    ],
+    tags: ["light", "asian-inspired", "wraps"]
+  },
+  {
+    title: "Tofu Stroganoff",
+    category: "Main Course",
+    description: "Creamy stroganoff with tofu, mushrooms and coconut cream.",
+    ingredients: ["2 8oz blocks tofu", "Fresh or canned mushrooms", "2 coconut cream cans (15 oz each), refrigerated overnight", "Turmeric", "Salt and pepper", "Ketchup", "Mustard", "Garlic", "1 onion, diced", "½ tsp turmeric"],
+    steps: [
+      "Press tofu to expel water for about 1 hour.",
+      "Sauté onion and garlic in olive oil for 10-15 minutes.",
+      "Add in uncooked mushrooms and cook for a few minutes.",
+      "Add in tofu, cook for a few more minutes.",
+      "Add in solids from coconut cream.",
+      "Add in ketchup and mustard.",
+      "Let cook for a few minutes (not too long or hot).",
+      "Serve with rice or pasta."
+    ],
+    notes: "Stove at 3-4 setting, use small amount of vegan butter.",
+    tags: ["comfort", "creamy", "protein"]
+  },
+  {
+    title: "Cauliflower Wellington",
+    category: "Main Course",
+    description: "Whole cauliflower wrapped in vegan pastry with mushroom pâté.",
+    ingredients: ["Whole cauliflower", "1½ cups wheat flour", "1¼ cups white or wheat flour", "1½ tsp salt", "½ cup vegan butter", "1 cup cold water", "1½ tsp lemon juice", "Mushroom pâté"],
+    steps: [
+      "Preheat oven to 350°F.",
+      "Make vegan pastry by combining flours, salt, butter, water and lemon juice.",
+      "Prepare mushroom pâté.",
+      "Wrap cauliflower in pastry with pâté.",
+      "Bake until pastry is golden and cauliflower is tender."
+    ],
+    tags: ["holiday", "impressive", "pastry"]
+  },
+  {
+    title: "Ratatouille",
+    category: "Main Course",
+    description: "Classic layered ratatouille with tomato, zucchini, eggplant and onion.",
+    ingredients: ["Tomato", "Zucchini", "Eggplant", "Onion", "Tomato sauce", "Seasonings"],
+    steps: [
+      "Chop tomatoes, onions and zucchini.",
+      "Fill base of pan with tomato sauce and seasonings.",
+      "Alternate vegetables in pan in layers.",
+      "Bake until vegetables are tender."
+    ],
+    tags: ["french", "roasted", "classic"]
+  },
+  {
+    title: "Eggplant Parmesan",
+    category: "Main Course",
+    description: "Breaded eggplant with tomato sauce, creamed cashews and rice.",
+    ingredients: ["1 eggplant", "Salt", "Flour", "Flax eggs", "Breadcrumbs", "Cashews", "Nutritional yeast", "Canned diced tomatoes", "Onion", "Garlic", "Bay leaf", "Rice", "Olive oil"],
+    steps: [
+      "Slice eggplant and salt generously. Let sit 30 min to draw out moisture. Pat dry and repeat on other side.",
+      "Prepare sauce: cook onion and garlic in olive oil, add tomatoes, boil 20-30 minutes, blend.",
+      "Prepare creamed cashews: soak cashews, blend with nutritional yeast, water, lemon and salt.",
+      "Dip each eggplant slice in flour, then flax egg, then breading.",
+      "Fry about 2 min on each side.",
+      "Preheat oven to 350°F. Layer sauce, eggplant and more sauce in dish.",
+      "Bake until bubbly. Serve with rice."
+    ],
+    tags: ["italian", "comfort", "breaded"]
+  },
+
+  // ─── BRUNCH ───
+  {
+    title: "Pancakes",
+    category: "Brunch",
+    description: "Light whole wheat pancakes with applesauce.",
+    ingredients: ["1½ cups whole wheat pastry flour", "2 tsp baking powder", "¼ tsp sea salt", "¼ tsp ground nutmeg", "1 cup unsweetened applesauce", "1¼ cups plant milk", "½ tsp pure vanilla extract", "Fresh fruit", "Dessert sauce"],
+    steps: [
+      "Mix dry ingredients: flour, baking powder, salt and nutmeg.",
+      "Add the wet ingredients into the center of the dry ingredients and mix with spatula or wooden spoon.",
+      "Let batter stand for about 10 minutes.",
+      "Preheat skillet over medium heat and preheat oven to 200°F.",
+      "Cook pancakes on skillet until bubbles form, flip and cook other side.",
+      "Keep warm in oven. Serve with fresh fruit."
+    ],
+    tags: ["breakfast", "classic"]
+  },
+  {
+    title: "Vegan Banana Pancakes",
+    category: "Brunch",
+    description: "Fluffy banana pancakes with optional chocolate chips or fruit.",
+    ingredients: ["1 small ripe banana", "1 tbsp coconut oil", "1 tbsp maple syrup", "1⅓ tsp baking powder", "¼ tsp sea salt", "¾ cup non-dairy milk", "½ cup oat flour", "¾ cup whole wheat flour", "Optional: vegan dark chocolate chips or fruit"],
+    steps: [
+      "Mash banana in mixing bowl. Add oil, maple syrup, baking powder, salt and whisk.",
+      "Add non-dairy milk and whisk to combine.",
+      "Add oat flour and whole wheat flour. Gently stir — don't over-mix.",
+      "Fold in optional fruit or chocolate chips.",
+      "Heat nonstick skillet over medium heat with a little oil.",
+      "Spoon ¼-⅓ cup batter onto skillet. Cook 2-3 minutes per side until golden brown.",
+      "Transfer to plate and keep warm in 200°F oven. Makes about 12 pancakes."
+    ],
+    notes: "Store cooled leftovers in container separated with wax paper. Keeps 4 days in fridge, 1 month in freezer.",
+    tags: ["breakfast", "banana"]
+  },
+  {
+    title: "Tofu Scramble",
+    category: "Brunch",
+    description: "Quick tofu scramble with curry and miso.",
+    ingredients: ["½ diced onion", "3 cloves garlic", "4 tbsp vegetable broth", "1 tsp curry powder", "1 tsp white miso paste", "8 oz firm silken tofu", "Salt and pepper", "½ diced tomato", "Chopped spinach"],
+    steps: [
+      "Sauté onion and garlic in vegetable broth over medium heat until onion begins to brown.",
+      "Reduce heat to just below medium, add curry powder, cook a few minutes then add miso paste and tofu.",
+      "Cook for about 5 minutes, then add spinach and tomato. Cook another minute.",
+      "Add salt and pepper and serve immediately."
+    ],
+    tags: ["breakfast", "protein", "quick"]
+  },
+  {
+    title: "Orange Date Homemade Granola",
+    category: "Brunch",
+    description: "Granola with candied orange peels, dates, and warm spices.",
+    ingredients: ["4 cups old fashioned oats", "4-5 diced pitted Medjool dates", "¼ cup agave", "3 tbsp maple syrup", "1 tbsp vanilla extract", "¼ cup coconut oil", "2 cups candied orange peels", "1 tbsp cinnamon", "1 tbsp nutmeg", "8-9 cardamom seeds"],
+    steps: [
+      "Preheat oven to 350°F.",
+      "Heat agave and coconut oil in saucepan on medium-low heat, add vanilla.",
+      "Chop candied oranges and dates into small pieces.",
+      "Add oats to large bowl.",
+      "Blend all ingredients with oats and mix through.",
+      "Pour on lined pan and bake 20-30 minutes. Stir after about 10 minutes. Bake until lightly golden.",
+      "Let cool for about an hour undisturbed.",
+      "Store in airtight container at room temp for 1-2 weeks or freezer up to 3 months."
+    ],
+    tags: ["granola", "make-ahead"]
+  },
+  {
+    title: "Spanish Omelette",
+    category: "Brunch",
+    description: "Classic Spanish tortilla with potatoes and caramelized onions using chickpea flour.",
+    ingredients: ["1 large onion", "3 tbsp olive oil", "2 tbsp cane sugar", "1.5 kg potatoes", "7 tbsp chickpea flour", "200 ml water", "Parsley leaves", "Salt and pepper"],
+    steps: [
+      "Peel and chop onion, sauté over low heat.",
+      "Raise temperature and add sugar, leave to caramelize, remove from heat.",
+      "Preheat oven to 425°F.",
+      "Peel and wash potatoes, slice thinly.",
+      "Lay out thinly sliced potatoes on lined baking sheet.",
+      "Season with salt, pepper and olive oil. Roast.",
+      "Mix flour and water with whisk, let sit 5 min.",
+      "Add in potatoes, onions and parsley.",
+      "Heat oil in pan, add potato mixture and spread evenly.",
+      "Cook over low heat 10 minutes until underside is golden with a small crust.",
+      "Flip the omelette using a plate over the pan.",
+      "Continue cooking until golden. Flip more if needed.",
+      "Let cool and serve at room temperature."
+    ],
+    tags: ["spanish", "brunch", "potato"]
+  },
+  {
+    title: "Chickpea Veggie Foldover",
+    category: "Brunch",
+    description: "Classic weekend breakfast staple. Prepare dry ingredients ahead for camping trips!",
+    ingredients: ["¾ cup chickpea flour", "¾ cup plant-based milk", "2 tsp apple cider vinegar", "2 tsp nutritional yeast", "¼ tsp turmeric powder", "¼ tsp garlic powder", "¼ tsp onion powder", "¼ tsp baking soda", "2 tbsp arrowroot powder", "Salt to taste"],
+    steps: [
+      "Whisk together all ingredients for batter, allow to sit about 5-10 minutes.",
+      "Sauté veggies for filling and set aside.",
+      "Cook foldover in skillet with small amount of vegan butter on medium-low heat.",
+      "Fill with sautéed veggies, fold and serve."
+    ],
+    notes: "Stove at 3-4 setting. Use spatula to round edges. Dry ingredients can be pre-mixed for camping.",
+    tags: ["breakfast", "chickpea", "skillet"]
+  },
+  {
+    title: "Chocolate Donuts",
+    category: "Brunch",
+    description: "Quick chocolate donuts or brownies using applesauce and date puree.",
+    ingredients: ["¾ cup whole wheat flour", "¼ cup cocoa powder", "1 tsp baking powder", "¼ tsp salt", "¾ cup applesauce", "¾ cup date puree", "¼ cup plant-based milk", "½ tsp pure vanilla extract"],
+    steps: [
+      "Preheat oven to 350°F.",
+      "Whisk together flour, cocoa powder, baking powder and salt.",
+      "Separately mix applesauce, date puree, plant milk and vanilla.",
+      "Add wet ingredients to dry ingredients.",
+      "Spoon batter into donut pan.",
+      "Bake for approximately 12-15 minutes or until springy."
+    ],
+    notes: "Can use a donut pan or brownie pan.",
+    tags: ["chocolate", "baked", "treat"]
+  },
+  {
+    title: "Sunflower Sausage",
+    category: "Brunch",
+    description: "Savory sunflower seed sausage with sun-dried tomatoes and liquid smoke.",
+    ingredients: ["4 tbsp olive oil", "½ medium onion", "1 minced garlic clove", "2 cups raw hulled sunflower seeds", "¼ cup sun dried tomatoes", "2 tbsp liquid aminos", "1½ tsp maple syrup", "1 tsp liquid smoke", "1 tsp fennel seeds", "½ tsp cumin", "½ tsp paprika", "Salt and pepper"],
+    steps: [
+      "Sauté onions and garlic in skillet with small amount of olive oil for about 5 minutes.",
+      "Process all ingredients in food processor, adding onion and garlic last. Gradually add oil.",
+      "Continue to process until sticky sausage-like consistency. Scrape sides as needed.",
+      "Serve cold or heat in a skillet for a few minutes."
+    ],
+    tags: ["protein", "sausage", "savory"]
+  },
+
+  // ─── SMALL MEALS & SNACKS ───
+  {
+    title: "Carrot Dogs",
+    category: "Small Meals & Snacks",
+    description: "Marinated carrots in buns with São Paulo or Chicago-style toppings.",
+    ingredients: ["6 large carrots", "2 cups water", "¼ cup tamari", "1 tbsp red wine or apple cider vinegar", "4 garlic cloves", "1 tsp turmeric", "½ tsp paprika", "¼ tsp black pepper", "6 whole wheat hot dog buns"],
+    steps: [
+      "Boil carrots until tender, about 10 minutes. Drain and rinse in cold water.",
+      "Combine water, tamari, vinegar, garlic, turmeric, paprika, and pepper in container.",
+      "Add boiled carrots to marinade, cover and refrigerate overnight or at least 12 hours.",
+      "Heat skillet on medium heat, add carrots and marinade and cook until marinade is mostly gone.",
+      "Serve in steamed or toasted buns with desired toppings."
+    ],
+    notes: "São Paulo toppings: potato chips, homemade ketchup. Chicago toppings: tomato, sport peppers, relish, mustard, celery salt, diced onions, pickle.",
+    tags: ["fun", "grilled", "hot-dog"]
+  },
+  {
+    title: "Re-Fried Beans",
+    category: "Small Meals & Snacks",
+    description: "Homemade refried pinto beans with garlic and bell pepper.",
+    ingredients: ["1½ cups pinto beans", "1 whole onion, diced", "4 cloves garlic", "1 large bell pepper", "Water"],
+    steps: [
+      "Soak beans for 2-3 hours ahead of cooking.",
+      "Place onion, garlic, bell pepper and beans in large pot, cover with water a few inches over ingredients.",
+      "Boil for 2-3 hours depending on soak time.",
+      "Drain, reserving a few cups of liquid.",
+      "Sauté beans in skillet, crushing with wooden spoon. Add reserved water for creamy result.",
+      "Serve immediately with salt, pepper, tomato and cilantro.",
+      "Reheat leftovers in skillet or microwave. Good a few days in fridge or months frozen."
+    ],
+    tags: ["beans", "mexican", "make-ahead"]
+  },
+  {
+    title: "Edamame with Mint and Lemon",
+    category: "Small Meals & Snacks",
+    description: "Quick sautéed edamame with fresh mint and lemon.",
+    ingredients: ["1 small red onion", "2 tbsp olive oil", "200g edamame (soy beans)", "Juice of ½ lemon", "Handful of chopped mint leaves", "Salt and pepper"],
+    steps: [
+      "Cut onion into strips.",
+      "Heat oil in frying pan and cook onion until soft.",
+      "Add beans and cook briefly.",
+      "Season with lemon, mint, salt and pepper."
+    ],
+    tags: ["quick", "light", "appetizer"]
+  },
+  {
+    title: "Carrot and Shallot Bruschetta",
+    category: "Small Meals & Snacks",
+    description: "Roasted carrot and shallot topping on toasted baguette.",
+    ingredients: ["500g carrots", "200g shallots", "3 tbsp olive oil", "Handful of mint", "Juice of 1 lime", "Salt and pepper", "1 baguette"],
+    steps: [
+      "Preheat oven to 400°F.",
+      "Peel and cut shallots into strips.",
+      "Peel and slice carrots lengthwise, removing stems.",
+      "Spread on baking sheet, season with olive oil and salt.",
+      "Bake about 25 minutes, remove and cool.",
+      "Finely chop the shallots and carrots.",
+      "Chop mint leaves and add to mixture.",
+      "Slice and toast baguette, top with carrot mixture and serve."
+    ],
+    tags: ["appetizer", "roasted", "bruschetta"]
+  },
+  {
+    title: "Mushrooms with Mango Ceviche and Avocado Cream",
+    category: "Small Meals & Snacks",
+    description: "Yields approx 16 mushroom appetizer bites.",
+    ingredients: ["½ small onion", "1 mango", "Juice of 1 lime", "½ tsp chili flakes", "6 sprigs coriander, chopped", "1 ripe avocado", "Salt and pepper", "500g chestnut mushrooms", "1 tbsp olive oil", "Toothpicks"],
+    steps: [
+      "Cut onion into strips.",
+      "Dice mango and combine with lime juice, chili flakes and coriander.",
+      "Mash avocado with salt and pepper for cream.",
+      "Sauté mushrooms in olive oil until tender.",
+      "Top each mushroom with mango ceviche and avocado cream. Secure with toothpick."
+    ],
+    tags: ["appetizer", "tropical", "party"]
+  },
+  {
+    title: "Tempeh Nuggets",
+    category: "Small Meals & Snacks",
+    description: "Air-fried breaded tempeh nuggets.",
+    ingredients: ["Tempeh", "Soy sauce or liquid aminos", "3 cloves garlic", "Salt and pepper", "Breadcrumbs", "Nutritional yeast", "Plant-based milk"],
+    steps: [
+      "Marinate tempeh for 4-12 hours.",
+      "Boil tempeh in marinade for about 30 minutes.",
+      "Mix breadcrumbs with salt, pepper and nutritional yeast.",
+      "Dunk each tempeh piece in milk, then cover in breadcrumbs.",
+      "Air fry for about 8 minutes at 325°F."
+    ],
+    tags: ["protein", "air-fryer", "crispy"]
+  },
+  {
+    title: "Banana Granola",
+    category: "Small Meals & Snacks",
+    description: "Easy baked granola with mashed banana and coconut oil.",
+    ingredients: ["3 cups organic oats", "2 tbsp cinnamon", "½ cup pecans, walnuts, or cashews", "1 tsp salt", "3 tbsp sweetener", "¼ cup flax meal", "¼ cup coconut oil", "2 whole bananas, mashed"],
+    steps: [
+      "Preheat oven to 350°F.",
+      "Combine oats, cinnamon, sweetener, flax meal, nuts, salt.",
+      "Add bananas and mash.",
+      "Add coconut oil and mix together.",
+      "Spread on lined pan and bake 20-30 minutes, stirring halfway.",
+      "Let cool undisturbed."
+    ],
+    tags: ["granola", "snack", "make-ahead"]
+  },
+  {
+    title: "Brazilian Pinto Beans",
+    category: "Small Meals & Snacks",
+    description: "Pressure-cooked pinto beans with garlic and bay leaf, Brazilian-style.",
+    ingredients: ["2 cups pinto beans", "1 bay leaf", "Water", "Salt", "Parsley", "Garlic", "Pepper"],
+    steps: [
+      "Soak beans overnight.",
+      "Place beans, bay leaf and water in pressure cooker, cook 12 minutes on high pressure.",
+      "Drain beans, reserve some water.",
+      "Sauté garlic in skillet, add beans and seasonings."
+    ],
+    tags: ["brazilian", "beans", "pressure cooker"]
+  },
+  {
+    title: "Thin Crust Pizza",
+    category: "Small Meals & Snacks",
+    description: "Thin crust pizza with spelt and wheat flour.",
+    ingredients: ["1 cup spelt flour", "1 cup wheat flour", "2 tbsp yeast", "2 tsp salt", "2 tbsp olive oil", "¾ cup warm water (110°F)"],
+    steps: [
+      "Mix all ingredients in bowl for stand mixer.",
+      "Mix dough with dough hook, add water and oil slowly.",
+      "Mix until dough forms a ball.",
+      "Let rise in warm area about 1 hour until doubled.",
+      "Roll out into desired pizza shape.",
+      "Bake crust only at 425°F for 5 minutes.",
+      "Add sauce and toppings.",
+      "Bake for 9 minutes with toppings."
+    ],
+    tags: ["pizza", "thin-crust"]
+  },
+  {
+    title: "Uruguay Pizza",
+    category: "Small Meals & Snacks",
+    description: "Quick no-yeast pizza using baking powder.",
+    ingredients: ["1½ cups white flour", "1½ cups wheat flour", "½ tsp salt", "1 tsp baking powder", "½ cup vegetable oil", "½ cup water", "½ cup milk", "Desired sauce and toppings", "Salt, pepper, oregano, olive oil"],
+    steps: [
+      "Preheat oven to 350°F.",
+      "Mix flours, salt and baking powder.",
+      "Add vegetable oil to flour mixture.",
+      "Heat milk and water until warm. Add to mixture.",
+      "Mix with spoon a few times — leave lumps, don't fully mix. Just ensure flour isn't dry.",
+      "Spread across prepared baking sheet.",
+      "Cover with sauce and desired toppings.",
+      "Bake until done."
+    ],
+    tags: ["pizza", "no-yeast", "quick"]
+  },
+  {
+    title: "Pizza Sauce",
+    category: "Small Meals & Snacks",
+    description: "Fresh San Marzano tomato pizza sauce — making sauce is an art, not a science.",
+    ingredients: ["2 pounds fresh San Marzano tomatoes", "4 garlic cloves", "½ medium onion", "1 tbsp oregano", "Red pepper flakes, salt and pepper", "Olive oil"],
+    steps: [
+      "Cook onions and garlic in olive oil until fragrant.",
+      "Wash and quarter tomatoes. De-seed carefully.",
+      "Add tomatoes to onions and garlic.",
+      "Cover and cook on low heat.",
+      "Taste, season, cook more, repeat — making sauce just right is an art not a science."
+    ],
+    tags: ["sauce", "italian", "basics"]
+  },
+  {
+    title: "Air Fried Mushrooms",
+    category: "Small Meals & Snacks",
+    description: "Crispy air-fried mushrooms with nutritional yeast and smoked paprika.",
+    ingredients: ["Maple syrup", "Oat milk", "Wheat flour", "Nutritional yeast", "Smoked paprika", "Paprika", "Whole white mushrooms"],
+    steps: [
+      "Mix together all ingredients except mushrooms.",
+      "Toss mushrooms in mixture and add to air fryer basket.",
+      "Air fry at 350°F for 20-25 minutes."
+    ],
+    tags: ["air-fryer", "crispy", "snack"]
+  },
+  {
+    title: "Vegan Deep Dish Pizza",
+    category: "Small Meals & Snacks",
+    description: "Chicago-style deep dish with cornmeal crust, cashew cheese, and fresh toppings.",
+    ingredients: ["2 cups flour blend", "½ cup cornmeal", "2¼ tsp instant yeast", "1¼ tsp salt", "1¼ cups water", "3 tbsp vegan butter", "2 tsp sugar", "1 cup raw cashews (soaked 4+ hours)", "1 cup plant milk", "3 tbsp tapioca starch", "3 tbsp nutritional yeast", "1 tbsp lemon juice", "2 tbsp white miso paste", "2 cups crushed San Marzano tomatoes", "3 garlic cloves", "1½ tsp oregano", "½ tsp red pepper flakes", "Mushrooms, bell pepper, onion, tomato"],
+    steps: [
+      "Make crust: combine flours, cornmeal, sugar, salt and yeast. Stir in water and oil.",
+      "Knead until smooth and elastic, about 7 minutes.",
+      "Oil a bowl, let dough rise until doubled, about 1 hour.",
+      "Press dough into oiled 9-inch cake pan, sides rising about 3 inches.",
+      "Make cheese: blend all cheese ingredients until smooth. Simmer in saucepan, whisking 5-10 minutes until cheese-like.",
+      "Combine sauce ingredients in a separate bowl.",
+      "Cook toppings in skillet — mushrooms first, then peppers and onions.",
+      "Preheat oven to 425°F.",
+      "Bake crust 10 minutes.",
+      "Layer: cheese, then veggies, then sauce on top.",
+      "Cover with foil and bake 15-20 minutes until sauce bubbles.",
+      "Let sit at least 10 minutes before cutting."
+    ],
+    tags: ["pizza", "deep-dish", "chicago"]
+  },
+  {
+    title: "Cauliflower Lentil Tacos",
+    category: "Small Meals & Snacks",
+    description: "Tacos with lentil-cauliflower filling and fresh guacamole.",
+    ingredients: ["6 ripe avocados", "1 medium jalapeño", "¼ cup fresh cilantro", "¼ cup fresh lime juice", "1½ tsp sea salt", "¾ tsp ground cumin", "Pinch cayenne pepper", "1½ medium tomatoes", "1 cup green or brown lentils", "3 cups water", "1 head cauliflower", "2 tbsp olive oil", "2 medium onions", "1 jalapeño pepper", "4 cloves garlic", "4 tsp chili powder", "2 tsp cumin", "1 tsp coriander", "½ cup tomato sauce", "Taco shells", "4 cups shredded lettuce"],
+    steps: [
+      "Make guacamole: mash avocados, add all ingredients except tomatoes, mix. Refrigerate 1 hour.",
+      "Rinse lentils, boil in water, simmer about 30 minutes. Drain.",
+      "Process cauliflower into small pieces in food processor.",
+      "Cook onion and jalapeño in skillet with olive oil.",
+      "Add cauliflower, lentils, spices and tomato sauce.",
+      "Serve in taco shells with lettuce and guacamole."
+    ],
+    tags: ["tacos", "mexican", "protein"]
+  },
+  {
+    title: "Quinoa Falafel",
+    category: "Small Meals & Snacks",
+    description: "Crispy quinoa falafel with avocado tahini sauce.",
+    ingredients: ["½ cup water", "1 lime, juiced", "1 avocado", "¼ cup raw tahini", "¼ cup cilantro", "15 oz garbanzo beans, drained", "1 onion, diced", "2 cloves garlic", "1 tbsp olive oil", "⅓ cup cooked white quinoa", "Sea salt", "1 tbsp cumin", "1 tsp ground flaxseed", "2 tbsp coconut oil"],
+    steps: [
+      "Make avocado tahini sauce: blend water, lime, avocado, tahini, and cilantro at high speed for 30 seconds.",
+      "Combine all falafel ingredients in food processor, pulse until dough-like consistency.",
+      "Form into spoon-sized disks.",
+      "Heat pan with coconut oil and cook falafel 3-5 minutes on each side until golden brown."
+    ],
+    tags: ["falafel", "mediterranean", "protein"]
+  },
+  {
+    title: "Simple Air Fryer Potato Chips",
+    category: "Small Meals & Snacks",
+    description: "Crispy homemade potato chips in the air fryer.",
+    ingredients: ["3 whole potatoes", "Salt and pepper"],
+    steps: [
+      "Slice potato thinly across the shorter length. A food processor slicing blade works great.",
+      "Place in air fryer and fry for about 20-30 minutes, toss halfway through.",
+      "Season with desired seasoning — salt and pepper, old bay, or truffle seasoning."
+    ],
+    tags: ["air-fryer", "snack", "simple"]
+  },
+  {
+    title: "Plant Based Pigs in a Blanket",
+    category: "Small Meals & Snacks",
+    description: "Baby carrots marinated and wrapped in croissant dough.",
+    ingredients: ["Baby carrots", "Soy sauce", "Vegan Worcestershire", "Paprika", "Salt", "Black pepper", "Croissant dough"],
+    steps: [
+      "Boil carrots in water for about 15 minutes until tender but not falling apart.",
+      "Marinate carrots for about 8 hours — longer for more flavor.",
+      "Slice small rolls of croissant dough and wrap each carrot individually.",
+      "Place on baking sheet with small spacing.",
+      "Bake for 10-15 minutes until tops are golden brown.",
+      "Serve with spicy ketchup or honey mustard."
+    ],
+    tags: ["fun", "party", "appetizer"]
+  },
+  {
+    title: "Banana Peel Meat",
+    category: "Small Meals & Snacks",
+    description: "Brazilian-style pulled 'meat' made from banana peels.",
+    ingredients: ["Peels of 5 bananas", "2 tomatoes", "1 onion", "3 garlic cloves", "Ginger", "Fresh herbs (basil, parsley, green onions)", "Olive oil", "Soy sauce", "Tomato paste", "Green olives", "½ lime juice", "Pepper sauce", "Salt", "Nutritional yeast"],
+    steps: [
+      "Scrape banana peels with a fork.",
+      "Boil peels in water with squeezed lime to remove banana flavor. Drain.",
+      "Chop tomatoes, onion, garlic, ginger and fresh herbs.",
+      "Heat olive oil and sauté onion, garlic, ginger.",
+      "Add banana peels (without the lime water).",
+      "Add tomatoes and a bit of soy sauce on medium heat.",
+      "Cover the pan and cook for about 10 min.",
+      "Remove cover. Add tomato paste, lime juice, pepper, spices.",
+      "Add herbs and chopped olives."
+    ],
+    tags: ["brazilian", "creative", "zero-waste"]
+  },
+  {
+    title: "Coxinha",
+    category: "Small Meals & Snacks",
+    description: "Brazilian coxinhas with potato dough and banana peel meat filling.",
+    ingredients: ["3 medium potatoes, cooked", "1 onion", "6 garlic cloves", "Salt", "Oil/olive oil", "Curcuma (optional)", "2+ cups flour", "Potato cooking water", "Banana peel meat (for filling)", "Breadcrumbs"],
+    steps: [
+      "Make dough: blend cooked potatoes, sautéed onion and garlic, salt, oil and ½ cup potato water until smooth.",
+      "Cook purée on medium heat until bubbly. Switch to low heat.",
+      "Add 1 cup flour and mix. Add 1 more cup and mix until not sticking to pan or hands.",
+      "Remove from stove and let cool. Mix with hands when cool.",
+      "Make fake egg: mix a little water and a little flour.",
+      "Shape dough into thin disc on hand, add filling, close and shape into coxinha (teardrop).",
+      "Dip in fake egg, then breadcrumbs.",
+      "Fry in oil (not super hot) between 4 and 5 on electric stove.",
+      "Coxinha shape: about 35 seconds in oil."
+    ],
+    notes: "Deep pan, one or two at a time. Half moon = 45 seconds, ball = 40 seconds, coxinha = 35 seconds.",
+    tags: ["brazilian", "fried", "party"]
+  },
+  {
+    title: "Kale and Mushroom Salad",
+    category: "Small Meals & Snacks",
+    description: "Simple sautéed mushroom and onion salad over fresh kale.",
+    ingredients: ["Kale", "Mushrooms", "Onion"],
+    steps: [
+      "Sauté onion and mushrooms until soft.",
+      "Chop kale.",
+      "Top kale with sautéed mushrooms and onions."
+    ],
+    notes: "This recipe came about from searching the fridge and only finding kale, mushrooms and onions!",
+    tags: ["salad", "simple", "quick"]
+  },
+  {
+    title: "Tomato Basil Pie",
+    category: "Small Meals & Snacks",
+    description: "Simple tomato basil pie with fresh cherry tomatoes.",
+    ingredients: ["Cherry tomatoes", "Fresh basil", "Olive oil"],
+    steps: [
+      "Slice tomatoes in half.",
+      "Arrange in pie dish with basil.",
+      "Drizzle with olive oil and bake."
+    ],
+    tags: ["simple", "tomato", "summer"]
+  },
+  {
+    title: "Churros Two Ways",
+    category: "Small Meals & Snacks",
+    description: "Churros made from choux dough — air fried or deep fried.",
+    ingredients: ["Choux dough", "Oil for frying", "Granulated sugar", "Cinnamon", "Chocolate dipping sauce or Nutella"],
+    steps: [
+      "Pipe churros and refrigerate on baking sheet for 1 hour.",
+      "Air Fry Method: transfer to air fryer basket with ½-inch spacing. Spray with oil. Air fry at 375°F for 10-12 minutes until golden brown.",
+      "Deep Fry Method: fry in hot oil until golden.",
+      "Combine sugar and cinnamon in shallow bowl.",
+      "Immediately toss baked churros in sugar mixture.",
+      "Serve warm with chocolate dipping sauce."
+    ],
+    tags: ["dessert", "fried", "brazilian"]
+  },
+
+  // ─── CHEESE ───
+  {
+    title: "Macadamia Spread (Ricotta-Style)",
+    category: "Cheese",
+    description: "Smooth spread meant to resemble ricotta cheese.",
+    ingredients: ["1 cup raw macadamia nuts", "1¾ tbsp lemon juice", "½ tbsp miso", "½ tbsp salt"],
+    steps: [
+      "Soak macadamia nuts in warm water for at least 1 hour.",
+      "Remove from water, saving the water.",
+      "Process macadamia nuts, lemon juice, salt and miso in food processor. Add saved water until smooth and creamy (about 2-5 tbsp).",
+      "Add salt to taste. Serve immediately or preserve 1-2 weeks in airtight container."
+    ],
+    tags: ["cheese", "ricotta", "cashew-free"]
+  },
+  {
+    title: "Catupiry (Potato)",
+    category: "Cheese",
+    description: "Brazilian-style potato-based creamy cheese.",
+    ingredients: ["1 large potato or mandioca", "Olive oil", "1 clove garlic", "Salt", "Oregano", "Nutritional yeast"],
+    steps: [
+      "Cook 1 large potato, reserve water.",
+      "Blend large potato, add garlic, salt and olive oil.",
+      "Add potato water until you reach the texture of catupiry (no bumps, very smooth and creamy).",
+      "Add pinch of oregano and mix."
+    ],
+    tags: ["cheese", "brazilian", "potato"]
+  },
+  {
+    title: "Tofu Spread",
+    category: "Cheese",
+    description: "Herbed tofu spread with cashews and lime.",
+    ingredients: ["About 3 oz tofu", "Juice of 1 lime", "Handful of cashews", "Drizzle of olive oil", "Salt and pepper", "Onion and garlic powder", "Oregano, thyme and cumin"],
+    steps: ["Process all ingredients in food processor until smooth, adding oil while processing."],
+    tags: ["cheese", "spread", "quick"]
+  },
+  {
+    title: "Cashew Ranch",
+    category: "Cheese",
+    description: "Creamy cashew-based ranch dressing.",
+    ingredients: ["1 cup raw cashews (soaked 30 min)", "½ cup water", "1 tbsp lemon juice", "¼ tsp garlic powder", "¼ tsp onion powder", "½ tsp dried parsley", "½ tsp dried chives", "Salt and pepper to taste"],
+    steps: ["Blend all ingredients until smooth."],
+    tags: ["dressing", "ranch", "cashew"]
+  },
+
+  // ─── DESSERTS ───
+  {
+    title: "Pecan Pie",
+    category: "Desserts",
+    description: "Vegan pecan pie with coconut milk and dates.",
+    ingredients: ["2 cups pecans", "1 can coconut milk (full-fat)", "½ cup coconut sugar", "4 tbsp vegan butter", "¼ cup chopped Medjool dates", "2 tsp vanilla extract", "3 tbsp cornstarch or arrowroot powder", "¼ tsp fine sea salt", "1 (9-inch) prepared pie crust"],
+    steps: [
+      "Preheat oven to 350°F. Bake prepared pie crust for 7 minutes to set. Cool.",
+      "Combine coconut milk and cornstarch, whisk until smooth.",
+      "Melt vegan butter over medium heat. Add pecans and toast 30 seconds while stirring.",
+      "Pour in dates, coconut sugar, coconut milk mixture, vanilla and salt. Whisk until smooth.",
+      "Remove from heat and pour into pie crust.",
+      "Bake for about 30 minutes until filling appears mostly firm when jiggled.",
+      "Cool on counter 2-3 hours, then refrigerate at least 8 hours, ideally overnight.",
+      "Let sit at room temperature at least 1 hour before serving."
+    ],
+    tags: ["pie", "pecan", "holiday"]
+  },
+  {
+    title: "Candied Orange Peels",
+    category: "Desserts",
+    description: "Sweet candied orange peels — save the syrup for drinks or oat pudding.",
+    ingredients: ["Peels from 2-3 oranges", "Water", "Sugar or agave"],
+    steps: [
+      "Place orange peels in saucepan, cover with water and bring to a boil.",
+      "Simmer for 5 minutes. Drain, rinse and repeat 1-2 more times.",
+      "Mix water and sweetener in saucepan, bring to simmer with orange peels.",
+      "Simmer for 30-45 minutes.",
+      "Strain, save the syrup. Leave peels out to dry.",
+      "Store in airtight container."
+    ],
+    tags: ["candy", "citrus", "make-ahead"]
+  },
+  {
+    title: "Chocolate Oat Pudding",
+    category: "Desserts",
+    description: "Rich chocolate pudding made from steel cut oats. Italian-inspired budino style.",
+    ingredients: ["½ cup steel cut oats", "4 cups water", "¼ cup cocoa powder", "¼ cup agave nectar", "¾ tsp stevia", "½ tsp orange oil or preferred flavoring", "1 pinch of salt"],
+    steps: [
+      "Soak oats in water for 30 minutes.",
+      "Blend oats and water together for 2-3 minutes and strain.",
+      "Strain into pot, whisk in cocoa, agave, stevia and salt.",
+      "Heat over medium heat while whisking until milk thickens.",
+      "Store in airtight container and refrigerate until solid pudding consistency."
+    ],
+    tags: ["chocolate", "pudding", "healthy"]
+  },
+  {
+    title: "Budino al Cioccolato Vegan",
+    category: "Desserts",
+    description: "Italian vegan chocolate pudding (budino) — makes 4.",
+    ingredients: ["350 ml plant milk", "10g cocoa powder", "40g dark chocolate", "10g cocoa butter", "40g whole cane sugar", "5g agar agar", "1 tsp vanilla bean (optional)", "1 tsp espresso powder (optional)"],
+    steps: [
+      "Pour plant milk in saucepan, dissolve agar agar, cocoa powder and sugar.",
+      "Heat stirring constantly with whisk. When heated, melt dark chocolate and cocoa butter.",
+      "Continue stirring until boiling is reached. Add optional vanilla and espresso.",
+      "Pour into silicone molds or glasses.",
+      "Cool in fridge for a couple of hours.",
+      "Turn puddings onto plate and serve."
+    ],
+    notes: "Can substitute agar agar with rice flour or cornstarch.",
+    tags: ["italian", "chocolate", "pudding"]
+  },
+  {
+    title: "Butter Rich Spritz Cookies",
+    category: "Desserts",
+    description: "Classic buttery spritz cookies.",
+    ingredients: ["2½ cups sifted all-purpose flour", "½ tsp salt", "1 cup butter", "1¼ cups sifted powdered sugar", "2 egg yolks or 1 egg", "½ tsp almond extract", "1 tsp vanilla"],
+    steps: [
+      "Cream butter and sugar.",
+      "Add egg and extracts, mix well.",
+      "Add flour and salt, mix until combined.",
+      "Press through cookie press onto baking sheet.",
+      "Bake at 400°F for 6-8 minutes."
+    ],
+    tags: ["cookies", "classic", "holiday"]
+  },
+  {
+    title: "Apple Pie à la Mode",
+    category: "Desserts",
+    description: "Classic apple pie with banana ice cream.",
+    ingredients: ["4 cups sliced apples", "2 tbsp cinnamon", "4 tbsp sugar", "Juice of 1 lemon", "Pie crust", "2-3 whole peeled frozen bananas"],
+    steps: [
+      "Preheat oven to 350°F.",
+      "Combine sliced apples, cinnamon, sugar and lemon juice for filling.",
+      "Pour filling into prepared pie crust.",
+      "Bake until golden and bubbly.",
+      "For banana ice cream: blend frozen bananas until smooth and creamy.",
+      "Serve pie warm topped with banana ice cream."
+    ],
+    tags: ["pie", "apple", "ice-cream"]
+  },
+  {
+    title: "Chocolate Coffee Mug Cake",
+    category: "Desserts",
+    description: "90-second chocolate mug cake.",
+    ingredients: ["3 tbsp flour", "3 tbsp sugar", "2 tbsp cocoa powder", "¼ tsp baking powder", "3 tbsp plant-based milk", "3 tbsp oil"],
+    steps: [
+      "Mix all ingredients in mug.",
+      "Microwave for 90 seconds."
+    ],
+    tags: ["quick", "chocolate", "microwave"]
+  },
+  {
+    title: "Peanut Butter Cookies",
+    category: "Desserts",
+    description: "Classic peanut butter cookies with maple syrup.",
+    ingredients: ["½ cup all-purpose flour", "½ cup whole wheat flour", "½ tsp baking powder", "½ tsp kosher salt", "¾ cup peanut butter", "½ cup maple syrup/honey mix", "1 tsp vanilla extract", "4 tbsp almond milk"],
+    steps: [
+      "Preheat oven to 350°F. Line baking sheet.",
+      "Mix flour, baking soda, and salt.",
+      "Combine peanut butter, maple syrup, vanilla and milk in large bowl.",
+      "Pour flour mixture over peanut butter mixture and mix.",
+      "Refrigerate batter 30 minutes or shape with wet fingers.",
+      "Press fork crosswise on each cookie.",
+      "Sprinkle with turbinado sugar and kosher salt.",
+      "Bake for 14 minutes at 350°F. Cool 5 minutes."
+    ],
+    notes: "Can substitute date/water mixture for syrup. May need more oil or liquid to avoid dryness.",
+    tags: ["cookies", "peanut-butter", "classic"]
+  },
+  {
+    title: "Pecan Turtles",
+    category: "Desserts",
+    description: "Date-based pecan turtles with coconut oil chocolate.",
+    ingredients: ["32 pecans", "½ cup diced dates", "Coconut oil chocolate", "3 tbsp honey, maple syrup or simple syrup", "½ tsp vanilla extract", "Pinch of salt"],
+    steps: [
+      "Preheat oven to 350°F. Roast pecans 10-12 minutes. Set aside.",
+      "Pulse dates in food processor until small bits remain or ball forms.",
+      "Form date mixture into 8 small round discs. Add 4 pecan halves for 'legs'. Freeze 10 minutes.",
+      "Melt chocolate and coconut oil over double boiler.",
+      "Top each turtle with melted chocolate and coat evenly.",
+      "Freeze 10-15 minutes to set.",
+      "Store in fridge 5-7 days or freezer up to 1 month."
+    ],
+    tags: ["candy", "chocolate", "pecan"]
+  },
+  {
+    title: "Coconut Oil Chocolate",
+    category: "Desserts",
+    description: "Simple 5-ingredient chocolate made with coconut oil.",
+    ingredients: ["⅓ cup cocoa powder", "⅓ cup coconut oil", "3 tbsp honey, maple syrup or simple syrup", "½ tsp vanilla extract", "Pinch of salt"],
+    steps: [
+      "Heat coconut oil in small saucepan over low heat.",
+      "Once melted, add remaining ingredients.",
+      "Stir and pour over parchment-lined cookie sheet.",
+      "Refrigerate 2-4 hours until set.",
+      "Break into pieces. Store in airtight container in refrigerator."
+    ],
+    tags: ["chocolate", "simple", "no-bake"]
+  },
+  {
+    title: "Snickerdoodles",
+    category: "Desserts",
+    description: "Soft vegan snickerdoodle cookies — makes 10.",
+    ingredients: ["¼ cup vegan butter", "⅓ cup white sugar", "1 tsp vanilla extract", "1 tsp apple cider vinegar", "½ cup all-purpose flour", "¼ cup wheat flour", "1 tsp baking powder", "1¼ tsp cinnamon", "¼ tsp salt", "1 tbsp soy milk"],
+    steps: [
+      "Preheat oven to 375°F. Line baking sheet.",
+      "Cream together sugar and butter.",
+      "Add apple cider vinegar and vanilla extract.",
+      "Add flours, baking powder, cinnamon and salt. Mix by hand to form crumbly dough.",
+      "Add milk slowly until cookie dough consistency is formed.",
+      "Roll into 10 balls by hand.",
+      "Roll each ball in cinnamon and sugar mixture.",
+      "Bake for 10 minutes at 375°F. Cool 5 minutes."
+    ],
+    tags: ["cookies", "cinnamon", "classic"]
+  },
+  {
+    title: "Vegan Chocolate Kugelhopf",
+    category: "Desserts",
+    description: "Rich chocolate bundt cake with flax egg whites.",
+    ingredients: ["1½ tsp active dry yeast", "2 tbsp warm water", "1½ cups almond milk", "7 tbsp vegan butter", "½ cup sugar", "3¾ cups flour", "1 tsp salt", "½ cup flax egg white", "Cocoa powder"],
+    steps: [
+      "Preheat oven.",
+      "Combine warm water and yeast, let rest.",
+      "Make flax egg whites: simmer ⅓ cup flax seeds with 3 cups water for 15-20 minutes.",
+      "Beat butter and sugar until creamy, add ½ cup flax egg white mixture.",
+      "Add yeast mixture.",
+      "Combine cocoa, flour and salt.",
+      "Rise in 10-inch bundt pan for about 4 hours.",
+      "Bake for about 30 minutes until toothpick comes out clean.",
+      "Dust with cocoa powder.",
+      "Frost with fruit and powdered sugar."
+    ],
+    tags: ["cake", "chocolate", "holiday"]
+  },
+  {
+    title: "Panettone Vegano",
+    category: "Desserts",
+    description: "Vegan Italian panettone with dark chocolate and roasted hazelnuts.",
+    ingredients: ["150 ml oat milk", "7g dry yeast", "3 tbsp vegan egg mixture", "6 tbsp sparkling water", "500g all-purpose flour", "150g sugar", "½ tsp salt", "½ vanilla bean", "½ tsp lemon zest", "150g vegan butter", "250g dark chocolate (70%+)", "150g roasted hazelnuts"],
+    steps: [
+      "Warm oat milk, dissolve yeast in a small amount, combine with rest of milk.",
+      "Whisk vegan egg with sparkling water.",
+      "Combine flour, sugar, salt, vanilla bean and lemon zest in stand mixer.",
+      "Add softened butter one tbsp at a time on low speed.",
+      "Slowly add warm yeast and milk mixture.",
+      "Knead on higher speed for about 5 minutes until soft.",
+      "Chop 150g chocolate and 150g hazelnuts, knead into dough.",
+      "Cover and let rise in warm spot for 2-3 hours until nearly tripled.",
+      "Scrape into lined panettone mould. Let rise another hour.",
+      "Bake at 175°C for 60-75 minutes.",
+      "Cool at least 1 hour.",
+      "Melt remaining chocolate, pour over cool panettone. Sprinkle with chopped hazelnuts."
+    ],
+    notes: "Increase recipe by about 1.3x to fit a 7-inch panettone pan. Top will get very brown — that's normal.",
+    tags: ["italian", "holiday", "cake"]
+  },
+  {
+    title: "German Potato Salad",
+    category: "Desserts",
+    description: "Warm German-style potato salad with vinegar dressing.",
+    ingredients: ["4-5 pounds small red potatoes, cooked with skin", "¾ cup white vinegar", "¾ cup white sugar", "1 flax egg white", "1 cup water", "Salt", "1 large onion, chopped", "½ cup celery, chopped", "Green pepper", "Parsley"],
+    steps: [
+      "Peel potatoes, cut in slices. Add salt, pepper, chopped onion and celery.",
+      "Prepare fat/oil substitute — cook until lightly brown, add vinegar and sugar, bring to rolling boil.",
+      "Cool for 5-10 minutes then quickly add egg which has been whipped in water, stir rapidly.",
+      "Return to stove and bring to another rolling boil.",
+      "Pour over potatoes. Mix, add onions, keep warmed. Give time to marinate."
+    ],
+    notes: "For Idaho potatoes, add more dressing/juice. Original calls for bacon — substitute with oil/fat/bacon flavor.",
+    tags: ["german", "potato", "side"]
+  }
+];
+
+// ─── CATEGORY MAPPING ───
+const CATEGORIES = [
+  "All",
+  "Pantry Staples",
+  "Bread",
+  "Soups, Salads & Pastas",
+  "Main Course",
+  "Brunch",
+  "Small Meals & Snacks",
+  "Cheese",
+  "Desserts"
+];
+
+let activeCategory = "All";
+let searchQuery = "";
+
+// ─── RENDER ───
+function renderTabs() {
+  const tabs = document.getElementById('catTabs');
+  tabs.innerHTML = CATEGORIES.map(cat =>
+    `<div class="cat-tab ${cat === activeCategory ? 'active' : ''}" data-cat="${cat}">${cat}</div>`
+  ).join('');
+  tabs.querySelectorAll('.cat-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      activeCategory = tab.dataset.cat;
+      renderTabs();
+      renderGrid();
+    });
+  });
+}
+
+function getFilteredRecipes() {
+  return RECIPES.filter(r => {
+    const matchesCat = activeCategory === "All" || r.category === activeCategory;
+    if (!searchQuery) return matchesCat;
+    const q = searchQuery.toLowerCase();
+    const matchesSearch =
+      r.title.toLowerCase().includes(q) ||
+      r.description.toLowerCase().includes(q) ||
+      r.ingredients.some(i => i.toLowerCase().includes(q)) ||
+      r.tags.some(t => t.toLowerCase().includes(q)) ||
+      r.category.toLowerCase().includes(q);
+    return matchesCat && matchesSearch;
+  });
+}
+
+function renderGrid() {
+  const grid = document.getElementById('recipeGrid');
+  const empty = document.getElementById('emptyState');
+  const count = document.getElementById('recipeCount');
+  const filtered = getFilteredRecipes();
+
+  count.textContent = `${filtered.length} recipe${filtered.length !== 1 ? 's' : ''}`;
+
+  if (filtered.length === 0) {
+    grid.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  grid.innerHTML = filtered.map((r, i) => {
+    const idx = RECIPES.indexOf(r);
+    const aiCls = r._ai ? ' ai-gen' : '';
+    const delBtn = r._ai ? '<button class="card-del" onclick="removeRecipe('+idx+')" title="Remove">&#10005;</button>' : '';
+    return '<div class="recipe-card' + aiCls + '" data-idx="' + idx + '">' + delBtn +
+      '<div class="card-cat">' + r.category + '</div>' +
+      '<h3>' + r.title + '</h3>' +
+      '<div class="card-desc">' + r.description + '</div>' +
+      '<div class="card-tags">' + r.tags.map(t => '<span>' + t + '</span>').join('') + '</div></div>';
+  }).join('');
+
+  grid.querySelectorAll('.recipe-card').forEach(card => {
+    card.addEventListener('click', () => openModal(parseInt(card.dataset.idx)));
+  });
+}
+
+function openModal(idx) {
+  const r = RECIPES[idx];
+  const overlay = document.getElementById('modalOverlay');
+  const header = document.getElementById('modalHeader');
+  const body = document.getElementById('modalBody');
+
+  header.innerHTML = `
+    <div class="modal-cat">${r.category}${r._ai ? ' \u00b7 AI Generated' : ''}</div>
+    <h2>${r.title}</h2>
+    ${r.description ? `<div class="modal-desc">${r.description}</div>` : ''}
+  `;
+
+  let html = '<h4>Ingredients</h4><ul>';
+  r.ingredients.forEach(i => html += `<li>${i}</li>`);
+  html += '</ul><h4>Instructions</h4><ol>';
+  r.steps.forEach(s => html += `<li>${s}</li>`);
+  html += '</ol>';
+  if (r.notes) {
+    html += `<div class="modal-notes"><strong>Notes:</strong> ${r.notes}</div>`;
+  }
+
+  body.innerHTML = html;
+  overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// ─── EVENTS ───
+document.getElementById('modalClose').addEventListener('click', closeModal);
+document.getElementById('modalOverlay').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeModal();
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal(); if (typeof closeSett === 'function') closeSett(); } });
+
+document.getElementById('searchInput').addEventListener('input', e => {
+  searchQuery = e.target.value;
+  renderGrid();
+});
+
+
+// ─── AI CONFIG (localStorage) ───
+const AI_KEY = 'deliciousness_ai_cfg';
+function loadCfg() { try { return JSON.parse(localStorage.getItem(AI_KEY)) || {}; } catch { return {}; } }
+function saveCfg(c) { localStorage.setItem(AI_KEY, JSON.stringify(c)); updIndicator(); }
+function updIndicator() {
+  const c = loadCfg(), b = document.getElementById('aiCfgBtn');
+  b.classList.toggle('connected', !!(c.baseUrl && c.apiKey && c.deploy));
+}
+function setStatus(msg, type) {
+  const el = document.getElementById('aiStatus');
+  el.textContent = msg; el.className = 'ai-status' + (type ? ' ' + type : '');
+}
+
+// Settings modal
+document.getElementById('aiCfgBtn').addEventListener('click', () => {
+  const c = loadCfg();
+  document.getElementById('cfgUrl').value = c.baseUrl || '';
+  document.getElementById('cfgKey').value = c.apiKey || '';
+  document.getElementById('cfgDeploy').value = c.deploy || 'gpt-5';
+  document.getElementById('cfgVer').value = c.apiVer || '2025-01-01-preview';
+  document.getElementById('settOverlay').classList.add('open');
+});
+function closeSett() { document.getElementById('settOverlay').classList.remove('open'); }
+document.getElementById('settClose').addEventListener('click', closeSett);
+document.getElementById('settCancel').addEventListener('click', closeSett);
+document.getElementById('settOverlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeSett(); });
+document.getElementById('settSave').addEventListener('click', () => {
+  saveCfg({
+    baseUrl: document.getElementById('cfgUrl').value.trim().replace(/\/+$/, ''),
+    apiKey: document.getElementById('cfgKey').value.trim(),
+    deploy: document.getElementById('cfgDeploy').value.trim() || 'gpt-5',
+    apiVer: document.getElementById('cfgVer').value.trim() || '2025-01-01-preview'
+  });
+  closeSett();
+  setStatus('Connected — ready to generate recipes', 'success');
+});
+
+// AI Generation
+async function genRecipe(prompt) {
+  const c = loadCfg();
+  if (!c.baseUrl || !c.apiKey || !c.deploy) { setStatus('Configure AI connection first (click gear icon)', 'error'); return null; }
+
+  const sys = `You are a recipe assistant for a plant-based cookbook called "Deliciousness". Respond ONLY with valid JSON (no markdown, no backticks) in this format:
+{"title":"Name","category":"One of: Pantry Staples, Bread, Soups Salads & Pastas, Main Course, Brunch, Small Meals & Snacks, Cheese, Desserts","description":"Short description.","ingredients":["item 1","item 2"],"steps":["Step 1.","Step 2."],"notes":"Optional tips.","tags":["tag1","tag2","tag3"]}
+Make recipes plant-based/vegan with realistic measurements and detailed steps. Pick the best category. Generate 3-5 lowercase tags.`;
+
+  const url = c.baseUrl + '/openai/deployments/' + c.deploy + '/chat/completions?api-version=' + c.apiVer;
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'api-key': c.apiKey },
+      body: JSON.stringify({ messages: [{ role: 'system', content: sys }, { role: 'user', content: prompt }], temperature: 0.7, max_tokens: 1200 })
+    });
+    if (!resp.ok) { const e = await resp.json().catch(() => ({})); throw new Error(e.error?.message || 'HTTP ' + resp.status); }
+    const data = await resp.json();
+    const raw = data.choices?.[0]?.message?.content;
+    if (!raw) throw new Error('Empty API response');
+    const cleaned = raw.replace(/```json\s*/gi, '').replace(/```\s*/gi, '').trim();
+    const r = JSON.parse(cleaned);
+    if (!r.title || !r.ingredients || !r.steps) throw new Error('Invalid recipe structure');
+    r.category = r.category || 'Main Course';
+    r.description = r.description || '';
+    r.tags = r.tags || [];
+    r._ai = true;
+    return r;
+  } catch (err) { setStatus('Error: ' + err.message, 'error'); return null; }
+}
+
+// AI bar events
+const aiIn = document.getElementById('aiInput'), aiBtn = document.getElementById('aiSend');
+async function handleAI() {
+  const p = aiIn.value.trim(); if (!p) return;
+  aiBtn.disabled = true; aiBtn.textContent = '...'; aiIn.disabled = true;
+  setStatus('Generating recipe with AI...', '');
+  document.getElementById('aiStatus').classList.add('ai-thinking');
+  const recipe = await genRecipe(p);
+  document.getElementById('aiStatus').classList.remove('ai-thinking');
+  aiBtn.disabled = false; aiBtn.textContent = 'Generate'; aiIn.disabled = false;
+  if (recipe) {
+    RECIPES.unshift(recipe);
+    activeCategory = 'All'; searchQuery = '';
+    document.getElementById('searchInput').value = '';
+    renderTabs(); renderGrid(); aiIn.value = '';
+    setStatus('Added "' + recipe.title + '" to your cookbook', 'success');
+    setTimeout(() => {
+      const fc = document.querySelector('.recipe-card');
+      if (fc) { fc.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        fc.style.outline = '2px solid var(--accent)'; fc.style.outlineOffset = '2px';
+        setTimeout(() => { fc.style.outline = ''; fc.style.outlineOffset = ''; }, 2000);
+      }
+    }, 100);
+  }
+}
+aiBtn.addEventListener('click', handleAI);
+aiIn.addEventListener('keydown', e => { if (e.key === 'Enter') handleAI(); });
+
+function removeRecipe(idx) { event.stopPropagation(); RECIPES.splice(idx, 1); renderGrid(); }
+
+// ─── INIT ───
+updIndicator();
+renderTabs();
+renderGrid();
+</script>
+</body>
+</html>

@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Meal Planner — Weekly</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{--bg:#f6f5f1;--card:#fff;--border:#e5e2dd;--text:#1a1a1a;--mid:#4a4a4a;--muted:#888;--dim:#b0b0b0;--green:#1a8a5c;--blue:#2d6bcf;--warm:#c4723a;--purple:#7c5cbf;--red:#c43a3a;--green-bg:rgba(26,138,92,.07);--blue-bg:rgba(45,107,207,.06);--warm-bg:rgba(196,114,58,.07);--purple-bg:rgba(124,92,191,.06)}
+html,body{height:100%;overflow-x:hidden;overscroll-behavior:contain}
+body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro','Helvetica Neue',sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.4;-webkit-font-smoothing:antialiased;padding-bottom:72px}
+
+header{padding:16px 16px 12px;background:var(--card);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:50}
+header h1{font-size:18px;font-weight:700;letter-spacing:-.3px}
+.week-nav{display:flex;align-items:center;justify-content:space-between;margin-top:6px}
+.week-nav button{background:none;border:none;font-size:18px;color:var(--muted);cursor:pointer;padding:4px 8px}
+.week-nav span{font-size:12px;color:var(--muted);font-weight:500}
+
+.tabs{display:flex;gap:0;border-bottom:1px solid var(--border);background:var(--card);overflow-x:auto;-webkit-overflow-scrolling:touch;padding:0 4px}
+.tabs::-webkit-scrollbar{display:none}
+.tab{padding:10px 12px;font-size:12px;font-weight:600;color:var(--muted);border:none;background:none;cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;transition:all .2s;flex:1;text-align:center}
+.tab.active{color:var(--green);border-bottom-color:var(--green)}
+.tab.has-meals::after{content:'';display:block;width:4px;height:4px;background:var(--green);border-radius:50%;margin:3px auto 0}
+
+.day-panel{display:none;padding:12px}
+.day-panel.active{display:block}
+
+.meal-slot{margin-bottom:12px}
+.meal-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.meal-label .icon{font-size:14px}
+.meal-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px;position:relative}
+.meal-card.empty{border-style:dashed;text-align:center;color:var(--dim);cursor:pointer;padding:20px 12px;font-size:13px}
+.meal-card.empty:active{background:var(--bg)}
+.meal-name{font-size:15px;font-weight:600;margin-bottom:2px}
+.meal-notes{font-size:12px;color:var(--muted);line-height:1.4}
+.meal-tags{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px}
+.meal-tag{font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;text-transform:uppercase;letter-spacing:.5px}
+.meal-actions{position:absolute;top:8px;right:8px;display:flex;gap:4px}
+.meal-act-btn{width:26px;height:26px;border-radius:50%;border:1px solid var(--border);background:var(--card);font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+
+/* Grocery list */
+.grocery-section{padding:12px}
+.grocery-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--card);border:1px solid var(--border);border-radius:8px;margin-bottom:4px}
+.grocery-check{width:22px;height:22px;border-radius:6px;border:2px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px;transition:all .15s}
+.grocery-check.checked{background:var(--green);border-color:var(--green);color:#fff}
+.grocery-text{flex:1;font-size:13px}
+.grocery-text.checked{text-decoration:line-through;color:var(--dim)}
+
+.field-input{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;background:var(--card);color:var(--text);outline:none}
+.field-input:focus{border-color:var(--green)}
+.btn{display:inline-flex;align-items:center;justify-content:center;padding:10px 18px;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:opacity .15s}
+.btn:active{opacity:.7}
+.btn-primary{background:var(--green);color:#fff}
+.btn-outline{background:none;border:1px solid var(--border);color:var(--text)}
+.btn-sm{padding:7px 12px;font-size:12px}
+
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;display:none;align-items:flex-end;justify-content:center}
+.modal-bg.open{display:flex}
+.modal{background:var(--card);border-radius:16px 16px 0 0;width:100%;max-width:500px;max-height:80vh;overflow-y:auto;padding:20px 16px 32px}
+.modal h3{font-size:16px;font-weight:700;margin-bottom:14px}
+
+.save-bar{position:fixed;bottom:0;left:0;right:0;padding:12px 16px;background:var(--card);border-top:1px solid var(--border);display:flex;gap:8px;z-index:60}
+.save-bar .btn{flex:1}
+
+.toast{position:fixed;bottom:72px;left:50%;transform:translateX(-50%) translateY(60px);background:var(--text);color:#fff;padding:10px 20px;border-radius:20px;font-size:12px;font-weight:500;opacity:0;transition:all .3s;z-index:999;pointer-events:none}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+
+.view-toggle{display:flex;gap:0;margin:12px 12px 0;border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.view-btn{flex:1;padding:8px;text-align:center;font-size:12px;font-weight:600;cursor:pointer;background:var(--card);color:var(--muted);border:none;font-family:inherit}
+.view-btn.active{background:var(--green);color:#fff}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🍽️ Meal Planner</h1>
+  <div class="week-nav">
+    <button onclick="changeWeek(-1)">‹</button>
+    <span id="weekLabel"></span>
+    <button onclick="changeWeek(1)">›</button>
+  </div>
+</header>
+
+<div class="view-toggle">
+  <button class="view-btn active" id="vMeals" onclick="setView('meals')">Meals</button>
+  <button class="view-btn" id="vGrocery" onclick="setView('grocery')">Grocery List</button>
+</div>
+
+<div id="mealsView">
+  <div class="tabs" id="dayTabs"></div>
+  <div id="dayPanels"></div>
+</div>
+
+<div id="groceryView" class="grocery-section" style="display:none"></div>
+
+<div class="modal-bg" id="modalBg" onclick="if(event.target===this)closeModal()">
+  <div class="modal" id="modalContent"></div>
+</div>
+
+<div class="save-bar">
+  <button class="btn btn-outline" onclick="saveAll()">💾 Save</button>
+  <button class="btn btn-primary" onclick="shareFile()">📤 Share</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const DAYS=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+const MEALS=[
+  {key:'breakfast',label:'Breakfast',icon:'☀️'},
+  {key:'lunch',label:'Lunch',icon:'🌤️'},
+  {key:'dinner',label:'Dinner',icon:'🌙'},
+  {key:'snack',label:'Snack',icon:'🍎'}
+];
+const TAGS=[
+  {label:'Quick',color:'var(--green)',bg:'var(--green-bg)'},
+  {label:'Prep Ahead',color:'var(--blue)',bg:'var(--blue-bg)'},
+  {label:'Leftover',color:'var(--warm)',bg:'var(--warm-bg)'},
+  {label:'Takeout',color:'var(--purple)',bg:'var(--purple-bg)'},
+  {label:'New Recipe',color:'var(--red)',bg:'rgba(196,58,58,.07)'}
+];
+
+let state=load();
+let weekOffset=0;
+let currentDay=0;
+let currentView='meals';
+
+function load(){try{const s=localStorage.getItem('mealplan');if(s)return JSON.parse(s)}catch(e){}
+return{weeks:{},grocery:{}}}
+function save(){localStorage.setItem('mealplan',JSON.stringify(state))}
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2000)}
+function weekKey(){const d=getMonday();return d.toISOString().split('T')[0]}
+function getMonday(){const d=new Date();d.setDate(d.getDate()-((d.getDay()+6)%7)+(weekOffset*7));return d}
+
+function changeWeek(dir){weekOffset+=dir;render()}
+
+function setView(v){
+  currentView=v;
+  document.getElementById('vMeals').classList.toggle('active',v==='meals');
+  document.getElementById('vGrocery').classList.toggle('active',v==='grocery');
+  document.getElementById('mealsView').style.display=v==='meals'?'':'none';
+  document.getElementById('groceryView').style.display=v==='grocery'?'':'none';
+  if(v==='grocery')renderGrocery();
+}
+
+function render(){
+  const mon=getMonday();
+  const sun=new Date(mon);sun.setDate(sun.getDate()+6);
+  document.getElementById('weekLabel').textContent=mon.toLocaleDateString('en-US',{month:'short',day:'numeric'})+' – '+sun.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+
+  const wk=weekKey();
+  if(!state.weeks[wk])state.weeks[wk]={};
+
+  // Day tabs
+  let tabsHtml='';
+  DAYS.forEach((d,i)=>{
+    const dayDate=new Date(mon);dayDate.setDate(dayDate.getDate()+i);
+    const num=dayDate.getDate();
+    const dayData=state.weeks[wk][i]||{};
+    const hasMeals=MEALS.some(m=>dayData[m.key]&&dayData[m.key].name);
+    tabsHtml+=`<button class="tab ${i===currentDay?'active':''} ${hasMeals?'has-meals':''}" onclick="selectDay(${i})">${d}<br><span style="font-size:10px;font-weight:400">${num}</span></button>`;
+  });
+  document.getElementById('dayTabs').innerHTML=tabsHtml;
+
+  // Day panels
+  let panelsHtml='';
+  DAYS.forEach((d,i)=>{
+    const dayData=state.weeks[wk][i]||{};
+    panelsHtml+=`<div class="day-panel ${i===currentDay?'active':''}" id="dp-${i}">`;
+    MEALS.forEach(m=>{
+      const meal=dayData[m.key];
+      panelsHtml+=`<div class="meal-slot"><div class="meal-label"><span class="icon">${m.icon}</span>${m.label}</div>`;
+      if(meal&&meal.name){
+        let tagsHtml='';
+        if(meal.tags)meal.tags.forEach(t=>{
+          const tag=TAGS.find(x=>x.label===t);
+          if(tag)tagsHtml+=`<span class="meal-tag" style="color:${tag.color};background:${tag.bg}">${t}</span>`;
+        });
+        panelsHtml+=`<div class="meal-card">
+          <div class="meal-actions">
+            <button class="meal-act-btn" onclick="editMeal(${i},'${m.key}')">✎</button>
+            <button class="meal-act-btn" onclick="clearMeal(${i},'${m.key}')">&times;</button>
+          </div>
+          <div class="meal-name">${meal.name}</div>
+          ${meal.notes?`<div class="meal-notes">${meal.notes}</div>`:''}
+          ${tagsHtml?`<div class="meal-tags">${tagsHtml}</div>`:''}
+        </div>`;
+      } else {
+        panelsHtml+=`<div class="meal-card empty" onclick="editMeal(${i},'${m.key}')">+ Add ${m.label.toLowerCase()}</div>`;
+      }
+      panelsHtml+=`</div>`;
+    });
+    panelsHtml+=`</div>`;
+  });
+  document.getElementById('dayPanels').innerHTML=panelsHtml;
+}
+
+function selectDay(i){currentDay=i;render()}
+
+function editMeal(dayIdx,mealKey){
+  const wk=weekKey();
+  const existing=(state.weeks[wk]&&state.weeks[wk][dayIdx]&&state.weeks[wk][dayIdx][mealKey])||{};
+  const tagsHtml=TAGS.map(t=>{
+    const checked=existing.tags&&existing.tags.includes(t.label);
+    return `<label style="display:inline-flex;align-items:center;gap:4px;padding:5px 10px;border-radius:16px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid ${checked?t.color:'var(--border)'};background:${checked?t.bg:'var(--card)'};color:${checked?t.color:'var(--muted)'}">
+      <input type="checkbox" value="${t.label}" ${checked?'checked':''} style="display:none" class="tag-cb">${t.label}</label>`;
+  }).join(' ');
+
+  document.getElementById('modalContent').innerHTML=`<h3>${MEALS.find(m=>m.key===mealKey).icon} ${MEALS.find(m=>m.key===mealKey).label} — ${DAYS[dayIdx]}</h3>
+    <div style="margin-bottom:10px"><input class="field-input" id="mm-name" placeholder="What are you eating?" value="${existing.name||''}"></div>
+    <div style="margin-bottom:10px"><input class="field-input" id="mm-notes" placeholder="Notes, recipe link, etc." value="${existing.notes||''}"></div>
+    <div style="margin-bottom:10px"><div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:5px">Tags</div><div style="display:flex;flex-wrap:wrap;gap:6px">${tagsHtml}</div></div>
+    <div style="margin-bottom:10px"><div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:5px">Grocery Items (one per line)</div><textarea class="field-input" id="mm-grocery" rows="3" placeholder="chicken breast&#10;rice&#10;broccoli" style="resize:vertical">${existing.grocery?existing.grocery.join('\\n'):''}</textarea></div>
+    <button class="btn btn-primary" onclick="saveMeal(${dayIdx},'${mealKey}')" style="width:100%">Save</button>`;
+  document.getElementById('modalBg').classList.add('open');
+}
+
+function saveMeal(dayIdx,mealKey){
+  const wk=weekKey();
+  if(!state.weeks[wk])state.weeks[wk]={};
+  if(!state.weeks[wk][dayIdx])state.weeks[wk][dayIdx]={};
+  const tags=[...document.querySelectorAll('.tag-cb:checked')].map(c=>c.value);
+  const groceryRaw=document.getElementById('mm-grocery').value;
+  const grocery=groceryRaw.split('\\n').map(s=>s.trim()).filter(Boolean);
+  state.weeks[wk][dayIdx][mealKey]={
+    name:document.getElementById('mm-name').value.trim(),
+    notes:document.getElementById('mm-notes').value.trim(),
+    tags,grocery
+  };
+  save();closeModal();render();toast('Saved');
+}
+
+function clearMeal(dayIdx,mealKey){
+  const wk=weekKey();
+  if(state.weeks[wk]&&state.weeks[wk][dayIdx])delete state.weeks[wk][dayIdx][mealKey];
+  save();render();
+}
+
+function renderGrocery(){
+  const el=document.getElementById('groceryView');
+  const wk=weekKey();
+  const week=state.weeks[wk]||{};
+  if(!state.grocery[wk])state.grocery[wk]={};
+  const items={};
+  DAYS.forEach((_,i)=>{
+    const day=week[i]||{};
+    MEALS.forEach(m=>{
+      const meal=day[m.key];
+      if(meal&&meal.grocery)meal.grocery.forEach(g=>{items[g.toLowerCase()]=g});
+    });
+  });
+  const list=Object.values(items);
+  if(!list.length){el.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted);font-size:13px">Add grocery items to your meals to build the list</div>';return}
+  const checked=state.grocery[wk];
+  let html=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><span style="font-size:13px;font-weight:600">${list.length} items</span><button class="btn btn-sm btn-outline" onclick="uncheckAll()">Uncheck all</button></div>`;
+  list.sort().forEach(item=>{
+    const c=checked[item.toLowerCase()]?'checked':'';
+    html+=`<div class="grocery-item" onclick="toggleGrocery('${item.toLowerCase().replace(/'/g,"\\'")}')">
+      <div class="grocery-check ${c}">${c?'✓':''}</div>
+      <span class="grocery-text ${c}">${item}</span>
+    </div>`;
+  });
+  el.innerHTML=html;
+}
+
+function toggleGrocery(item){
+  const wk=weekKey();
+  if(!state.grocery[wk])state.grocery[wk]={};
+  state.grocery[wk][item]=!state.grocery[wk][item];
+  save();renderGrocery();
+}
+function uncheckAll(){const wk=weekKey();state.grocery[wk]={};save();renderGrocery()}
+
+function closeModal(){document.getElementById('modalBg').classList.remove('open')}
+function saveAll(){save();toast('All saved ✓')}
+
+function shareFile(){
+  const blob=new Blob([document.documentElement.outerHTML],{type:'text/html'});
+  const file=new File([blob],'meal-planner.html',{type:'text/html'});
+  if(navigator.canShare&&navigator.canShare({files:[file]})){
+    navigator.share({files:[file],title:'Meal Planner'});
+  } else {
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=file.name;a.click();
+    toast('Downloaded');
+  }
+}
+
+render();
+</script>
+</body>
+</html>

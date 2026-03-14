@@ -1,0 +1,1723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PM Workspace — HTML Build Manager</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-deep: #0f1117;
+  --bg-surface: #181a24;
+  --bg-card: #1e2130;
+  --bg-elevated: #252839;
+  --border-subtle: #2a2d3e;
+  --border-medium: #363a50;
+  --text-primary: #e8eaed;
+  --text-secondary: #9aa0b4;
+  --text-muted: #5c6178;
+  --accent-teal: #38bdf8;
+  --accent-teal-dim: rgba(56, 189, 248, 0.15);
+  --accent-amber: #f59e0b;
+  --accent-green: #34d399;
+  --accent-rose: #f43f5e;
+  --accent-violet: #a78bfa;
+  --accent-orange: #fb923c;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --shadow-card: 0 2px 8px rgba(0,0,0,0.3), 0 1px 3px rgba(0,0,0,0.2);
+  --shadow-elevated: 0 8px 32px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.3);
+  --font-ui: 'DM Sans', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --toolbar-h: 56px;
+  --sidebar-w: 280px;
+  --preview-w: 420px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; overflow: hidden; }
+body {
+  font-family: var(--font-ui);
+  background: var(--bg-deep);
+  color: var(--text-primary);
+}
+
+/* ─── TOOLBAR ─── */
+.toolbar {
+  height: var(--toolbar-h);
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  gap: 12px;
+  z-index: 100;
+  position: relative;
+}
+.toolbar-brand {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--accent-teal);
+  letter-spacing: -0.5px;
+  white-space: nowrap;
+  padding-right: 12px;
+  border-right: 1px solid var(--border-subtle);
+}
+.toolbar-brand span { color: var(--text-muted); font-weight: 400; }
+
+.btn {
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 6px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-medium);
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+.btn:hover { background: var(--border-subtle); color: var(--text-primary); }
+.btn-primary {
+  background: var(--accent-teal);
+  color: #0f1117;
+  border-color: var(--accent-teal);
+  font-weight: 600;
+}
+.btn-primary:hover { filter: brightness(1.1); }
+.btn-sm { padding: 4px 10px; font-size: 11px; }
+.btn-icon {
+  width: 32px; height: 32px; padding: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+
+.toolbar-separator {
+  width: 1px; height: 24px; background: var(--border-subtle);
+}
+
+.search-box {
+  background: var(--bg-deep);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 6px 12px;
+  font-family: var(--font-ui);
+  font-size: 12px;
+  color: var(--text-primary);
+  width: 200px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.search-box:focus { border-color: var(--accent-teal); }
+.search-box::placeholder { color: var(--text-muted); }
+
+.toolbar-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+
+select.filter-select {
+  appearance: none;
+  background: var(--bg-deep) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%235c6178'/%3E%3C/svg%3E") no-repeat right 8px center;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 6px 28px 6px 10px;
+  font-family: var(--font-ui);
+  font-size: 12px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  outline: none;
+}
+select.filter-select:focus { border-color: var(--accent-teal); }
+
+/* ─── LAYOUT ─── */
+.app-layout {
+  display: flex;
+  height: calc(100vh - var(--toolbar-h));
+}
+
+/* ─── SIDEBAR ─── */
+.sidebar {
+  width: var(--sidebar-w);
+  min-width: var(--sidebar-w);
+  background: var(--bg-surface);
+  border-right: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: width 0.2s, min-width 0.2s;
+}
+.sidebar.collapsed { width: 0; min-width: 0; }
+
+.sidebar-header {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.sidebar-title {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--text-muted);
+}
+.file-count {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  background: var(--bg-deep);
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.sidebar-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 6px;
+}
+.sidebar-list::-webkit-scrollbar { width: 4px; }
+.sidebar-list::-webkit-scrollbar-thumb { background: var(--border-medium); border-radius: 4px; }
+
+.file-item {
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: background 0.1s;
+  border: 1px solid transparent;
+  margin-bottom: 2px;
+}
+.file-item:hover { background: var(--bg-elevated); }
+.file-item.selected {
+  background: var(--accent-teal-dim);
+  border-color: rgba(56, 189, 248, 0.3);
+}
+.file-item.on-board { opacity: 0.5; }
+.file-item-name {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.file-item-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.file-item-size {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-muted);
+}
+.tag-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.rev-badge {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--accent-amber);
+  background: rgba(245, 158, 11, 0.12);
+  padding: 1px 6px;
+  border-radius: 8px;
+}
+
+/* ─── COLLECTIONS ─── */
+.collections-section {
+  border-top: 1px solid var(--border-subtle);
+  padding: 10px 14px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+.collection-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 12px;
+  transition: background 0.1s;
+}
+.collection-item:hover { background: var(--bg-elevated); }
+.collection-item.active { background: var(--accent-teal-dim); }
+.collection-dot {
+  width: 10px; height: 10px;
+  border-radius: 3px;
+}
+.collection-count {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-muted);
+}
+.add-collection {
+  font-size: 11px;
+  color: var(--accent-teal);
+  cursor: pointer;
+  padding: 4px 8px;
+  margin-top: 4px;
+}
+.add-collection:hover { text-decoration: underline; }
+
+/* ─── WHITEBOARD ─── */
+.board-container {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  background: var(--bg-deep);
+  background-image:
+    radial-gradient(circle, var(--border-subtle) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+.board-canvas {
+  position: absolute;
+  top: 0; left: 0;
+  width: 6000px;
+  height: 6000px;
+  transform-origin: 0 0;
+}
+
+/* Board Card */
+.board-card {
+  position: absolute;
+  width: 260px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  cursor: grab;
+  user-select: none;
+  transition: box-shadow 0.15s, border-color 0.15s;
+  overflow: hidden;
+}
+.board-card:hover {
+  border-color: var(--border-medium);
+  box-shadow: var(--shadow-elevated);
+}
+.board-card.dragging {
+  box-shadow: var(--shadow-elevated);
+  opacity: 0.92;
+  cursor: grabbing;
+  z-index: 1000;
+}
+.board-card.selected-card {
+  border-color: var(--accent-teal);
+  box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.25), var(--shadow-elevated);
+}
+.card-thumb {
+  width: 100%;
+  height: 160px;
+  background: #fff;
+  overflow: hidden;
+  position: relative;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.card-thumb iframe {
+  width: 1280px;
+  height: 800px;
+  transform: scale(0.203);
+  transform-origin: 0 0;
+  border: none;
+  pointer-events: none;
+}
+.card-body {
+  padding: 10px 12px;
+}
+.card-filename {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 6px;
+}
+.card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+.card-tag {
+  font-size: 10px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+.card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.card-rev {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--accent-amber);
+}
+.card-actions {
+  display: flex;
+  gap: 4px;
+}
+.card-action-btn {
+  width: 22px; height: 22px;
+  border: none;
+  background: var(--bg-elevated);
+  color: var(--text-muted);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.1s;
+}
+.card-action-btn:hover { color: var(--text-primary); background: var(--border-subtle); }
+.card-action-btn.remove-btn:hover { color: var(--accent-rose); }
+
+/* ─── STICKY NOTE ─── */
+.sticky-note {
+  position: absolute;
+  width: 180px;
+  min-height: 100px;
+  background: #fef3c7;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-card);
+  cursor: grab;
+  user-select: none;
+  padding: 10px 12px;
+  font-family: var(--font-ui);
+  font-size: 12px;
+  color: #78350f;
+  display: flex;
+  flex-direction: column;
+}
+.sticky-note.dragging { cursor: grabbing; opacity: 0.9; z-index: 1000; }
+.sticky-note textarea {
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: #78350f;
+  font-family: var(--font-ui);
+  font-size: 12px;
+  resize: none;
+  outline: none;
+  min-height: 60px;
+}
+.sticky-note .sticky-close {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #b45309;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.sticky-note:hover .sticky-close { opacity: 1; }
+.sticky-colors { display: flex; gap: 4px; margin-top: 6px; }
+.sticky-color-dot {
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: border-color 0.1s;
+}
+.sticky-color-dot:hover, .sticky-color-dot.active { border-color: rgba(0,0,0,0.3); }
+
+/* ─── PREVIEW PANEL ─── */
+.preview-panel {
+  width: var(--preview-w);
+  min-width: var(--preview-w);
+  background: var(--bg-surface);
+  border-left: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  transition: width 0.2s, min-width 0.2s;
+}
+.preview-panel.collapsed { width: 0; min-width: 0; overflow: hidden; }
+.preview-header {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.preview-header h3 {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+.preview-tabs {
+  display: flex;
+  gap: 2px;
+  padding: 4px;
+  background: var(--bg-deep);
+  border-radius: var(--radius-sm);
+}
+.preview-tab {
+  padding: 4px 10px;
+  font-size: 11px;
+  border-radius: 4px;
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: all 0.1s;
+}
+.preview-tab.active { background: var(--bg-elevated); color: var(--text-primary); }
+.preview-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.preview-frame-container {
+  flex: 1;
+  position: relative;
+  background: #fff;
+}
+.preview-frame-container iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+.preview-compare {
+  display: flex;
+  flex: 1;
+}
+.preview-compare > div {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--border-subtle);
+}
+.preview-compare > div:last-child { border-right: none; }
+.preview-compare-label {
+  padding: 4px 10px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  background: var(--bg-deep);
+  text-align: center;
+}
+.preview-compare iframe { flex: 1; width: 100%; border: none; }
+
+.preview-detail {
+  padding: 12px 14px;
+  border-top: 1px solid var(--border-subtle);
+  max-height: 200px;
+  overflow-y: auto;
+}
+.detail-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.detail-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  min-width: 60px;
+}
+.detail-value {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+/* ─── TAG MANAGER MODAL ─── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  backdrop-filter: blur(4px);
+}
+.modal-overlay.hidden { display: none; }
+.modal {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  width: 400px;
+  max-height: 500px;
+  overflow-y: auto;
+  box-shadow: var(--shadow-elevated);
+}
+.modal h2 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 14px;
+  color: var(--text-primary);
+}
+.modal-input {
+  width: 100%;
+  padding: 8px 12px;
+  background: var(--bg-deep);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  color: var(--text-primary);
+  outline: none;
+  margin-bottom: 10px;
+}
+.modal-input:focus { border-color: var(--accent-teal); }
+.color-picker-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.color-pick {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 3px solid transparent;
+  transition: border-color 0.1s, transform 0.1s;
+}
+.color-pick:hover { transform: scale(1.15); }
+.color-pick.active { border-color: var(--text-primary); }
+.tag-list-manage { display: flex; flex-direction: column; gap: 4px; }
+.tag-manage-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-elevated);
+}
+.tag-manage-item .tag-name { flex: 1; font-size: 12px; }
+.tag-manage-item .tag-delete {
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+.tag-manage-item .tag-delete:hover { color: var(--accent-rose); }
+
+/* ─── BOARD ZOOM CONTROLS ─── */
+.board-controls {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  display: flex;
+  gap: 4px;
+  z-index: 50;
+}
+.board-controls .btn {
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+.zoom-display {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+}
+
+/* ─── CONTEXT MENU ─── */
+.ctx-menu {
+  position: fixed;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-md);
+  padding: 4px;
+  min-width: 180px;
+  box-shadow: var(--shadow-elevated);
+  z-index: 10000;
+}
+.ctx-menu.hidden { display: none; }
+.ctx-item {
+  padding: 7px 12px;
+  font-size: 12px;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  transition: background 0.1s;
+}
+.ctx-item:hover { background: var(--bg-card); color: var(--text-primary); }
+.ctx-item.danger:hover { color: var(--accent-rose); }
+.ctx-divider { height: 1px; background: var(--border-subtle); margin: 4px 0; }
+
+/* ─── ONBOARDING / EMPTY STATE ─── */
+.empty-state {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  pointer-events: none;
+}
+.empty-state > * { pointer-events: auto; }
+.empty-state-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--accent-teal-dim);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+}
+.empty-state h2 {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.empty-state p {
+  font-size: 13px;
+  color: var(--text-muted);
+  text-align: center;
+  max-width: 320px;
+  line-height: 1.5;
+}
+
+/* ─── SCROLLBAR ─── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-medium); border-radius: 6px; }
+
+/* ─── TOAST ─── */
+.toast-container {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 99999;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+}
+.toast {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-md);
+  padding: 10px 18px;
+  font-size: 12px;
+  color: var(--text-primary);
+  box-shadow: var(--shadow-elevated);
+  animation: toastIn 0.25s ease;
+}
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+</style>
+</head>
+<body>
+
+<!-- TOOLBAR -->
+<div class="toolbar">
+  <div class="toolbar-brand">PM:WORKSPACE <span>v1</span></div>
+  <button class="btn btn-primary" id="btnScanFolder" title="Pick folder to scan">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
+    Scan Folder
+  </button>
+  <button class="btn" id="btnRefresh" title="Re-scan current folder">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+    Refresh
+  </button>
+
+  <div class="toolbar-separator"></div>
+
+  <input type="text" class="search-box" id="searchBox" placeholder="Filter files…">
+
+  <select class="filter-select" id="sortSelect">
+    <option value="name-asc">Name A-Z</option>
+    <option value="name-desc">Name Z-A</option>
+    <option value="size-asc">Size ↑</option>
+    <option value="size-desc">Size ↓</option>
+    <option value="rev-desc">Rev ↓</option>
+  </select>
+
+  <select class="filter-select" id="tagFilter">
+    <option value="">All Tags</option>
+  </select>
+
+  <div class="toolbar-separator"></div>
+
+  <button class="btn" id="btnAddSticky" title="Add sticky note">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M12 8v8M8 12h8"/></svg>
+    Sticky
+  </button>
+  <button class="btn" id="btnTagManager" title="Manage tags">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><circle cx="7" cy="7" r="1"/></svg>
+    Tags
+  </button>
+
+  <div class="toolbar-right">
+    <button class="btn btn-sm" id="btnToggleSidebar">Sidebar</button>
+    <button class="btn btn-sm" id="btnTogglePreview">Preview</button>
+    <button class="btn btn-sm" id="btnExport">
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+      Export
+    </button>
+  </div>
+</div>
+
+<!-- LAYOUT -->
+<div class="app-layout">
+  <!-- SIDEBAR -->
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <span class="sidebar-title">Files</span>
+      <span class="file-count" id="fileCount">0</span>
+    </div>
+    <div class="sidebar-list" id="fileList"></div>
+    <div class="collections-section">
+      <div class="sidebar-title" style="margin-bottom:8px;">Collections</div>
+      <div id="collectionsList"></div>
+      <div class="add-collection" id="addCollectionBtn">+ New Collection</div>
+    </div>
+  </div>
+
+  <!-- WHITEBOARD -->
+  <div class="board-container" id="boardContainer">
+    <div class="board-canvas" id="boardCanvas"></div>
+    <div class="empty-state" id="emptyState">
+      <div class="empty-state-icon">📂</div>
+      <h2>Open a Folder to Start</h2>
+      <p>Click <strong>Scan Folder</strong> to pick a directory. All .html files will be loaded and ready to organize.</p>
+      <button class="btn btn-primary" id="btnScanFolder2">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
+        Scan Folder
+      </button>
+    </div>
+    <div class="board-controls">
+      <button class="btn btn-icon" id="zoomOut" title="Zoom out">−</button>
+      <span class="zoom-display" id="zoomDisplay">100%</span>
+      <button class="btn btn-icon" id="zoomIn" title="Zoom in">+</button>
+      <button class="btn btn-icon" id="zoomFit" title="Reset view">⊡</button>
+    </div>
+  </div>
+
+  <!-- PREVIEW PANEL -->
+  <div class="preview-panel" id="previewPanel">
+    <div class="preview-header">
+      <h3 id="previewTitle">Preview</h3>
+      <div class="preview-tabs">
+        <div class="preview-tab active" data-mode="single">Single</div>
+        <div class="preview-tab" data-mode="compare">Compare</div>
+      </div>
+    </div>
+    <div class="preview-content" id="previewContent">
+      <div class="preview-frame-container" id="previewSingle">
+        <iframe id="previewFrame" sandbox="allow-same-origin"></iframe>
+      </div>
+      <div class="preview-compare" id="previewCompare" style="display:none;">
+        <div>
+          <div class="preview-compare-label" id="compareLabel1">—</div>
+          <iframe id="compareFrame1" sandbox="allow-same-origin"></iframe>
+        </div>
+        <div>
+          <div class="preview-compare-label" id="compareLabel2">—</div>
+          <iframe id="compareFrame2" sandbox="allow-same-origin"></iframe>
+        </div>
+      </div>
+    </div>
+    <div class="preview-detail" id="previewDetail"></div>
+  </div>
+</div>
+
+<!-- CONTEXT MENU -->
+<div class="ctx-menu hidden" id="ctxMenu"></div>
+
+<!-- TAG MANAGER MODAL -->
+<div class="modal-overlay hidden" id="tagModal">
+  <div class="modal">
+    <h2>Tag Manager</h2>
+    <input class="modal-input" id="newTagName" placeholder="New tag name…">
+    <div class="color-picker-row" id="tagColorPicker"></div>
+    <button class="btn btn-primary btn-sm" id="addTagBtn" style="margin-bottom:14px;">Add Tag</button>
+    <div class="tag-list-manage" id="tagListManage"></div>
+    <div style="margin-top:14px;text-align:right;">
+      <button class="btn btn-sm" id="closeTagModal">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST CONTAINER -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+/* ═══════════════════════════════════════════
+   STATE
+   ═══════════════════════════════════════════ */
+const STATE = {
+  dirHandle: null,
+  files: [],            // { name, size, content, handle, blob }
+  boardCards: [],        // { id, fileIdx, x, y, collection }
+  stickyNotes: [],       // { id, x, y, text, color }
+  tags: [],              // { name, color }
+  fileTags: {},          // fileName -> [tagName, ...]
+  fileRevs: {},          // fileName -> rev string
+  collections: [],       // { name, color }
+  fileCollections: {},   // fileName -> collectionName
+  selectedFiles: [],     // [fileIdx, ...]
+  compareFiles: [],      // [fileIdx, fileIdx]
+  previewMode: 'single',
+  zoom: 1,
+  panX: 0, panY: 0,
+  isPanning: false,
+  nextCardId: 1,
+  nextStickyId: 1,
+};
+
+const TAG_COLORS = [
+  '#38bdf8', '#34d399', '#f59e0b', '#f43f5e',
+  '#a78bfa', '#fb923c', '#ec4899', '#6ee7b7',
+  '#fbbf24', '#818cf8'
+];
+const STICKY_COLORS = ['#fef3c7', '#dcfce7', '#dbeafe', '#fce7f3', '#f3e8ff'];
+const COLLECTION_COLORS = ['#38bdf8', '#34d399', '#f59e0b', '#a78bfa', '#f43f5e', '#fb923c'];
+
+/* ═══════════════════════════════════════════
+   PERSISTENCE (localStorage)
+   ═══════════════════════════════════════════ */
+function saveState() {
+  try {
+    const s = {
+      boardCards: STATE.boardCards,
+      stickyNotes: STATE.stickyNotes,
+      tags: STATE.tags,
+      fileTags: STATE.fileTags,
+      fileRevs: STATE.fileRevs,
+      collections: STATE.collections,
+      fileCollections: STATE.fileCollections,
+      nextCardId: STATE.nextCardId,
+      nextStickyId: STATE.nextStickyId,
+    };
+    localStorage.setItem('pm-workspace-state', JSON.stringify(s));
+  } catch(e) {}
+}
+function loadState() {
+  try {
+    const raw = localStorage.getItem('pm-workspace-state');
+    if (!raw) return;
+    const s = JSON.parse(raw);
+    Object.assign(STATE, s);
+  } catch(e) {}
+}
+
+/* ═══════════════════════════════════════════
+   UTILITY
+   ═══════════════════════════════════════════ */
+function toast(msg) {
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.textContent = msg;
+  document.getElementById('toastContainer').appendChild(el);
+  setTimeout(() => el.remove(), 2500);
+}
+
+function humanSize(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024*1024) return (bytes/1024).toFixed(1) + ' KB';
+  return (bytes/(1024*1024)).toFixed(1) + ' MB';
+}
+
+function parseRevFromName(name) {
+  const m = name.match(/[_\-\s](?:rev|v|version)[\s_\-]?(\d+(?:\.\d+)?)/i);
+  if (m) return 'v' + m[1];
+  const m2 = name.match(/[_\-](\d+)(?:\.html?)$/i);
+  if (m2) return 'v' + m2[1];
+  return '';
+}
+
+/* ═══════════════════════════════════════════
+   FOLDER SCANNING
+   ═══════════════════════════════════════════ */
+async function scanFolder() {
+  try {
+    const dirHandle = await window.showDirectoryPicker({ mode: 'read' });
+    STATE.dirHandle = dirHandle;
+    await loadFiles();
+  } catch(e) {
+    if (e.name !== 'AbortError') toast('Error: ' + e.message);
+  }
+}
+
+async function loadFiles() {
+  if (!STATE.dirHandle) return;
+  STATE.files = [];
+  for await (const [name, handle] of STATE.dirHandle) {
+    if (handle.kind !== 'file') continue;
+    if (!name.toLowerCase().endsWith('.html') && !name.toLowerCase().endsWith('.htm')) continue;
+    // skip self
+    if (name === 'pm-workspace.html') continue;
+    try {
+      const file = await handle.getFile();
+      const content = await file.text();
+      STATE.files.push({
+        name,
+        size: file.size,
+        lastModified: file.lastModified,
+        content,
+        handle,
+      });
+    } catch(e) {}
+  }
+  // auto-detect revs
+  STATE.files.forEach(f => {
+    if (!STATE.fileRevs[f.name]) {
+      const r = parseRevFromName(f.name);
+      if (r) STATE.fileRevs[f.name] = r;
+    }
+  });
+  renderSidebar();
+  updateEmptyState();
+  toast(`Loaded ${STATE.files.length} HTML file${STATE.files.length !== 1 ? 's' : ''}`);
+  saveState();
+}
+
+/* ═══════════════════════════════════════════
+   SIDEBAR RENDERING
+   ═══════════════════════════════════════════ */
+function getFilteredFiles() {
+  const search = document.getElementById('searchBox').value.toLowerCase();
+  const tagFilt = document.getElementById('tagFilter').value;
+  let list = STATE.files.map((f, i) => ({ ...f, idx: i }));
+
+  if (search) list = list.filter(f => f.name.toLowerCase().includes(search));
+  if (tagFilt) list = list.filter(f => (STATE.fileTags[f.name] || []).includes(tagFilt));
+
+  const sort = document.getElementById('sortSelect').value;
+  list.sort((a, b) => {
+    switch(sort) {
+      case 'name-asc': return a.name.localeCompare(b.name);
+      case 'name-desc': return b.name.localeCompare(a.name);
+      case 'size-asc': return a.size - b.size;
+      case 'size-desc': return b.size - a.size;
+      case 'rev-desc':
+        const ra = (STATE.fileRevs[a.name] || '').replace(/\D/g, '') || '0';
+        const rb = (STATE.fileRevs[b.name] || '').replace(/\D/g, '') || '0';
+        return parseInt(rb) - parseInt(ra);
+      default: return 0;
+    }
+  });
+  return list;
+}
+
+function renderSidebar() {
+  const list = getFilteredFiles();
+  const el = document.getElementById('fileList');
+  const onBoard = new Set(STATE.boardCards.map(c => c.fileIdx));
+
+  el.innerHTML = list.map(f => {
+    const tags = STATE.fileTags[f.name] || [];
+    const rev = STATE.fileRevs[f.name] || '';
+    const col = STATE.fileCollections[f.name] || '';
+    const sel = STATE.selectedFiles.includes(f.idx);
+    const ob = onBoard.has(f.idx);
+
+    return `<div class="file-item ${sel ? 'selected' : ''} ${ob ? 'on-board' : ''}"
+      data-idx="${f.idx}"
+      ondblclick="addToBoard(${f.idx})"
+      onclick="selectFile(${f.idx}, event)"
+      oncontextmenu="showFileCtx(event, ${f.idx})">
+      <div class="file-item-name" title="${f.name}">${f.name}</div>
+      <div class="file-item-meta">
+        <span class="file-item-size">${humanSize(f.size)}</span>
+        ${rev ? `<span class="rev-badge">${rev}</span>` : ''}
+        ${tags.map(t => {
+          const tag = STATE.tags.find(tt => tt.name === t);
+          return tag ? `<span class="tag-dot" style="background:${tag.color}" title="${t}"></span>` : '';
+        }).join('')}
+      </div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('fileCount').textContent = STATE.files.length;
+  renderCollections();
+  updateTagFilter();
+}
+
+/* ═══════════════════════════════════════════
+   FILE SELECTION & PREVIEW
+   ═══════════════════════════════════════════ */
+function selectFile(idx, event) {
+  if (event && event.ctrlKey) {
+    const i = STATE.selectedFiles.indexOf(idx);
+    if (i >= 0) STATE.selectedFiles.splice(i, 1);
+    else STATE.selectedFiles.push(idx);
+  } else if (event && event.shiftKey && STATE.selectedFiles.length) {
+    // range select
+    const last = STATE.selectedFiles[STATE.selectedFiles.length - 1];
+    const start = Math.min(last, idx), end = Math.max(last, idx);
+    for (let i = start; i <= end; i++) {
+      if (!STATE.selectedFiles.includes(i)) STATE.selectedFiles.push(i);
+    }
+  } else {
+    STATE.selectedFiles = [idx];
+  }
+  renderSidebar();
+  updatePreview();
+}
+
+function updatePreview() {
+  const panel = document.getElementById('previewPanel');
+  if (panel.classList.contains('collapsed')) return;
+
+  if (STATE.previewMode === 'single') {
+    const idx = STATE.selectedFiles[STATE.selectedFiles.length - 1];
+    if (idx != null && STATE.files[idx]) {
+      const f = STATE.files[idx];
+      document.getElementById('previewTitle').textContent = f.name;
+      const blob = new Blob([f.content], { type: 'text/html' });
+      document.getElementById('previewFrame').src = URL.createObjectURL(blob);
+      renderPreviewDetail(f);
+    }
+  } else if (STATE.previewMode === 'compare') {
+    const picks = STATE.selectedFiles.slice(-2);
+    if (picks.length >= 2) {
+      const f1 = STATE.files[picks[0]], f2 = STATE.files[picks[1]];
+      document.getElementById('compareLabel1').textContent = f1.name;
+      document.getElementById('compareLabel2').textContent = f2.name;
+      document.getElementById('compareFrame1').src = URL.createObjectURL(new Blob([f1.content], {type:'text/html'}));
+      document.getElementById('compareFrame2').src = URL.createObjectURL(new Blob([f2.content], {type:'text/html'}));
+      document.getElementById('previewTitle').textContent = 'Comparing';
+    }
+  }
+}
+
+function renderPreviewDetail(f) {
+  const tags = STATE.fileTags[f.name] || [];
+  const rev = STATE.fileRevs[f.name] || '—';
+  const col = STATE.fileCollections[f.name] || '—';
+  document.getElementById('previewDetail').innerHTML = `
+    <div class="detail-row"><span class="detail-label">File</span><span class="detail-value">${f.name}</span></div>
+    <div class="detail-row"><span class="detail-label">Size</span><span class="detail-value">${humanSize(f.size)}</span></div>
+    <div class="detail-row"><span class="detail-label">Rev</span><span class="detail-value" style="color:var(--accent-amber)">${rev}</span></div>
+    <div class="detail-row"><span class="detail-label">Tags</span><span class="detail-value">${tags.length ? tags.join(', ') : '—'}</span></div>
+    <div class="detail-row"><span class="detail-label">Group</span><span class="detail-value">${col}</span></div>
+  `;
+}
+
+/* ═══════════════════════════════════════════
+   BOARD: ADD / REMOVE CARDS
+   ═══════════════════════════════════════════ */
+function addToBoard(fileIdx) {
+  if (STATE.boardCards.find(c => c.fileIdx === fileIdx)) {
+    toast('Already on board');
+    return;
+  }
+  // place near center of current view
+  const cx = (-STATE.panX + window.innerWidth / 2) / STATE.zoom;
+  const cy = (-STATE.panY + window.innerHeight / 2) / STATE.zoom;
+  const jitter = () => (Math.random() - 0.5) * 120;
+
+  const card = {
+    id: STATE.nextCardId++,
+    fileIdx,
+    x: cx + jitter(),
+    y: cy + jitter(),
+    collection: STATE.fileCollections[STATE.files[fileIdx].name] || '',
+  };
+  STATE.boardCards.push(card);
+  renderBoardCard(card);
+  renderSidebar();
+  saveState();
+  toast(`Added "${STATE.files[fileIdx].name}" to board`);
+}
+
+function removeFromBoard(cardId) {
+  const idx = STATE.boardCards.findIndex(c => c.id === cardId);
+  if (idx >= 0) STATE.boardCards.splice(idx, 1);
+  const el = document.querySelector(`[data-card-id="${cardId}"]`);
+  if (el) el.remove();
+  renderSidebar();
+  saveState();
+}
+
+function renderBoardCard(card) {
+  const f = STATE.files[card.fileIdx];
+  if (!f) return;
+
+  const el = document.createElement('div');
+  el.className = 'board-card';
+  el.dataset.cardId = card.id;
+  el.style.left = card.x + 'px';
+  el.style.top = card.y + 'px';
+
+  const tags = STATE.fileTags[f.name] || [];
+  const rev = STATE.fileRevs[f.name] || '';
+
+  const blob = new Blob([f.content], { type: 'text/html' });
+  const blobUrl = URL.createObjectURL(blob);
+
+  el.innerHTML = `
+    <div class="card-thumb">
+      <iframe src="${blobUrl}" sandbox="allow-same-origin" loading="lazy"></iframe>
+    </div>
+    <div class="card-body">
+      <div class="card-filename" title="${f.name}">${f.name}</div>
+      <div class="card-tags">
+        ${tags.map(t => {
+          const tag = STATE.tags.find(tt => tt.name === t);
+          const bg = tag ? tag.color : '#666';
+          return `<span class="card-tag" style="background:${bg}22;color:${bg};border:1px solid ${bg}44">${t}</span>`;
+        }).join('')}
+      </div>
+      <div class="card-footer">
+        <span class="card-rev">${rev}</span>
+        <div class="card-actions">
+          <button class="card-action-btn" onclick="event.stopPropagation();selectFile(${card.fileIdx})" title="Preview">👁</button>
+          <button class="card-action-btn remove-btn" onclick="event.stopPropagation();removeFromBoard(${card.id})" title="Remove">✕</button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  el.addEventListener('contextmenu', e => showCardCtx(e, card.id));
+  el.addEventListener('click', (e) => {
+    document.querySelectorAll('.board-card').forEach(c => c.classList.remove('selected-card'));
+    el.classList.add('selected-card');
+    selectFile(card.fileIdx, e);
+  });
+
+  makeDraggable(el, card);
+  document.getElementById('boardCanvas').appendChild(el);
+}
+
+function refreshBoardCards() {
+  document.querySelectorAll('.board-card').forEach(el => el.remove());
+  STATE.boardCards.forEach(c => renderBoardCard(c));
+}
+
+/* ═══════════════════════════════════════════
+   DRAGGING (CARDS & STICKIES)
+   ═══════════════════════════════════════════ */
+function makeDraggable(el, stateObj) {
+  let startX, startY, origX, origY;
+
+  el.addEventListener('pointerdown', e => {
+    if (e.target.closest('.card-action-btn, .card-tag, textarea, .sticky-close, .sticky-color-dot')) return;
+    e.preventDefault();
+    el.classList.add('dragging');
+    el.setPointerCapture(e.pointerId);
+
+    startX = e.clientX;
+    startY = e.clientY;
+    origX = stateObj.x;
+    origY = stateObj.y;
+
+    const onMove = ev => {
+      const dx = (ev.clientX - startX) / STATE.zoom;
+      const dy = (ev.clientY - startY) / STATE.zoom;
+      stateObj.x = origX + dx;
+      stateObj.y = origY + dy;
+      el.style.left = stateObj.x + 'px';
+      el.style.top = stateObj.y + 'px';
+    };
+    const onUp = () => {
+      el.classList.remove('dragging');
+      el.removeEventListener('pointermove', onMove);
+      el.removeEventListener('pointerup', onUp);
+      saveState();
+    };
+    el.addEventListener('pointermove', onMove);
+    el.addEventListener('pointerup', onUp);
+  });
+}
+
+/* ═══════════════════════════════════════════
+   PAN & ZOOM
+   ═══════════════════════════════════════════ */
+function applyTransform() {
+  const canvas = document.getElementById('boardCanvas');
+  canvas.style.transform = `translate(${STATE.panX}px, ${STATE.panY}px) scale(${STATE.zoom})`;
+  document.getElementById('zoomDisplay').textContent = Math.round(STATE.zoom * 100) + '%';
+}
+
+function initPanZoom() {
+  const container = document.getElementById('boardContainer');
+
+  container.addEventListener('pointerdown', e => {
+    if (e.target !== container && !e.target.closest('.board-canvas-bg')) return;
+    if (e.button === 1 || (e.button === 0 && e.target === container)) {
+      STATE.isPanning = true;
+      container.style.cursor = 'grabbing';
+      const sx = e.clientX, sy = e.clientY;
+      const ox = STATE.panX, oy = STATE.panY;
+
+      const onMove = ev => {
+        STATE.panX = ox + (ev.clientX - sx);
+        STATE.panY = oy + (ev.clientY - sy);
+        applyTransform();
+      };
+      const onUp = () => {
+        STATE.isPanning = false;
+        container.style.cursor = '';
+        window.removeEventListener('pointermove', onMove);
+        window.removeEventListener('pointerup', onUp);
+      };
+      window.addEventListener('pointermove', onMove);
+      window.addEventListener('pointerup', onUp);
+    }
+  });
+
+  container.addEventListener('wheel', e => {
+    e.preventDefault();
+    const factor = e.deltaY > 0 ? 0.92 : 1.08;
+    const newZoom = Math.max(0.15, Math.min(3, STATE.zoom * factor));
+
+    // zoom toward cursor
+    const rect = container.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+    STATE.panX = mx - (mx - STATE.panX) * (newZoom / STATE.zoom);
+    STATE.panY = my - (my - STATE.panY) * (newZoom / STATE.zoom);
+    STATE.zoom = newZoom;
+    applyTransform();
+  }, { passive: false });
+
+  document.getElementById('zoomIn').onclick = () => { STATE.zoom = Math.min(3, STATE.zoom * 1.2); applyTransform(); };
+  document.getElementById('zoomOut').onclick = () => { STATE.zoom = Math.max(0.15, STATE.zoom / 1.2); applyTransform(); };
+  document.getElementById('zoomFit').onclick = () => { STATE.zoom = 1; STATE.panX = 0; STATE.panY = 0; applyTransform(); };
+}
+
+/* ═══════════════════════════════════════════
+   STICKY NOTES
+   ═══════════════════════════════════════════ */
+function addStickyNote() {
+  const cx = (-STATE.panX + window.innerWidth / 2) / STATE.zoom;
+  const cy = (-STATE.panY + window.innerHeight / 2) / STATE.zoom;
+  const note = {
+    id: STATE.nextStickyId++,
+    x: cx + (Math.random() - 0.5) * 100,
+    y: cy + (Math.random() - 0.5) * 100,
+    text: '',
+    color: STICKY_COLORS[0],
+  };
+  STATE.stickyNotes.push(note);
+  renderStickyNote(note);
+  saveState();
+}
+
+function renderStickyNote(note) {
+  const el = document.createElement('div');
+  el.className = 'sticky-note';
+  el.dataset.stickyId = note.id;
+  el.style.left = note.x + 'px';
+  el.style.top = note.y + 'px';
+  el.style.background = note.color;
+
+  el.innerHTML = `
+    <span class="sticky-close" onclick="removeStickyNote(${note.id})">✕</span>
+    <textarea placeholder="Write a note…">${note.text}</textarea>
+    <div class="sticky-colors">
+      ${STICKY_COLORS.map(c =>
+        `<div class="sticky-color-dot ${c === note.color ? 'active' : ''}"
+          style="background:${c}" onclick="changeStickyColor(${note.id}, '${c}', this)"></div>`
+      ).join('')}
+    </div>
+  `;
+
+  el.querySelector('textarea').addEventListener('input', e => {
+    note.text = e.target.value;
+    saveState();
+  });
+
+  makeDraggable(el, note);
+  document.getElementById('boardCanvas').appendChild(el);
+}
+
+function removeStickyNote(id) {
+  const idx = STATE.stickyNotes.findIndex(n => n.id === id);
+  if (idx >= 0) STATE.stickyNotes.splice(idx, 1);
+  const el = document.querySelector(`[data-sticky-id="${id}"]`);
+  if (el) el.remove();
+  saveState();
+}
+
+function changeStickyColor(id, color, dot) {
+  const note = STATE.stickyNotes.find(n => n.id === id);
+  if (note) {
+    note.color = color;
+    const el = document.querySelector(`[data-sticky-id="${id}"]`);
+    if (el) {
+      el.style.background = color;
+      el.querySelectorAll('.sticky-color-dot').forEach(d => d.classList.remove('active'));
+      dot.classList.add('active');
+    }
+    saveState();
+  }
+}
+
+function refreshStickies() {
+  document.querySelectorAll('.sticky-note').forEach(el => el.remove());
+  STATE.stickyNotes.forEach(n => renderStickyNote(n));
+}
+
+/* ═══════════════════════════════════════════
+   TAGS
+   ═══════════════════════════════════════════ */
+let selectedTagColor = TAG_COLORS[0];
+
+function initTagModal() {
+  const picker = document.getElementById('tagColorPicker');
+  picker.innerHTML = TAG_COLORS.map(c =>
+    `<div class="color-pick ${c === selectedTagColor ? 'active' : ''}"
+      style="background:${c}" onclick="pickTagColor('${c}', this)"></div>`
+  ).join('');
+}
+
+function pickTagColor(c, el) {
+  selectedTagColor = c;
+  document.querySelectorAll('#tagColorPicker .color-pick').forEach(d => d.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function renderTagList() {
+  document.getElementById('tagListManage').innerHTML = STATE.tags.map((t, i) => `
+    <div class="tag-manage-item">
+      <span class="tag-dot" style="background:${t.color}"></span>
+      <span class="tag-name">${t.name}</span>
+      <span class="tag-delete" onclick="deleteTag(${i})">✕</span>
+    </div>
+  `).join('');
+}
+
+function addTag() {
+  const name = document.getElementById('newTagName').value.trim();
+  if (!name) return;
+  if (STATE.tags.find(t => t.name === name)) { toast('Tag already exists'); return; }
+  STATE.tags.push({ name, color: selectedTagColor });
+  document.getElementById('newTagName').value = '';
+  renderTagList();
+  updateTagFilter();
+  saveState();
+  toast(`Tag "${name}" created`);
+}
+
+function deleteTag(idx) {
+  const name = STATE.tags[idx].name;
+  STATE.tags.splice(idx, 1);
+  // clean up references
+  for (const fn in STATE.fileTags) {
+    STATE.fileTags[fn] = STATE.fileTags[fn].filter(t => t !== name);
+  }
+  renderTagList();
+  renderSidebar();
+  refreshBoardCards();
+  saveState();
+}
+
+function toggleFileTag(fileName, tagName) {
+  if (!STATE.fileTags[fileName]) STATE.fileTags[fileName] = [];
+  const arr = STATE.fileTags[fileName];
+  const idx = arr.indexOf(tagName);
+  if (idx >= 0) arr.splice(idx, 1);
+  else arr.push(tagName);
+  renderSidebar();
+  refreshBoardCards();
+  saveState();
+}
+
+function updateTagFilter() {
+  const sel = document.getElementById('tagFilter');
+  const val = sel.value;
+  sel.innerHTML = '<option value="">All Tags</option>' +
+    STATE.tags.map(t => `<option value="${t.name}">${t.name}</option>`).join('');
+  sel.value = val;
+}
+
+/* ═══════════════════════════════════════════
+   COLLECTIONS
+   ═══════════════════════════════════════════ */
+function renderCollections() {
+  const el = document.getElementById('collectionsList');
+  el.innerHTML = STATE.collections.map((c, i) => {
+    const count = Object.values(STATE.fileCollections).filter(v => v === c.name).length;
+    return `<div class="collection-item" onclick="filterByCollection('${c.name}')"
+      oncontextmenu="showCollectionCtx(event, ${i})">
+      <span class="collection-dot" style="background:${c.color}"></span>
+      <span>${c.name}</span>
+      <span class="collection-count">${count}</span>
+    </div>`;
+  }).join('');
+}
+
+function addCollection() {
+  const name = prompt('Collection name:');
+  if (!name || !name.trim()) return;
+  if (STATE.collections.find(c => c.name === name.trim())) { toast('Already exists'); return; }
+  STATE.collections.push({
+    name: name.trim(),
+    color: COLLECTION_COLORS[STATE.collections.length % COLLECTION_COLORS.length]
+  });
+  renderCollections();
+  saveState();
+  toast(`Collection "${name.trim()}" created`);
+}
+
+function assignCollection(fileName, colName) {
+  STATE.fileCollections[fileName] = colName;
+  // update board card if present
+  const fIdx = STATE.files.findIndex(f => f.name === fileName);
+  const bc = STATE.boardCards.find(c => c.fileIdx === fIdx);
+  if (bc) bc.collection = colName;
+  renderSidebar();
+  saveState();
+}
+
+function filterByCollection(colName) {
+  // select all files in this collection
+  STATE.selectedFiles = [];
+  STATE.files.forEach((f, i) => {
+    if (STATE.fileCollections[f.name] === colName) STATE.selectedFiles.push(i);
+  });
+  renderSidebar();
+  toast(`Showing "${colName}" collection`);
+}
+
+/* ═══════════════════════════════════════════
+   REV MANAGEMENT
+   ═══════════════════════════════════════════ */
+function setRev(fileName) {
+  const current = STATE.fileRevs[fileName] || '';
+  const rev = prompt('Set revision (e.g. v1, v2.1, RC1):', current);
+  if (rev === null) return;
+  STATE.fileRevs[fileName] = rev;
+  renderSidebar();
+  refreshBoardCards();
+  saveState();
+}
+
+/* ═══════════════════════════════════════════
+   CONTEXT MENUS
+   ═══════════════════════════════════════════ */
+function showCtxMenu(e, items) {
+  e.preventDefault();
+  const menu = document.getElementById('ctxMenu');
+  menu.innerHTML = items.map(item => {
+    if (item === '---') return '<div class="ctx-divider"></div>';
+    return `<div class="ctx-item ${item.danger ? 'danger' : ''}" onclick="(${item.fn})();hideCtxMenu();">${item.label}</div>`;
+  }).join('');
+  menu.classList.remove('hidden');
+  menu.style.left = e.clientX + 'px';
+  menu.style.top = e.clientY + 'px';
+  // keep on screen
+  requestAnimationFrame(() => {
+    const r = menu.getBoundingClientRect();
+    if (r.right > window.innerWidth) menu.style.left = (window.innerWidth - r.width - 8) + 'px';
+    if (r.bottom > window.innerHeight) menu.style.top = (window.innerHeight - r.height - 8) + 'px';
+  });
+}
+function hideCtxMenu() { document.getElementById('ctxMenu').classList.add('hidden'); }
+document.addEventListener('click', hideCtxMenu);
+
+function showFileCtx(e, idx) {
+  const f = STATE.files[idx];
+  const onBoard = STATE.boardCards.find(c => c.fileIdx === idx);
+  const items = [
+    { label: onBoard ? '✓ On Board' : '▸ Add to Board', fn: `function(){addToBoard(${idx})}` },
+    '---',
+    { label: '✎ Set Revision', fn: `function(){setRev('${f.name.replace(/'/g, "\\'")}')}`},
+    '---',
+  ];
+  STATE.tags.forEach(t => {
+    const has = (STATE.fileTags[f.name] || []).includes(t.name);
+    items.push({ label: `${has ? '✓' : '○'} ${t.name}`, fn: `function(){toggleFileTag('${f.name.replace(/'/g, "\\'")}','${t.name.replace(/'/g, "\\'")}')}` });
+  });
+  if (STATE.collections.length) {
+    items.push('---');
+    STATE.collections.forEach(c => {
+      const has = STATE.fileCollections[f.name] === c.name;
+      items.push({ label: `${has ? '◉' : '○'} ${c.name}`, fn: `function(){assignCollection('${f.name.replace(/'/g, "\\'")}','${c.name.replace(/'/g, "\\'")}')}` });
+    });
+  }
+  showCtxMenu(e, items);
+}
+
+function showCardCtx(e, cardId) {
+  const card = STATE.boardCards.find(c => c.id === cardId);
+  if (!card) return;
+  const f = STATE.files[card.fileIdx];
+  const items = [
+    { label: '👁 Preview', fn: `function(){selectFile(${card.fileIdx})}` },
+    { label: '✎ Set Revision', fn: `function(){setRev('${f.name.replace(/'/g, "\\'")}')}` },
+    '---',
+  ];
+  STATE.tags.forEach(t => {
+    const has = (STATE.fileTags[f.name] || []).includes(t.name);
+    items.push({ label: `${has ? '✓' : '○'} ${t.name}`, fn: `function(){toggleFileTag('${f.name.replace(/'/g, "\\'")}','${t.name.replace(/'/g, "\\'")}')}` });
+  });
+  items.push('---');
+  items.push({ label: 'Remove from board', fn: `function(){removeFromBoard(${cardId})}`, danger: true });
+  showCtxMenu(e, items);
+}
+
+function showCollectionCtx(e, idx) {
+  e.preventDefault();
+  const c = STATE.collections[idx];
+  showCtxMenu(e, [
+    { label: '🔍 Show files', fn: `function(){filterByCollection('${c.name.replace(/'/g, "\\'")}')}` },
+    { label: '🗑 Delete collection', fn: `function(){
+      STATE.collections.splice(${idx}, 1);
+      for(const k in STATE.fileCollections) { if(STATE.fileCollections[k]==='${c.name.replace(/'/g, "\\'")}') delete STATE.fileCollections[k]; }
+      renderCollections();
+      saveState();
+      toast('Collection deleted');
+    }`, danger: true },
+  ]);
+}
+
+/* ═══════════════════════════════════════════
+   EXPORT
+   ═══════════════════════════════════════════ */
+function exportManifest() {
+  const manifest = {
+    exported: new Date().toISOString(),
+    files: STATE.files.map(f => ({
+      name: f.name,
+      size: f.size,
+      rev: STATE.fileRevs[f.name] || null,
+      tags: STATE.fileTags[f.name] || [],
+      collection: STATE.fileCollections[f.name] || null,
+      onBoard: STATE.boardCards.some(c => STATE.files[c.fileIdx]?.name === f.name),
+    })),
+    collections: STATE.collections,
+    boardLayout: STATE.boardCards.map(c => ({
+      file: STATE.files[c.fileIdx]?.name,
+      x: Math.round(c.x),
+      y: Math.round(c.y),
+    })),
+    notes: STATE.stickyNotes.map(n => ({
+      text: n.text,
+      x: Math.round(n.x),
+      y: Math.round(n.y),
+    })),
+  };
+  const blob = new Blob([JSON.stringify(manifest, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'pm-workspace-manifest.json';
+  a.click();
+  toast('Manifest exported');
+}
+
+/* ═══════════════════════════════════════════
+   UI TOGGLING & MISC
+   ═══════════════════════════════════════════ */
+function updateEmptyState() {
+  document.getElementById('emptyState').style.display = STATE.files.length ? 'none' : 'flex';
+}
+
+function initPreviewTabs() {
+  document.querySelectorAll('.preview-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.preview-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      STATE.previewMode = tab.dataset.mode;
+      document.getElementById('previewSingle').style.display = STATE.previewMode === 'single' ? '' : 'none';
+      document.getElementById('previewCompare').style.display = STATE.previewMode === 'compare' ? 'flex' : 'none';
+      updatePreview();
+    });
+  });
+}
+
+/* ═══════════════════════════════════════════
+   INIT
+   ═══════════════════════════════════════════ */
+function init() {
+  loadState();
+
+  // Default tags
+  if (!STATE.tags.length) {
+    STATE.tags = [
+      { name: 'approved', color: '#34d399' },
+      { name: 'WIP', color: '#f59e0b' },
+      { name: 'review', color: '#38bdf8' },
+      { name: 'archived', color: '#5c6178' },
+    ];
+    saveState();
+  }
+  if (!STATE.collections.length) {
+    STATE.collections = [
+      { name: 'Final Build', color: '#34d399' },
+      { name: 'Candidates', color: '#38bdf8' },
+    ];
+    saveState();
+  }
+
+  initPanZoom();
+  initPreviewTabs();
+  initTagModal();
+  renderTagList();
+  renderSidebar();
+  updateEmptyState();
+
+  // Restore board items after files load
+  refreshBoardCards();
+  refreshStickies();
+
+  // Event bindings
+  document.getElementById('btnScanFolder').onclick = scanFolder;
+  document.getElementById('btnScanFolder2').onclick = scanFolder;
+  document.getElementById('btnRefresh').onclick = loadFiles;
+  document.getElementById('btnAddSticky').onclick = addStickyNote;
+  document.getElementById('btnExport').onclick = exportManifest;
+  document.getElementById('addCollectionBtn').onclick = addCollection;
+
+  document.getElementById('btnToggleSidebar').onclick = () => {
+    document.getElementById('sidebar').classList.toggle('collapsed');
+  };
+  document.getElementById('btnTogglePreview').onclick = () => {
+    document.getElementById('previewPanel').classList.toggle('collapsed');
+  };
+
+  document.getElementById('searchBox').addEventListener('input', renderSidebar);
+  document.getElementById('sortSelect').addEventListener('change', renderSidebar);
+  document.getElementById('tagFilter').addEventListener('change', renderSidebar);
+
+  document.getElementById('btnTagManager').onclick = () => {
+    document.getElementById('tagModal').classList.remove('hidden');
+    initTagModal();
+    renderTagList();
+  };
+  document.getElementById('closeTagModal').onclick = () => {
+    document.getElementById('tagModal').classList.add('hidden');
+  };
+  document.getElementById('addTagBtn').onclick = addTag;
+  document.getElementById('newTagName').addEventListener('keydown', e => {
+    if (e.key === 'Enter') addTag();
+  });
+
+  // close modal on overlay click
+  document.getElementById('tagModal').addEventListener('click', e => {
+    if (e.target.id === 'tagModal') e.target.classList.add('hidden');
+  });
+
+  // Check API support
+  if (!('showDirectoryPicker' in window)) {
+    toast('⚠ File System Access API not supported. Use Chrome or Edge.');
+  }
+}
+
+init();
+</script>
+</body>
+</html>

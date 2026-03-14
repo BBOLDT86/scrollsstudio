@@ -1,0 +1,1728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Open Intranet — Build Workspace</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,300;1,9..40,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f4f3ef;
+  --bg-deep: #eae9e4;
+  --bg-card: #ffffff;
+  --bg-card-hover: #fafaf8;
+  --border: rgba(0,0,0,0.06);
+  --border-strong: rgba(0,0,0,0.12);
+  --border-focus: rgba(0,0,0,0.22);
+  --text: #1a1a1a;
+  --text-mid: #4a4a4a;
+  --text-muted: #888;
+  --text-dim: #b0b0b0;
+  --green: #1a8a5c;
+  --green-bg: rgba(26,138,92,0.07);
+  --green-light: rgba(26,138,92,0.12);
+  --blue: #2d6bcf;
+  --blue-bg: rgba(45,107,207,0.06);
+  --blue-light: rgba(45,107,207,0.12);
+  --warm: #c4723a;
+  --warm-bg: rgba(196,114,58,0.07);
+  --warm-light: rgba(196,114,58,0.12);
+  --purple: #7c5cbf;
+  --purple-bg: rgba(124,92,191,0.06);
+  --purple-light: rgba(124,92,191,0.12);
+  --red: #d04040;
+  --red-bg: rgba(208,64,64,0.07);
+  --sidebar-w: 240px;
+  --header-h: 56px;
+  --radius: 10px;
+  --radius-sm: 6px;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'DM Sans', -apple-system, sans-serif;
+  background: var(--bg); color: var(--text);
+  height: 100vh; width: 100vw; overflow: hidden;
+  -webkit-font-smoothing: antialiased; font-size: 14px;
+}
+.app { display: flex; height: 100vh; }
+
+/* ── SIDEBAR ── */
+.sidebar {
+  width: var(--sidebar-w); min-width: var(--sidebar-w);
+  background: #1a1a1a; color: #fff;
+  display: flex; flex-direction: column;
+  border-right: 1px solid rgba(255,255,255,0.04); z-index: 50;
+}
+.sidebar-brand { padding: 20px 22px 16px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+.sidebar-brand h1 { font-family: 'Instrument Serif', serif; font-weight: 400; font-size: 1.15rem; letter-spacing: -0.3px; line-height: 1.2; }
+.sidebar-brand .sub { font-size: 0.68rem; color: rgba(255,255,255,0.35); letter-spacing: 2px; text-transform: uppercase; margin-top: 4px; font-weight: 500; }
+.sidebar-nav { flex: 1; padding: 12px 10px; overflow-y: auto; }
+.sidebar-nav::-webkit-scrollbar { width: 0; }
+.nav-section-label { font-size: 0.62rem; text-transform: uppercase; letter-spacing: 2px; color: rgba(255,255,255,0.25); padding: 16px 12px 6px; font-weight: 600; }
+.nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 7px; cursor: pointer; transition: all 0.15s; font-size: 0.82rem; color: rgba(255,255,255,0.55); font-weight: 400; position: relative; }
+.nav-item:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.85); }
+.nav-item.active { background: rgba(255,255,255,0.1); color: #fff; font-weight: 500; }
+.nav-item .icon { width: 18px; text-align: center; font-size: 0.9rem; opacity: 0.7; flex-shrink: 0; }
+.nav-item.active .icon { opacity: 1; }
+.nav-item .badge { margin-left: auto; background: var(--warm); color: #fff; font-size: 0.6rem; font-weight: 700; padding: 1px 6px; border-radius: 8px; min-width: 18px; text-align: center; }
+.sidebar-footer { padding: 14px 22px; border-top: 1px solid rgba(255,255,255,0.06); font-size: 0.7rem; color: rgba(255,255,255,0.2); }
+
+/* ── MAIN ── */
+.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.header { height: var(--header-h); min-height: var(--header-h); display: flex; align-items: center; justify-content: space-between; padding: 0 28px; background: var(--bg); border-bottom: 1px solid var(--border); }
+.header-left { display: flex; align-items: center; gap: 14px; }
+.header-left h2 { font-family: 'Instrument Serif', serif; font-weight: 400; font-size: 1.2rem; letter-spacing: -0.3px; }
+.header-left .page-desc { font-size: 0.76rem; color: var(--text-muted); padding-left: 14px; border-left: 1px solid var(--border-strong); }
+.header-actions { display: flex; align-items: center; gap: 8px; }
+.btn { font-family: 'DM Sans', sans-serif; font-size: 0.78rem; font-weight: 500; padding: 7px 14px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--bg-card); color: var(--text); cursor: pointer; transition: all 0.15s; display: inline-flex; align-items: center; gap: 6px; }
+.btn:hover { border-color: var(--border-strong); box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+.btn-primary { background: var(--text); color: #fff; border-color: var(--text); }
+.btn-primary:hover { background: #333; }
+.btn-sm { padding: 5px 10px; font-size: 0.72rem; }
+.btn-ghost { background: transparent; border-color: transparent; }
+.btn-ghost:hover { background: rgba(0,0,0,0.04); border-color: transparent; }
+.btn-green { background: var(--green); color: #fff; border-color: var(--green); }
+.btn-green:hover { background: #168050; }
+.content { flex: 1; overflow-y: auto; padding: 24px 28px 40px; }
+.content::-webkit-scrollbar { width: 6px; }
+.content::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 3px; }
+.view { display: none; }
+.view.active { display: block; }
+
+/* ── DASHBOARD ── */
+.dash-greeting { margin-bottom: 28px; }
+.dash-greeting h2 { font-family: 'Instrument Serif', serif; font-weight: 400; font-size: 1.8rem; letter-spacing: -0.5px; margin-bottom: 4px; }
+.dash-greeting p { color: var(--text-muted); font-size: 0.88rem; }
+.metrics-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 28px; }
+.metric-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; transition: border-color 0.2s; }
+.metric-card:hover { border-color: var(--border-strong); }
+.metric-label { font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1.5px; font-weight: 500; margin-bottom: 8px; }
+.metric-value { font-family: 'Instrument Serif', serif; font-size: 2rem; line-height: 1; margin-bottom: 4px; }
+.metric-sub { font-size: 0.74rem; color: var(--text-dim); }
+.metric-sub .up { color: var(--green); font-weight: 600; }
+.metric-sub .down { color: var(--red); font-weight: 600; }
+.dash-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+.card-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid var(--border); }
+.card-header h3 { font-family: 'Instrument Serif', serif; font-weight: 400; font-size: 1rem; }
+.card-body { padding: 16px 20px; }
+
+/* ── SPRINT BOARD ── */
+.sprint-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.sprint-header h2 { font-family: 'Instrument Serif', serif; font-weight: 400; font-size: 1.4rem; }
+.sprint-meta { display: flex; align-items: center; gap: 16px; font-size: 0.78rem; color: var(--text-muted); }
+.sprint-progress-bar { width: 120px; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+.sprint-progress-fill { height: 100%; background: var(--green); border-radius: 2px; transition: width 0.4s; }
+.board { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; min-height: 500px; }
+.board-col { background: var(--bg-deep); border-radius: var(--radius); padding: 12px; display: flex; flex-direction: column; }
+.col-header { display: flex; align-items: center; justify-content: space-between; padding: 6px 4px 12px; font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-muted); }
+.col-header .count { background: var(--bg-card); border: 1px solid var(--border); width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.68rem; font-weight: 700; color: var(--text-mid); }
+.col-cards { flex: 1; display: flex; flex-direction: column; gap: 8px; min-height: 60px; }
+.sprint-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 14px; cursor: grab; transition: all 0.15s; position: relative; }
+.sprint-card:hover { border-color: var(--border-strong); box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+.sprint-card.dragging { opacity: 0.5; transform: rotate(2deg); }
+.sprint-card.ai-created { animation: aiCardPulse 0.6s ease; }
+@keyframes aiCardPulse { 0% { transform: scale(0.92); opacity: 0; box-shadow: 0 0 0 4px var(--green-light); } 50% { box-shadow: 0 0 0 4px var(--green-light); } 100% { transform: scale(1); opacity: 1; box-shadow: none; } }
+.sprint-card-title { font-weight: 500; font-size: 0.84rem; margin-bottom: 6px; line-height: 1.35; }
+.sprint-card-desc { font-size: 0.74rem; color: var(--text-muted); line-height: 1.45; margin-bottom: 10px; }
+.sprint-card-footer { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+.card-tag { font-size: 0.62rem; font-weight: 600; letter-spacing: 0.5px; padding: 2px 8px; border-radius: 4px; text-transform: uppercase; }
+.tag-app { background: var(--blue-bg); color: var(--blue); }
+.tag-design { background: var(--purple-bg); color: var(--purple); }
+.tag-infra { background: var(--warm-bg); color: var(--warm); }
+.tag-docs { background: var(--green-bg); color: var(--green); }
+.tag-bug { background: var(--red-bg); color: var(--red); }
+.card-priority { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.priority-high { background: var(--red); }
+.priority-med { background: var(--warm); }
+.priority-low { background: var(--green); }
+.card-points { font-size: 0.66rem; font-weight: 700; color: var(--text-dim); background: var(--bg); padding: 1px 6px; border-radius: 3px; }
+.board-col.drag-over { background: rgba(45,107,207,0.06); }
+.board-col.drag-over .col-cards { outline: 2px dashed rgba(45,107,207,0.25); outline-offset: -2px; border-radius: 6px; }
+
+/* ── AI COMMAND BAR ── */
+.ai-command-bar { margin-bottom: 16px; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; transition: border-color 0.2s, box-shadow 0.2s; }
+.ai-command-bar:focus-within { border-color: var(--border-focus); box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+.ai-command-bar.processing { border-color: var(--blue); box-shadow: 0 0 0 2px var(--blue-bg); }
+.ai-command-bar.success { border-color: var(--green); box-shadow: 0 0 0 2px var(--green-bg); }
+.ai-command-bar.error { border-color: var(--red); box-shadow: 0 0 0 2px var(--red-bg); }
+.ai-cmd-inner { display: flex; align-items: center; gap: 0; }
+.ai-cmd-icon { padding: 0 4px 0 14px; font-size: 1rem; color: var(--text-dim); flex-shrink: 0; display: flex; align-items: center; }
+.ai-cmd-icon.active { color: var(--green); }
+.ai-cmd-input { flex: 1; border: none; outline: none; background: transparent; font-family: 'DM Sans', sans-serif; font-size: 0.88rem; color: var(--text); padding: 14px 12px; line-height: 1.4; }
+.ai-cmd-input::placeholder { color: var(--text-dim); }
+.ai-cmd-send { padding: 8px 16px; margin: 6px 8px 6px 0; border: none; border-radius: var(--radius-sm); background: var(--text); color: #fff; font-family: 'DM Sans', sans-serif; font-size: 0.76rem; font-weight: 600; cursor: pointer; transition: all 0.15s; letter-spacing: 0.5px; white-space: nowrap; }
+.ai-cmd-send:hover { background: #333; }
+.ai-cmd-send:disabled { background: var(--bg-deep); color: var(--text-dim); cursor: default; }
+.ai-cmd-send.processing { background: var(--blue); pointer-events: none; }
+.ai-cmd-feedback { padding: 10px 16px; border-top: 1px solid var(--border); font-size: 0.78rem; color: var(--text-muted); display: none; line-height: 1.5; }
+.ai-cmd-feedback.visible { display: block; }
+.ai-cmd-feedback.success { color: var(--green); background: var(--green-bg); }
+.ai-cmd-feedback.error { color: var(--red); background: var(--red-bg); }
+.ai-cmd-feedback.info { color: var(--blue); background: var(--blue-bg); }
+.ai-cmd-examples { padding: 8px 16px 10px; border-top: 1px solid var(--border); display: flex; gap: 6px; flex-wrap: wrap; }
+.ai-cmd-example { font-size: 0.68rem; color: var(--text-muted); background: var(--bg); padding: 3px 10px; border-radius: 12px; cursor: pointer; transition: all 0.15s; border: 1px solid var(--border); }
+.ai-cmd-example:hover { border-color: var(--border-strong); color: var(--text-mid); }
+
+/* ── APP LIBRARY ── */
+.library-controls { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; gap: 12px; flex-wrap: wrap; }
+.search-box { display: flex; align-items: center; gap: 8px; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 7px 12px; flex: 1; max-width: 320px; }
+.search-box input { border: none; outline: none; background: transparent; font-family: inherit; font-size: 0.82rem; color: var(--text); width: 100%; }
+.search-box input::placeholder { color: var(--text-dim); }
+.filter-pills { display: flex; gap: 6px; }
+.pill { font-size: 0.72rem; font-weight: 500; padding: 5px 12px; border-radius: 20px; border: 1px solid var(--border); background: var(--bg-card); color: var(--text-muted); cursor: pointer; transition: all 0.15s; }
+.pill:hover { border-color: var(--border-strong); color: var(--text-mid); }
+.pill.active { background: var(--text); color: #fff; border-color: var(--text); }
+.app-table { width: 100%; border-collapse: collapse; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+.app-table thead th { font-size: 0.68rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-dim); text-align: left; padding: 12px 16px; border-bottom: 1px solid var(--border-strong); background: var(--bg); }
+.app-table tbody tr { transition: background 0.1s; cursor: pointer; }
+.app-table tbody tr:hover { background: var(--bg-card-hover); }
+.app-table tbody td { padding: 12px 16px; border-bottom: 1px solid var(--border); font-size: 0.82rem; color: var(--text-mid); }
+.app-table .app-name { font-weight: 500; color: var(--text); }
+.status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+.status-live { background: var(--green); }
+.status-dev { background: var(--blue); }
+.status-design { background: var(--purple); }
+.status-planned { background: var(--text-dim); }
+.status-blocked { background: var(--red); }
+
+/* ── UPDATE LOG ── */
+.update-timeline { max-width: 760px; }
+.update-item { display: flex; gap: 16px; padding: 18px 0; border-bottom: 1px solid var(--border); position: relative; }
+.update-date { min-width: 80px; font-size: 0.72rem; color: var(--text-dim); padding-top: 3px; font-variant-numeric: tabular-nums; }
+.update-content { flex: 1; }
+.update-content h4 { font-weight: 600; font-size: 0.88rem; margin-bottom: 4px; }
+.update-content p { font-size: 0.8rem; color: var(--text-muted); line-height: 1.55; max-width: none; }
+.update-type { font-size: 0.62rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; padding: 2px 8px; border-radius: 3px; margin-bottom: 6px; display: inline-block; }
+.type-release { background: var(--green-bg); color: var(--green); }
+.type-sprint { background: var(--blue-bg); color: var(--blue); }
+.type-decision { background: var(--purple-bg); color: var(--purple); }
+.type-blocker { background: var(--red-bg); color: var(--red); }
+.type-design { background: var(--warm-bg); color: var(--warm); }
+
+/* ── ROADMAP ── */
+.roadmap-lanes { display: flex; flex-direction: column; gap: 18px; }
+.roadmap-quarter { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+.quarter-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; border-bottom: 1px solid var(--border); cursor: pointer; }
+.quarter-header h3 { font-family: 'Instrument Serif', serif; font-weight: 400; font-size: 1.05rem; }
+.quarter-header .q-stats { display: flex; gap: 12px; font-size: 0.72rem; color: var(--text-muted); }
+.quarter-body { padding: 16px 20px; }
+.quarter-body.collapsed { display: none; }
+.roadmap-items { display: flex; flex-direction: column; gap: 8px; }
+.roadmap-item { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 7px; background: var(--bg); border: 1px solid var(--border); transition: border-color 0.15s; }
+.roadmap-item:hover { border-color: var(--border-strong); }
+.roadmap-item .ri-name { flex: 1; font-size: 0.84rem; font-weight: 500; }
+.roadmap-item .ri-category { font-size: 0.68rem; color: var(--text-muted); min-width: 90px; }
+.roadmap-item .ri-status { font-size: 0.66rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; padding: 2px 8px; border-radius: 3px; }
+
+/* ── MODAL ── */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(2px); }
+.modal-overlay.open { display: flex; }
+.modal { background: var(--bg-card); border-radius: 12px; width: 560px; max-width: 92vw; max-height: 85vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
+.modal.modal-wide { width: 720px; }
+.modal.modal-xl { width: 900px; }
+.modal-header { display: flex; align-items: center; justify-content: space-between; padding: 18px 24px; border-bottom: 1px solid var(--border); }
+.modal-header h3 { font-family: 'Instrument Serif', serif; font-weight: 400; font-size: 1.15rem; }
+.modal-close { width: 28px; height: 28px; border-radius: 6px; border: none; background: transparent; cursor: pointer; font-size: 1.1rem; color: var(--text-muted); display: flex; align-items: center; justify-content: center; transition: background 0.15s; }
+.modal-close:hover { background: var(--bg); }
+.modal-body { padding: 20px 24px; }
+.modal-footer { display: flex; justify-content: flex-end; gap: 8px; padding: 14px 24px; border-top: 1px solid var(--border); }
+.form-group { margin-bottom: 16px; }
+.form-label { display: block; font-size: 0.74rem; font-weight: 600; color: var(--text-mid); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1px; }
+.form-input, .form-select, .form-textarea { width: 100%; padding: 9px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-family: inherit; font-size: 0.84rem; color: var(--text); background: var(--bg); transition: border-color 0.15s; }
+.form-input:focus, .form-select:focus, .form-textarea:focus { outline: none; border-color: var(--border-focus); }
+.form-textarea { min-height: 80px; resize: vertical; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+/* ── AI WORKSHOP ── */
+.ws-layout { display: flex; flex-direction: column; gap: 16px; }
+.ws-config { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 20px; }
+.ws-config-row { display: flex; gap: 12px; align-items: flex-start; }
+.ws-config-row + .ws-config-row { margin-top: 12px; }
+.ws-panels { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.ws-panel { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; display: flex; flex-direction: column; }
+.ws-panel-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 18px; border-bottom: 1px solid var(--border); background: var(--bg); }
+.ws-panel-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-muted); font-weight: 600; }
+.ws-panel-body { padding: 16px 18px; flex: 1; }
+.ws-file-count { font-size: 0.72rem; color: var(--text-dim); }
+.ws-drop { border: 2px dashed var(--border-strong); border-radius: var(--radius); padding: 28px 20px; text-align: center; cursor: pointer; transition: all 0.2s; }
+.ws-drop:hover { border-color: var(--green); background: var(--green-bg); }
+.ws-drop-icon { font-size: 1.6rem; color: var(--text-dim); margin-bottom: 6px; }
+.ws-drop-text { font-size: 0.84rem; color: var(--text-mid); font-weight: 500; }
+.ws-drop-hint { font-size: 0.72rem; color: var(--text-dim); margin-top: 4px; }
+.ws-file-list { margin-top: 12px; }
+.ws-file-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border); margin-bottom: 6px; font-size: 0.82rem; transition: border-color 0.15s; }
+.ws-file-item:hover { border-color: var(--border-strong); }
+.ws-file-item.active { border-color: var(--green); background: var(--green-bg); }
+.ws-file-item-name { font-weight: 500; color: var(--text); cursor: pointer; flex: 1; }
+.ws-file-item-size { font-size: 0.7rem; color: var(--text-dim); margin: 0 10px; }
+.ws-file-item-remove { background: none; border: none; cursor: pointer; color: var(--text-dim); font-size: 0.9rem; padding: 0 4px; transition: color 0.15s; }
+.ws-file-item-remove:hover { color: var(--red); }
+.ws-code-preview { margin-top: 12px; max-height: 180px; overflow: auto; background: var(--bg); border-radius: var(--radius-sm); padding: 12px; font-size: 0.72rem; line-height: 1.55; color: var(--text-muted); white-space: pre-wrap; word-break: break-all; font-family: 'DM Sans', monospace; border: 1px solid var(--border); }
+.ws-sys-prompt { width: 100%; min-height: 70px; padding: 10px 12px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); font-family: 'DM Sans', sans-serif; font-size: 0.78rem; color: var(--text-mid); resize: vertical; margin-bottom: 10px; line-height: 1.5; }
+.ws-sys-prompt:focus { border-color: var(--border-focus); outline: none; }
+.ws-query { width: 100%; min-height: 220px; padding: 14px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); font-family: 'DM Sans', sans-serif; font-size: 0.86rem; color: var(--text); resize: vertical; line-height: 1.65; }
+.ws-query:focus { border-color: var(--border-focus); outline: none; }
+.ws-query::placeholder { color: var(--text-dim); }
+.ws-action-bar { display: flex; align-items: center; gap: 12px; }
+.ws-status { flex: 1; font-size: 0.78rem; color: var(--text-muted); text-align: right; }
+.ws-status.processing { color: var(--blue); font-weight: 500; }
+.ws-status.error { color: var(--red); font-weight: 500; }
+.ws-status.success { color: var(--green); font-weight: 500; }
+.ws-output { display: flex; gap: 14px; }
+.ws-preview-frame { width: 100%; min-height: 500px; border: none; background: #fff; border-radius: 0 0 var(--radius) var(--radius); }
+.ws-output-code { min-height: 500px; max-height: 600px; overflow: auto; padding: 16px; font-size: 0.76rem; font-family: 'DM Sans', monospace; white-space: pre-wrap; line-height: 1.55; color: var(--text-mid); margin: 0; background: var(--bg); }
+.ws-history-item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 0.8rem; cursor: pointer; }
+.ws-history-item:hover { color: var(--green); }
+.ws-history-item:last-child { border-bottom: none; }
+.ws-history-time { font-size: 0.7rem; color: var(--text-dim); min-width: 60px; }
+.ws-history-prompt { flex: 1; color: var(--text-mid); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ws-history-action { color: var(--blue); font-size: 0.72rem; font-weight: 500; }
+
+/* ── NOTES ── */
+.notes-area { width: 100%; min-height: 300px; padding: 16px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg-card); font-family: 'DM Sans', sans-serif; font-size: 0.86rem; color: var(--text); line-height: 1.65; resize: vertical; outline: none; }
+.notes-area:focus { border-color: var(--border-focus); }
+
+/* ── CHARTS ── */
+.chart-svg { width: 100%; height: 140px; }
+.chart-line { fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.chart-dot { r: 3; }
+.chart-gridline { stroke: var(--border); stroke-width: 1; stroke-dasharray: 3 3; }
+.chart-label { font-size: 10px; fill: var(--text-dim); font-family: 'DM Sans', sans-serif; }
+.velocity-bars { display: flex; align-items: flex-end; gap: 6px; height: 120px; margin-top: 16px; }
+.v-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; justify-content: flex-end; }
+.v-bar { width: 100%; border-radius: 4px 4px 0 0; transition: height 0.5s ease; }
+.v-bar-label { font-size: 0.62rem; color: var(--text-dim); }
+.v-bar-value { font-size: 0.68rem; font-weight: 600; color: var(--text-mid); }
+
+/* ── ACTIVITY ── */
+.activity-item { display: flex; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 0.78rem; color: var(--text-muted); }
+.activity-item:last-child { border-bottom: none; }
+.activity-dot { width: 6px; height: 6px; border-radius: 50%; margin-top: 6px; flex-shrink: 0; }
+.activity-item strong { color: var(--text-mid); font-weight: 500; }
+.activity-time { font-size: 0.68rem; color: var(--text-dim); margin-top: 2px; }
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.animate-in { animation: fadeUp 0.35s ease forwards; }
+.animate-in:nth-child(2) { animation-delay: 0.04s; }
+.animate-in:nth-child(3) { animation-delay: 0.08s; }
+.animate-in:nth-child(4) { animation-delay: 0.12s; }
+@keyframes aiDots { 0%, 20% { opacity: 0.2; } 50% { opacity: 1; } 100% { opacity: 0.2; } }
+.ai-dots span { animation: aiDots 1.4s infinite; display: inline-block; }
+.ai-dots span:nth-child(2) { animation-delay: 0.2s; }
+.ai-dots span:nth-child(3) { animation-delay: 0.4s; }
+</style>
+<style>
+/* ══════════════════════════════════════
+   PAGES EDITOR (Notion-style)
+   ══════════════════════════════════════ */
+.pages-layout { display: flex; height: calc(100vh - var(--header-h) - 1px); margin: -24px -28px -40px; }
+.pages-sidebar { width: 220px; min-width: 220px; background: var(--bg-deep); border-right: 1px solid var(--border); display: flex; flex-direction: column; transition: margin-left .25s ease, opacity .2s; }
+.pages-sidebar.collapsed { margin-left: -220px; opacity: 0; pointer-events: none; }
+.pages-sidebar-header { padding: 14px 14px 10px; display: flex; align-items: center; justify-content: space-between; }
+.pages-sidebar-title { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 2px; color: var(--text-muted); font-weight: 600; }
+.pages-sidebar-toggle { width: 24px; height: 24px; border: none; background: none; cursor: pointer; border-radius: 4px; color: var(--text-muted); font-size: 0.8rem; display: grid; place-items: center; }
+.pages-sidebar-toggle:hover { background: rgba(0,0,0,0.06); color: var(--text); }
+.pages-list { flex: 1; overflow-y: auto; padding: 4px 8px; }
+.pages-list::-webkit-scrollbar { width: 4px; }
+.pages-list::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 2px; }
+.page-nav-item { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: var(--radius-sm); cursor: pointer; font-size: 0.82rem; color: var(--text-mid); transition: all .12s; position: relative; }
+.page-nav-item:hover { background: rgba(0,0,0,0.04); color: var(--text); }
+.page-nav-item.active { background: var(--bg-card); color: var(--text); font-weight: 500; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+.page-nav-item .pn-icon { font-size: 1rem; flex-shrink: 0; width: 20px; text-align: center; }
+.page-nav-item .pn-title { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.page-nav-item .pn-delete { display: none; width: 20px; height: 20px; border: none; background: none; cursor: pointer; color: var(--text-dim); border-radius: 4px; font-size: 0.75rem; line-height: 20px; text-align: center; }
+.page-nav-item:hover .pn-delete { display: block; }
+.page-nav-item .pn-delete:hover { background: var(--red-bg); color: var(--red); }
+.pages-new-btn { margin: 6px 8px 14px; padding: 7px 10px; border: 1px dashed var(--border-strong); border-radius: var(--radius-sm); background: none; cursor: pointer; font-family: inherit; font-size: 0.78rem; color: var(--text-muted); display: flex; align-items: center; gap: 8px; transition: all .15s; width: calc(100% - 16px); text-align: left; }
+.pages-new-btn:hover { border-color: var(--green); color: var(--green); background: var(--green-bg); }
+
+.pages-editor-area { flex: 1; display: flex; flex-direction: column; min-width: 0; position: relative; }
+.pages-topbar { height: 40px; display: flex; align-items: center; padding: 0 20px; gap: 8px; flex-shrink: 0; border-bottom: 1px solid transparent; transition: border-color .2s; }
+.pages-topbar.scrolled { border-bottom-color: var(--border); }
+.pages-topbar-toggle { width: 26px; height: 26px; border: none; background: none; cursor: pointer; border-radius: 4px; display: none; place-items: center; color: var(--text-muted); font-size: 0.9rem; }
+.pages-topbar-toggle:hover { background: rgba(0,0,0,0.04); }
+.pages-sidebar.collapsed ~ .pages-editor-area .pages-topbar-toggle { display: grid; }
+.pages-breadcrumb { font-size: 0.76rem; color: var(--text-muted); display: flex; align-items: center; gap: 4px; }
+.pages-breadcrumb span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px; }
+.pages-editor-scroll { flex: 1; overflow-y: auto; overflow-x: hidden; scroll-behavior: smooth; }
+.pages-editor-scroll::-webkit-scrollbar { width: 5px; }
+.pages-editor-scroll::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 3px; }
+.pages-editor-inner { max-width: 680px; margin: 0 auto; padding: 32px 48px 120px; min-height: 100%; }
+
+/* Page icon & title */
+.pe-icon-area { font-size: 48px; margin-bottom: 8px; cursor: pointer; width: fit-content; line-height: 1; transition: transform .15s; }
+.pe-icon-area:hover { transform: scale(1.08); }
+.pe-title-input { font-family: 'Instrument Serif', serif; font-size: 2.2rem; font-weight: 400; line-height: 1.2; border: none; outline: none; width: 100%; background: transparent; color: var(--text); letter-spacing: -0.5px; resize: none; overflow: hidden; }
+.pe-title-input::placeholder { color: var(--text-dim); }
+.pe-title-input:empty::before { content: attr(data-placeholder); color: var(--text-dim); }
+
+/* Blocks */
+.pe-block-wrapper { position: relative; margin: 2px 0; border-radius: 4px; transition: background .1s; }
+.pe-block-wrapper:hover > .pe-block-handle { opacity: 1; }
+.pe-block-wrapper.pe-dragging { opacity: 0.4; }
+.pe-block-wrapper.pe-drag-over-top { box-shadow: 0 -2px 0 var(--blue); }
+.pe-block-wrapper.pe-drag-over-bottom { box-shadow: 0 2px 0 var(--blue); }
+.pe-block-wrapper.pe-selected { background: var(--blue-bg); border-radius: 4px; }
+.pe-block-handle { position: absolute; left: -26px; top: 4px; width: 20px; height: 22px; opacity: 0; display: flex; align-items: center; justify-content: center; cursor: grab; border-radius: 4px; color: var(--text-dim); transition: opacity .15s, color .1s, background .1s; user-select: none; }
+.pe-block-handle:hover { background: rgba(0,0,0,0.05); color: var(--text-muted); }
+.pe-block-handle svg { width: 12px; height: 12px; }
+.pe-block { padding: 3px 2px; outline: none; min-height: 1.55em; word-break: break-word; font-size: 0.92rem; line-height: 1.65; }
+.pe-block:empty::before { content: attr(data-placeholder); color: var(--text-dim); pointer-events: none; }
+.pe-block[data-type="h1"] { font-family: 'Instrument Serif', serif; font-size: 1.75rem; font-weight: 400; line-height: 1.25; margin-top: 24px; letter-spacing: -0.5px; }
+.pe-block[data-type="h2"] { font-family: 'Instrument Serif', serif; font-size: 1.35rem; font-weight: 400; line-height: 1.3; margin-top: 18px; letter-spacing: -0.3px; }
+.pe-block[data-type="h3"] { font-size: 1.05rem; font-weight: 600; line-height: 1.35; margin-top: 14px; }
+.pe-block[data-type="bullet"] { padding-left: 22px; }
+.pe-block[data-type="bullet"]::before { content: "•"; position: absolute; left: 8px; color: var(--text); font-weight: 700; }
+.pe-block[data-type="numbered"] { padding-left: 22px; }
+.pe-block[data-type="todo"] { padding-left: 26px; cursor: text; }
+.pe-block-wrapper:has(.pe-block[data-type="todo"]) .pe-todo-check { position: absolute; left: 2px; top: 7px; width: 15px; height: 15px; border: 2px solid var(--text-muted); border-radius: 3px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .15s; background: transparent; z-index: 1; }
+.pe-block-wrapper:has(.pe-block[data-type="todo"]) .pe-todo-check:hover { border-color: var(--blue); }
+.pe-block-wrapper:has(.pe-block[data-type="todo"].pe-checked) .pe-todo-check { background: var(--blue); border-color: var(--blue); }
+.pe-block-wrapper:has(.pe-block[data-type="todo"].pe-checked) .pe-todo-check::after { content: "✓"; color: #fff; font-size: 10px; font-weight: 700; }
+.pe-block[data-type="todo"].pe-checked { text-decoration: line-through; color: var(--text-muted); }
+.pe-block[data-type="quote"] { border-left: 3px solid var(--text); padding-left: 14px; font-style: italic; color: var(--text-mid); }
+.pe-block[data-type="callout"] { background: var(--warm-bg); padding: 12px 14px 12px 40px; border-radius: var(--radius-sm); position: relative; }
+.pe-block[data-type="callout"]::before { content: "💡"; position: absolute; left: 14px; top: 12px; font-style: normal; }
+.pe-block[data-type="code"] { font-family: 'DM Sans', monospace; font-size: 0.8rem; background: var(--bg-deep); padding: 12px 14px; border-radius: var(--radius-sm); white-space: pre-wrap; line-height: 1.55; border: 1px solid var(--border); tab-size: 2; }
+.pe-block[data-type="divider"] { height: 1px; background: var(--border); margin: 12px 0; padding: 0; min-height: 0; pointer-events: none; }
+.pe-block[data-type="file"] { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 14px; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: border-color .15s; min-height: auto; }
+.pe-block[data-type="file"]:hover { border-color: var(--border-strong); }
+.pe-block b, .pe-block strong { font-weight: 700; }
+.pe-block i, .pe-block em { font-style: italic; }
+.pe-block u { text-decoration: underline; }
+.pe-block s, .pe-block strike { text-decoration: line-through; }
+.pe-block code { font-family: 'DM Sans', monospace; font-size: 0.85em; background: var(--red-bg); color: var(--red); padding: 1px 5px; border-radius: 3px; }
+
+/* Slash menu */
+#pe-slash-menu { position: fixed; background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 4px 24px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.02); width: 260px; max-height: 380px; overflow-y: auto; z-index: 200; display: none; padding: 6px; }
+#pe-slash-menu.visible { display: block; animation: peMenuIn .12s ease-out; }
+@keyframes peMenuIn { from { opacity:0; transform:translateY(-4px); } to { opacity:1; transform:translateY(0); } }
+.pe-slash-label { font-size: 0.62rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-muted); padding: 8px 8px 4px; }
+.pe-slash-item { display: flex; align-items: center; gap: 10px; padding: 6px 8px; border-radius: var(--radius-sm); cursor: pointer; transition: background .1s; }
+.pe-slash-item:hover, .pe-slash-item.pe-selected { background: rgba(0,0,0,0.04); }
+.pe-slash-item-icon { width: 36px; height: 36px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-size: 0.82rem; flex-shrink: 0; font-weight: 600; }
+.pe-slash-item-text { flex: 1; }
+.pe-slash-item-text .pe-si-name { font-size: 0.82rem; font-weight: 500; color: var(--text); }
+.pe-slash-item-text .pe-si-desc { font-size: 0.7rem; color: var(--text-muted); }
+.pe-slash-item.pe-ai-item { border-left: 2px solid var(--green); }
+.pe-slash-item.pe-ai-item .pe-slash-item-icon { background: var(--green-bg); color: var(--green); border-color: var(--green-light); }
+.pe-ai-prompt-wrap { margin: 4px 0; padding: 10px 14px; background: var(--green-bg); border: 1px solid var(--green-light); border-radius: var(--radius-sm); display: none; }
+.pe-ai-prompt-wrap.visible { display: block; animation: peMenuIn .15s ease-out; }
+.pe-ai-prompt-label { font-size: 0.68rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--green); margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+.pe-ai-prompt-input { width: 100%; border: 1px solid var(--green-light); border-radius: 4px; padding: 8px 10px; font-family: inherit; font-size: 0.84rem; color: var(--text); background: var(--bg-card); outline: none; line-height: 1.4; }
+.pe-ai-prompt-input:focus { border-color: var(--green); }
+.pe-ai-prompt-input::placeholder { color: var(--text-dim); }
+.pe-ai-prompt-hint { font-size: 0.68rem; color: var(--text-muted); margin-top: 6px; display: flex; align-items: center; gap: 12px; }
+.pe-ai-prompt-hint kbd { font-family: inherit; font-size: 0.64rem; background: var(--bg); border: 1px solid var(--border); padding: 1px 5px; border-radius: 3px; }
+.pe-ai-generating { display: flex; align-items: center; gap: 8px; padding: 10px 14px; background: var(--green-bg); border: 1px solid var(--green-light); border-radius: var(--radius-sm); margin: 4px 0; font-size: 0.82rem; color: var(--green); font-weight: 500; }
+#pe-format-bar { position: fixed; background: var(--text); border-radius: 8px; padding: 2px 4px; display: none; z-index: 200; box-shadow: 0 4px 16px rgba(0,0,0,0.2); animation: peMenuIn .12s ease-out; gap: 1px; }
+#pe-format-bar.visible { display: flex; }
+.pe-fmt-btn { width: 30px; height: 28px; border: none; background: none; color: rgba(255,255,255,0.8); cursor: pointer; border-radius: 4px; font-size: 0.8rem; display: grid; place-items: center; transition: background .1s, color .1s; }
+.pe-fmt-btn:hover { background: rgba(255,255,255,0.15); color: #fff; }
+.pe-fmt-btn.active { color: var(--blue); }
+.pe-fmt-sep { width: 1px; background: rgba(255,255,255,0.15); margin: 4px 2px; }
+.pe-ai-text-btn { width: auto !important; padding: 0 8px; font-size: 0.68rem; font-weight: 600; color: var(--green) !important; letter-spacing: 0.5px; }
+.pe-ai-text-btn:hover { background: rgba(26,138,92,0.2) !important; }
+#pe-icon-picker { position: fixed; background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 8px 32px rgba(0,0,0,0.1); width: 280px; max-height: 240px; overflow-y: auto; z-index: 210; display: none; padding: 10px; }
+#pe-icon-picker.visible { display: block; animation: peMenuIn .15s ease-out; }
+#pe-icon-picker .pe-emoji-grid { display: flex; flex-wrap: wrap; gap: 2px; }
+#pe-icon-picker .pe-emoji-grid span { width: 32px; height: 32px; display: grid; place-items: center; font-size: 1.15rem; cursor: pointer; border-radius: 4px; transition: background .1s; }
+#pe-icon-picker .pe-emoji-grid span:hover { background: rgba(0,0,0,0.05); }
+#pe-icon-picker .pe-remove-icon { display: block; width: 100%; text-align: center; font-size: 0.7rem; color: var(--text-muted); padding: 8px 0 4px; cursor: pointer; border-top: 1px solid var(--border); margin-top: 6px; }
+#pe-icon-picker .pe-remove-icon:hover { color: var(--red); }
+
+/* ══════════════════════════════════════
+   TEMPLATE LIBRARY
+   ══════════════════════════════════════ */
+.tpl-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 20px; }
+.tpl-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; cursor: pointer; transition: all .2s; position: relative; overflow: hidden; }
+.tpl-card:hover { border-color: var(--border-strong); box-shadow: 0 4px 16px rgba(0,0,0,0.06); transform: translateY(-2px); }
+.tpl-card-icon { font-size: 1.8rem; margin-bottom: 12px; }
+.tpl-card-title { font-family: 'Instrument Serif', serif; font-size: 1.05rem; font-weight: 400; margin-bottom: 4px; }
+.tpl-card-desc { font-size: 0.76rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 12px; }
+.tpl-card-tags { display: flex; gap: 4px; flex-wrap: wrap; }
+.tpl-card-tag { font-size: 0.62rem; font-weight: 600; letter-spacing: 0.5px; padding: 2px 8px; border-radius: 4px; text-transform: uppercase; }
+.tpl-card.tpl-ai { border-left: 3px solid var(--green); }
+.tpl-card.tpl-ai .tpl-card-icon::after { content: ' ⬡'; font-size: 0.7rem; color: var(--green); vertical-align: super; }
+.tpl-section-title { font-family: 'Instrument Serif', serif; font-size: 1.2rem; font-weight: 400; margin-bottom: 4px; }
+.tpl-section-desc { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 16px; }
+
+/* ══════════════════════════════════════
+   CALCULATOR PANEL
+   ══════════════════════════════════════ */
+.calc-overlay { position: fixed; right: -340px; top: 0; bottom: 0; width: 340px; background: var(--bg-card); border-left: 1px solid var(--border); box-shadow: -4px 0 24px rgba(0,0,0,0.08); z-index: 400; transition: right .3s ease; display: flex; flex-direction: column; }
+.calc-overlay.open { right: 0; }
+.calc-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid var(--border); }
+.calc-header h3 { font-family: 'Instrument Serif', serif; font-weight: 400; font-size: 1.05rem; }
+.calc-display { padding: 20px; background: var(--bg-deep); border-bottom: 1px solid var(--border); }
+.calc-expression { font-size: 0.76rem; color: var(--text-muted); min-height: 20px; text-align: right; font-family: 'DM Sans', monospace; }
+.calc-result { font-family: 'Instrument Serif', serif; font-size: 2.4rem; text-align: right; letter-spacing: -0.5px; min-height: 48px; overflow-x: auto; }
+.calc-history { flex: 1; overflow-y: auto; padding: 12px 20px; }
+.calc-history-item { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 0.78rem; cursor: pointer; }
+.calc-history-item:hover { color: var(--green); }
+.calc-history-expr { color: var(--text-muted); }
+.calc-history-val { font-weight: 600; color: var(--text); }
+.calc-keypad { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; padding: 12px; }
+.calc-key { height: 48px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--bg-card); font-family: 'DM Sans', sans-serif; font-size: 1rem; color: var(--text); cursor: pointer; transition: all .1s; display: grid; place-items: center; }
+.calc-key:hover { background: var(--bg-deep); }
+.calc-key:active { transform: scale(0.95); }
+.calc-key.op { color: var(--blue); font-weight: 600; }
+.calc-key.eq { background: var(--green); color: #fff; border-color: var(--green); }
+.calc-key.eq:hover { background: #168050; }
+.calc-key.clear { color: var(--red); font-weight: 600; }
+.calc-key.wide { grid-column: span 2; }
+
+/* ══════════════════════════════════════
+   PM WORKFLOW / PRODUCT DISCOVERY
+   ══════════════════════════════════════ */
+.pm-workflow { display: flex; flex-direction: column; gap: 20px; }
+.pm-pipeline { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+.pm-stage { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; display: flex; flex-direction: column; min-height: 200px; }
+.pm-stage-header { padding: 12px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.pm-stage-title { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-muted); }
+.pm-stage-count { font-size: 0.66rem; background: var(--bg); padding: 2px 8px; border-radius: 10px; color: var(--text-dim); font-weight: 600; }
+.pm-stage-body { flex: 1; padding: 10px; display: flex; flex-direction: column; gap: 6px; overflow-y: auto; }
+.pm-item { padding: 10px 12px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 0.8rem; cursor: pointer; transition: all .15s; }
+.pm-item:hover { border-color: var(--border-strong); box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
+.pm-item-title { font-weight: 500; margin-bottom: 2px; }
+.pm-item-meta { font-size: 0.7rem; color: var(--text-muted); }
+.pm-input-bar { display: flex; gap: 10px; align-items: stretch; }
+.pm-input-bar textarea { flex: 1; padding: 12px 14px; border: 1px solid var(--border); border-radius: var(--radius); font-family: inherit; font-size: 0.86rem; color: var(--text); background: var(--bg-card); resize: none; min-height: 80px; }
+.pm-input-bar textarea:focus { outline: none; border-color: var(--border-focus); }
+.pm-action-col { display: flex; flex-direction: column; gap: 6px; min-width: 160px; }
+
+/* ══════════════════════════════════════
+   FILE WORKSPACE (draggable canvas)
+   ══════════════════════════════════════ */
+.file-workspace { position: relative; min-height: 500px; background: var(--bg-deep); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+.file-workspace-canvas { position: relative; min-height: 500px; padding: 20px; }
+.fw-file-card { position: absolute; width: 160px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 14px; cursor: grab; transition: box-shadow .15s, border-color .15s; user-select: none; z-index: 1; }
+.fw-file-card:hover { border-color: var(--border-strong); box-shadow: 0 4px 16px rgba(0,0,0,0.08); z-index: 2; }
+.fw-file-card.dragging { box-shadow: 0 8px 32px rgba(0,0,0,0.15); z-index: 10; cursor: grabbing; }
+.fw-file-icon { font-size: 2rem; margin-bottom: 8px; text-align: center; }
+.fw-file-name { font-size: 0.78rem; font-weight: 500; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fw-file-size { font-size: 0.68rem; color: var(--text-dim); text-align: center; margin-top: 2px; }
+.fw-file-actions { display: flex; gap: 4px; margin-top: 8px; justify-content: center; }
+.fw-drop-zone { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(26,138,92,0.06); border: 2px dashed var(--green); border-radius: var(--radius); z-index: 20; }
+.fw-drop-zone.active { display: flex; }
+.fw-drop-text { font-size: 0.9rem; color: var(--green); font-weight: 500; }
+
+/* ── HTML PREVIEW POPUP ── */
+.html-preview-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 2000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(3px); }
+.html-preview-overlay.open { display: flex; }
+.html-preview-container { width: 85vw; height: 80vh; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 24px 80px rgba(0,0,0,0.25); display: flex; flex-direction: column; }
+.html-preview-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; background: var(--bg-deep); border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.html-preview-header h4 { font-family: 'Instrument Serif', serif; font-weight: 400; font-size: 1rem; }
+.html-preview-frame { flex: 1; border: none; width: 100%; }
+
+/* ── MULTI-SELECT BAR ── */
+.multi-select-bar { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--text); color: #fff; border-radius: 12px; padding: 8px 16px; display: none; align-items: center; gap: 12px; z-index: 150; box-shadow: 0 4px 20px rgba(0,0,0,0.2); animation: fadeUp .2s ease; }
+.multi-select-bar.visible { display: flex; }
+.msb-count { font-size: 0.78rem; font-weight: 500; }
+.msb-btn { border: none; background: rgba(255,255,255,0.15); color: #fff; padding: 5px 12px; border-radius: 6px; font-family: inherit; font-size: 0.74rem; cursor: pointer; transition: background .15s; }
+.msb-btn:hover { background: rgba(255,255,255,0.25); }
+.msb-btn.danger { background: rgba(208,64,64,0.6); }
+.msb-btn.danger:hover { background: rgba(208,64,64,0.8); }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 1024px) { .metrics-row { grid-template-columns: repeat(2, 1fr); } .board { grid-template-columns: repeat(2, 1fr); } .dash-grid { grid-template-columns: 1fr; } .ws-panels { grid-template-columns: 1fr; } .tpl-grid { grid-template-columns: repeat(2, 1fr); } .pm-pipeline { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 768px) { .sidebar { display: none; } .board { grid-template-columns: 1fr; } .metrics-row { grid-template-columns: 1fr 1fr; } .tpl-grid { grid-template-columns: 1fr; } .pm-pipeline { grid-template-columns: 1fr; } }
+@media (max-width: 860px) { .pages-sidebar { position: fixed; left: 0; top: 0; bottom: 0; z-index: 250; background: var(--bg-card); } .pages-editor-inner { padding: 24px 20px 100px; } .pe-block-handle { left: -22px; } }
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <h1>Open Intranet</h1>
+      <div class="sub">Build Workspace</div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Overview</div>
+      <div class="nav-item active" data-view="dashboard">
+        <span class="icon">◫</span> Dashboard
+      </div>
+      <div class="nav-item" data-view="sprint">
+        <span class="icon">▤</span> Sprint Board
+      </div>
+      <div class="nav-item" data-view="library">
+        <span class="icon">▦</span> App Library
+      </div>
+      <div class="nav-item" data-view="roadmap">
+        <span class="icon">▬</span> Roadmap
+      </div>
+
+      <div class="nav-section-label">Build</div>
+      <div class="nav-item" data-view="pages">
+        <span class="icon">☷</span> Pages
+      </div>
+      <div class="nav-item" data-view="templates">
+        <span class="icon">⬡</span> Templates
+        <span class="badge" style="background:var(--green)">AI</span>
+      </div>
+      <div class="nav-item" data-view="pm">
+        <span class="icon">◎</span> Product Discovery
+      </div>
+      <div class="nav-item" data-view="workshop">
+        <span class="icon">⊞</span> AI Workshop
+      </div>
+      <div class="nav-item" data-view="files">
+        <span class="icon">▧</span> File Workspace
+      </div>
+
+      <div class="nav-section-label">Team</div>
+      <div class="nav-item" data-view="updates">
+        <span class="icon">◉</span> Update Log
+        <span class="badge">2</span>
+      </div>
+      <div class="nav-item" data-view="notes">
+        <span class="icon">☰</span> Working Notes
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      v1.0 — intranetworkspacerev<br>
+      Data persists in localStorage
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+    <header class="header">
+      <div class="header-left">
+        <h2 id="pageTitle">Dashboard</h2>
+        <span class="page-desc" id="pageDesc">Sprint 4 · Week 2 of 3</span>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-ghost btn-sm" onclick="toggleCalc()" title="Calculator">⊞ Calc</button>
+        <button class="btn" onclick="exportData()">↓ Export</button>
+        <button class="btn btn-primary" id="primaryAction" onclick="openNewCardModal()">+ New Card</button>
+      </div>
+    </header>
+
+    <div class="content">
+      <!-- ═══ DASHBOARD ═══ -->
+      <div class="view active" id="view-dashboard">
+        <div class="dash-greeting animate-in">
+          <h2>Good <span id="greeting-time">morning</span></h2>
+          <p>Here's where the Open Intranet build stands.</p>
+        </div>
+        <div class="metrics-row">
+          <div class="metric-card animate-in"><div class="metric-label">Apps in Library</div><div class="metric-value" id="metric-apps">0</div><div class="metric-sub"><span class="up" id="metric-apps-live">0 live</span> · <span id="metric-apps-dev">0 in dev</span></div></div>
+          <div class="metric-card animate-in"><div class="metric-label">Sprint Velocity</div><div class="metric-value" id="metric-velocity">0</div><div class="metric-sub">pts / sprint avg</div></div>
+          <div class="metric-card animate-in"><div class="metric-label">Cards This Sprint</div><div class="metric-value" id="metric-cards">0</div><div class="metric-sub"><span id="metric-done">0</span> done · <span id="metric-remaining">0</span> remaining</div></div>
+          <div class="metric-card animate-in"><div class="metric-label">Updates This Week</div><div class="metric-value" id="metric-updates">0</div><div class="metric-sub">Last: <span id="metric-last-update">—</span></div></div>
+        </div>
+        <div class="dash-grid">
+          <div class="card animate-in"><div class="card-header"><h3>Sprint Burndown</h3><span style="font-size:0.72rem;color:var(--text-dim)" id="burndown-sprint-label">Sprint 4</span></div><div class="card-body"><div class="chart-area" id="burndown-chart"></div></div></div>
+          <div class="card animate-in"><div class="card-header"><h3>Velocity History</h3><span style="font-size:0.72rem;color:var(--text-dim)">Last 6 sprints</span></div><div class="card-body"><div class="velocity-bars" id="velocity-chart"></div></div></div>
+          <div class="card animate-in"><div class="card-header"><h3>Recent Activity</h3></div><div class="card-body" id="activity-feed"></div></div>
+          <div class="card animate-in"><div class="card-header"><h3>Blockers & Risks</h3></div><div class="card-body" id="blockers-feed"></div></div>
+        </div>
+      </div>
+
+      <!-- ═══ SPRINT BOARD ═══ -->
+      <div class="view" id="view-sprint">
+        <div class="sprint-header">
+          <div><h2 id="sprint-name">Sprint 4</h2><div class="sprint-meta"><span class="sprint-dates" id="sprint-dates">Mar 3 – Mar 21</span><div class="sprint-progress-bar"><div class="sprint-progress-fill" id="sprint-progress"></div></div><span id="sprint-pts-label">0 / 0 pts</span></div></div>
+          <div style="display:flex;gap:8px;"><button class="btn btn-sm" onclick="openSprintSettingsModal()">⚙ Sprint Settings</button><button class="btn btn-sm btn-primary" onclick="openNewCardModal()">+ Add Card</button></div>
+        </div>
+        <div class="ai-command-bar" id="aiCmdBar">
+          <div class="ai-cmd-inner"><div class="ai-cmd-icon" id="aiCmdIcon">⬡</div><input class="ai-cmd-input" id="aiCmdInput" type="text" placeholder='Type a command… "add a card for dark mode toggle" or "move trip planner to in-progress"' autocomplete="off"><button class="ai-cmd-send" id="aiCmdSend" onclick="aiCommandExecute()">Run ▶</button></div>
+          <div class="ai-cmd-examples" id="aiCmdExamples"><span class="ai-cmd-example" onclick="aiCmdFill(this)">Add a card for responsive nav component</span><span class="ai-cmd-example" onclick="aiCmdFill(this)">Delete the chore rotation drag UI card</span><span class="ai-cmd-example" onclick="aiCmdFill(this)">Move trip planner to in-progress</span><span class="ai-cmd-example" onclick="aiCmdFill(this)">Add 3 cards for photo slideshow MVP</span></div>
+          <div class="ai-cmd-feedback" id="aiCmdFeedback"></div>
+        </div>
+        <div class="board" id="sprint-board">
+          <div class="board-col" data-status="backlog"><div class="col-header">Backlog <span class="count" data-count="backlog">0</span></div><div class="col-cards" data-status="backlog"></div></div>
+          <div class="board-col" data-status="in-progress"><div class="col-header">In Progress <span class="count" data-count="in-progress">0</span></div><div class="col-cards" data-status="in-progress"></div></div>
+          <div class="board-col" data-status="review"><div class="col-header">Review <span class="count" data-count="review">0</span></div><div class="col-cards" data-status="review"></div></div>
+          <div class="board-col" data-status="done"><div class="col-header">Done <span class="count" data-count="done">0</span></div><div class="col-cards" data-status="done"></div></div>
+        </div>
+      </div>
+
+      <!-- ═══ APP LIBRARY ═══ -->
+      <div class="view" id="view-library">
+        <div class="library-controls">
+          <div class="search-box"><span style="color:var(--text-dim)">⌕</span><input type="text" placeholder="Search apps…" id="app-search" oninput="renderLibrary()"></div>
+          <div class="filter-pills" id="lib-filters"><span class="pill active" data-filter="all">All</span><span class="pill" data-filter="live">Live</span><span class="pill" data-filter="dev">In Dev</span><span class="pill" data-filter="design">Design</span><span class="pill" data-filter="planned">Planned</span></div>
+          <button class="btn btn-primary btn-sm" onclick="openNewAppModal()">+ Add App</button>
+        </div>
+        <table class="app-table"><thead><tr><th>App Name</th><th>Category</th><th>Status</th><th>Sprint</th><th>File Size</th><th>Last Updated</th></tr></thead><tbody id="app-table-body"></tbody></table>
+      </div>
+
+      <!-- ═══ ROADMAP ═══ -->
+      <div class="view" id="view-roadmap">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;"><h2 style="font-family:'Instrument Serif',serif;font-weight:400;font-size:1.4rem;">Product Roadmap</h2><button class="btn btn-sm btn-primary" onclick="openNewRoadmapModal()">+ Add Item</button></div>
+        <div class="roadmap-lanes" id="roadmap-lanes"></div>
+      </div>
+
+      <!-- ═══ UPDATES ═══ -->
+      <div class="view" id="view-updates">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;"><h2 style="font-family:'Instrument Serif',serif;font-weight:400;font-size:1.4rem;">Update Log</h2><button class="btn btn-sm btn-primary" onclick="openNewUpdateModal()">+ Post Update</button></div>
+        <div class="update-timeline" id="update-timeline"></div>
+      </div>
+
+      <!-- ═══ PAGES ═══ -->
+      <div class="view" id="view-pages">
+        <div class="pages-layout">
+          <div class="pages-sidebar" id="pagesSidebar">
+            <div class="pages-sidebar-header"><span class="pages-sidebar-title">Pages</span><button class="pages-sidebar-toggle" onclick="peToggleSidebar()" title="Toggle sidebar">◀</button></div>
+            <div class="pages-list" id="pagesListContainer"></div>
+            <button class="pages-new-btn" onclick="peCreateNewPage()"><span style="font-size:1rem;opacity:.5">+</span> New page</button>
+          </div>
+          <div class="pages-editor-area">
+            <div class="pages-topbar" id="pagesTopbar">
+              <button class="pages-topbar-toggle" onclick="peToggleSidebar()" title="Open sidebar">☰</button>
+              <div class="pages-breadcrumb" id="pagesBreadcrumb"></div>
+              <div style="flex:1"></div>
+              <label class="btn btn-ghost btn-sm" style="cursor:pointer;margin:0"><input type="file" id="peFileAttach" multiple style="display:none" onchange="peHandleFileAttach(this.files)">📎 Attach File</label>
+              <button class="btn btn-ghost btn-sm" onclick="peExportPage()" title="Export page as markdown">↓ Export</button>
+            </div>
+            <div class="pages-editor-scroll" id="pagesEditorScroll"><div class="pages-editor-inner" id="pagesEditorInner"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ TEMPLATES ═══ -->
+      <div class="view" id="view-templates">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+          <div><div class="tpl-section-title">Template Library</div><div class="tpl-section-desc">AI-native templates — click to generate a new page pre-filled with structured content</div></div>
+          <div class="search-box" style="max-width:240px;"><span style="color:var(--text-dim)">⌕</span><input type="text" placeholder="Search templates…" id="tpl-search" oninput="renderTemplates()"></div>
+        </div>
+        <div class="filter-pills" id="tpl-filters" style="margin-bottom:16px;">
+          <span class="pill active" data-tplfilter="all">All</span>
+          <span class="pill" data-tplfilter="pm">Product</span>
+          <span class="pill" data-tplfilter="engineering">Engineering</span>
+          <span class="pill" data-tplfilter="design">Design</span>
+          <span class="pill" data-tplfilter="ai">AI-Powered</span>
+        </div>
+        <div class="tpl-grid" id="tpl-grid"></div>
+      </div>
+
+      <!-- ═══ PRODUCT DISCOVERY ═══ -->
+      <div class="view" id="view-pm">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+          <div><h2 style="font-family:'Instrument Serif',serif;font-weight:400;font-size:1.4rem;">Product Discovery</h2><p style="font-size:0.78rem;color:var(--text-muted);margin-top:2px;">AI-powered pipeline: describe your app → identify pain points → generate features → create sprint cards</p></div>
+        </div>
+        <div class="pm-workflow">
+          <div class="pm-input-bar">
+            <textarea id="pmAppDesc" placeholder="Describe the app or feature area you're exploring…&#10;&#10;Example: A meal planning app for busy families that need to plan weekly dinners, generate grocery lists, and track dietary restrictions for multiple household members."></textarea>
+            <div class="pm-action-col">
+              <button class="btn btn-green" onclick="pmRunDiscovery()" id="pmRunBtn">⬡ Run AI Discovery</button>
+              <button class="btn btn-sm" onclick="pmClearAll()">Clear All</button>
+              <button class="btn btn-sm" onclick="pmSendToSprint()" id="pmToSprintBtn" disabled>→ Send to Sprint</button>
+              <button class="btn btn-sm" onclick="pmCreatePage()" id="pmToPageBtn" disabled>📄 Create Page</button>
+            </div>
+          </div>
+          <div class="pm-pipeline" id="pmPipeline">
+            <div class="pm-stage"><div class="pm-stage-header"><span class="pm-stage-title">Pain Points</span><span class="pm-stage-count" id="pm-count-0">0</span></div><div class="pm-stage-body" id="pm-stage-0"></div></div>
+            <div class="pm-stage"><div class="pm-stage-header"><span class="pm-stage-title">User Stories</span><span class="pm-stage-count" id="pm-count-1">0</span></div><div class="pm-stage-body" id="pm-stage-1"></div></div>
+            <div class="pm-stage"><div class="pm-stage-header"><span class="pm-stage-title">Features</span><span class="pm-stage-count" id="pm-count-2">0</span></div><div class="pm-stage-body" id="pm-stage-2"></div></div>
+            <div class="pm-stage"><div class="pm-stage-header"><span class="pm-stage-title">Sprint Cards</span><span class="pm-stage-count" id="pm-count-3">0</span></div><div class="pm-stage-body" id="pm-stage-3"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ AI WORKSHOP ═══ -->
+      <div class="view" id="view-workshop">
+        <div class="ws-layout">
+          <div class="ws-config">
+            <div class="ws-config-row"><div class="form-group" style="flex:2"><label class="form-label">Azure OpenAI Endpoint</label><input class="form-input" id="ws-endpoint" type="text" placeholder="https://your-resource.cognitiveservices.azure.com"></div><div class="form-group" style="flex:1"><label class="form-label">API Key</label><input class="form-input" id="ws-apikey" type="password" placeholder="••••••••"></div></div>
+            <div class="ws-config-row"><div class="form-group" style="flex:1"><label class="form-label">Model / Deployment</label><input class="form-input" id="ws-model" type="text" placeholder="gpt-4o"></div><div class="form-group" style="flex:1"><label class="form-label">API Format</label><select class="form-select" id="ws-apiformat"><option value="chat">Chat Completions (standard)</option><option value="responses">Responses API (preview)</option></select></div><div class="form-group" style="flex:1"><label class="form-label">API Version</label><select class="form-select" id="ws-apiversion"><option value="2025-04-01-preview">2025-04-01-preview</option><option value="2025-03-01-preview">2025-03-01-preview</option><option value="2024-10-21">2024-10-21 (GA)</option><option value="2024-06-01">2024-06-01</option></select></div><div class="form-group" style="flex:0 0 auto;align-self:flex-end;"><button class="btn btn-primary btn-sm" onclick="wseSaveConfig()">Save Config</button></div></div>
+          </div>
+          <div class="ws-panels">
+            <div class="ws-panel"><div class="ws-panel-header"><span class="ws-panel-title">⬡ Source Files</span><span class="ws-file-count" id="ws-file-count">0 files</span></div><div class="ws-panel-body"><div class="ws-drop" id="wsDropZone" onclick="document.getElementById('wsFileInput').click()"><div class="ws-drop-icon">⊞</div><div class="ws-drop-text">Drop HTML files here or click to browse</div><div class="ws-drop-hint">Accepts .html and .htm files</div><input type="file" id="wsFileInput" accept=".html,.htm" multiple style="display:none"></div><div class="ws-file-list" id="wsFileList"></div><div class="ws-code-preview" id="wsCodePreview" style="display:none"></div></div></div>
+            <div class="ws-panel"><div class="ws-panel-header"><span class="ws-panel-title">◉ Instructions</span><button class="btn btn-ghost btn-sm" onclick="wseToggleSysPrompt()">System Prompt ▾</button></div><div class="ws-panel-body"><textarea class="ws-sys-prompt" id="wsSysPrompt" style="display:none"></textarea><textarea class="ws-query" id="wsQuery" placeholder="Describe the changes you want…&#10;&#10;Examples:&#10;• Redesign the header to match dashboard.html&#10;• Add a dark mode toggle&#10;• Merge the sidebar from nav.html into index.html"></textarea></div></div>
+          </div>
+          <div class="ws-action-bar"><button class="btn" onclick="wseClearAll()">Clear All</button><div class="ws-status" id="wsStatus"></div><button class="btn btn-primary" id="wsSendBtn" onclick="wseSend()" disabled>▶ Send to Azure AI</button></div>
+          <div class="ws-output" id="wsOutput" style="display:none"><div class="ws-panel" style="flex:1"><div class="ws-panel-header"><span class="ws-panel-title">Output</span><div style="display:flex;gap:6px;"><button class="btn btn-sm" id="wsToggleView" onclick="wseToggleOutput()">◇ Code</button><button class="btn btn-sm" onclick="wseCopyOutput()">⊡ Copy</button><button class="btn btn-sm btn-primary" onclick="wseDownloadOutput()">↓ Download</button></div></div><div class="ws-panel-body" style="padding:0"><iframe class="ws-preview-frame" id="wsPreviewFrame"></iframe><pre class="ws-output-code" id="wsOutputCode" style="display:none"></pre></div></div></div>
+          <div class="ws-history" id="wsHistory" style="display:none"><div class="ws-panel"><div class="ws-panel-header"><span class="ws-panel-title">Sprint History</span><button class="btn btn-ghost btn-sm" onclick="wseClearHistory()">Clear</button></div><div class="ws-panel-body"><div id="wsHistoryList"></div></div></div></div>
+        </div>
+      </div>
+
+      <!-- ═══ FILE WORKSPACE ═══ -->
+      <div class="view" id="view-files">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+          <div><h2 style="font-family:'Instrument Serif',serif;font-weight:400;font-size:1.4rem;">File Workspace</h2><p style="font-size:0.78rem;color:var(--text-muted);margin-top:2px;">Drop files onto the canvas. Drag to arrange. Click HTML files to preview.</p></div>
+          <div style="display:flex;gap:8px;"><label class="btn btn-primary btn-sm" style="cursor:pointer;margin:0"><input type="file" id="fwFileInput" multiple style="display:none" onchange="fwHandleFiles(this.files)">+ Add Files</label><button class="btn btn-sm" onclick="fwClearAll()">Clear All</button></div>
+        </div>
+        <div class="file-workspace" id="fileWorkspace">
+          <div class="file-workspace-canvas" id="fwCanvas" ondragover="fwCanvasDragOver(event)" ondrop="fwCanvasDrop(event)"></div>
+          <div class="fw-drop-zone" id="fwDropZone"><span class="fw-drop-text">Drop files here</span></div>
+        </div>
+      </div>
+
+      <!-- ═══ NOTES ═══ -->
+      <div class="view" id="view-notes">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;"><h2 style="font-family:'Instrument Serif',serif;font-weight:400;font-size:1.4rem;">Working Notes</h2><span style="font-size:0.74rem;color:var(--text-dim)">Auto-saves on edit</span></div>
+        <textarea class="notes-area" id="working-notes" placeholder="Architecture decisions, meeting notes, design rationale — anything the team needs to remember.
+
+Use this as a persistent scratchpad. Everything saves automatically."></textarea>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL ═══ -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal" id="modal-dialog">
+    <div class="modal-header"><h3 id="modal-title">New Card</h3><button class="modal-close" onclick="closeModal()">✕</button></div>
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-footer" id="modal-footer"></div>
+  </div>
+</div>
+
+<!-- Pages Editor: Slash Menu -->
+<div id="pe-slash-menu"></div>
+
+<!-- Pages Editor: Format Toolbar -->
+<div id="pe-format-bar">
+  <button class="pe-fmt-btn" data-cmd="bold" title="Bold"><b>B</b></button>
+  <button class="pe-fmt-btn" data-cmd="italic" title="Italic"><i>I</i></button>
+  <button class="pe-fmt-btn" data-cmd="underline" title="Underline"><u>U</u></button>
+  <button class="pe-fmt-btn" data-cmd="strikeThrough" title="Strikethrough"><s>S</s></button>
+  <div class="pe-fmt-sep"></div>
+  <button class="pe-fmt-btn" data-cmd="code" title="Code" style="font-family:'DM Sans',monospace;font-size:0.72rem">&lt;/&gt;</button>
+  <div class="pe-fmt-sep"></div>
+  <button class="pe-fmt-btn pe-ai-text-btn" onclick="peAIRewrite()" title="AI Rewrite">⬡ AI</button>
+</div>
+
+<!-- Pages Editor: Icon Picker -->
+<div id="pe-icon-picker"></div>
+
+<!-- Multi-Select Bar -->
+<div class="multi-select-bar" id="multiSelectBar">
+  <span class="msb-count" id="msbCount">0 selected</span>
+  <button class="msb-btn" onclick="msbCopy()">Copy</button>
+  <button class="msb-btn" onclick="msbMoveToPage()">Move to Page</button>
+  <button class="msb-btn danger" onclick="msbDelete()">Delete</button>
+  <button class="msb-btn" onclick="msbClearSelection()">✕</button>
+</div>
+
+<!-- Calculator Panel -->
+<div class="calc-overlay" id="calcOverlay">
+  <div class="calc-header"><h3>Calculator</h3><button class="modal-close" onclick="toggleCalc()">✕</button></div>
+  <div class="calc-display"><div class="calc-expression" id="calcExpr"></div><div class="calc-result" id="calcResult">0</div></div>
+  <div class="calc-keypad">
+    <button class="calc-key clear" onclick="calcClear()">C</button>
+    <button class="calc-key op" onclick="calcInput('(')">(</button>
+    <button class="calc-key op" onclick="calcInput(')')">)</button>
+    <button class="calc-key op" onclick="calcInput('÷')">÷</button>
+    <button class="calc-key" onclick="calcInput('7')">7</button>
+    <button class="calc-key" onclick="calcInput('8')">8</button>
+    <button class="calc-key" onclick="calcInput('9')">9</button>
+    <button class="calc-key op" onclick="calcInput('×')">×</button>
+    <button class="calc-key" onclick="calcInput('4')">4</button>
+    <button class="calc-key" onclick="calcInput('5')">5</button>
+    <button class="calc-key" onclick="calcInput('6')">6</button>
+    <button class="calc-key op" onclick="calcInput('−')">−</button>
+    <button class="calc-key" onclick="calcInput('1')">1</button>
+    <button class="calc-key" onclick="calcInput('2')">2</button>
+    <button class="calc-key" onclick="calcInput('3')">3</button>
+    <button class="calc-key op" onclick="calcInput('+')">+</button>
+    <button class="calc-key" onclick="calcInput('%')">%</button>
+    <button class="calc-key" onclick="calcInput('0')">0</button>
+    <button class="calc-key" onclick="calcInput('.')">.</button>
+    <button class="calc-key eq" onclick="calcEval()">=</button>
+  </div>
+  <div class="calc-history" id="calcHistory"></div>
+</div>
+
+<!-- HTML Preview Popup -->
+<div class="html-preview-overlay" id="htmlPreviewOverlay" onclick="if(event.target===this)closeHtmlPreview()">
+  <div class="html-preview-container">
+    <div class="html-preview-header"><h4 id="htmlPreviewTitle">Preview</h4><div style="display:flex;gap:8px;"><button class="btn btn-sm" onclick="sendPreviewToAI()">⬡ Send to AI</button><button class="modal-close" onclick="closeHtmlPreview()">✕</button></div></div>
+    <iframe class="html-preview-frame" id="htmlPreviewFrame"></iframe>
+  </div>
+</div>
+<script>
+// ═══════════════════════════════════════════
+// DATA LAYER
+// ═══════════════════════════════════════════
+const STORE_KEY = 'oi_workspace_v1';
+const DEFAULT_DATA = {
+  sprint: { name: 'Sprint 4', number: 4, startDate: '2026-03-03', endDate: '2026-03-21', velocity: [18, 22, 26, 20, 24, 0] },
+  cards: [
+    { id: 'c1', title: 'Budget Planner — core layout & state', desc: 'Build paycheck-by-paycheck budget tool with visual spending categories. localStorage persistence.', status: 'done', tag: 'app', priority: 'high', points: 5, sprint: 4, created: '2026-03-03' },
+    { id: 'c2', title: 'Design system tokens — v2 color update', desc: 'Update CSS custom properties across all apps to align with new brand palette. Audit contrast ratios.', status: 'done', tag: 'design', priority: 'med', points: 3, sprint: 4, created: '2026-03-03' },
+    { id: 'c3', title: 'Wedding RSVP — meal selection logic', desc: 'Dropdown for dietary restrictions, plus-one flow, confirmation screen with edit capability.', status: 'review', tag: 'app', priority: 'high', points: 5, sprint: 4, created: '2026-03-05' },
+    { id: 'c4', title: 'Bill Splitter — recurring splits feature', desc: 'Allow saving split templates for recurring bills. Monthly reminder view.', status: 'in-progress', tag: 'app', priority: 'med', points: 3, sprint: 4, created: '2026-03-06' },
+    { id: 'c5', title: 'Shared nav component spec', desc: 'Define optional header component that can be injected into any app for cross-navigation.', status: 'in-progress', tag: 'infra', priority: 'low', points: 2, sprint: 4, created: '2026-03-07' },
+    { id: 'c6', title: 'Trip Planner — itinerary builder MVP', desc: 'Drag-and-drop day planner, group voting on activities, packing list generator.', status: 'backlog', tag: 'app', priority: 'high', points: 8, sprint: 4, created: '2026-03-04' },
+    { id: 'c7', title: 'QA pass — Budget Planner cross-browser', desc: 'Test Safari, Firefox, Chrome. Fix mobile viewport bugs. Verify offline mode.', status: 'backlog', tag: 'bug', priority: 'med', points: 2, sprint: 4, created: '2026-03-10' },
+    { id: 'c8', title: 'Documentation — app creation guide', desc: 'Write dev guide: file structure, design tokens, testing checklist, submission criteria.', status: 'backlog', tag: 'docs', priority: 'low', points: 3, sprint: 4, created: '2026-03-08' },
+    { id: 'c9', title: 'Super Bowl Squares — auto-randomize', desc: 'Random number assignment, payment tracking, live winner highlighting.', status: 'in-progress', tag: 'app', priority: 'med', points: 5, sprint: 4, created: '2026-03-05' },
+    { id: 'c10', title: 'Chore Rotation — drag UI polish', desc: 'Improve drag-and-drop feel on mobile. Add haptic feedback styling. Fix snap zones.', status: 'review', tag: 'design', priority: 'low', points: 2, sprint: 4, created: '2026-03-09' },
+  ],
+  apps: [
+    { id: 'a1', name: 'Budget Planner', category: 'Life & Household', status: 'live', sprint: 3, size: '48 KB', updated: '2026-03-02' },
+    { id: 'a2', name: 'Chore Rotation', category: 'Life & Household', status: 'live', sprint: 3, size: '32 KB', updated: '2026-03-01' },
+    { id: 'a3', name: 'Contact Info Hub', category: 'Life & Household', status: 'live', sprint: 2, size: '36 KB', updated: '2026-02-18' },
+    { id: 'a4', name: 'Wedding RSVP', category: 'Group & Social', status: 'dev', sprint: 4, size: '52 KB', updated: '2026-03-10' },
+    { id: 'a5', name: 'Bill Splitter', category: 'Group & Social', status: 'dev', sprint: 4, size: '41 KB', updated: '2026-03-11' },
+    { id: 'a6', name: 'Group Trip Planner', category: 'Group & Social', status: 'design', sprint: 4, size: '—', updated: '2026-03-08' },
+    { id: 'a7', name: 'Super Bowl Squares', category: 'Sports & Games', status: 'dev', sprint: 4, size: '38 KB', updated: '2026-03-10' },
+    { id: 'a8', name: 'Potluck Signup', category: 'Group & Social', status: 'live', sprint: 2, size: '28 KB', updated: '2026-02-14' },
+    { id: 'a9', name: 'Address Book', category: 'Life & Household', status: 'live', sprint: 1, size: '34 KB', updated: '2026-01-28' },
+    { id: 'a10', name: 'Photo Slideshow', category: 'Life & Household', status: 'planned', sprint: 5, size: '—', updated: '—' },
+    { id: 'a11', name: 'E-Card Maker', category: 'Life & Household', status: 'planned', sprint: 5, size: '—', updated: '—' },
+    { id: 'a12', name: 'March Madness Bracket', category: 'Sports & Games', status: 'design', sprint: 5, size: '—', updated: '2026-03-06' },
+    { id: 'a13', name: 'Fantasy Draft Board', category: 'Sports & Games', status: 'planned', sprint: 6, size: '—', updated: '—' },
+    { id: 'a14', name: 'Freelancer Invoice', category: 'Professional', status: 'planned', sprint: 6, size: '—', updated: '—' },
+    { id: 'a15', name: 'Pickup Game Scheduler', category: 'Sports & Games', status: 'planned', sprint: 6, size: '—', updated: '—' },
+    { id: 'a16', name: 'Contractor Estimate Builder', category: 'Professional', status: 'planned', sprint: 7, size: '—', updated: '—' },
+    { id: 'a17', name: 'Baby Pool', category: 'Group & Social', status: 'planned', sprint: 5, size: '—', updated: '—' },
+    { id: 'a18', name: 'Concert Lineup Ranker', category: 'Group & Social', status: 'planned', sprint: 6, size: '—', updated: '—' },
+  ],
+  roadmap: [
+    { id: 'r1', name: 'Core Design System v2', quarter: 'Q1 2026', category: 'Infrastructure', status: 'done' },
+    { id: 'r2', name: 'Life & Household Suite (6 apps)', quarter: 'Q1 2026', category: 'Apps', status: 'in-progress' },
+    { id: 'r3', name: 'Group & Social Suite (6 apps)', quarter: 'Q1 2026', category: 'Apps', status: 'in-progress' },
+    { id: 'r4', name: 'Build Workspace (this tool)', quarter: 'Q1 2026', category: 'Infrastructure', status: 'in-progress' },
+    { id: 'r5', name: 'Sports & Games Suite (6 apps)', quarter: 'Q2 2026', category: 'Apps', status: 'planned' },
+    { id: 'r6', name: 'Professional Suite (6 apps)', quarter: 'Q2 2026', category: 'Apps', status: 'planned' },
+    { id: 'r7', name: 'App submission & review process', quarter: 'Q2 2026', category: 'Process', status: 'planned' },
+    { id: 'r8', name: 'Shared nav / cross-link protocol', quarter: 'Q2 2026', category: 'Infrastructure', status: 'planned' },
+    { id: 'r9', name: 'Distribution — Gumroad/Etsy storefront', quarter: 'Q3 2026', category: 'Distribution', status: 'planned' },
+    { id: 'r10', name: 'Doccoin protocol — research & spec', quarter: 'Q3 2026', category: 'Infrastructure', status: 'planned' },
+    { id: 'r11', name: 'Community template submissions', quarter: 'Q3 2026', category: 'Community', status: 'planned' },
+    { id: 'r12', name: 'Seasonal bundles — Back to School', quarter: 'Q3 2026', category: 'Distribution', status: 'planned' },
+    { id: 'r13', name: 'Doccoin v1 — document discovery', quarter: 'Q4 2026', category: 'Infrastructure', status: 'planned' },
+    { id: 'r14', name: '50-app milestone', quarter: 'Q4 2026', category: 'Apps', status: 'planned' },
+    { id: 'r15', name: 'Holiday bundle & marketing push', quarter: 'Q4 2026', category: 'Distribution', status: 'planned' },
+  ],
+  updates: [
+    { id: 'u1', date: '2026-03-12', title: 'Build Workspace v1.0 shipped', body: 'Major revision: templates library, product discovery pipeline, calculator, file workspace, multi-block select, and AI page generation all live.', type: 'release' },
+    { id: 'u2', date: '2026-03-10', title: 'Wedding RSVP entering review', body: 'Meal selection, dietary restrictions, and plus-one logic all implemented. Needs QA on mobile Safari before launch.', type: 'sprint' },
+    { id: 'u3', date: '2026-03-08', title: 'Design system v2 tokens finalized', body: 'New color palette locked. All CSS custom properties documented. Migration guide for existing apps written.', type: 'design' },
+    { id: 'u4', date: '2026-03-06', title: 'Decision: No backend for v1', body: 'Confirmed architecture — all apps remain pure HTML/CSS/JS with localStorage. Doccoin protocol research begins Q3.', type: 'decision' },
+    { id: 'u5', date: '2026-03-04', title: 'Sprint 4 kickoff', body: '38 points planned. Focus: Wedding RSVP, Bill Splitter, Super Bowl Squares, plus design system polish.', type: 'sprint' },
+    { id: 'u6', date: '2026-02-28', title: 'Sprint 3 retro — velocity concern', body: 'Delivered 20 of 26 planned points. Trip Planner scoping was too aggressive.', type: 'blocker' },
+  ],
+  notes: `# Open Intranet — Working Notes\n\n## Architecture Principles\n- Every app: single .html file, zero dependencies\n- Design tokens via CSS custom properties (--oi-* namespace)\n- localStorage for persistence, no cloud\n- Works offline, works on any device\n\n## Sprint Conventions\n- 3-week sprints\n- Points: 1 (trivial), 2 (small), 3 (medium), 5 (large), 8 (epic)\n- Review = functional complete, needs QA/polish\n- Done = shipped, tested, documented`
+};
+
+function loadData() { try { const raw = localStorage.getItem(STORE_KEY); return raw ? JSON.parse(raw) : JSON.parse(JSON.stringify(DEFAULT_DATA)); } catch(e) { return JSON.parse(JSON.stringify(DEFAULT_DATA)); } }
+function saveData() { localStorage.setItem(STORE_KEY, JSON.stringify(DATA)); }
+let DATA = loadData();
+
+// ═══════════════════════════════════════════
+// UTILITIES
+// ═══════════════════════════════════════════
+function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1).replace('-', ' '); }
+function formatDate(d) { const dt = new Date(d + 'T00:00:00'); return dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); }
+function uid() { return 'x' + Math.random().toString(36).substr(2, 9); }
+
+// ═══════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════
+const viewTitles = {
+  dashboard: ['Dashboard', `Sprint ${DATA.sprint.number} · Week 2 of 3`],
+  sprint: ['Sprint Board', `${DATA.sprint.name} — ${DATA.sprint.startDate} to ${DATA.sprint.endDate}`],
+  library: ['App Library', `${DATA.apps.length} apps tracked`],
+  roadmap: ['Roadmap', 'Q1–Q4 2026'],
+  updates: ['Update Log', `${DATA.updates.length} entries`],
+  notes: ['Working Notes', 'Persistent scratchpad'],
+  pages: ['Pages', 'Notion-style documents with AI assist'],
+  templates: ['Templates', 'AI-native page templates'],
+  pm: ['Product Discovery', 'AI-powered feature pipeline'],
+  workshop: ['AI Workshop', 'HTML file + prompt → updated HTML'],
+  files: ['File Workspace', 'Drag, organize, and preview files'],
+};
+
+document.querySelectorAll('.nav-item[data-view]').forEach(item => {
+  item.addEventListener('click', () => {
+    const view = item.dataset.view;
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    item.classList.add('active');
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.getElementById('view-' + view).classList.add('active');
+    document.getElementById('pageTitle').textContent = viewTitles[view][0];
+    document.getElementById('pageDesc').textContent = viewTitles[view][1];
+    if (view === 'sprint') renderBoard();
+    if (view === 'library') renderLibrary();
+    if (view === 'roadmap') renderRoadmap();
+    if (view === 'updates') renderUpdates();
+    if (view === 'notes') document.getElementById('working-notes').value = DATA.notes;
+    if (view === 'dashboard') renderDashboard();
+    if (view === 'pages') peInit();
+    if (view === 'workshop') wseRenderHistory();
+    if (view === 'templates') renderTemplates();
+  });
+});
+
+// ═══════════════════════════════════════════
+// SPRINT BOARD
+// ═══════════════════════════════════════════
+let draggedCard = null;
+function renderBoard() {
+  const statuses = ['backlog', 'in-progress', 'review', 'done'];
+  const currentCards = DATA.cards.filter(c => c.sprint === DATA.sprint.number);
+  statuses.forEach(status => {
+    const col = document.querySelector(`.col-cards[data-status="${status}"]`);
+    col.innerHTML = '';
+    const cards = currentCards.filter(c => c.status === status);
+    document.querySelector(`.count[data-count="${status}"]`).textContent = cards.length;
+    cards.forEach(card => {
+      const el = document.createElement('div');
+      el.className = 'sprint-card'; el.draggable = true; el.dataset.id = card.id;
+      el.innerHTML = `<div class="sprint-card-title">${esc(card.title)}</div><div class="sprint-card-desc">${esc(card.desc).slice(0,90)}${card.desc.length>90?'…':''}</div><div class="sprint-card-footer"><div style="display:flex;gap:6px;align-items:center;"><span class="card-tag tag-${card.tag}">${card.tag}</span><span class="card-priority priority-${card.priority}"></span></div><span class="card-points">${card.points} pts</span></div>`;
+      el.addEventListener('dragstart', e => { draggedCard = el; el.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; });
+      el.addEventListener('dragend', () => { if(draggedCard) draggedCard.classList.remove('dragging'); document.querySelectorAll('.board-col').forEach(c => c.classList.remove('drag-over')); draggedCard = null; });
+      el.addEventListener('click', () => openEditCardModal(card.id));
+      col.appendChild(el);
+    });
+  });
+  const total = currentCards.reduce((s,c) => s+c.points, 0);
+  const done = currentCards.filter(c => c.status==='done').reduce((s,c) => s+c.points, 0);
+  document.getElementById('sprint-progress').style.width = total ? (done/total*100)+'%' : '0%';
+  document.getElementById('sprint-pts-label').textContent = `${done} / ${total} pts`;
+  document.querySelectorAll('.board-col').forEach(col => {
+    col.addEventListener('dragover', e => { e.preventDefault(); col.classList.add('drag-over'); });
+    col.addEventListener('dragleave', () => col.classList.remove('drag-over'));
+    col.addEventListener('drop', e => { e.preventDefault(); col.classList.remove('drag-over'); if(!draggedCard) return; const card = DATA.cards.find(c => c.id===draggedCard.dataset.id); if(card) { card.status = col.dataset.status; saveData(); renderBoard(); } });
+  });
+}
+
+// ═══════════════════════════════════════════
+// APP LIBRARY
+// ═══════════════════════════════════════════
+function renderLibrary() {
+  const search = (document.getElementById('app-search')?.value||'').toLowerCase();
+  const activeFilter = document.querySelector('.pill.active')?.dataset.filter||'all';
+  let apps = DATA.apps;
+  if(search) apps = apps.filter(a => a.name.toLowerCase().includes(search)||a.category.toLowerCase().includes(search));
+  if(activeFilter !== 'all') apps = apps.filter(a => a.status === activeFilter);
+  document.getElementById('app-table-body').innerHTML = apps.map(a => `<tr><td class="app-name">${esc(a.name)}</td><td>${esc(a.category)}</td><td><span class="status-dot status-${a.status}"></span>${capitalize(a.status)}</td><td>Sprint ${a.sprint}</td><td>${a.size}</td><td>${a.updated}</td></tr>`).join('');
+}
+document.addEventListener('click', e => { if(e.target.closest('.pill[data-filter]')) { document.querySelectorAll('.pill[data-filter]').forEach(p => p.classList.remove('active')); e.target.closest('.pill').classList.add('active'); renderLibrary(); } });
+
+// ═══════════════════════════════════════════
+// ROADMAP
+// ═══════════════════════════════════════════
+function renderRoadmap() {
+  const quarters = [...new Set(DATA.roadmap.map(r => r.quarter))];
+  const container = document.getElementById('roadmap-lanes'); container.innerHTML = '';
+  quarters.forEach(q => {
+    const items = DATA.roadmap.filter(r => r.quarter === q);
+    const done = items.filter(r => r.status==='done').length;
+    const inProg = items.filter(r => r.status==='in-progress').length;
+    const sc = { done:'var(--green-bg);color:var(--green)', 'in-progress':'var(--blue-bg);color:var(--blue)', planned:'var(--bg);color:var(--text-muted)' };
+    const sl = { done:'Done', 'in-progress':'Active', planned:'Planned' };
+    const el = document.createElement('div'); el.className = 'roadmap-quarter';
+    el.innerHTML = `<div class="quarter-header" onclick="this.nextElementSibling.classList.toggle('collapsed')"><h3>${q}</h3><div class="q-stats"><span>${done} done</span><span>${inProg} active</span><span>${items.length} total</span></div></div><div class="quarter-body"><div class="roadmap-items">${items.map(r => `<div class="roadmap-item"><span class="status-dot status-${r.status==='in-progress'?'dev':r.status==='done'?'live':'planned'}"></span><span class="ri-name">${esc(r.name)}</span><span class="ri-category">${esc(r.category)}</span><span class="ri-status" style="background:${sc[r.status]}">${sl[r.status]}</span></div>`).join('')}</div></div>`;
+    container.appendChild(el);
+  });
+}
+
+// ═══════════════════════════════════════════
+// UPDATE LOG
+// ═══════════════════════════════════════════
+function renderUpdates() { document.getElementById('update-timeline').innerHTML = DATA.updates.map(u => `<div class="update-item"><div class="update-date">${formatDate(u.date)}</div><div class="update-content"><span class="update-type type-${u.type}">${u.type}</span><h4>${esc(u.title)}</h4><p>${esc(u.body)}</p></div></div>`).join(''); }
+
+// ═══════════════════════════════════════════
+// DASHBOARD
+// ═══════════════════════════════════════════
+function renderDashboard() {
+  const h = new Date().getHours();
+  document.getElementById('greeting-time').textContent = h < 12 ? 'morning' : h < 17 ? 'afternoon' : 'evening';
+  const cc = DATA.cards.filter(c => c.sprint === DATA.sprint.number), dc = cc.filter(c => c.status==='done');
+  const la = DATA.apps.filter(a => a.status==='live'), da = DATA.apps.filter(a => a.status==='dev');
+  const vels = DATA.sprint.velocity.filter(v => v > 0), avgV = vels.length ? Math.round(vels.reduce((a,b)=>a+b,0)/vels.length) : 0;
+  const ru = DATA.updates.filter(u => { const d = new Date(u.date); return (new Date()-d) < 7*86400000; });
+  document.getElementById('metric-apps').textContent = DATA.apps.length;
+  document.getElementById('metric-apps-live').textContent = la.length+' live';
+  document.getElementById('metric-apps-dev').textContent = da.length+' in dev';
+  document.getElementById('metric-velocity').textContent = avgV;
+  document.getElementById('metric-cards').textContent = cc.length;
+  document.getElementById('metric-done').textContent = dc.length;
+  document.getElementById('metric-remaining').textContent = cc.length - dc.length;
+  document.getElementById('metric-updates').textContent = ru.length;
+  document.getElementById('metric-last-update').textContent = DATA.updates.length ? formatDate(DATA.updates[0].date) : '—';
+  renderBurndown(cc); renderVelocity(); renderActivityFeed(); renderBlockers();
+}
+function renderBurndown(cards) {
+  const total = cards.reduce((s,c)=>s+c.points,0), days = 15, ideal = Array.from({length:days+1},(_,i)=>total-(total/days)*i);
+  const actual = [total,total,total-3,total-3,total-5,total-8,total-8,total-10,total-10,total-13];
+  const w=100,ht=100,xS=w/days;
+  let svg = `<svg class="chart-svg" viewBox="0 0 ${w+20} ${ht+20}" preserveAspectRatio="none">`;
+  for(let i=0;i<=4;i++){const y=(ht/4)*i+10;svg+=`<line x1="10" y1="${y}" x2="${w+10}" y2="${y}" class="chart-gridline"/><text x="5" y="${y+3}" class="chart-label" text-anchor="end" style="font-size:6px">${Math.round(total-(total/4)*i)}</text>`;}
+  svg+=`<path d="${ideal.slice(0,days+1).map((v,i)=>`${i===0?'M':'L'}${10+i*xS},${10+ht-(v/total)*ht}`).join(' ')}" class="chart-line" stroke="var(--text-dim)" stroke-dasharray="4 3"/>`;
+  svg+=`<path d="${actual.map((v,i)=>`${i===0?'M':'L'}${10+i*xS},${10+ht-(v/total)*ht}`).join(' ')}" class="chart-line" stroke="var(--green)"/>`;
+  actual.forEach((v,i)=>{svg+=`<circle cx="${10+i*xS}" cy="${10+ht-(v/total)*ht}" r="2" fill="var(--green)" class="chart-dot"/>`;});
+  svg+='</svg>'; document.getElementById('burndown-chart').innerHTML = svg;
+}
+function renderVelocity() {
+  const vels = DATA.sprint.velocity, max = Math.max(...vels,1);
+  const colors = ['var(--text-dim)','var(--text-dim)','var(--text-dim)','var(--text-dim)','var(--text-dim)','var(--blue)'];
+  document.getElementById('velocity-chart').innerHTML = vels.map((v,i) => `<div class="v-bar-wrap"><div class="v-bar-value">${v||'—'}</div><div class="v-bar" style="height:${v?(v/max*80):4}px;background:${v?colors[i]:'var(--border)'};"></div><div class="v-bar-label">S${i+DATA.sprint.number-vels.length+1}</div></div>`).join('');
+}
+function renderActivityFeed() {
+  const activities = [{color:'var(--green)',text:'<strong>Budget Planner</strong> moved to Done',time:'2 hours ago'},{color:'var(--blue)',text:'<strong>Wedding RSVP</strong> moved to Review',time:'5 hours ago'},{color:'var(--purple)',text:'Design tokens v2 <strong>merged</strong>',time:'1 day ago'},{color:'var(--warm)',text:'<strong>Bill Splitter</strong> — recurring splits started',time:'1 day ago'},{color:'var(--blue)',text:'Sprint 4 <strong>kickoff</strong> logged',time:'8 days ago'}];
+  document.getElementById('activity-feed').innerHTML = activities.map(a => `<div class="activity-item"><span class="activity-dot" style="background:${a.color}"></span><div><div>${a.text}</div><div class="activity-time">${a.time}</div></div></div>`).join('');
+}
+function renderBlockers() {
+  const blockers = DATA.cards.filter(c => c.priority==='high'&&c.status!=='done');
+  const feed = document.getElementById('blockers-feed');
+  if(!blockers.length) { feed.innerHTML = '<div style="font-size:0.82rem;color:var(--text-dim);padding:8px 0;">No high-priority items outstanding. Nice.</div>'; return; }
+  feed.innerHTML = blockers.map(b => `<div class="activity-item"><span class="activity-dot" style="background:var(--red)"></span><div><div><strong>${esc(b.title)}</strong></div><div class="activity-time">${capitalize(b.status)} · ${b.points} pts</div></div></div>`).join('');
+}
+
+// ═══════════════════════════════════════════
+// MODALS
+// ═══════════════════════════════════════════
+function openModal(title, bodyHTML, footerHTML, cls) {
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-body').innerHTML = bodyHTML;
+  document.getElementById('modal-footer').innerHTML = footerHTML;
+  document.getElementById('modal-dialog').className = 'modal' + (cls ? ' ' + cls : '');
+  document.getElementById('modal-overlay').classList.add('open');
+}
+function closeModal() { document.getElementById('modal-overlay').classList.remove('open'); }
+document.getElementById('modal-overlay').addEventListener('click', e => { if(e.target===e.currentTarget) closeModal(); });
+
+function openNewCardModal() {
+  openModal('New Sprint Card', `<div class="form-group"><label class="form-label">Title</label><input class="form-input" id="f-title" placeholder="What needs to get done?"></div><div class="form-group"><label class="form-label">Description</label><textarea class="form-textarea" id="f-desc" placeholder="Details, acceptance criteria…"></textarea></div><div class="form-row"><div class="form-group"><label class="form-label">Tag</label><select class="form-select" id="f-tag"><option value="app">App</option><option value="design">Design</option><option value="infra">Infra</option><option value="docs">Docs</option><option value="bug">Bug</option></select></div><div class="form-group"><label class="form-label">Priority</label><select class="form-select" id="f-priority"><option value="high">High</option><option value="med">Medium</option><option value="low">Low</option></select></div></div><div class="form-row"><div class="form-group"><label class="form-label">Points</label><select class="form-select" id="f-points"><option value="1">1</option><option value="2">2</option><option value="3" selected>3</option><option value="5">5</option><option value="8">8</option></select></div><div class="form-group"><label class="form-label">Status</label><select class="form-select" id="f-status"><option value="backlog">Backlog</option><option value="in-progress">In Progress</option><option value="review">Review</option><option value="done">Done</option></select></div></div>`, `<button class="btn" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="saveNewCard()">Create Card</button>`);
+}
+function saveNewCard() {
+  const title = document.getElementById('f-title').value.trim(); if(!title) return;
+  DATA.cards.push({ id:'c'+Date.now(), title, desc:document.getElementById('f-desc').value.trim(), status:document.getElementById('f-status').value, tag:document.getElementById('f-tag').value, priority:document.getElementById('f-priority').value, points:parseInt(document.getElementById('f-points').value), sprint:DATA.sprint.number, created:new Date().toISOString().slice(0,10) });
+  saveData(); closeModal(); renderBoard(); renderDashboard();
+}
+function openEditCardModal(cardId) {
+  const card = DATA.cards.find(c => c.id===cardId); if(!card) return;
+  openModal('Edit Card', `<div class="form-group"><label class="form-label">Title</label><input class="form-input" id="f-title" value="${esc(card.title)}"></div><div class="form-group"><label class="form-label">Description</label><textarea class="form-textarea" id="f-desc">${esc(card.desc)}</textarea></div><div class="form-row"><div class="form-group"><label class="form-label">Tag</label><select class="form-select" id="f-tag">${['app','design','infra','docs','bug'].map(t=>`<option value="${t}"${card.tag===t?' selected':''}>${t}</option>`).join('')}</select></div><div class="form-group"><label class="form-label">Priority</label><select class="form-select" id="f-priority">${['high','med','low'].map(p=>`<option value="${p}"${card.priority===p?' selected':''}>${p}</option>`).join('')}</select></div></div><div class="form-row"><div class="form-group"><label class="form-label">Points</label><select class="form-select" id="f-points">${[1,2,3,5,8].map(p=>`<option value="${p}"${card.points===p?' selected':''}>${p}</option>`).join('')}</select></div><div class="form-group"><label class="form-label">Status</label><select class="form-select" id="f-status">${['backlog','in-progress','review','done'].map(s=>`<option value="${s}"${card.status===s?' selected':''}>${s}</option>`).join('')}</select></div></div>`, `<button class="btn" style="color:var(--red);border-color:var(--red)" onclick="deleteCard('${card.id}')">Delete</button><div style="flex:1"></div><button class="btn" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="saveEditCard('${card.id}')">Save</button>`);
+}
+function saveEditCard(id) { const c = DATA.cards.find(x=>x.id===id); if(!c) return; c.title=document.getElementById('f-title').value.trim(); c.desc=document.getElementById('f-desc').value.trim(); c.tag=document.getElementById('f-tag').value; c.priority=document.getElementById('f-priority').value; c.points=parseInt(document.getElementById('f-points').value); c.status=document.getElementById('f-status').value; saveData(); closeModal(); renderBoard(); renderDashboard(); }
+function deleteCard(id) { DATA.cards = DATA.cards.filter(c=>c.id!==id); saveData(); closeModal(); renderBoard(); renderDashboard(); }
+function openNewAppModal() { openModal('Add App to Library', `<div class="form-group"><label class="form-label">App Name</label><input class="form-input" id="f-app-name" placeholder="e.g. Mortgage Comparison"></div><div class="form-row"><div class="form-group"><label class="form-label">Category</label><select class="form-select" id="f-app-cat"><option>Life & Household</option><option>Group & Social</option><option>Sports & Games</option><option>Professional</option></select></div><div class="form-group"><label class="form-label">Status</label><select class="form-select" id="f-app-status"><option value="planned">Planned</option><option value="design">Design</option><option value="dev">In Dev</option><option value="live">Live</option></select></div></div><div class="form-row"><div class="form-group"><label class="form-label">Target Sprint</label><input class="form-input" id="f-app-sprint" type="number" value="${DATA.sprint.number}"></div><div class="form-group"><label class="form-label">File Size</label><input class="form-input" id="f-app-size" placeholder="e.g. 42 KB" value="—"></div></div>`, `<button class="btn" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="saveNewApp()">Add App</button>`); }
+function saveNewApp() { const name=document.getElementById('f-app-name').value.trim(); if(!name)return; DATA.apps.push({id:'a'+Date.now(),name,category:document.getElementById('f-app-cat').value,status:document.getElementById('f-app-status').value,sprint:parseInt(document.getElementById('f-app-sprint').value),size:document.getElementById('f-app-size').value||'—',updated:new Date().toISOString().slice(0,10)}); saveData(); closeModal(); renderLibrary(); renderDashboard(); }
+function openNewUpdateModal() { openModal('Post Update', `<div class="form-group"><label class="form-label">Title</label><input class="form-input" id="f-up-title" placeholder="What happened?"></div><div class="form-group"><label class="form-label">Details</label><textarea class="form-textarea" id="f-up-body" placeholder="Context, links, decisions…"></textarea></div><div class="form-group"><label class="form-label">Type</label><select class="form-select" id="f-up-type"><option value="release">Release</option><option value="sprint">Sprint</option><option value="design">Design</option><option value="decision">Decision</option><option value="blocker">Blocker</option></select></div>`, `<button class="btn" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="saveNewUpdate()">Post</button>`); }
+function saveNewUpdate() { const title=document.getElementById('f-up-title').value.trim(); if(!title)return; DATA.updates.unshift({id:'u'+Date.now(),date:new Date().toISOString().slice(0,10),title,body:document.getElementById('f-up-body').value.trim(),type:document.getElementById('f-up-type').value}); saveData(); closeModal(); renderUpdates(); renderDashboard(); }
+function openNewRoadmapModal() { openModal('Add Roadmap Item', `<div class="form-group"><label class="form-label">Name</label><input class="form-input" id="f-rm-name" placeholder="e.g. Doccoin v2"></div><div class="form-row"><div class="form-group"><label class="form-label">Quarter</label><select class="form-select" id="f-rm-q"><option>Q1 2026</option><option>Q2 2026</option><option>Q3 2026</option><option>Q4 2026</option></select></div><div class="form-group"><label class="form-label">Category</label><select class="form-select" id="f-rm-cat"><option>Apps</option><option>Infrastructure</option><option>Distribution</option><option>Process</option><option>Community</option></select></div></div><div class="form-group"><label class="form-label">Status</label><select class="form-select" id="f-rm-status"><option value="planned">Planned</option><option value="in-progress">In Progress</option><option value="done">Done</option></select></div>`, `<button class="btn" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="saveNewRoadmapItem()">Add</button>`); }
+function saveNewRoadmapItem() { const name=document.getElementById('f-rm-name').value.trim(); if(!name)return; DATA.roadmap.push({id:'r'+Date.now(),name,quarter:document.getElementById('f-rm-q').value,category:document.getElementById('f-rm-cat').value,status:document.getElementById('f-rm-status').value}); saveData(); closeModal(); renderRoadmap(); }
+function openSprintSettingsModal() { openModal('Sprint Settings', `<div class="form-group"><label class="form-label">Sprint Name</label><input class="form-input" id="f-sp-name" value="${esc(DATA.sprint.name)}"></div><div class="form-row"><div class="form-group"><label class="form-label">Start Date</label><input class="form-input" id="f-sp-start" type="date" value="${DATA.sprint.startDate}"></div><div class="form-group"><label class="form-label">End Date</label><input class="form-input" id="f-sp-end" type="date" value="${DATA.sprint.endDate}"></div></div><div class="form-group"><label class="form-label">Sprint Number</label><input class="form-input" id="f-sp-num" type="number" value="${DATA.sprint.number}"></div>`, `<button class="btn" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="saveSprintSettings()">Save</button>`); }
+function saveSprintSettings() { DATA.sprint.name=document.getElementById('f-sp-name').value.trim(); DATA.sprint.startDate=document.getElementById('f-sp-start').value; DATA.sprint.endDate=document.getElementById('f-sp-end').value; DATA.sprint.number=parseInt(document.getElementById('f-sp-num').value); saveData(); closeModal(); renderBoard(); renderDashboard(); }
+
+// NOTES
+const notesEl = document.getElementById('working-notes'); notesEl.value = DATA.notes;
+let noteTimer;
+notesEl.addEventListener('input', () => { clearTimeout(noteTimer); noteTimer = setTimeout(() => { DATA.notes = notesEl.value; saveData(); }, 500); });
+
+// EXPORT
+function exportData() { const blob = new Blob([JSON.stringify(DATA,null,2)],{type:'application/json'}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'oi-workspace-export-'+new Date().toISOString().slice(0,10)+'.json'; a.click(); URL.revokeObjectURL(a.href); }
+</script>
+<script>
+// ═══════════════════════════════════════════
+// PAGES EDITOR
+// ═══════════════════════════════════════════
+const PE_STORE_KEY = 'oi_pages_v1';
+const PE_EMOJIS = ['📝','📄','📋','📌','📎','📊','📈','🎯','💡','🔥','⭐','❤️','🚀','🎨','🎵','📚','🏠','💼','🌍','🔧','⚡','🌟','✨','🎉','🍀','🌊','🌸','🦋','🌈','☀️','🌙','⛰️','🛠️','📡','🔬','🧪','🎸','📷','🖊️','✏️','💻','📱','🗂️','🧠','🤖','⚙️','🔒','📐','🗺️','🎪'];
+let peState, peCurrentPageId = null, peSlashMenuOpen = false, peSlashFilterText = '', peSlashMenuIdx = 0, peSlashTriggerBlockId = null, peDragSrcId = null;
+let peSelectedBlocks = new Set();
+
+const PE_BLOCK_TYPES = [
+  {type:'text',label:'Text',desc:'Plain text block',icon:'Aa'},{type:'h1',label:'Heading 1',desc:'Large section heading',icon:'H1'},{type:'h2',label:'Heading 2',desc:'Medium heading',icon:'H2'},{type:'h3',label:'Heading 3',desc:'Small heading',icon:'H3'},
+  {type:'bullet',label:'Bullet List',desc:'Simple bullet point',icon:'•'},{type:'numbered',label:'Numbered List',desc:'Ordered list item',icon:'1.'},{type:'todo',label:'To-do',desc:'Checkbox item',icon:'☑'},
+  {type:'quote',label:'Quote',desc:'Block quotation',icon:'❝'},{type:'callout',label:'Callout',desc:'Highlighted info box',icon:'💡'},{type:'code',label:'Code',desc:'Code snippet',icon:'{ }'},{type:'divider',label:'Divider',desc:'Horizontal line',icon:'—'},
+  {type:'file',label:'File Attachment',desc:'Attach a file to this page',icon:'📎'},
+  {type:'ai',label:'AI Generate',desc:'Ask AI to write content',icon:'⬡'},{type:'ai-page',label:'AI → New Page',desc:'Generate a new page from prompt',icon:'📄⬡'},
+];
+
+function peDefaultState() {
+  const pid = uid();
+  return { pages: [{ id: pid, title: 'Getting Started', icon: '🚀', blocks: [
+    {id:uid(),type:'h1',content:'Welcome to Pages'},{id:uid(),type:'text',content:'A Notion-style editor with AI writing assist, file attachments, and multi-block selection.'},{id:uid(),type:'h2',content:'Quick Start'},
+    {id:uid(),type:'bullet',content:'Type <code>/</code> to open the block menu'},{id:uid(),type:'bullet',content:'Select text and click <b>⬡ AI</b> to rewrite with AI'},{id:uid(),type:'bullet',content:'Use <code>/ai</code> to generate content from a prompt'},
+    {id:uid(),type:'bullet',content:'Use <code>/ai-page</code> to generate an entirely new page'},{id:uid(),type:'bullet',content:'Hold <code>Shift</code> and click blocks to multi-select'},
+    {id:uid(),type:'bullet',content:'Attach files with the 📎 button or <code>/file</code> command'},{id:uid(),type:'bullet',content:'Drag blocks to reorder using the ⠿ handle'},
+    {id:uid(),type:'divider',content:''},{id:uid(),type:'callout',content:'AI features use your Azure OpenAI config from the AI Workshop tab. Set your endpoint, key, and model there first.'},
+    {id:uid(),type:'text',content:''},
+  ]}], sidebarOpen: true };
+}
+function peLoadState() { try { const r = localStorage.getItem(PE_STORE_KEY); if(r) return JSON.parse(r); } catch(e){} return peDefaultState(); }
+function peSaveState() { try { localStorage.setItem(PE_STORE_KEY, JSON.stringify(peState)); } catch(e){} }
+peState = peLoadState();
+
+function peGetPage(id) { return peState.pages.find(p=>p.id===id); }
+function peEsc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+function pePlaceCaretAtEnd(el) { el.focus(); const s=window.getSelection(),r=document.createRange(); r.selectNodeContents(el); r.collapse(false); s.removeAllRanges(); s.addRange(r); }
+function pePlaceCaretAt(el, offset) { el.focus(); const s=window.getSelection(),r=document.createRange(); let cc=0; const w=document.createTreeWalker(el,NodeFilter.SHOW_TEXT,null,false); let n; while(n=w.nextNode()){const l=n.textContent.length;if(cc+l>=offset){r.setStart(n,offset-cc);r.collapse(true);s.removeAllRanges();s.addRange(r);return;}cc+=l;} r.selectNodeContents(el);r.collapse(false);s.removeAllRanges();s.addRange(r); }
+
+function peInit() {
+  if(!peState.sidebarOpen) document.getElementById('pagesSidebar').classList.add('collapsed');
+  if(peState.pages.length===0) { peState = peDefaultState(); peSaveState(); }
+  if(!peCurrentPageId || !peGetPage(peCurrentPageId)) peCurrentPageId = peState.pages[0].id;
+  peRenderSidebar(); peRenderEditor(); peUpdateBreadcrumb();
+}
+function peRenderSidebar() {
+  document.getElementById('pagesListContainer').innerHTML = peState.pages.map(p => `<div class="page-nav-item ${p.id===peCurrentPageId?'active':''}" onclick="peOpenPage('${p.id}')"><span class="pn-icon">${p.icon||'📄'}</span><span class="pn-title">${peEsc(p.title||'Untitled')}</span>${peState.pages.length>1?`<button class="pn-delete" onclick="event.stopPropagation();peDeletePage('${p.id}')" title="Delete page">✕</button>`:''}</div>`).join('');
+}
+function peToggleSidebar() { const sb = document.getElementById('pagesSidebar'); sb.classList.toggle('collapsed'); peState.sidebarOpen = !sb.classList.contains('collapsed'); peSaveState(); }
+function peCreateNewPage(title, icon, blocks) {
+  const page = { id: uid(), title: title||'', icon: icon||'📄', blocks: blocks || [{id:uid(),type:'text',content:''}] };
+  peState.pages.push(page); peSaveState(); peOpenPage(page.id); return page;
+}
+function peDeletePage(pid) { if(peState.pages.length<=1) return; peState.pages = peState.pages.filter(p=>p.id!==pid); peSaveState(); if(peCurrentPageId===pid) peOpenPage(peState.pages[0].id); else peRenderSidebar(); }
+function peOpenPage(pid) { peSaveCurrentPage(); peCurrentPageId = pid; peSelectedBlocks.clear(); updateMultiSelectBar(); peRenderSidebar(); peRenderEditor(); peUpdateBreadcrumb(); document.getElementById('pagesEditorScroll').scrollTop = 0; }
+function peUpdateBreadcrumb() { const p = peGetPage(peCurrentPageId); if(p) document.getElementById('pagesBreadcrumb').innerHTML = `<span>${p.icon||'📄'}</span><span>${peEsc(p.title||'Untitled')}</span>`; }
+
+function peRenderBlock(b, numIdx) {
+  const isDivider = b.type==='divider', isTodo = b.type==='todo', isFile = b.type==='file';
+  const phMap = {text:'Type / for commands…',h1:'Heading 1',h2:'Heading 2',h3:'Heading 3',bullet:'List item',numbered:'List item',todo:'To-do',quote:'Quote',callout:'Type here…',code:'Code'};
+  let inner = '';
+  if(isDivider) { inner = `<div class="pe-block" data-type="divider"></div>`; }
+  else if(isFile) {
+    const meta = b.fileMeta || {};
+    const icon = (meta.name||'').match(/\.html?$/i) ? '🌐' : '📄';
+    inner = `<div class="pe-block" data-type="file" onclick="peClickFile('${b.id}')" title="Click to preview">${icon} <strong style="font-size:0.82rem">${peEsc(meta.name||'file')}</strong> <span style="font-size:0.7rem;color:var(--text-dim);margin-left:auto">${meta.sizeLabel||''}</span></div>`;
+  } else {
+    if(isTodo) inner += `<div class="pe-todo-check ${b.checked?'checked':''}"></div>`;
+    if(b.type==='numbered') { inner += `<div class="pe-block" data-type="numbered" contenteditable="true" data-placeholder="${phMap[b.type]||''}" style="padding-left:22px;position:relative;">${b.content||''}</div>`; inner = `<span style="position:absolute;left:2px;top:3px;font-size:0.82rem;color:var(--text-muted);pointer-events:none;width:18px;text-align:right;">${numIdx}.</span>` + inner; }
+    else { inner += `<div class="pe-block ${isTodo&&b.checked?'pe-checked':''}" data-type="${b.type}" contenteditable="true" data-placeholder="${phMap[b.type]||''}">${b.content||''}</div>`; }
+  }
+  return `<div class="pe-block-wrapper" data-block-id="${b.id}" draggable="false"><div class="pe-block-handle" title="Drag to reorder"><svg viewBox="0 0 10 16" fill="currentColor"><circle cx="3" cy="2" r="1.2"/><circle cx="7" cy="2" r="1.2"/><circle cx="3" cy="6" r="1.2"/><circle cx="7" cy="6" r="1.2"/><circle cx="3" cy="10" r="1.2"/><circle cx="7" cy="10" r="1.2"/><circle cx="3" cy="14" r="1.2"/><circle cx="7" cy="14" r="1.2"/></svg></div>${inner}</div>`;
+}
+
+function peRenderEditor() {
+  const page = peGetPage(peCurrentPageId); if(!page) return;
+  const ed = document.getElementById('pagesEditorInner');
+  let html = `<div class="pe-icon-area" onclick="peOpenIconPicker(event,'${page.id}')">${page.icon||'📄'}</div>`;
+  html += `<div class="pe-title-input" contenteditable="true" data-placeholder="Untitled" id="peTitleInput">${peEsc(page.title)}</div>`;
+  let numCount = 0;
+  page.blocks.forEach(b => { if(b.type==='numbered') numCount++; else numCount = 0; html += peRenderBlock(b, b.type==='numbered'?numCount:0); });
+  ed.innerHTML = html;
+  const titleEl = document.getElementById('peTitleInput');
+  titleEl.addEventListener('input', () => { page.title = titleEl.textContent; peRenderSidebar(); peUpdateBreadcrumb(); peScheduleSave(); });
+  titleEl.addEventListener('keydown', e => { if(e.key==='Enter'){e.preventDefault();const fb=ed.querySelector('.pe-block');if(fb)fb.focus();} });
+  ed.querySelectorAll('.pe-block[contenteditable]').forEach(el => peBindBlockEvents(el));
+  peBindTodoChecks(ed); peBindDragHandles(ed);
+}
+
+function peBindTodoChecks(container) {
+  container.querySelectorAll('.pe-todo-check').forEach(cb => {
+    cb.addEventListener('click', e => { e.stopPropagation(); const w = cb.closest('.pe-block-wrapper'), bid = w.dataset.blockId, pg = peGetPage(peCurrentPageId), bl = pg.blocks.find(x=>x.id===bid);
+      if(bl){bl.checked=!bl.checked;w.querySelector('.pe-block').classList.toggle('pe-checked',bl.checked);peScheduleSave();}
+    });
+  });
+}
+function peBindDragHandles(container) {
+  container.querySelectorAll('.pe-block-handle').forEach(h => h.addEventListener('mousedown',()=>h.closest('.pe-block-wrapper').setAttribute('draggable','true')));
+  container.querySelectorAll('.pe-block-wrapper').forEach(w => { w.addEventListener('dragstart',peDragStart);w.addEventListener('dragover',peDragOver);w.addEventListener('dragleave',peDragLeave);w.addEventListener('drop',peDrop);w.addEventListener('dragend',peDragEnd); });
+}
+
+function peBindBlockEvents(el) { el.addEventListener('input',peOnBlockInput); el.addEventListener('keydown',peOnBlockKeydown); el.addEventListener('paste', e=>{e.preventDefault();document.execCommand('insertText',false,(e.clipboardData||window.clipboardData).getData('text/plain'));}); }
+let peSaveTimer;
+function peScheduleSave() { clearTimeout(peSaveTimer); peSaveTimer = setTimeout(() => { peSaveCurrentPage(); peSaveState(); }, 400); }
+
+function peSaveCurrentPage() {
+  const page = peGetPage(peCurrentPageId); if(!page) return;
+  const wrappers = document.getElementById('pagesEditorInner').querySelectorAll('.pe-block-wrapper');
+  const newBlocks = [];
+  wrappers.forEach(w => {
+    const bid = w.dataset.blockId, blockEl = w.querySelector('.pe-block'); if(!blockEl) return;
+    const type = blockEl.dataset.type;
+    const existing = page.blocks.find(b=>b.id===bid);
+    const b = { id:bid, type, content: type==='file'?'':blockEl.innerHTML };
+    if(type==='todo') b.checked = blockEl.classList.contains('pe-checked');
+    if(type==='file' && existing) { b.fileMeta = existing.fileMeta; b.fileContent = existing.fileContent; }
+    newBlocks.push(b);
+  });
+  page.blocks = newBlocks;
+}
+
+function peOnBlockInput(e) {
+  const el = e.target, text = el.textContent;
+  if(text==='/') { peOpenSlashMenu(el); return; }
+  const sel = window.getSelection();
+  if(sel.rangeCount) {
+    const range = sel.getRangeAt(0), textBefore = peGetTextBeforeCursor(range);
+    if(textBefore && textBefore.endsWith('/') && !peSlashMenuOpen) { peSlashTriggerBlockId = el.closest('.pe-block-wrapper').dataset.blockId; peSlashFilterText = ''; peShowSlashMenu(el); }
+    else if(peSlashMenuOpen) { const si = textBefore ? textBefore.lastIndexOf('/') : -1; if(si>=0){peSlashFilterText=textBefore.substring(si+1);peFilterSlashMenu();}else peCloseSlashMenu(); }
+  }
+  peScheduleSave();
+}
+function peGetTextBeforeCursor(range) { const r=range.cloneRange(), block=range.startContainer.closest?range.startContainer.closest('.pe-block')||range.startContainer.parentElement:range.startContainer.parentElement; if(!block)return''; r.selectNodeContents(block); r.setEnd(range.startContainer,range.startOffset); return r.toString(); }
+
+function peOnBlockKeydown(e) {
+  const el = e.target;
+  if(peSlashMenuOpen) { if(e.key==='ArrowDown'){e.preventDefault();peNavigateSlashMenu(1);return;} if(e.key==='ArrowUp'){e.preventDefault();peNavigateSlashMenu(-1);return;} if(e.key==='Enter'){e.preventDefault();peSelectSlashItem();return;} if(e.key==='Escape'){peCloseSlashMenu();return;} }
+  if(e.key==='Enter' && !e.shiftKey) {
+    if(el.dataset.type==='code') return; e.preventDefault();
+    const sel=window.getSelection(); if(!sel.rangeCount)return;
+    const range=sel.getRangeAt(0); range.deleteContents();
+    const afterRange=document.createRange(); afterRange.setStart(range.endContainer,range.endOffset); afterRange.setEndAfter(el.lastChild||el);
+    const frag=afterRange.extractContents(), tmp=document.createElement('div'); tmp.appendChild(frag); const afterHtml=tmp.innerHTML;
+    const wrapper=el.closest('.pe-block-wrapper');
+    const newType=['bullet','numbered','todo'].includes(el.dataset.type)?el.dataset.type:'text';
+    const newBlock={id:uid(),type:newType,content:afterHtml}; if(newType==='todo') newBlock.checked=false;
+    wrapper.insertAdjacentHTML('afterend',peRenderBlock(newBlock,0));
+    const nw=wrapper.nextElementSibling, nb=nw.querySelector('.pe-block[contenteditable]');
+    if(nb){peBindBlockEvents(nb);nb.focus();const r2=document.createRange();r2.selectNodeContents(nb);r2.collapse(true);sel.removeAllRanges();sel.addRange(r2);}
+    peBindTodoChecks(nw); peBindDragHandles(nw); peRenumberBlocks(); peScheduleSave(); return;
+  }
+  if(e.key==='Backspace') {
+    const sel=window.getSelection(); if(!sel.rangeCount)return; const range=sel.getRangeAt(0);
+    if(range.startOffset===0 && range.collapsed) {
+      const w=el.closest('.pe-block-wrapper'), prev=w.previousElementSibling;
+      if(el.dataset.type!=='text' && el.textContent===''){e.preventDefault();peChangeBlockType(w,'text');return;}
+      if(prev && prev.classList.contains('pe-block-wrapper')){e.preventDefault();const pb=prev.querySelector('.pe-block[contenteditable]');if(pb){const pl=pb.textContent.length;pb.innerHTML+=el.innerHTML;w.remove();pePlaceCaretAt(pb,pl);peRenumberBlocks();peScheduleSave();}}
+    }
+  }
+  if(e.key==='ArrowUp'){const w=el.closest('.pe-block-wrapper'),p=w.previousElementSibling;if(p&&p.classList.contains('pe-block-wrapper')){const pb=p.querySelector('.pe-block[contenteditable]');if(pb){e.preventDefault();pb.focus();pePlaceCaretAtEnd(pb);}}}
+  if(e.key==='ArrowDown'){const w=el.closest('.pe-block-wrapper'),n=w.nextElementSibling;if(n&&n.classList.contains('pe-block-wrapper')){const nb=n.querySelector('.pe-block[contenteditable]');if(nb){e.preventDefault();nb.focus();pePlaceCaretAt(nb,0);}}}
+  if(e.key==='Tab'){if(el.dataset.type==='code'){e.preventDefault();document.execCommand('insertText',false,'  ');return;}e.preventDefault();}
+}
+
+function peChangeBlockType(wrapper, newType) {
+  const ob=wrapper.querySelector('.pe-block'), content=ob?ob.innerHTML:'', bid=wrapper.dataset.blockId;
+  const b={id:bid,type:newType,content}; if(newType==='todo') b.checked=false;
+  wrapper.outerHTML = peRenderBlock(b,0);
+  const nw=document.querySelector(`[data-block-id="${bid}"]`); if(nw){const nb=nw.querySelector('.pe-block[contenteditable]');if(nb){peBindBlockEvents(nb);nb.focus();pePlaceCaretAtEnd(nb);}peBindTodoChecks(nw);peBindDragHandles(nw);}
+  peRenumberBlocks(); peScheduleSave();
+}
+function peRenumberBlocks() { let c=0; document.getElementById('pagesEditorInner').querySelectorAll('.pe-block-wrapper').forEach(w=>{const b=w.querySelector('.pe-block');if(!b)return;if(b.dataset.type==='numbered'){c++;const ns=w.querySelector('span[style*="pointer-events"]');if(ns)ns.textContent=c+'.';}else c=0;}); }
+
+// SLASH MENU
+function peOpenSlashMenu(el) { peSlashTriggerBlockId = el.closest('.pe-block-wrapper').dataset.blockId; peSlashFilterText = ''; peShowSlashMenu(el); }
+function peShowSlashMenu(el) {
+  const menu=document.getElementById('pe-slash-menu'), rect=el.getBoundingClientRect(), sel=window.getSelection();
+  let left=rect.left, top=rect.bottom+4;
+  if(sel.rangeCount){const r=sel.getRangeAt(0).getBoundingClientRect();if(r.width||r.height){left=r.left;top=r.bottom+4;}}
+  if(left+260>window.innerWidth) left=window.innerWidth-270; if(top+380>window.innerHeight) top=rect.top-384;
+  menu.style.left=left+'px';menu.style.top=top+'px'; peSlashMenuOpen=true;peSlashMenuIdx=0; peFilterSlashMenu(); menu.classList.add('visible');
+}
+function peFilterSlashMenu() {
+  const menu=document.getElementById('pe-slash-menu'), filter=peSlashFilterText.toLowerCase();
+  const items = PE_BLOCK_TYPES.filter(t=>t.label.toLowerCase().includes(filter)||t.type.includes(filter));
+  if(!items.length){menu.innerHTML='<div style="padding:12px;color:var(--text-muted);font-size:0.78rem;">No results</div>';return;}
+  peSlashMenuIdx=Math.min(peSlashMenuIdx,items.length-1);
+  let html='<div class="pe-slash-label">Blocks</div>';
+  items.forEach((t,i)=>{const isAI=t.type.startsWith('ai');html+=`<div class="pe-slash-item ${i===peSlashMenuIdx?'pe-selected':''} ${isAI?'pe-ai-item':''}" data-type="${t.type}" onmouseenter="peSlashMenuIdx=${i};peHighlightSlash()" onclick="peSelectSlashByType('${t.type}')"><div class="pe-slash-item-icon">${t.icon}</div><div class="pe-slash-item-text"><div class="pe-si-name">${t.label}</div><div class="pe-si-desc">${t.desc}</div></div></div>`;});
+  menu.innerHTML = html;
+}
+function peHighlightSlash(){document.querySelectorAll('.pe-slash-item').forEach((el,i)=>el.classList.toggle('pe-selected',i===peSlashMenuIdx));}
+function peNavigateSlashMenu(dir){const items=document.querySelectorAll('.pe-slash-item');peSlashMenuIdx=(peSlashMenuIdx+dir+items.length)%items.length;peHighlightSlash();items[peSlashMenuIdx]?.scrollIntoView({block:'nearest'});}
+function peSelectSlashItem(){const items=document.querySelectorAll('.pe-slash-item');if(items[peSlashMenuIdx])peSelectSlashByType(items[peSlashMenuIdx].dataset.type);}
+
+function peSelectSlashByType(type) {
+  peCloseSlashMenu();
+  const wrapper=document.querySelector(`[data-block-id="${peSlashTriggerBlockId}"]`); if(!wrapper) return;
+  const block=wrapper.querySelector('.pe-block'); if(!block) return;
+  let html=block.innerHTML; const si=html.lastIndexOf('/'); if(si>=0)html=html.substring(0,si); block.innerHTML=html;
+  if(type==='ai'){peShowAIPrompt(wrapper);return;}
+  if(type==='ai-page'){peShowAIPagePrompt(wrapper);return;}
+  if(type==='file'){document.getElementById('peFileAttach').click();return;}
+  if(type==='divider'){const nb={id:uid(),type:'divider',content:''};wrapper.insertAdjacentHTML('afterend',peRenderBlock(nb,0));const tb={id:uid(),type:'text',content:''};wrapper.nextElementSibling.insertAdjacentHTML('afterend',peRenderBlock(tb,0));const te=wrapper.nextElementSibling.nextElementSibling.querySelector('.pe-block[contenteditable]');if(te){peBindBlockEvents(te);te.focus();}peScheduleSave();return;}
+  peChangeBlockType(wrapper, type);
+}
+function peCloseSlashMenu(){peSlashMenuOpen=false;document.getElementById('pe-slash-menu').classList.remove('visible');}
+
+// FORMAT TOOLBAR
+document.addEventListener('selectionchange', () => {
+  const sel=window.getSelection(), bar=document.getElementById('pe-format-bar');
+  if(!sel.rangeCount||sel.isCollapsed){bar.classList.remove('visible');return;}
+  const range=sel.getRangeAt(0), parent=range.commonAncestorContainer;
+  const block=parent.closest?parent.closest('.pe-block'):parent.parentElement?.closest('.pe-block');
+  if(!block||block.dataset.type==='code'){bar.classList.remove('visible');return;}
+  const rect=range.getBoundingClientRect();if(rect.width<2){bar.classList.remove('visible');return;}
+  bar.style.left=(rect.left+rect.width/2-100)+'px';bar.style.top=(rect.top-38)+'px';bar.classList.add('visible');
+  bar.querySelectorAll('.pe-fmt-btn[data-cmd]').forEach(btn=>{const cmd=btn.dataset.cmd;if(cmd==='code')return;btn.classList.toggle('active',document.queryCommandState(cmd));});
+});
+document.getElementById('pe-format-bar').addEventListener('mousedown', e => {
+  e.preventDefault(); const btn=e.target.closest('.pe-fmt-btn'); if(!btn||btn.classList.contains('pe-ai-text-btn'))return;
+  const cmd=btn.dataset.cmd;
+  if(cmd==='code'){const sel=window.getSelection();if(!sel.rangeCount)return;const range=sel.getRangeAt(0),text=range.toString();range.deleteContents();const code=document.createElement('code');code.textContent=text;range.insertNode(code);sel.removeAllRanges();const r=document.createRange();r.selectNodeContents(code);sel.addRange(r);}
+  else document.execCommand(cmd,false,null);
+  peScheduleSave();
+});
+document.addEventListener('mousedown', e => { if(!e.target.closest('#pe-slash-menu')&&!e.target.closest('.pe-block'))peCloseSlashMenu(); if(!e.target.closest('#pe-icon-picker')&&!e.target.closest('.pe-icon-area'))document.getElementById('pe-icon-picker').classList.remove('visible'); });
+
+// ICON PICKER
+function peOpenIconPicker(e,pageId){const p=document.getElementById('pe-icon-picker'),rect=e.target.getBoundingClientRect();p.style.left=rect.left+'px';p.style.top=(rect.bottom+4)+'px';p.innerHTML=`<div class="pe-emoji-grid">${PE_EMOJIS.map(em=>`<span onclick="peSetPageIcon('${pageId}','${em}')">${em}</span>`).join('')}</div><div class="pe-remove-icon" onclick="peSetPageIcon('${pageId}','')">Remove icon</div>`;p.classList.add('visible');}
+function peSetPageIcon(pageId,icon){const p=peGetPage(pageId);if(p){p.icon=icon||'📄';peSaveState();peRenderEditor();peRenderSidebar();}document.getElementById('pe-icon-picker').classList.remove('visible');}
+
+// DRAG & DROP
+function peDragStart(e){const w=e.target.closest('.pe-block-wrapper');if(!w)return;peDragSrcId=w.dataset.blockId;w.classList.add('pe-dragging');e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',peDragSrcId);}
+function peDragOver(e){e.preventDefault();e.dataTransfer.dropEffect='move';const w=e.target.closest('.pe-block-wrapper');if(!w||w.dataset.blockId===peDragSrcId)return;document.querySelectorAll('.pe-drag-over-top,.pe-drag-over-bottom').forEach(el=>el.classList.remove('pe-drag-over-top','pe-drag-over-bottom'));const rect=w.getBoundingClientRect(),mid=rect.top+rect.height/2;if(e.clientY<mid)w.classList.add('pe-drag-over-top');else w.classList.add('pe-drag-over-bottom');}
+function peDragLeave(e){const w=e.target.closest('.pe-block-wrapper');if(w)w.classList.remove('pe-drag-over-top','pe-drag-over-bottom');}
+function peDrop(e){e.preventDefault();const w=e.target.closest('.pe-block-wrapper');if(!w||w.dataset.blockId===peDragSrcId)return;const srcEl=document.querySelector(`[data-block-id="${peDragSrcId}"]`);if(!srcEl)return;const rect=w.getBoundingClientRect(),mid=rect.top+rect.height/2;if(e.clientY<mid)w.before(srcEl);else w.after(srcEl);document.querySelectorAll('.pe-drag-over-top,.pe-drag-over-bottom').forEach(el=>el.classList.remove('pe-drag-over-top','pe-drag-over-bottom'));peRenumberBlocks();peScheduleSave();}
+function peDragEnd(e){const w=e.target.closest('.pe-block-wrapper');if(w){w.classList.remove('pe-dragging');w.setAttribute('draggable','false');}peDragSrcId=null;document.querySelectorAll('.pe-drag-over-top,.pe-drag-over-bottom').forEach(el=>el.classList.remove('pe-drag-over-top','pe-drag-over-bottom'));}
+
+// MULTI-SELECT
+document.addEventListener('click', e => {
+  if(!document.getElementById('view-pages').classList.contains('active')) return;
+  const wrapper = e.target.closest('.pe-block-wrapper');
+  if(wrapper && e.shiftKey) {
+    e.preventDefault();
+    const bid = wrapper.dataset.blockId;
+    if(peSelectedBlocks.has(bid)) { peSelectedBlocks.delete(bid); wrapper.classList.remove('pe-selected'); }
+    else { peSelectedBlocks.add(bid); wrapper.classList.add('pe-selected'); }
+    updateMultiSelectBar(); return;
+  }
+  if(!e.shiftKey && !e.target.closest('.multi-select-bar')) {
+    if(peSelectedBlocks.size > 0) { peSelectedBlocks.clear(); document.querySelectorAll('.pe-block-wrapper.pe-selected').forEach(el=>el.classList.remove('pe-selected')); updateMultiSelectBar(); }
+  }
+});
+function updateMultiSelectBar() { const bar=document.getElementById('multiSelectBar'); if(peSelectedBlocks.size>0){bar.classList.add('visible');document.getElementById('msbCount').textContent=peSelectedBlocks.size+' selected';}else bar.classList.remove('visible'); }
+function msbClearSelection() { peSelectedBlocks.clear(); document.querySelectorAll('.pe-block-wrapper.pe-selected').forEach(el=>el.classList.remove('pe-selected')); updateMultiSelectBar(); }
+function msbDelete() { peSaveCurrentPage(); const page=peGetPage(peCurrentPageId); if(!page) return; page.blocks = page.blocks.filter(b=>!peSelectedBlocks.has(b.id)); peSelectedBlocks.clear(); peSaveState(); peRenderEditor(); updateMultiSelectBar(); }
+function msbCopy() {
+  peSaveCurrentPage(); const page=peGetPage(peCurrentPageId); if(!page) return;
+  const blocks = page.blocks.filter(b=>peSelectedBlocks.has(b.id));
+  const text = blocks.map(b => (b.content||'').replace(/<[^>]+>/g,'')).join('\n');
+  navigator.clipboard.writeText(text).then(()=>{msbClearSelection();});
+}
+function msbMoveToPage() {
+  if(peState.pages.length < 2) { alert('Create another page first.'); return; }
+  const pages = peState.pages.filter(p=>p.id!==peCurrentPageId);
+  let html = '<div class="form-group"><label class="form-label">Move to Page</label><select class="form-select" id="f-move-target">';
+  pages.forEach(p => { html += `<option value="${p.id}">${peEsc(p.title||'Untitled')}</option>`; });
+  html += '</select></div>';
+  openModal('Move Blocks', html, `<button class="btn" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="msbExecMove()">Move</button>`);
+}
+function msbExecMove() {
+  peSaveCurrentPage();
+  const targetId = document.getElementById('f-move-target').value;
+  const srcPage = peGetPage(peCurrentPageId), tgtPage = peGetPage(targetId); if(!srcPage||!tgtPage) return;
+  const moving = srcPage.blocks.filter(b=>peSelectedBlocks.has(b.id));
+  srcPage.blocks = srcPage.blocks.filter(b=>!peSelectedBlocks.has(b.id));
+  tgtPage.blocks.push(...moving);
+  peSelectedBlocks.clear(); peSaveState(); closeModal(); peRenderEditor(); updateMultiSelectBar();
+}
+
+// FILE ATTACHMENTS
+function peHandleFileAttach(files) {
+  if(!files.length) return;
+  const page = peGetPage(peCurrentPageId); if(!page) return;
+  peSaveCurrentPage();
+  for(const file of files) {
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const block = { id:uid(), type:'file', content:'', fileMeta:{ name:file.name, size:file.size, sizeLabel:(file.size/1024).toFixed(1)+' KB', type:file.type }, fileContent: ev.target.result };
+      page.blocks.push(block); peSaveState(); peRenderEditor();
+    };
+    if(file.name.match(/\.html?$/i)) reader.readAsText(file);
+    else reader.readAsDataURL(file);
+  }
+}
+function peClickFile(blockId) {
+  const page = peGetPage(peCurrentPageId); if(!page) return;
+  const block = page.blocks.find(b=>b.id===blockId); if(!block||!block.fileMeta) return;
+  if(block.fileMeta.name.match(/\.html?$/i) && block.fileContent) { openHtmlPreview(block.fileMeta.name, block.fileContent); }
+}
+
+// AI FEATURES
+function peShowAIPrompt(afterWrapper) {
+  document.querySelectorAll('.pe-ai-prompt-wrap,.pe-ai-generating').forEach(el=>el.remove());
+  const div=document.createElement('div'); div.className='pe-ai-prompt-wrap visible';
+  div.innerHTML=`<div class="pe-ai-prompt-label">⬡ AI Generate</div><input class="pe-ai-prompt-input" type="text" placeholder="Write a summary of…, Generate a list of…, Draft a paragraph about…" autofocus><div class="pe-ai-prompt-hint"><span><kbd>Enter</kbd> to generate</span><span><kbd>Esc</kbd> to cancel</span></div>`;
+  afterWrapper.after(div);
+  const input=div.querySelector('.pe-ai-prompt-input');
+  setTimeout(()=>input.focus(),50);
+  input.addEventListener('keydown', async e => { if(e.key==='Escape'){div.remove();return;} if(e.key==='Enter'){e.preventDefault();const prompt=input.value.trim();if(!prompt)return;await peAIGenerate(prompt,div,afterWrapper);} });
+}
+function peShowAIPagePrompt(afterWrapper) {
+  document.querySelectorAll('.pe-ai-prompt-wrap,.pe-ai-generating').forEach(el=>el.remove());
+  const div=document.createElement('div'); div.className='pe-ai-prompt-wrap visible';
+  div.innerHTML=`<div class="pe-ai-prompt-label">📄⬡ Generate New Page</div><input class="pe-ai-prompt-input" type="text" placeholder="Create a project spec for…, Write a meeting notes template for…" autofocus><div class="pe-ai-prompt-hint"><span><kbd>Enter</kbd> to generate new page</span><span><kbd>Esc</kbd> to cancel</span></div>`;
+  afterWrapper.after(div);
+  const input=div.querySelector('.pe-ai-prompt-input');
+  setTimeout(()=>input.focus(),50);
+  input.addEventListener('keydown', async e => { if(e.key==='Escape'){div.remove();return;} if(e.key==='Enter'){e.preventDefault();const prompt=input.value.trim();if(!prompt)return;await peAINewPage(prompt,div);} });
+}
+
+async function peAIGenerate(prompt, promptDiv, afterWrapper) {
+  const cfg = getAzureConfig();
+  if(!cfg.endpoint||!cfg.apiKey||!cfg.model){promptDiv.innerHTML=`<div style="color:var(--red);font-size:0.82rem;padding:4px;">Configure Azure OpenAI in the AI Workshop tab first.</div>`;setTimeout(()=>promptDiv.remove(),3000);return;}
+  promptDiv.innerHTML=`<div class="pe-ai-generating"><span class="ai-dots"><span>●</span><span>●</span><span>●</span></span> Generating…</div>`;
+  const page=peGetPage(peCurrentPageId);let ctx='';if(page){ctx=`Page title:"${page.title||'Untitled'}"\n`;page.blocks.forEach(b=>{if(b.content&&b.type!=='divider'){const t=b.content.replace(/<[^>]+>/g,'');if(t.trim())ctx+=`[${b.type}] ${t}\n`;}});}
+  const sys=`You are an AI writing assistant in a Notion-style block editor.\nOUTPUT RULES:\n- Return ONLY a JSON array of blocks. No markdown, no explanation.\n- Each block: {"type":"text"|"h1"|"h2"|"h3"|"bullet"|"numbered"|"todo"|"quote"|"callout"|"code","content":"html content"}\n- For todo items, add "checked":false\n- Use inline HTML: <b>bold</b>, <i>italic</i>, <code>code</code>\n- Generate 2-10 blocks typically\n\nCONTEXT:\n${ctx}`;
+  try {
+    let raw = await callAzureAI(sys,prompt,{maxTokens:4000}); raw=raw.replace(/^```json?\s*/i,'').replace(/\s*```\s*$/,'').trim();
+    const blocks=JSON.parse(raw); let insertAfter=afterWrapper;
+    for(const b of blocks){const nb={id:uid(),type:b.type||'text',content:b.content||'',checked:b.checked||false};insertAfter.insertAdjacentHTML('afterend',peRenderBlock(nb,0));insertAfter=insertAfter.nextElementSibling;const nbe=insertAfter.querySelector('.pe-block[contenteditable]');if(nbe)peBindBlockEvents(nbe);peBindTodoChecks(insertAfter);peBindDragHandles(insertAfter);insertAfter.style.animation='fadeUp 0.3s ease forwards';}
+    promptDiv.remove(); peRenumberBlocks(); peScheduleSave();
+  } catch(e){promptDiv.innerHTML=`<div style="color:var(--red);font-size:0.82rem;padding:8px;">AI Error: ${peEsc(e.message)}</div>`;setTimeout(()=>promptDiv.remove(),5000);}
+}
+
+async function peAINewPage(prompt, promptDiv) {
+  const cfg = getAzureConfig();
+  if(!cfg.endpoint||!cfg.apiKey||!cfg.model){promptDiv.innerHTML=`<div style="color:var(--red);font-size:0.82rem;padding:4px;">Configure Azure OpenAI in the AI Workshop tab first.</div>`;setTimeout(()=>promptDiv.remove(),3000);return;}
+  promptDiv.innerHTML=`<div class="pe-ai-generating"><span class="ai-dots"><span>●</span><span>●</span><span>●</span></span> Generating new page…</div>`;
+  const sys=`You are an AI that generates complete Notion-style page content.\nReturn ONLY a JSON object with: {"title":"Page Title","icon":"emoji","blocks":[{"type":"...","content":"..."}]}\nBlock types: text, h1, h2, h3, bullet, numbered, todo, quote, callout, code, divider\nGenerate 8-20 blocks for a thorough, well-structured page. Use appropriate headings, lists, and formatting.`;
+  try {
+    let raw = await callAzureAI(sys,prompt,{maxTokens:6000}); raw=raw.replace(/^```json?\s*/i,'').replace(/\s*```\s*$/,'').trim();
+    const data=JSON.parse(raw);
+    const blocks=(data.blocks||[]).map(b=>({id:uid(),type:b.type||'text',content:b.content||'',checked:b.checked||false}));
+    promptDiv.remove();
+    peCreateNewPage(data.title||'AI Generated Page', data.icon||'🤖', blocks.length?blocks:[{id:uid(),type:'text',content:''}]);
+  } catch(e){promptDiv.innerHTML=`<div style="color:var(--red);font-size:0.82rem;padding:8px;">AI Error: ${peEsc(e.message)}</div>`;setTimeout(()=>promptDiv.remove(),5000);}
+}
+
+async function peAIRewrite() {
+  const sel=window.getSelection(); if(!sel.rangeCount||sel.isCollapsed)return;
+  const selectedText=sel.toString().trim(); if(!selectedText)return;
+  const cfg=getAzureConfig(); if(!cfg.endpoint||!cfg.apiKey||!cfg.model){alert('Configure Azure OpenAI in the AI Workshop tab first.');return;}
+  document.getElementById('pe-format-bar').classList.remove('visible');
+  const range=sel.getRangeAt(0),marker=document.createElement('span'); marker.style.cssText='background:var(--green-bg);color:var(--green);font-size:0.76rem;padding:1px 6px;border-radius:3px;font-weight:500;';marker.textContent='⬡ rewriting…';range.deleteContents();range.insertNode(marker);
+  try{let result=await callAzureAI('You are an AI writing assistant. Rewrite the given text to be clearer and more professional. Return ONLY the rewritten text (plain text with optional inline HTML: <b>, <i>, <code>). No explanation.',`Rewrite this text:\n\n${selectedText}`,{maxTokens:2000});result=result.replace(/^```[a-z]*\s*/i,'').replace(/\s*```\s*$/,'').trim();const span=document.createElement('span');span.innerHTML=result;marker.replaceWith(span);while(span.firstChild)span.parentNode.insertBefore(span.firstChild,span);span.remove();peScheduleSave();}
+  catch(e){marker.textContent=selectedText;marker.style.cssText='';}
+}
+
+function peExportPage() {
+  const page=peGetPage(peCurrentPageId); if(!page)return;
+  let md=`# ${page.title||'Untitled'}\n\n`;
+  page.blocks.forEach(b=>{const text=(b.content||'').replace(/<br\s*\/?>/gi,'\n').replace(/<[^>]+>/g,'');
+    switch(b.type){case'h1':md+=`# ${text}\n\n`;break;case'h2':md+=`## ${text}\n\n`;break;case'h3':md+=`### ${text}\n\n`;break;case'bullet':md+=`- ${text}\n`;break;case'numbered':md+=`1. ${text}\n`;break;case'todo':md+=`- [${b.checked?'x':' '}] ${text}\n`;break;case'quote':md+=`> ${text}\n\n`;break;case'callout':md+=`> 💡 ${text}\n\n`;break;case'code':md+=`\`\`\`\n${text}\n\`\`\`\n\n`;break;case'divider':md+=`---\n\n`;break;case'file':md+=`📎 ${b.fileMeta?.name||'file'}\n\n`;break;default:if(text.trim())md+=`${text}\n\n`;break;}
+  });
+  const blob=new Blob([md],{type:'text/markdown'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=(page.title||'untitled').replace(/[^a-z0-9]/gi,'-').toLowerCase()+'.md';a.click();URL.revokeObjectURL(a.href);
+}
+
+document.addEventListener('keydown', e => {
+  if(!document.getElementById('view-pages').classList.contains('active')) return;
+  if((e.ctrlKey||e.metaKey)&&e.key==='n'){e.preventDefault();peCreateNewPage();}
+  if((e.ctrlKey||e.metaKey)&&e.key==='\\'){e.preventDefault();peToggleSidebar();}
+});
+document.getElementById('pagesEditorScroll').addEventListener('scroll', e => { document.getElementById('pagesTopbar').classList.toggle('scrolled',e.target.scrollTop>4); });
+
+// ═══════════════════════════════════════════
+// AZURE AI SHARED CALLER
+// ═══════════════════════════════════════════
+function getAzureConfig() {
+  try { const cfg=JSON.parse(localStorage.getItem('oi_ws_azure_config')||'{}');
+    const ep=document.getElementById('ws-endpoint'),ak=document.getElementById('ws-apikey'),md=document.getElementById('ws-model'),af=document.getElementById('ws-apiformat'),av=document.getElementById('ws-apiversion');
+    return{endpoint:(ep&&ep.value.trim())||cfg.endpoint||'',apiKey:(ak&&ak.value.trim())||cfg.apiKey||'',model:(md&&md.value.trim())||cfg.model||'',apiFormat:(af&&af.value)||cfg.apiFormat||'chat',apiVersion:(av&&av.value)||cfg.apiVersion||'2024-10-21'};
+  } catch(e){return{};}
+}
+
+async function callAzureAI(systemPrompt, userMessage, opts={}) {
+  const cfg=getAzureConfig(),endpoint=cfg.endpoint.replace(/\/+$/,''),model=cfg.model,apiKey=cfg.apiKey,version=cfg.apiVersion||'2024-10-21',format=cfg.apiFormat||'chat',maxTokens=opts.maxTokens||4000;
+  let url,body;
+  if(format==='responses'){url=`${endpoint}/openai/responses?api-version=${version}`;body={model,instructions:systemPrompt,input:userMessage,max_output_tokens:maxTokens};}
+  else{url=`${endpoint}/openai/deployments/${encodeURIComponent(model)}/chat/completions?api-version=${version}`;body={messages:[{role:'system',content:systemPrompt},{role:'user',content:userMessage}],max_completion_tokens:maxTokens};}
+  const res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','api-key':apiKey},body:JSON.stringify(body)});
+  if(!res.ok){const t=await res.text();throw new Error(`HTTP ${res.status}: ${t.substring(0,300)}`);}
+  const data=await res.json(); let raw='';
+  if(format==='responses'&&data.output){for(const o of data.output){if(o.content){for(const c of o.content){if(c.text)raw+=c.text;}}}}
+  else if(data.choices&&data.choices.length>0){raw=data.choices[0].message?.content||'';}
+  return raw;
+}
+
+// ═══════════════════════════════════════════
+// AI COMMAND BAR (Sprint Board)
+// ═══════════════════════════════════════════
+const aiCmdInput=document.getElementById('aiCmdInput'),aiCmdSend=document.getElementById('aiCmdSend'),aiCmdFeedback=document.getElementById('aiCmdFeedback'),aiCmdBar=document.getElementById('aiCmdBar'),aiCmdIcon=document.getElementById('aiCmdIcon');
+aiCmdInput.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();aiCommandExecute();}});
+function aiCmdFill(el){aiCmdInput.value=el.textContent;aiCmdInput.focus();}
+function aiCmdSetFeedback(msg,type){aiCmdFeedback.textContent=msg;aiCmdFeedback.className='ai-cmd-feedback visible '+(type||'');if(type!=='info')setTimeout(()=>{aiCmdFeedback.className='ai-cmd-feedback';},6000);}
+function buildProjectContext(){const cc=DATA.cards.filter(c=>c.sprint===DATA.sprint.number);return`PROJECT CONTEXT:\nSprint: ${DATA.sprint.name} (#${DATA.sprint.number})\nCards:\n${cc.map(c=>`- [${c.id}] "${c.title}" | ${c.status} | ${c.tag} | ${c.priority} | ${c.points}pts`).join('\n')}\n\nTag options: app, design, infra, docs, bug\nPriority: high, med, low\nStatus: backlog, in-progress, review, done\nPoints: 1, 2, 3, 5, 8`;}
+const AI_CMD_SYS=`You are the AI command engine for a sprint board. Return ONLY valid JSON with: {"actions":[{"type":"create_card"|"delete_card"|"move_card"|"edit_card","card_id":"...","data":{"title":"...","desc":"...","tag":"...","priority":"...","points":N,"status":"..."}}],"summary":"..."}`;
+
+async function aiCommandExecute(){
+  const input=aiCmdInput.value.trim();if(!input)return;
+  const cfg=getAzureConfig();if(!cfg.endpoint||!cfg.apiKey||!cfg.model){aiCmdSetFeedback('Configure Azure OpenAI in the AI Workshop tab first.','error');return;}
+  aiCmdBar.className='ai-command-bar processing';aiCmdIcon.className='ai-cmd-icon active';aiCmdSend.className='ai-cmd-send processing';aiCmdSend.textContent='⟳';aiCmdSetFeedback('Thinking…','info');
+  try{let raw=await callAzureAI(AI_CMD_SYS,`${buildProjectContext()}\n\nUSER COMMAND: ${input}`,{maxTokens:4000});raw=raw.replace(/^```json?\s*/i,'').replace(/\s*```\s*$/,'').trim();const result=JSON.parse(raw);let ax=0;
+    for(const a of(result.actions||[])){switch(a.type){case'create_card':{const d=a.data;DATA.cards.push({id:'c'+Date.now()+Math.random().toString(36).slice(2,5),title:d.title||'Untitled',desc:d.desc||'',status:d.status||'backlog',tag:d.tag||'app',priority:d.priority||'med',points:d.points||3,sprint:DATA.sprint.number,created:new Date().toISOString().slice(0,10)});ax++;break;}case'delete_card':{const i=DATA.cards.findIndex(c=>c.id===a.card_id);if(i>=0){DATA.cards.splice(i,1);ax++;}break;}case'move_card':{const c=DATA.cards.find(x=>x.id===a.card_id);if(c&&a.data?.status){c.status=a.data.status;ax++;}break;}case'edit_card':{const c=DATA.cards.find(x=>x.id===a.card_id);if(c&&a.data){for(const[k,v]of Object.entries(a.data)){if(v!==undefined&&v!==null)c[k]=v;}ax++;}break;}}}
+    saveData();renderBoard();renderDashboard();aiCmdBar.className='ai-command-bar success';aiCmdSetFeedback('✓ '+(result.summary||`Executed ${ax} action${ax!==1?'s':''}`), 'success');aiCmdInput.value='';
+    setTimeout(()=>{document.querySelectorAll('.sprint-card').forEach(el=>{const c=DATA.cards.find(x=>x.id===el.dataset.id);if(c&&new Date()-new Date(c.created)<10000)el.classList.add('ai-created');});},100);
+    setTimeout(()=>{aiCmdBar.className='ai-command-bar';},3000);
+  }catch(e){aiCmdBar.className='ai-command-bar error';aiCmdSetFeedback('Error: '+e.message,'error');setTimeout(()=>{aiCmdBar.className='ai-command-bar';},4000);}
+  finally{aiCmdSend.className='ai-cmd-send';aiCmdSend.textContent='Run ▶';aiCmdIcon.className='ai-cmd-icon';}
+}
+
+// ═══════════════════════════════════════════
+// AI WORKSHOP
+// ═══════════════════════════════════════════
+const WSE_CONFIG_KEY='oi_ws_azure_config',WSE_HISTORY_KEY='oi_ws_history';let wseFiles={},wseActiveFile=null,wseOutputHTML='';
+const WS_SYSTEM_PROMPT=`You are a senior frontend engineer. When given source files and instructions, output a complete, valid HTML document. Return ONLY the HTML starting with <!DOCTYPE html>. No markdown fences. No truncation. Complete file.`;
+(function(){try{const cfg=JSON.parse(localStorage.getItem(WSE_CONFIG_KEY)||'{}');if(cfg.endpoint)document.getElementById('ws-endpoint').value=cfg.endpoint;if(cfg.apiKey)document.getElementById('ws-apikey').value=cfg.apiKey;if(cfg.model)document.getElementById('ws-model').value=cfg.model;if(cfg.apiFormat)document.getElementById('ws-apiformat').value=cfg.apiFormat;if(cfg.apiVersion)document.getElementById('ws-apiversion').value=cfg.apiVersion;}catch(e){}})();
+document.getElementById('wsSysPrompt').value=WS_SYSTEM_PROMPT;
+function wseSaveConfig(){const cfg={endpoint:document.getElementById('ws-endpoint').value.trim(),apiKey:document.getElementById('ws-apikey').value.trim(),model:document.getElementById('ws-model').value.trim(),apiFormat:document.getElementById('ws-apiformat').value,apiVersion:document.getElementById('ws-apiversion').value};localStorage.setItem(WSE_CONFIG_KEY,JSON.stringify(cfg));wseSetStatus('Config saved','success');}
+const wsDropZone=document.getElementById('wsDropZone'),wsFileInput=document.getElementById('wsFileInput');
+wsDropZone.addEventListener('dragover',e=>{e.preventDefault();wsDropZone.style.borderColor='var(--green)';wsDropZone.style.background='var(--green-bg)';});
+wsDropZone.addEventListener('dragleave',()=>{wsDropZone.style.borderColor='';wsDropZone.style.background='';});
+wsDropZone.addEventListener('drop',e=>{e.preventDefault();wsDropZone.style.borderColor='';wsDropZone.style.background='';wseHandleFiles(e.dataTransfer.files);});
+wsFileInput.addEventListener('change',e=>wseHandleFiles(e.target.files));
+function wseHandleFiles(files){for(const f of files){if(!f.name.match(/\.html?$/i))continue;const r=new FileReader();r.onload=e=>{wseFiles[f.name]={content:e.target.result,size:f.size};wseRenderFileList();wseUpdateSendState();};r.readAsText(f);}}
+function wseRenderFileList(){const list=document.getElementById('wsFileList'),names=Object.keys(wseFiles);document.getElementById('ws-file-count').textContent=names.length+' file'+(names.length!==1?'s':'');if(!names.length){list.innerHTML='';document.getElementById('wsCodePreview').style.display='none';wseActiveFile=null;return;}list.innerHTML=names.map(name=>{const sizeKB=(wseFiles[name].size/1024).toFixed(1);return`<div class="ws-file-item ${name===wseActiveFile?'active':''}" data-file="${esc(name)}"><span class="ws-file-item-name" onclick="wsePreviewFile('${esc(name)}')">${esc(name)}</span><span class="ws-file-item-size">${sizeKB} KB</span><button class="ws-file-item-remove" onclick="wseRemoveFile('${esc(name)}')" title="Remove">✕</button></div>`;}).join('');if(!wseActiveFile||!wseFiles[wseActiveFile])wsePreviewFile(names[0]);}
+function wsePreviewFile(name){wseActiveFile=name;const p=document.getElementById('wsCodePreview');p.style.display='block';p.textContent=wseFiles[name].content.substring(0,2000)+(wseFiles[name].content.length>2000?'\n\n… [truncated]':'');wseRenderFileList();}
+function wseRemoveFile(name){delete wseFiles[name];if(wseActiveFile===name)wseActiveFile=null;wseRenderFileList();wseUpdateSendState();}
+function wseUpdateSendState(){document.getElementById('wsSendBtn').disabled=!(Object.keys(wseFiles).length>0&&document.getElementById('wsQuery').value.trim().length>0);}
+document.getElementById('wsQuery').addEventListener('input',wseUpdateSendState);
+function wseToggleSysPrompt(){const el=document.getElementById('wsSysPrompt');el.style.display=el.style.display==='none'?'block':'none';}
+function wseSetStatus(msg,type){const el=document.getElementById('wsStatus');el.textContent=msg;el.className='ws-status'+(type?' '+type:'');if(type!=='processing')setTimeout(()=>{el.textContent='';el.className='ws-status';},6000);}
+async function wseSend(){const ep=document.getElementById('ws-endpoint').value.trim(),ak=document.getElementById('ws-apikey').value.trim(),md=document.getElementById('ws-model').value.trim(),query=document.getElementById('wsQuery').value.trim(),sys=document.getElementById('wsSysPrompt').value.trim();if(!ep||!ak||!md){wseSetStatus('Missing Azure config','error');return;}let fb='';for(const[n,o]of Object.entries(wseFiles)){fb+=`FILE: ${n}\n\`\`\`html\n${o.content}\n\`\`\`\n\n`;}wseSetStatus('Sending to Azure AI…','processing');document.getElementById('wsSendBtn').disabled=true;try{let raw=await callAzureAI(sys,`Here are the project files:\n\n${fb}\nInstructions: ${query}`,{maxTokens:16000});raw=raw.replace(/^```html?\s*/i,'').replace(/\s*```\s*$/,'').trim();wseOutputHTML=raw;document.getElementById('wsOutput').style.display='flex';document.getElementById('wsPreviewFrame').srcdoc=wseOutputHTML;document.getElementById('wsOutputCode').textContent=wseOutputHTML;wseSetStatus('Done — output ready','success');wseAddHistory(query);}catch(e){wseSetStatus('Error: '+e.message,'error');}finally{wseUpdateSendState();}}
+let wseShowCode=false;
+function wseToggleOutput(){wseShowCode=!wseShowCode;document.getElementById('wsPreviewFrame').style.display=wseShowCode?'none':'block';document.getElementById('wsOutputCode').style.display=wseShowCode?'block':'none';document.getElementById('wsToggleView').textContent=wseShowCode?'◐ Preview':'◇ Code';}
+function wseCopyOutput(){if(!wseOutputHTML)return;navigator.clipboard.writeText(wseOutputHTML).then(()=>wseSetStatus('Copied','success'));}
+function wseDownloadOutput(){if(!wseOutputHTML)return;const n=wseActiveFile||'output.html';const blob=new Blob([wseOutputHTML],{type:'text/html'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=n.replace(/\.html?$/i,'')+'_updated.html';a.click();URL.revokeObjectURL(a.href);}
+function wseClearAll(){wseFiles={};wseActiveFile=null;wseOutputHTML='';wseShowCode=false;document.getElementById('wsQuery').value='';document.getElementById('wsOutput').style.display='none';document.getElementById('wsCodePreview').style.display='none';wseRenderFileList();wseUpdateSendState();wseSetStatus('Cleared','success');}
+function wseAddHistory(prompt){try{let h=JSON.parse(localStorage.getItem(WSE_HISTORY_KEY)||'[]');h.unshift({time:new Date().toISOString(),prompt:prompt.substring(0,200),filesUsed:Object.keys(wseFiles)});if(h.length>30)h=h.slice(0,30);localStorage.setItem(WSE_HISTORY_KEY,JSON.stringify(h));wseRenderHistory();}catch(e){}}
+function wseRenderHistory(){try{const h=JSON.parse(localStorage.getItem(WSE_HISTORY_KEY)||'[]');const el=document.getElementById('wsHistory');if(!h.length){el.style.display='none';return;}el.style.display='block';document.getElementById('wsHistoryList').innerHTML=h.map((x,i)=>{const dt=new Date(x.time);return`<div class="ws-history-item" onclick="wseReplayHistory(${i})"><span class="ws-history-time">${dt.toLocaleDateString('en-US',{month:'short',day:'numeric'})}</span><span class="ws-history-prompt">${esc(x.prompt)}</span><span class="ws-history-action">${x.filesUsed.length} file${x.filesUsed.length!==1?'s':''}</span></div>`;}).join('');}catch(e){}}
+function wseReplayHistory(idx){try{const h=JSON.parse(localStorage.getItem(WSE_HISTORY_KEY)||'[]');if(h[idx]){document.getElementById('wsQuery').value=h[idx].prompt;wseUpdateSendState();}}catch(e){}}
+function wseClearHistory(){localStorage.removeItem(WSE_HISTORY_KEY);wseRenderHistory();}
+
+// ═══════════════════════════════════════════
+// TEMPLATE LIBRARY
+// ═══════════════════════════════════════════
+const TEMPLATES = [
+  {id:'t1',name:'Product Requirements Doc',icon:'📋',desc:'Structured PRD with problem statement, user stories, success metrics, and technical constraints.',category:'pm',ai:true,blocks:[{type:'h1',content:'Product Requirements Document'},{type:'h2',content:'Problem Statement'},{type:'text',content:''},{type:'h2',content:'User Stories'},{type:'todo',content:'As a user, I want to…',checked:false},{type:'h2',content:'Success Metrics'},{type:'bullet',content:'Key metric 1'},{type:'h2',content:'Technical Constraints'},{type:'text',content:''}]},
+  {id:'t2',name:'Sprint Retrospective',icon:'🔄',desc:'What went well, what didn\'t, and action items for the next sprint.',category:'pm',ai:false,blocks:[{type:'h1',content:'Sprint Retrospective'},{type:'h2',content:'What Went Well'},{type:'bullet',content:''},{type:'h2',content:'What Could Improve'},{type:'bullet',content:''},{type:'h2',content:'Action Items'},{type:'todo',content:'',checked:false}]},
+  {id:'t3',name:'Architecture Decision Record',icon:'🏗️',desc:'Document key technical decisions with context, options considered, and rationale.',category:'engineering',ai:true,blocks:[{type:'h1',content:'ADR: [Decision Title]'},{type:'h2',content:'Status'},{type:'text',content:'Proposed / Accepted / Deprecated'},{type:'h2',content:'Context'},{type:'text',content:''},{type:'h2',content:'Options Considered'},{type:'numbered',content:'Option 1'},{type:'h2',content:'Decision'},{type:'text',content:''},{type:'h2',content:'Consequences'},{type:'bullet',content:''}]},
+  {id:'t4',name:'User Pain Point Analysis',icon:'🎯',desc:'AI-powered: describe your users, get structured pain point analysis with opportunity mapping.',category:'ai',ai:true,blocks:[]},
+  {id:'t5',name:'Feature Specification',icon:'⚡',desc:'Detailed spec for a single feature: user flow, edge cases, acceptance criteria, and design notes.',category:'engineering',ai:true,blocks:[{type:'h1',content:'Feature Spec: [Feature Name]'},{type:'h2',content:'Overview'},{type:'text',content:''},{type:'h2',content:'User Flow'},{type:'numbered',content:'Step 1'},{type:'h2',content:'Edge Cases'},{type:'bullet',content:''},{type:'h2',content:'Acceptance Criteria'},{type:'todo',content:'',checked:false},{type:'h2',content:'Design Notes'},{type:'text',content:''}]},
+  {id:'t6',name:'Design System Audit',icon:'🎨',desc:'Checklist and template for auditing design consistency across components.',category:'design',ai:false,blocks:[{type:'h1',content:'Design System Audit'},{type:'h2',content:'Typography'},{type:'todo',content:'Font families consistent',checked:false},{type:'todo',content:'Heading hierarchy correct',checked:false},{type:'h2',content:'Colors'},{type:'todo',content:'All custom properties defined',checked:false},{type:'h2',content:'Spacing'},{type:'todo',content:'Base grid maintained (8px)',checked:false},{type:'h2',content:'Components'},{type:'todo',content:'Button variants documented',checked:false}]},
+  {id:'t7',name:'Meeting Notes',icon:'📝',desc:'Structured meeting notes with attendees, agenda, discussion, and action items.',category:'pm',ai:false,blocks:[{type:'h1',content:'Meeting Notes — [Date]'},{type:'h3',content:'Attendees'},{type:'text',content:''},{type:'h2',content:'Agenda'},{type:'numbered',content:''},{type:'h2',content:'Discussion'},{type:'text',content:''},{type:'h2',content:'Action Items'},{type:'todo',content:'',checked:false}]},
+  {id:'t8',name:'AI Competitive Analysis',icon:'🔬',desc:'AI-powered: name your competitors, get structured comparison across features, pricing, and positioning.',category:'ai',ai:true,blocks:[]},
+  {id:'t9',name:'Release Checklist',icon:'🚀',desc:'Pre-launch checklist covering QA, accessibility, performance, and deployment steps.',category:'engineering',ai:false,blocks:[{type:'h1',content:'Release Checklist'},{type:'h2',content:'Pre-Release'},{type:'todo',content:'All tests passing',checked:false},{type:'todo',content:'Cross-browser QA complete',checked:false},{type:'todo',content:'Mobile responsive verified',checked:false},{type:'todo',content:'Accessibility audit done',checked:false},{type:'h2',content:'Deployment'},{type:'todo',content:'Build artifacts generated',checked:false},{type:'todo',content:'Version number updated',checked:false},{type:'h2',content:'Post-Release'},{type:'todo',content:'Monitoring dashboards checked',checked:false}]},
+  {id:'t10',name:'AI Brainstorm Session',icon:'🧠',desc:'AI-powered: describe a challenge, get 10 creative solutions with pros/cons analysis.',category:'ai',ai:true,blocks:[]},
+  {id:'t11',name:'Component Design Brief',icon:'🎨',desc:'Brief for designing a new UI component: purpose, variants, states, and interaction patterns.',category:'design',ai:true,blocks:[{type:'h1',content:'Component Brief: [Name]'},{type:'h2',content:'Purpose'},{type:'text',content:''},{type:'h2',content:'Variants'},{type:'bullet',content:'Default'},{type:'bullet',content:'Hover'},{type:'bullet',content:'Active'},{type:'bullet',content:'Disabled'},{type:'h2',content:'Interaction'},{type:'text',content:''},{type:'h2',content:'Accessibility'},{type:'text',content:''}]},
+  {id:'t12',name:'Bug Report Template',icon:'🐛',desc:'Structured bug report with reproduction steps, expected vs. actual behavior, and environment details.',category:'engineering',ai:false,blocks:[{type:'h1',content:'Bug Report'},{type:'h2',content:'Summary'},{type:'text',content:''},{type:'h2',content:'Steps to Reproduce'},{type:'numbered',content:''},{type:'h2',content:'Expected Behavior'},{type:'text',content:''},{type:'h2',content:'Actual Behavior'},{type:'text',content:''},{type:'h2',content:'Environment'},{type:'bullet',content:'Browser: '},{type:'bullet',content:'OS: '},{type:'bullet',content:'Device: '}]},
+];
+
+function renderTemplates() {
+  const search=(document.getElementById('tpl-search')?.value||'').toLowerCase();
+  const activeFilter=document.querySelector('.pill[data-tplfilter].active')?.dataset.tplfilter||'all';
+  let tpls=TEMPLATES;
+  if(search)tpls=tpls.filter(t=>t.name.toLowerCase().includes(search)||t.desc.toLowerCase().includes(search));
+  if(activeFilter!=='all')tpls=tpls.filter(t=>t.category===activeFilter||(activeFilter==='ai'&&t.ai));
+  document.getElementById('tpl-grid').innerHTML=tpls.map(t=>`<div class="tpl-card ${t.ai?'tpl-ai':''}" onclick="useTemplate('${t.id}')"><div class="tpl-card-icon">${t.icon}</div><div class="tpl-card-title">${t.name}</div><div class="tpl-card-desc">${t.desc}</div><div class="tpl-card-tags"><span class="tpl-card-tag" style="background:var(${t.category==='pm'?'--blue-bg':t.category==='engineering'?'--warm-bg':t.category==='design'?'--purple-bg':'--green-bg'});color:var(${t.category==='pm'?'--blue':t.category==='engineering'?'--warm':t.category==='design'?'--purple':'--green'})">${t.category}</span>${t.ai?'<span class="tpl-card-tag" style="background:var(--green-bg);color:var(--green)">AI-Powered</span>':''}</div></div>`).join('');
+}
+document.addEventListener('click',e=>{if(e.target.closest('.pill[data-tplfilter]')){document.querySelectorAll('.pill[data-tplfilter]').forEach(p=>p.classList.remove('active'));e.target.closest('.pill').classList.add('active');renderTemplates();}});
+
+async function useTemplate(tplId) {
+  const tpl=TEMPLATES.find(t=>t.id===tplId); if(!tpl)return;
+  if(tpl.ai && tpl.blocks.length===0) {
+    // AI-powered template — prompt user first
+    openModal('Generate: '+tpl.name, `<div class="form-group"><label class="form-label">Describe your context</label><textarea class="form-textarea" id="f-tpl-prompt" placeholder="Give details for AI to generate the content…" style="min-height:120px;"></textarea></div><p style="font-size:0.76rem;color:var(--text-muted);">AI will generate a complete page using the "${tpl.name}" template format.</p>`, `<button class="btn" onclick="closeModal()">Cancel</button><button class="btn btn-green" onclick="execAITemplate('${tplId}')">⬡ Generate Page</button>`, 'modal-wide');
+    return;
+  }
+  const blocks = tpl.blocks.map(b=>({...b,id:uid()}));
+  if(!blocks.length) blocks.push({id:uid(),type:'text',content:''});
+  peCreateNewPage(tpl.name, tpl.icon, blocks);
+  // Switch to pages view
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.querySelector('.nav-item[data-view="pages"]').classList.add('active');
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-pages').classList.add('active');
+  document.getElementById('pageTitle').textContent=viewTitles.pages[0];
+  document.getElementById('pageDesc').textContent=viewTitles.pages[1];
+  peInit();
+}
+
+async function execAITemplate(tplId) {
+  const tpl=TEMPLATES.find(t=>t.id===tplId);if(!tpl)return;
+  const prompt=document.getElementById('f-tpl-prompt').value.trim();if(!prompt)return;
+  const cfg=getAzureConfig();if(!cfg.endpoint||!cfg.apiKey||!cfg.model){alert('Configure Azure OpenAI first.');return;}
+  closeModal();
+  const sys=`You are an AI that generates complete Notion-style page content for a "${tpl.name}" template.\nReturn ONLY a JSON object: {"title":"...","icon":"${tpl.icon}","blocks":[{"type":"...","content":"..."}]}\nBlock types: text, h1, h2, h3, bullet, numbered, todo, quote, callout, code, divider\nGenerate 10-25 blocks for thorough coverage. Be specific and actionable.`;
+  try{let raw=await callAzureAI(sys,prompt,{maxTokens:6000});raw=raw.replace(/^```json?\s*/i,'').replace(/\s*```\s*$/,'').trim();const data=JSON.parse(raw);
+    const blocks=(data.blocks||[]).map(b=>({id:uid(),type:b.type||'text',content:b.content||'',checked:b.checked||false}));
+    peCreateNewPage(data.title||tpl.name, data.icon||tpl.icon, blocks.length?blocks:[{id:uid(),type:'text',content:''}]);
+    document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));document.querySelector('.nav-item[data-view="pages"]').classList.add('active');document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.getElementById('view-pages').classList.add('active');document.getElementById('pageTitle').textContent=viewTitles.pages[0];document.getElementById('pageDesc').textContent=viewTitles.pages[1];peInit();
+  }catch(e){alert('AI Error: '+e.message);}
+}
+
+// ═══════════════════════════════════════════
+// CALCULATOR
+// ═══════════════════════════════════════════
+let calcExpr = '', calcHistory = [];
+function toggleCalc(){document.getElementById('calcOverlay').classList.toggle('open');}
+function calcInput(ch){calcExpr+=ch;document.getElementById('calcExpr').textContent=calcExpr;}
+function calcClear(){calcExpr='';document.getElementById('calcExpr').textContent='';document.getElementById('calcResult').textContent='0';}
+function calcEval(){
+  if(!calcExpr)return;
+  try{const expr=calcExpr.replace(/×/g,'*').replace(/÷/g,'/').replace(/−/g,'-');const result=Function('"use strict";return('+expr+')')();document.getElementById('calcResult').textContent=Number.isFinite(result)?parseFloat(result.toFixed(10)):'Error';if(Number.isFinite(result)){calcHistory.unshift({expr:calcExpr,result:parseFloat(result.toFixed(10))});renderCalcHistory();}calcExpr='';}
+  catch(e){document.getElementById('calcResult').textContent='Error';calcExpr='';}
+  document.getElementById('calcExpr').textContent='';
+}
+function renderCalcHistory(){document.getElementById('calcHistory').innerHTML=calcHistory.slice(0,20).map(h=>`<div class="calc-history-item" onclick="calcInput('${h.result}')"><span class="calc-history-expr">${h.expr}</span><span class="calc-history-val">= ${h.result}</span></div>`).join('');}
+document.addEventListener('keydown',e=>{if(!document.getElementById('calcOverlay').classList.contains('open'))return;if(e.key>='0'&&e.key<='9'||e.key==='.')calcInput(e.key);if(e.key==='+')calcInput('+');if(e.key==='-')calcInput('−');if(e.key==='*')calcInput('×');if(e.key==='/')calcInput('÷');if(e.key==='Enter')calcEval();if(e.key==='Escape')toggleCalc();if(e.key==='Backspace'){calcExpr=calcExpr.slice(0,-1);document.getElementById('calcExpr').textContent=calcExpr;}});
+
+// ═══════════════════════════════════════════
+// PRODUCT DISCOVERY (PM WORKFLOW)
+// ═══════════════════════════════════════════
+let pmData = {painPoints:[],stories:[],features:[],cards:[]};
+async function pmRunDiscovery() {
+  const desc=document.getElementById('pmAppDesc').value.trim();if(!desc)return;
+  const cfg=getAzureConfig();if(!cfg.endpoint||!cfg.apiKey||!cfg.model){alert('Configure Azure OpenAI in the AI Workshop tab first.');return;}
+  const btn=document.getElementById('pmRunBtn');btn.disabled=true;btn.textContent='⟳ Running…';
+  const sys=`You are a product manager AI. Given an app description, generate a complete product discovery pipeline.\nReturn ONLY JSON:\n{"painPoints":[{"title":"...","desc":"..."}],"stories":[{"title":"As a...","desc":"..."}],"features":[{"title":"...","desc":"...","priority":"high|med|low"}],"cards":[{"title":"...","desc":"...","tag":"app|design|infra|docs|bug","priority":"high|med|low","points":1|2|3|5|8}]}\nGenerate 3-5 items per stage. Be specific and actionable.`;
+  try{let raw=await callAzureAI(sys,desc,{maxTokens:6000});raw=raw.replace(/^```json?\s*/i,'').replace(/\s*```\s*$/,'').trim();pmData=JSON.parse(raw);pmRenderPipeline();document.getElementById('pmToSprintBtn').disabled=false;document.getElementById('pmToPageBtn').disabled=false;}
+  catch(e){alert('AI Error: '+e.message);}
+  finally{btn.disabled=false;btn.textContent='⬡ Run AI Discovery';}
+}
+function pmRenderPipeline(){
+  const stages=[pmData.painPoints||[],pmData.stories||[],pmData.features||[],pmData.cards||[]];
+  stages.forEach((items,i)=>{
+    document.getElementById('pm-count-'+i).textContent=items.length;
+    document.getElementById('pm-stage-'+i).innerHTML=items.map(it=>`<div class="pm-item"><div class="pm-item-title">${esc(it.title||'')}</div><div class="pm-item-meta">${esc(it.desc||'').slice(0,80)}${(it.desc||'').length>80?'…':''}</div></div>`).join('')||'<div style="font-size:0.78rem;color:var(--text-dim);padding:8px;">Run AI Discovery to populate</div>';
+  });
+}
+function pmSendToSprint(){if(!pmData.cards||!pmData.cards.length)return;pmData.cards.forEach(c=>{DATA.cards.push({id:'c'+Date.now()+Math.random().toString(36).slice(2,5),title:c.title||'Untitled',desc:c.desc||'',status:'backlog',tag:c.tag||'app',priority:c.priority||'med',points:c.points||3,sprint:DATA.sprint.number,created:new Date().toISOString().slice(0,10)});});saveData();renderBoard();alert(`Added ${pmData.cards.length} cards to Sprint ${DATA.sprint.number} backlog.`);}
+function pmCreatePage(){if(!pmData.painPoints?.length)return;const blocks=[{id:uid(),type:'h1',content:'Product Discovery Report'},{id:uid(),type:'h2',content:'Pain Points'}];(pmData.painPoints||[]).forEach(p=>{blocks.push({id:uid(),type:'bullet',content:`<b>${esc(p.title)}</b> — ${esc(p.desc||'')}`});});blocks.push({id:uid(),type:'h2',content:'User Stories'});(pmData.stories||[]).forEach(s=>{blocks.push({id:uid(),type:'bullet',content:`<b>${esc(s.title)}</b> — ${esc(s.desc||'')}`});});blocks.push({id:uid(),type:'h2',content:'Features'});(pmData.features||[]).forEach(f=>{blocks.push({id:uid(),type:'bullet',content:`<b>${esc(f.title)}</b> (${f.priority||'med'}) — ${esc(f.desc||'')}`});});blocks.push({id:uid(),type:'h2',content:'Sprint Cards'});(pmData.cards||[]).forEach(c=>{blocks.push({id:uid(),type:'todo',content:`${esc(c.title)} [${c.tag}/${c.priority}/${c.points}pts]`,checked:false});});peCreateNewPage('Product Discovery Report','🎯',blocks);document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));document.querySelector('.nav-item[data-view="pages"]').classList.add('active');document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.getElementById('view-pages').classList.add('active');document.getElementById('pageTitle').textContent=viewTitles.pages[0];document.getElementById('pageDesc').textContent=viewTitles.pages[1];peInit();}
+function pmClearAll(){pmData={painPoints:[],stories:[],features:[],cards:[]};document.getElementById('pmAppDesc').value='';pmRenderPipeline();document.getElementById('pmToSprintBtn').disabled=true;document.getElementById('pmToPageBtn').disabled=true;}
+
+// ═══════════════════════════════════════════
+// FILE WORKSPACE
+// ═══════════════════════════════════════════
+let fwFiles = [];
+const fwFileInput = document.getElementById('fwFileInput');
+fwFileInput.addEventListener('change', e => fwHandleFiles(e.target.files));
+const fwWorkspace = document.getElementById('fileWorkspace');
+fwWorkspace.addEventListener('dragover', e => { e.preventDefault(); document.getElementById('fwDropZone').classList.add('active'); });
+fwWorkspace.addEventListener('dragleave', e => { if(!fwWorkspace.contains(e.relatedTarget)) document.getElementById('fwDropZone').classList.remove('active'); });
+fwWorkspace.addEventListener('drop', e => { e.preventDefault(); document.getElementById('fwDropZone').classList.remove('active'); if(e.dataTransfer.files.length) fwHandleFiles(e.dataTransfer.files); });
+
+function fwHandleFiles(files) {
+  for(const f of files) {
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const isHTML = f.name.match(/\.html?$/i);
+      fwFiles.push({ id:uid(), name:f.name, size:f.size, sizeLabel:(f.size/1024).toFixed(1)+' KB', type:f.type, content:ev.target.result, isHTML:!!isHTML, x:40+Math.random()*400, y:40+Math.random()*300 });
+      fwRender();
+    };
+    if(f.name.match(/\.html?$/i)) reader.readAsText(f);
+    else reader.readAsDataURL(f);
+  }
+}
+function fwRender() {
+  const canvas = document.getElementById('fwCanvas');
+  canvas.innerHTML = fwFiles.map(f => `<div class="fw-file-card" style="left:${f.x}px;top:${f.y}px;" data-fwid="${f.id}" onmousedown="fwStartDrag(event,'${f.id}')" ondblclick="fwOpen('${f.id}')"><div class="fw-file-icon">${f.isHTML?'🌐':'📄'}</div><div class="fw-file-name" title="${esc(f.name)}">${esc(f.name)}</div><div class="fw-file-size">${f.sizeLabel}</div><div class="fw-file-actions">${f.isHTML?`<button class="btn btn-sm" onclick="event.stopPropagation();fwOpen('${f.id}')">Preview</button>`:''}${f.isHTML?`<button class="btn btn-sm" onclick="event.stopPropagation();fwSendToWorkshop('${f.id}')">→ AI</button>`:''}<button class="btn btn-sm" style="color:var(--red)" onclick="event.stopPropagation();fwRemove('${f.id}')">✕</button></div></div>`).join('');
+}
+let fwDragId=null, fwDragOffset={x:0,y:0};
+function fwStartDrag(e, id){
+  if(e.target.closest('button')) return;
+  fwDragId=id; const card=e.target.closest('.fw-file-card'); card.classList.add('dragging');
+  fwDragOffset={x:e.clientX-card.offsetLeft, y:e.clientY-card.offsetTop};
+  document.addEventListener('mousemove',fwDragging);document.addEventListener('mouseup',fwEndDrag);
+}
+function fwDragging(e){if(!fwDragId)return;const f=fwFiles.find(x=>x.id===fwDragId);if(!f)return;f.x=e.clientX-fwDragOffset.x;f.y=e.clientY-fwDragOffset.y;const card=document.querySelector(`[data-fwid="${fwDragId}"]`);if(card){card.style.left=f.x+'px';card.style.top=f.y+'px';}}
+function fwEndDrag(){const card=document.querySelector(`[data-fwid="${fwDragId}"]`);if(card)card.classList.remove('dragging');fwDragId=null;document.removeEventListener('mousemove',fwDragging);document.removeEventListener('mouseup',fwEndDrag);}
+function fwOpen(id){const f=fwFiles.find(x=>x.id===id);if(!f||!f.isHTML)return;openHtmlPreview(f.name,f.content);}
+function fwRemove(id){fwFiles=fwFiles.filter(x=>x.id!==id);fwRender();}
+function fwSendToWorkshop(id){const f=fwFiles.find(x=>x.id===id);if(!f)return;wseFiles[f.name]={content:f.content,size:f.size};document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));document.querySelector('.nav-item[data-view="workshop"]').classList.add('active');document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.getElementById('view-workshop').classList.add('active');document.getElementById('pageTitle').textContent=viewTitles.workshop[0];document.getElementById('pageDesc').textContent=viewTitles.workshop[1];wseRenderFileList();wseUpdateSendState();}
+function fwClearAll(){fwFiles=[];fwRender();}
+function fwCanvasDragOver(e){e.preventDefault();}
+function fwCanvasDrop(e){e.preventDefault();}
+
+// HTML PREVIEW
+let htmlPreviewContent = '';
+function openHtmlPreview(name, content){htmlPreviewContent=content;document.getElementById('htmlPreviewTitle').textContent=name;document.getElementById('htmlPreviewFrame').srcdoc=content;document.getElementById('htmlPreviewOverlay').classList.add('open');}
+function closeHtmlPreview(){document.getElementById('htmlPreviewOverlay').classList.remove('open');}
+function sendPreviewToAI(){if(!htmlPreviewContent)return;const name=document.getElementById('htmlPreviewTitle').textContent;wseFiles[name]={content:htmlPreviewContent,size:htmlPreviewContent.length};closeHtmlPreview();document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));document.querySelector('.nav-item[data-view="workshop"]').classList.add('active');document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.getElementById('view-workshop').classList.add('active');document.getElementById('pageTitle').textContent=viewTitles.workshop[0];document.getElementById('pageDesc').textContent=viewTitles.workshop[1];wseRenderFileList();wseUpdateSendState();}
+
+// ═══════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════
+renderDashboard();
+renderBoard();
+pmRenderPipeline();
+</script>
+</body>
+</html>

@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Travel Dispatch">
+<meta name="format-detection" content="telephone=no">
+<title>The Travel Dispatch</title>
+<meta property="og:title" content="The Travel Dispatch — CMH → DFW">
+<meta property="og:description" content="Columbus to Dallas · Thursday, April 8 · Your Complete Travel Day Briefing">
+<meta property="og:type" content="article">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html{font-size:16px;-webkit-text-size-adjust:100%}
+body{
+  background:#F7F5F0;color:#1A1714;
+  font-family:Georgia,'Times New Roman',serif;
+  -webkit-font-smoothing:antialiased;
+  -webkit-tap-highlight-color:transparent;
+  overflow-x:hidden;
+  max-width:100vw;
+}
+:root{
+  --p:#F7F5F0;--pd:#EDE9E0;--ink:#1A1714;--il:#4A453D;--im:#7A746B;
+  --r:#C8BFB0;--rh:#8A8279;--a:#1B4B6B;--pos:#1B6B3A;--neg:#9B1B1B;
+  --hl:#E0EEF5;--warm:#C85A24;--sky:#4A9FD9;
+}
+
+/* ── ticker ── */
+.tk{background:var(--ink);color:var(--pd);padding:.4rem 0;overflow:hidden;font-family:'Courier New',Courier,monospace;font-size:.65rem;letter-spacing:.02em}
+.tk-t{display:flex;gap:1.8rem;animation:tkS 32s linear infinite;white-space:nowrap;width:max-content}
+@keyframes tkS{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.tk-i{display:inline-flex;align-items:center;gap:.25rem}
+.tk-i .rt{color:#F9A8D4}.tk-i .fl{color:#94A3B8}.tk-i .go{color:#FBBF24}
+
+/* ── masthead ── */
+.mh{text-align:center;padding:.9rem .8rem .5rem;border-bottom:3px double var(--rh)}
+.mh-top{display:flex;justify-content:space-between;font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.52rem;letter-spacing:.12em;text-transform:uppercase;color:var(--im);margin-bottom:.3rem}
+.mh-t{font-size:1.85rem;font-weight:bold;letter-spacing:.04em;line-height:1;text-transform:uppercase}
+.mh-s{font-style:italic;font-size:.75rem;color:var(--im);margin-top:.15rem}
+.mh-r{display:flex;align-items:center;gap:.5rem;margin-top:.4rem;font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.52rem;letter-spacing:.12em;text-transform:uppercase;color:var(--im)}
+.mh-r::before,.mh-r::after{content:'';flex:1;height:1px;background:var(--r)}
+
+/* ── route banner ── */
+.rb{background:var(--a);color:#fff;text-align:center;padding:.6rem .8rem;font-family:-apple-system,Helvetica,Arial,sans-serif}
+.rb-route{font-size:1.4rem;font-weight:800;letter-spacing:.06em;line-height:1.1}
+.rb-route .arr{color:#FBBF24;margin:0 .15rem;font-size:1.1rem}
+.rb-sub{font-size:.55rem;letter-spacing:.14em;text-transform:uppercase;opacity:.7;margin-top:.15rem}
+
+/* ── stats grid ── */
+.ms{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid var(--r);background:var(--pd);padding:.35rem 0}
+.mi{text-align:center;padding:.2rem .25rem;border-right:1px solid var(--r);font-family:-apple-system,Helvetica,Arial,sans-serif}
+.mi:nth-child(4n){border-right:none}
+.mi:nth-child(n+5){border-top:1px solid var(--r)}
+.mi .lb{font-size:.46rem;text-transform:uppercase;letter-spacing:.08em;color:var(--im);line-height:1.15}
+.mi .vl{font-family:'Courier New',Courier,monospace;font-size:.78rem;font-weight:bold;color:var(--ink)}
+.mi .ch{font-size:.46rem;color:var(--im)}
+.mi .ch.up{color:var(--pos)}.mi .ch.dn{color:var(--neg)}.mi .ch.warm{color:var(--warm)}
+
+/* ── content ── */
+.ca{padding:.9rem .85rem 1rem}
+.kk{font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.58rem;font-weight:bold;letter-spacing:.16em;text-transform:uppercase;color:var(--a);margin-bottom:.25rem}
+.lh{font-size:1.45rem;font-weight:bold;line-height:1.12;margin-bottom:.4rem;letter-spacing:-.01em}
+.ls{font-size:.88rem;line-height:1.38;color:var(--il);margin-bottom:.5rem}
+.by{font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.62rem;color:var(--im);letter-spacing:.04em;margin-bottom:.7rem;text-transform:uppercase}
+.sb p{font-size:.9rem;line-height:1.6;margin-bottom:.7rem}
+.sb p:first-of-type::first-letter{float:left;font-size:3.2rem;line-height:.78;font-weight:bold;padding-right:.08em;padding-top:.05em;color:var(--a)}
+.pq{border-left:3px solid var(--a);padding:.65rem .8rem;margin:.9rem 0;background:var(--hl);border-radius:0 3px 3px 0}
+.pq-t{font-style:italic;font-size:.92rem;line-height:1.4}
+.pq-a{font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.58rem;color:var(--im);margin-top:.3rem;letter-spacing:.06em;text-transform:uppercase}
+.div-h{border:none;border-top:2px solid var(--ink);margin:1.1rem 0}
+.div-l{border:none;border-top:1px solid var(--r);margin:.9rem 0}
+.sst{font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.56rem;letter-spacing:.2em;text-transform:uppercase;color:var(--a);font-weight:bold;padding-bottom:.35rem;border-bottom:2px solid var(--a);margin-bottom:.7rem}
+
+/* ── weather cards ── */
+.wx{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin:.7rem 0}
+.wxc{padding:.55rem;background:var(--pd);border:1px solid var(--r);border-radius:3px;text-align:center}
+.wxc-city{font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.52rem;letter-spacing:.1em;text-transform:uppercase;color:var(--im);margin-bottom:.1rem}
+.wxc-icon{font-size:1.6rem;line-height:1.1}
+.wxc-temp{font-family:'Courier New',Courier,monospace;font-size:1.3rem;font-weight:bold}
+.wxc-hl{font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.5rem;color:var(--im);letter-spacing:.04em}
+.wxc-cond{font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.6rem;color:var(--il);margin-top:.1rem}
+.wxc-wind{font-family:'Courier New',Courier,monospace;font-size:.52rem;color:var(--im);margin-top:.05rem}
+.wxc-sun{font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.48rem;color:var(--im);margin-top:.1rem}
+
+/* ── flight table ── */
+.ft-tbl{width:100%;border-collapse:collapse;margin:.5rem 0}
+.ft-tbl th{font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.46rem;letter-spacing:.08em;text-transform:uppercase;color:var(--im);text-align:left;padding:0 0 .3rem;border-bottom:1px solid var(--r);font-weight:600}
+.ft-tbl th:not(:first-child){text-align:right}
+.ft-tbl td{padding:.35rem 0;font-size:.72rem;border-bottom:1px solid var(--pd);font-family:'Courier New',Courier,monospace}
+.ft-tbl td:not(:first-child){text-align:right}
+.ft-tbl td:first-child{font-family:Georgia,serif;font-weight:bold;font-size:.7rem}
+.ft-tbl .ns{font-family:-apple-system,Helvetica,Arial,sans-serif;display:inline-block;font-size:.42rem;letter-spacing:.05em;text-transform:uppercase;padding:.08rem .25rem;border-radius:2px;background:#E8F5E9;color:var(--pos)}
+.ft-tbl .cn{font-family:-apple-system,Helvetica,Arial,sans-serif;display:inline-block;font-size:.42rem;letter-spacing:.05em;text-transform:uppercase;padding:.08rem .25rem;border-radius:2px;background:#FFF3E0;color:var(--warm)}
+
+/* ── airport map ── */
+.amap{margin:.7rem 0;padding:.5rem;background:var(--pd);border:1px solid var(--r);border-radius:3px}
+.amap-title{font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.52rem;letter-spacing:.12em;text-transform:uppercase;color:var(--im);margin-bottom:.35rem}
+.amap svg{width:100%;height:auto;display:block}
+
+/* ── lounge section ── */
+.lg-card{background:var(--pd);border:1px solid var(--r);border-radius:3px;padding:.65rem;margin:.6rem 0}
+.lg-hd{display:flex;align-items:center;gap:.4rem;margin-bottom:.4rem}
+.lg-badge{background:var(--a);color:#fff;font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.48rem;letter-spacing:.1em;text-transform:uppercase;padding:.15rem .4rem;border-radius:2px;font-weight:700}
+.lg-name{font-size:.85rem;font-weight:bold}
+.lg-detail{font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.6rem;color:var(--im);margin-bottom:.15rem}
+.lg-menu-grid{display:grid;grid-template-columns:1fr 1fr;gap:.4rem;margin-top:.5rem}
+.lg-menu-col h5{font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.48rem;letter-spacing:.1em;text-transform:uppercase;color:var(--a);font-weight:700;margin-bottom:.2rem;padding-bottom:.15rem;border-bottom:1px solid var(--r)}
+.lg-menu-col ul{margin:0;padding:0}
+.lg-menu-col li{font-size:.68rem;line-height:1.5;color:var(--il);list-style:none;padding-left:.6rem;position:relative;margin-bottom:.08rem}
+.lg-menu-col li::before{content:'\00b7';position:absolute;left:0;color:var(--a);font-weight:bold}
+
+/* ── timeline ── */
+.tl{margin:.7rem 0}
+.tl-item{display:flex;gap:.5rem;padding:.35rem 0;border-bottom:1px solid var(--pd)}
+.tl-item:last-child{border-bottom:none}
+.tl-time{font-family:'Courier New',Courier,monospace;font-size:.7rem;font-weight:bold;min-width:3.2rem;color:var(--a)}
+.tl-dot{width:8px;height:8px;background:var(--a);border-radius:50%;margin-top:.25rem;flex-shrink:0}
+.tl-body{flex:1}
+.tl-ev{font-size:.72rem;font-weight:bold;line-height:1.2}
+.tl-desc{font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.6rem;color:var(--im);margin-top:.05rem}
+
+/* ── checklist ── */
+.cl{margin:.5rem 0}
+.cl-item{display:flex;align-items:flex-start;gap:.35rem;padding:.25rem 0;border-bottom:1px solid var(--pd);font-size:.72rem}
+.cl-item:last-child{border-bottom:none}
+.cl-icon{font-size:.85rem;flex-shrink:0;width:1.2rem;text-align:center}
+.cl-txt{line-height:1.35}
+.cl-txt strong{font-weight:bold}
+.cl-txt span{font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.58rem;color:var(--im);display:block}
+
+/* ── pro tips ── */
+.tip{background:#FFFDE7;border:1px solid #FFD54F;border-radius:3px;padding:.55rem .65rem;margin:.5rem 0;font-size:.72rem;line-height:1.45}
+.tip-label{font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.48rem;letter-spacing:.1em;text-transform:uppercase;color:var(--warm);font-weight:700;margin-bottom:.15rem}
+
+/* ── sidebar briefs ── */
+.sbr{padding-bottom:.6rem;margin-bottom:.6rem;border-bottom:1px solid var(--r)}
+.sbr:last-child{border-bottom:none;margin-bottom:0}
+.sbr h4{font-size:.82rem;font-weight:bold;line-height:1.22;margin-bottom:.08rem}
+.sbr p{font-size:.72rem;line-height:1.42;color:var(--il)}
+
+/* ── section blocks ── */
+.bsec{padding-bottom:.9rem;margin-bottom:.9rem;border-bottom:1px solid var(--r)}
+.bsec:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
+
+/* ── qd ── */
+.qd{text-align:center;padding:.8rem .9rem;background:var(--pd);border:1px solid var(--r);margin-bottom:.7rem;border-radius:2px}
+.qd-t{font-style:italic;font-size:.92rem;line-height:1.4}
+.qd-a{font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.56rem;color:var(--im);margin-top:.3rem;letter-spacing:.08em;text-transform:uppercase}
+
+/* ── footer ── */
+.ftr{text-align:center;padding:.7rem .8rem 1rem;border-top:3px double var(--rh);font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.5rem;color:var(--im);letter-spacing:.08em;text-transform:uppercase;line-height:1.6}
+
+@supports(padding:env(safe-area-inset-top)){
+  .tk{padding-top:calc(.4rem + env(safe-area-inset-top))}
+  .ftr{padding-bottom:calc(1rem + env(safe-area-inset-bottom))}
+}
+</style>
+</head>
+<body>
+
+<!-- Ticker -->
+<div class="tk"><div class="tk-t" id="tk"></div></div>
+
+<!-- Masthead -->
+<div class="mh">
+  <div class="mh-top"><span>Issue No. 1</span><span>Travel Day Edition</span><span>Gate to Gate</span></div>
+  <div class="mh-t">The Travel Dispatch</div>
+  <div class="mh-s">Everything You Need Between Takeoff &amp; Touchdown</div>
+  <div class="mh-r">Thursday, April 8, 2026</div>
+</div>
+
+<!-- Route Banner -->
+<div class="rb">
+  <div class="rb-route">CMH <span class="arr">&#9992;</span> DFW</div>
+  <div class="rb-sub">Columbus, Ohio &#8594; Dallas&#8211;Fort Worth, Texas &#183; 930 Miles &#183; ~2h 59m Nonstop</div>
+</div>
+
+<!-- Stats -->
+<div class="ms" id="ms"></div>
+
+<!-- Content -->
+<div class="ca">
+
+  <div class="kk">Travel Day Briefing</div>
+  <h1 class="lh">Your Thursday Route: Spring in the Midwest to Sunshine in Big D</h1>
+  <div class="ls">A mild Columbus morning gives way to warm Texas sun as you cross 930 miles of America&#8217;s heartland &#8212; nonstop service on American Airlines, with a Southwest Love Field option</div>
+  <div class="by">By the Travel Dispatch Desk</div>
+  <div class="sb" id="lead-body"></div>
+
+  <div class="pq">
+    <div class="pq-t">&#8220;The world is a book, and those who do not travel read only one page.&#8221;</div>
+    <div class="pq-a">&#8212; Saint Augustine</div>
+  </div>
+
+  <hr class="div-h">
+
+  <!-- WEATHER -->
+  <div class="sst">Weather at a Glance</div>
+  <div class="wx" id="wx"></div>
+  <div class="tip" id="wx-tip"></div>
+
+  <hr class="div-l">
+
+  <!-- FLIGHTS -->
+  <div class="sst">Flight Board &#183; CMH &#8594; DFW / DAL</div>
+  <table class="ft-tbl" id="flights"></table>
+
+  <hr class="div-l">
+
+  <!-- AIRPORT MAPS -->
+  <div class="sst">Airport Quick Maps</div>
+  <div class="amap" id="cmh-map"></div>
+  <div class="amap" id="dfw-map"></div>
+
+  <hr class="div-h">
+
+  <!-- CENTURION LOUNGE -->
+  <div class="sst">The Centurion Lounge &#183; DFW</div>
+  <div class="lg-card" id="lounge"></div>
+
+  <hr class="div-h">
+
+  <!-- TRAVEL TIMELINE -->
+  <div class="sst">Sample Day Timeline</div>
+  <div class="tl" id="timeline"></div>
+
+  <hr class="div-l">
+
+  <!-- PACKING / CHECKLIST -->
+  <div class="sst">Travel Day Checklist</div>
+  <div class="cl" id="checklist"></div>
+
+  <hr class="div-h">
+
+  <!-- BRIEFS -->
+  <div class="bsec">
+    <div class="sst">Quick Reads</div>
+    <div id="briefs"></div>
+  </div>
+
+  <div class="qd">
+    <div class="qd-t">&#8220;A good traveler has no fixed plans and is not intent on arriving.&#8221;</div>
+    <div class="qd-a">&#8212; Lao Tzu</div>
+  </div>
+
+</div>
+
+<div class="ftr">&#169; 2026 The Travel Dispatch &#183; Thursday, April 8, 2026<br>Travel Day Edition &#183; CMH &#8594; DFW &#183; Columbus to Dallas&#8211;Fort Worth</div>
+
+<script>
+(function(){
+
+  // ── TICKER ──
+  var items=[
+    'CMH \u2192 DFW \u2708 NONSTOP 2H59M',
+    'COLUMBUS 57\u00b0F PARTLY CLOUDY',
+    'DALLAS 73\u00b0F WARM & CLEAR',
+    'AA NONSTOP 6X DAILY CMH\u2013DFW',
+    'WN NONSTOP CMH\u2013DAL 1X DAILY',
+    'CENTURION LOUNGE TERM D OPEN 5:30A',
+    'CHEF DEAN FEARING MENU \uD83C\uDF7D',
+    'SPA: FREE 12-MIN MASSAGE',
+    'CMH TSA WAIT ~12 MIN',
+    'SUNRISE CMH 7:04A \u00b7 SUNSET DFW 7:52P'
+  ];
+  var h='';
+  for(var i=0;i<items.length;i++){
+    var c=items[i].indexOf('\u2708')!==-1?'rt':items[i].indexOf('\u00b0F')!==-1?'go':'fl';
+    h+='<span class="tk-i"><span class="'+c+'">'+items[i]+'</span></span>';
+  }
+  document.getElementById('tk').innerHTML=h+h;
+
+  // ── STATS ──
+  var sd=[
+    ['Depart','CMH','Columbus, OH',''],
+    ['Arrive','DFW','Dallas\u2013Fort Worth',''],
+    ['Distance','930mi','Direct Route',''],
+    ['Flight Time','2h 59m','Nonstop','up'],
+    ['CMH Temp','57\u00b0F','High Today',''],
+    ['DFW Temp','73\u00b0F','High Today','warm'],
+    ['Nonstops','7','AA + WN Daily','up'],
+    ['Lounge','Open','5:30a\u201310p','up']
+  ];
+  var sh='';
+  for(var i=0;i<sd.length;i++){sh+='<div class="mi"><div class="lb">'+sd[i][0]+'</div><div class="vl">'+sd[i][1]+'</div><div class="ch'+(sd[i][3]?' '+sd[i][3]:'')+'">'+sd[i][2]+'</div></div>';}
+  document.getElementById('ms').innerHTML=sh;
+
+  // ── LEAD BODY ──
+  var lp=[
+    '<span style="font-family:-apple-system,Helvetica,Arial,sans-serif;font-weight:bold;font-size:.68rem">COLUMBUS, OHIO \u2014 </span>Thursday morning at John Glenn Columbus International should greet you with a mild spring start \u2014 temperatures in the upper 40s climbing to around 57\u00b0F with partly cloudy skies and a gentle southwest breeze. April in Ohio is fickle, so a light layer for the terminal won\u2019t go amiss.',
+    'Your destination tells a warmer story. Dallas\u2013Fort Worth is expecting a classic Texas spring day: 73\u00b0F, mostly sunny, with southerly winds around 11 mph. You\u2019ll land into air that feels 15 degrees warmer than what you left. Pack accordingly \u2014 the blazer that felt right at CMH will come off before you hit baggage claim.',
+    'American Airlines dominates this route with six daily nonstops from CMH to DFW, and Southwest runs a single daily nonstop to Love Field. The flight traces a line southwest over Indiana, Missouri, and Oklahoma \u2014 930 miles in just under three hours. Most AA departures use Embraer 175 regional jets operated by Envoy or Republic.',
+    'If your itinerary puts you through DFW Terminal D, the American Express Centurion Lounge awaits across from Gate D12. The Southwestern-inspired menu by James Beard Award\u2013winning chef Dean Fearing is worth arriving early for \u2014 think Texas migas, smoked brisket, and pecan-crusted chicken, plus a craft cocktail program by master mixologist Jim Meehan.'
+  ];
+  var lh='';for(var i=0;i<lp.length;i++){lh+='<p>'+lp[i]+'</p>';}
+  document.getElementById('lead-body').innerHTML=lh;
+
+  // ── WEATHER ──
+  document.getElementById('wx').innerHTML=
+    '<div class="wxc">'+
+      '<div class="wxc-city">Columbus, OH \u00b7 CMH</div>'+
+      '<div class="wxc-icon">\u26C5</div>'+
+      '<div class="wxc-temp">57\u00b0F</div>'+
+      '<div class="wxc-hl">Low 46\u00b0F \u00b7 High 57\u00b0F</div>'+
+      '<div class="wxc-cond">Partly Cloudy</div>'+
+      '<div class="wxc-wind">Wind: SW 9 mph</div>'+
+      '<div class="wxc-sun">\u2600 7:04 AM \u00b7 \u263D 8:03 PM</div>'+
+    '</div>'+
+    '<div class="wxc">'+
+      '<div class="wxc-city">Dallas, TX \u00b7 DFW</div>'+
+      '<div class="wxc-icon">\u2600\uFE0F</div>'+
+      '<div class="wxc-temp">73\u00b0F</div>'+
+      '<div class="wxc-hl">Low 59\u00b0F \u00b7 High 73\u00b0F</div>'+
+      '<div class="wxc-cond">Mostly Sunny</div>'+
+      '<div class="wxc-wind">Wind: S 11 mph</div>'+
+      '<div class="wxc-sun">\u2600 7:05 AM \u00b7 \u263D 7:52 PM</div>'+
+    '</div>';
+  document.getElementById('wx-tip').innerHTML=
+    '<div class="tip-label">Packing Note</div>'+
+    'You\u2019re crossing a +16\u00b0F temperature swing. Layer up at CMH (light jacket over a tee), ditch it at DFW. Rain risk is low at both ends \u2014 no umbrella needed. Sunglasses for Dallas are a must.';
+
+  // ── FLIGHTS ──
+  var fl=[
+    ['American 1273','6:00a','8:00a','Nonstop','E175','ns'],
+    ['American 1358','8:45a','10:48a','Nonstop','E175','ns'],
+    ['American 1492','11:30a','1:32p','Nonstop','E175','ns'],
+    ['American 1565','2:15p','4:18p','Nonstop','E175','ns'],
+    ['American 1870','5:00p','7:02p','Nonstop','E175','ns'],
+    ['American 1873','7:45p','9:48p','Nonstop','E175','ns'],
+    ['Southwest','11:15a','1:10p','Nonstop \u2192 DAL','B737','ns'],
+    ['Delta (via ATL)','6:10a','12:35p','1 Stop','A321','cn'],
+    ['United (via ORD)','7:20a','1:15p','1 Stop','A320','cn']
+  ];
+  var fh='<thead><tr><th>Flight</th><th>Depart</th><th>Arrive</th><th>Route</th><th>Aircraft</th></tr></thead><tbody>';
+  for(var i=0;i<fl.length;i++){
+    var badge=fl[i][5]==='ns'?'<span class="ns">Nonstop</span>':'<span class="cn">Connect</span>';
+    fh+='<tr><td>'+fl[i][0]+'</td><td>'+fl[i][1]+'</td><td>'+fl[i][2]+'</td><td>'+badge+'</td><td>'+fl[i][4]+'</td></tr>';
+  }
+  fh+='</tbody>';
+  document.getElementById('flights').innerHTML=fh;
+
+  // ── AIRPORT MAPS ──
+  var cmhSvg='<svg viewBox="0 0 340 130" xmlns="http://www.w3.org/2000/svg" style="font-family:-apple-system,Helvetica,Arial,sans-serif">'+
+    '<rect x="0" y="0" width="340" height="130" fill="#EDE9E0" rx="3"/>'+
+    '<rect x="60" y="50" width="220" height="30" fill="#1B4B6B" rx="2"/>'+
+    '<text x="170" y="69" text-anchor="middle" fill="#fff" font-size="7" font-weight="bold">MAIN TERMINAL</text>'+
+    '<rect x="80" y="15" width="60" height="32" fill="#4A9FD9" rx="2"/>'+
+    '<text x="110" y="35" text-anchor="middle" fill="#fff" font-size="6.5" font-weight="bold">CONC. A</text>'+
+    '<text x="110" y="25" text-anchor="middle" fill="#fff" font-size="5">Gates A1\u2013A28</text>'+
+    '<rect x="155" y="15" width="60" height="32" fill="#4A9FD9" rx="2"/>'+
+    '<text x="185" y="35" text-anchor="middle" fill="#fff" font-size="6.5" font-weight="bold">CONC. B</text>'+
+    '<text x="185" y="25" text-anchor="middle" fill="#fff" font-size="5">Gates B29\u2013B54</text>'+
+    '<rect x="230" y="15" width="60" height="32" fill="#4A9FD9" rx="2"/>'+
+    '<text x="260" y="35" text-anchor="middle" fill="#fff" font-size="6.5" font-weight="bold">CONC. C</text>'+
+    '<text x="260" y="25" text-anchor="middle" fill="#fff" font-size="5">Gates C45\u2013C68</text>'+
+    '<rect x="105" y="47" width="10" height="5" fill="#4A9FD9"/>'+
+    '<rect x="180" y="47" width="10" height="5" fill="#4A9FD9"/>'+
+    '<rect x="255" y="47" width="10" height="5" fill="#4A9FD9"/>'+
+    '<rect x="60" y="90" width="70" height="25" fill="#C8BFB0" rx="2" stroke="#8A8279" stroke-width=".5"/>'+
+    '<text x="95" y="106" text-anchor="middle" fill="#4A453D" font-size="5.5" font-weight="600">PARKING</text>'+
+    '<rect x="145" y="90" width="70" height="25" fill="#C8BFB0" rx="2" stroke="#8A8279" stroke-width=".5"/>'+
+    '<text x="180" y="106" text-anchor="middle" fill="#4A453D" font-size="5.5" font-weight="600">GROUND TRANS</text>'+
+    '<rect x="230" y="90" width="50" height="25" fill="#FFFDE7" rx="2" stroke="#FFD54F" stroke-width=".5"/>'+
+    '<text x="255" y="104" text-anchor="middle" fill="#C85A24" font-size="5" font-weight="600">TSA CHECK</text>'+
+    '<text x="255" y="111" text-anchor="middle" fill="#C85A24" font-size="4.5">~12 min avg</text>'+
+    '<text x="110" y="10" text-anchor="middle" fill="#1B4B6B" font-size="4.5" font-weight="600">\u2605 AA TO DFW</text>'+
+  '</svg>';
+  document.getElementById('cmh-map').innerHTML='<div class="amap-title">CMH \u00b7 John Glenn Columbus International</div>'+cmhSvg;
+
+  var dfwSvg='<svg viewBox="0 0 340 175" xmlns="http://www.w3.org/2000/svg" style="font-family:-apple-system,Helvetica,Arial,sans-serif">'+
+    '<rect x="0" y="0" width="340" height="175" fill="#EDE9E0" rx="3"/>'+
+    '<ellipse cx="170" cy="82" rx="145" ry="55" fill="none" stroke="#FFD54F" stroke-width="2" stroke-dasharray="4 2"/>'+
+    '<text x="170" y="14" text-anchor="middle" fill="#C85A24" font-size="5" font-weight="600">SKYLINK TRAIN (CONNECTS ALL TERMINALS)</text>'+
+    '<rect x="30" y="40" width="50" height="28" fill="#4A9FD9" rx="2"/>'+
+    '<text x="55" y="54" text-anchor="middle" fill="#fff" font-size="7" font-weight="bold">TERM A</text>'+
+    '<text x="55" y="63" text-anchor="middle" fill="#fff" font-size="4.5">American</text>'+
+    '<rect x="30" y="95" width="50" height="28" fill="#4A9FD9" rx="2"/>'+
+    '<text x="55" y="109" text-anchor="middle" fill="#fff" font-size="7" font-weight="bold">TERM B</text>'+
+    '<text x="55" y="118" text-anchor="middle" fill="#fff" font-size="4.5">American</text>'+
+    '<rect x="145" y="120" width="50" height="28" fill="#4A9FD9" rx="2"/>'+
+    '<text x="170" y="134" text-anchor="middle" fill="#fff" font-size="7" font-weight="bold">TERM C</text>'+
+    '<text x="170" y="143" text-anchor="middle" fill="#fff" font-size="4.5">American</text>'+
+    '<rect x="240" y="55" width="70" height="35" fill="#1B4B6B" rx="2" stroke="#FFD54F" stroke-width="1.5"/>'+
+    '<text x="275" y="72" text-anchor="middle" fill="#fff" font-size="8" font-weight="bold">TERM D</text>'+
+    '<text x="275" y="82" text-anchor="middle" fill="#FBBF24" font-size="5" font-weight="600">INTL \u00b7 AMEX LOUNGE</text>'+
+    '<rect x="245" y="110" width="55" height="28" fill="#4A9FD9" rx="2"/>'+
+    '<text x="272" y="124" text-anchor="middle" fill="#fff" font-size="7" font-weight="bold">TERM E</text>'+
+    '<text x="272" y="133" text-anchor="middle" fill="#fff" font-size="4.5">Delta \u00b7 United</text>'+
+    '<line x1="275" y1="45" x2="275" y2="55" stroke="#C85A24" stroke-width="1"/>'+
+    '<rect x="232" y="30" width="86" height="15" fill="#FFFDE7" rx="2" stroke="#FFD54F" stroke-width=".5"/>'+
+    '<text x="275" y="40" text-anchor="middle" fill="#C85A24" font-size="5.5" font-weight="700">\u2605 CENTURION LOUNGE</text>'+
+    '<text x="275" y="26" text-anchor="middle" fill="#C85A24" font-size="4.5">Across from Gate D12</text>'+
+    '<rect x="115" y="50" width="55" height="20" fill="#C8BFB0" rx="2" stroke="#8A8279" stroke-width=".5"/>'+
+    '<text x="142" y="63" text-anchor="middle" fill="#4A453D" font-size="5" font-weight="600">GRAND HYATT</text>'+
+    '<rect x="100" y="155" width="70" height="16" fill="#C8BFB0" rx="2" stroke="#8A8279" stroke-width=".5"/>'+
+    '<text x="135" y="166" text-anchor="middle" fill="#4A453D" font-size="5" font-weight="600">RENTAL CAR CENTER</text>'+
+  '</svg>';
+  document.getElementById('dfw-map').innerHTML='<div class="amap-title">DFW \u00b7 Dallas\u2013Fort Worth International</div>'+dfwSvg;
+
+  // ── CENTURION LOUNGE ──
+  document.getElementById('lounge').innerHTML=
+    '<div class="lg-hd">'+
+      '<span class="lg-badge">Amex Platinum</span>'+
+      '<span class="lg-name">The Centurion Lounge</span>'+
+    '</div>'+
+    '<div class="lg-detail">\uD83D\uDCCD Terminal D \u00b7 Across from Gate D12 \u00b7 Mezzanine Level above D15 Security</div>'+
+    '<div class="lg-detail">\uD83D\uDD50 Open 5:30 AM \u2013 10:00 PM Daily \u00b7 13,000 sq ft</div>'+
+    '<div class="lg-detail">\uD83C\uDF7D Culinary: Chef Dean Fearing (James Beard Award) \u00b7 \uD83C\uDF78 Bar: Jim Meehan (PDT NYC)</div>'+
+    '<div class="lg-detail">\uD83D\uDC86 Exhale Spa: Complimentary 12-min massage \u00b7 \uD83D\uDEBF Shower suites \u00b7 \uD83D\uDCDE Phone rooms</div>'+
+    '<div class="lg-menu-grid">'+
+      '<div class="lg-menu-col">'+
+        '<h5>\u2600 Breakfast</h5><ul>'+
+        '<li>Vanilla French Toast, berries, brown sugar cr\u00e8me fra\u00eeche</li>'+
+        '<li>Egg Frittata, roasted tomatoes, mushrooms, asparagus, Asiago</li>'+
+        '<li>Texas Migas, chorizo, tortilla strips, sweet onions, Brazos Valley cheddar</li>'+
+        '<li>Breakfast Quesadilla, bacon, roasted poblano, jalape\u00f1o jack</li>'+
+        '<li>Greek yogurt bar, fresh fruit, granola, cereals</li>'+
+        '</ul>'+
+      '</div>'+
+      '<div class="lg-menu-col">'+
+        '<h5>\u2600 Lunch / All Day</h5><ul>'+
+        '<li>Smoked Beef Brisket Tacos</li>'+
+        '<li>Chili-Rubbed Chicken</li>'+
+        '<li>Smoked Pecan Crusted Chicken, jalape\u00f1o jack grits</li>'+
+        '<li>Southwest Enchiladas</li>'+
+        '<li>Pozole soup</li>'+
+        '<li>Seasonal salads \u00b7 Peach cobbler</li>'+
+        '</ul>'+
+        '<h5>\uD83C\uDF78 Signature Cocktail</h5><ul>'+
+        '<li><b>Tex Mex</b> \u2014 Tito\u2019s vodka, Cabeza Blanco tequila, corn, honey, lime, jalape\u00f1o</li>'+
+        '<li>Prosecco, curated wines, craft beer, espresso bar</li>'+
+        '</ul>'+
+      '</div>'+
+    '</div>';
+
+  // ── TIMELINE ──
+  var ev=[
+    ['5:00a','Wake up & final pack','Light layers for CMH morning, sunglasses in carry-on'],
+    ['5:45a','Depart for CMH','15-min drive to airport \u00b7 Economy lot or rideshare'],
+    ['6:15a','Arrive CMH \u00b7 Check in','TSA PreCheck or Clear lane \u00b7 ~12 min average wait'],
+    ['6:45a','At gate \u00b7 Coffee','Concourse grab-and-go \u00b7 Donatos, Starbucks, Brazenhead'],
+    ['8:45a','Board AA 1358','Gate assignment on AA app \u00b7 Embraer 175 \u00b7 2h 3m block'],
+    ['10:48a','Land DFW','Terminal arrival \u00b7 Take Skylink to Terminal D'],
+    ['11:05a','Centurion Lounge','Lunch buffet live \u00b7 Grab a Tex Mex cocktail & brisket taco'],
+    ['12:00p','Depart DFW','Rental car center via shuttle \u00b7 Or rideshare to downtown'],
+    ['12:30p','Dallas Arrival','Welcome to Big D \u00b7 73\u00b0F and sunny \u2600\uFE0F']
+  ];
+  var th='';
+  for(var i=0;i<ev.length;i++){
+    th+='<div class="tl-item"><div class="tl-time">'+ev[i][0]+'</div><div class="tl-dot"></div><div class="tl-body"><div class="tl-ev">'+ev[i][1]+'</div><div class="tl-desc">'+ev[i][2]+'</div></div></div>';
+  }
+  document.getElementById('timeline').innerHTML=th;
+
+  // ── CHECKLIST ──
+  var cl=[
+    ['\uD83D\uDCF1','Mobile boarding pass','AA app or Apple Wallet \u00b7 Screenshot backup'],
+    ['\uD83E\uDEAA','ID / Passport','TSA requires Real ID after May 7, 2025'],
+    ['\uD83D\uDD0C','Charger & battery pack','E175 has limited outlets \u00b7 Pack a portable'],
+    ['\uD83C\uDFA7','Noise-cancelling headphones','2h 59m in comfort \u00b7 AirPods Max / Bose QC'],
+    ['\uD83E\uDDE5','Light jacket for CMH','46\u00b0F on the ground at 6 AM \u00b7 Shed it at DFW'],
+    ['\uD83D\uDD76','Sunglasses for DFW','73\u00b0F and sunny \u00b7 April UV index ~6 in Dallas'],
+    ['\uD83D\uDCB3','Amex Platinum','Centurion Lounge access \u00b7 Priority boarding on AA'],
+    ['\uD83D\uDCBC','Work essentials','Laptop, charger, notepad \u00b7 Lounge has Wi-Fi & conference rooms']
+  ];
+  var ch='';
+  for(var i=0;i<cl.length;i++){
+    ch+='<div class="cl-item"><div class="cl-icon">'+cl[i][0]+'</div><div class="cl-txt"><strong>'+cl[i][1]+'</strong><span>'+cl[i][2]+'</span></div></div>';
+  }
+  document.getElementById('checklist').innerHTML=ch;
+
+  // ── BRIEFS ──
+  var br=[
+    ['CMH: AirConnect Bus From Downtown in 11 Minutes','COTA operates the AirConnect line from downtown Columbus directly to John Glenn International \u2014 a fast, affordable alternative to rideshare.'],
+    ['DFW Skylink Train Connects All Terminals','The automated Skylink people mover circles all five terminals at DFW in about 9 minutes. Free and runs every 2 minutes during peak hours.'],
+    ['Centurion Lounge: Access Rules for 2026','Complimentary for Amex Platinum and Centurion members. Two guests per Platinum cardholder at no extra charge. Access limited to 3 hours before departure.'],
+    ['Dallas Weather: April Is Prime Time','Early April in Dallas averages highs in the low 70s with moderate humidity \u2014 the sweet spot between winter chill and the brutal summer heat that arrives in June.'],
+    ['Southwest vs. American on This Route','American runs six daily nonstops to DFW. Southwest offers one to Love Field (closer to downtown Dallas). Choose based on your final destination and loyalty program.']
+  ];
+  var bh='';for(var i=0;i<br.length;i++){bh+='<div class="sbr"><h4>'+br[i][0]+'</h4><p>'+br[i][1]+'</p></div>';}
+  document.getElementById('briefs').innerHTML=bh;
+
+})();
+</script>
+</body>
+</html>

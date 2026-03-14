@@ -1,0 +1,1181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Intranet</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#000000">
+<style>
+:root {
+  --black: #000000;
+  --near-black: #0a0a0a;
+  --dark: #111111;
+  --dark-2: #1a1a1a;
+  --dark-3: #222222;
+  --gray-1: #333333;
+  --gray-2: #555555;
+  --gray-3: #888888;
+  --gray-4: #aaaaaa;
+  --gray-5: #cccccc;
+  --white: #ffffff;
+  --off-white: #f5f5f7;
+  --blue: #2997ff;
+  --warm: #e8a445;
+  --green: #30d158;
+  --red: #ff453a;
+  --pad: 28px;
+  --safe-b: env(safe-area-inset-bottom, 0px);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+*:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; border-radius: 8px; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  background: var(--black); color: var(--white);
+  -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden; text-rendering: optimizeLegibility;
+  padding-bottom: calc(44px + env(safe-area-inset-bottom, 0px));
+}
+
+/* ─── Section dot nav ─── */
+.dot-nav {
+  position: fixed; right: 16px; top: 50%; transform: translateY(-50%);
+  z-index: 800; display: flex; flex-direction: column; gap: 10px;
+  opacity: 0; transition: opacity 0.5s;
+}
+.dot-nav.visible { opacity: 1; }
+.dot-nav a {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--gray-1); display: block;
+  transition: background 0.3s, transform 0.3s;
+}
+.dot-nav a:hover { background: var(--gray-3); transform: scale(1.5); }
+.dot-nav a.active { background: var(--warm); transform: scale(1.4); }
+@media (max-width: 768px) { .dot-nav { display: none; } }
+
+body::after {
+  content: ''; position: fixed; inset: 0; z-index: 9998; pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: 0.025; mix-blend-mode: overlay;
+}
+
+/* ─── The thin line of progress ─── */
+.progress { position: fixed; top: 0; left: 0; height: 1px; z-index: 9999; background: var(--blue); width: 0%; transition: width 60ms linear; opacity: 0.5; }
+
+/* ─── Bottom ticker ─── */
+.ticker {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 900;
+  background: rgba(0,0,0,0.85); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
+  border-top: 0.5px solid rgba(255,255,255,0.06);
+  padding: 10px var(--pad); padding-bottom: calc(10px + var(--safe-b));
+  display: flex; align-items: center; justify-content: center; gap: 20px;
+  font-size: 0.72rem; color: var(--gray-3); letter-spacing: 0.02em;
+}
+.ticker .days { font-weight: 600; font-size: 0.82rem; color: var(--warm); }
+
+/* ─── Reveal on scroll ─── */
+.r {
+  opacity: 0; transform: translateY(30px);
+  transition: opacity 1s cubic-bezier(0.25, 1, 0.5, 1), transform 1s cubic-bezier(0.25, 1, 0.5, 1);
+}
+.r.v { opacity: 1; transform: translateY(0); }
+
+/* ─── TYPOGRAPHY ─── */
+.hero-text {
+  font-weight: 700;
+  font-size: clamp(3.6rem, 14vw, 9rem);
+  line-height: 0.95;
+  letter-spacing: -0.05em;
+  color: var(--white);
+}
+.hero-sub {
+  font-weight: 700;
+  font-size: clamp(1.8rem, 5vw, 3.5rem);
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+  color: var(--white);
+}
+.section-title {
+  font-weight: 700;
+  font-size: clamp(1.6rem, 4vw, 2.8rem);
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+}
+.kicker {
+  font-weight: 500; font-size: 0.72rem; color: var(--gray-3);
+  letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 12px;
+}
+p { font-size: 1rem; line-height: 1.72; color: var(--gray-4); font-weight: 400; }
+p.deck { font-size: clamp(1.05rem, 1.8vw, 1.25rem); line-height: 1.62; color: var(--gray-4); max-width: 540px; }
+.accent { color: var(--warm); }
+.blue { color: var(--blue); }
+.dim { color: var(--gray-2); }
+.mono { font-family: 'SF Mono', SFMono-Regular, Menlo, monospace; font-size: 0.8em; color: var(--gray-3); background: var(--dark-2); padding: 2px 8px; border-radius: 4px; }
+
+/* ─── Sections ─── */
+section {
+  min-height: 100svh; display: flex; flex-direction: column;
+  justify-content: center; padding: 80px var(--pad);
+  position: relative;
+}
+section.half { min-height: 60svh; }
+section.auto { min-height: auto; padding: 72px var(--pad); }
+section.centered { align-items: center; text-align: center; }
+section.centered p { margin-left: auto; margin-right: auto; }
+
+/* ─── Big number ─── */
+.big-num {
+  font-weight: 700;
+  font-size: clamp(5rem, 18vw, 14rem);
+  line-height: 0.85;
+  letter-spacing: -0.05em;
+  color: var(--white);
+}
+.big-label {
+  font-size: clamp(0.9rem, 1.6vw, 1.15rem);
+  color: var(--gray-3); font-weight: 400;
+  margin-top: 8px; letter-spacing: -0.01em;
+}
+
+/* ─── Stats row ─── */
+.stats-row {
+  display: flex; flex-wrap: wrap; gap: 48px; margin-top: 40px;
+  justify-content: center;
+}
+.stat-item { text-align: center; }
+.stat-item .num {
+  font-weight: 700; font-size: clamp(2.4rem, 5vw, 3.6rem);
+  letter-spacing: -0.03em; color: var(--white);
+}
+.stat-item .label { font-size: 0.78rem; color: var(--gray-3); margin-top: 4px; letter-spacing: 0.02em; font-weight: 500; }
+
+/* ─── Divider ─── */
+.div-line { width: 40px; height: 1px; background: var(--gray-1); margin: 0 auto; }
+section .div-line { margin: 0; }
+
+/* ─── Cards — dark glass ─── */
+.card-grid { display: grid; gap: 12px; margin-top: 32px; width: 100%; }
+.card-grid.g2 { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+.card-grid.g3 { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+.card-grid.g4 { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
+
+.card {
+  background: var(--dark); border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 16px; padding: 26px;
+  transition: border-color 0.3s, transform 0.35s;
+}
+.card:hover { border-color: rgba(255,255,255,0.12); transform: translateY(-2px); }
+.card .icon { font-size: 1.1rem; margin-bottom: 14px; display: block; }
+.card h4 { font-weight: 600; font-size: 0.95rem; color: var(--white); margin-bottom: 6px; letter-spacing: -0.02em; }
+.card p { font-size: 0.84rem; color: var(--gray-3); line-height: 1.5; }
+
+/* ─── App icon grid — refined ─── */
+.app-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px 4px;
+  margin-top: 36px; width: 100%;
+  max-width: 520px;
+}
+a.app {
+  text-decoration: none; color: inherit;
+}
+a.app:focus-visible .app-icon { outline: 2px solid var(--blue); outline-offset: 3px; border-radius: 15px; }
+.card:focus-visible, .sprint:focus-visible, .flow:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+.app {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 12px 4px 10px; cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  border-radius: 16px;
+  transition: background 0.3s;
+  min-height: 44px;
+}
+.app:active { background: rgba(255,255,255,0.04); }
+.app-icon {
+  width: 58px; height: 58px; border-radius: 15px;
+  display: flex; align-items: center; justify-content: center;
+  position: relative;
+  transition: transform 0.3s cubic-bezier(0.25,1,0.5,1);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1);
+}
+.app:hover .app-icon { transform: scale(1.08); }
+.app-name {
+  font-size: 0.66rem; font-weight: 500; color: var(--gray-4);
+  margin-top: 7px; text-align: center; line-height: 1.15;
+  letter-spacing: -0.01em; max-width: 76px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+/* icon color themes */
+.app-icon.comm { background: linear-gradient(145deg, #34c759 0%, #248a3d 100%); }
+.app-icon.prod { background: linear-gradient(145deg, #2997ff 0%, #0060c7 100%); }
+.app-icon.create { background: linear-gradient(145deg, #bf5af2 0%, #8944ab 100%); }
+.app-icon.life { background: linear-gradient(145deg, #ff9f0a 0%, #e06d08 100%); }
+.app-icon.ai { background: linear-gradient(145deg, #e8a445 0%, #c97a1a 100%); }
+/* category label row */
+.app-cat {
+  grid-column: 1 / -1;
+  font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--gray-4);
+  padding: 22px 0 6px 4px;
+}
+.app-cat:first-child { padding-top: 0; }
+/* AI special glow */
+.app-icon.ai::after {
+  content: ''; position: absolute; inset: -3px; border-radius: 18px;
+  background: linear-gradient(135deg, rgba(232,164,69,0.35), rgba(232,164,69,0));
+  z-index: -1; opacity: 0; transition: opacity 0.3s;
+}
+.app:hover .app-icon.ai::after { opacity: 1; }
+
+/* SVG icons inside app-icon */
+.app-icon svg { width: 28px; height: 28px; }
+
+/* ─── Sprint cards ─── */
+.sprint-grid { display: grid; gap: 12px; margin-top: 28px; width: 100%; }
+.sprint {
+  background: var(--dark); border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 16px; padding: 26px; border-top: 3px solid transparent;
+  overflow: hidden; transition: border-color 0.3s, transform 0.35s;
+}
+.sprint .stag { font-size: 0.58rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 6px; }
+.sprint:hover { border-color: rgba(255,255,255,0.12); transform: translateY(-2px); }
+.sprint h4 { font-weight: 600; font-size: 1.05rem; color: var(--white); margin-bottom: 12px; letter-spacing: -0.02em; }
+.sprint ul { list-style: none; }
+.sprint ul li {
+  font-size: 0.82rem; color: var(--gray-3); padding: 5px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+  padding-left: 14px; position: relative; line-height: 1.42;
+}
+.sprint ul li:last-child { border: none; }
+.sprint ul li::before { content: ''; width: 3px; height: 3px; border-radius: 50%; background: var(--gray-2); position: absolute; left: 0; top: 12px; }
+
+/* ─── Revenue ─── */
+.rev {
+  background: var(--dark); border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 16px; padding: 26px; border-top: 2px solid transparent;
+  transition: border-color 0.3s, transform 0.35s;
+}
+.rev:hover { border-color: rgba(255,255,255,0.12); transform: translateY(-2px); }
+.rev .rtag { font-size: 0.56rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 4px; }
+.rev h4 { font-weight: 600; font-size: 1rem; color: var(--white); margin-bottom: 6px; }
+.rev p { font-size: 0.84rem; line-height: 1.5; }
+
+/* ─── Table ─── */
+.tbl-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 24px; width: 100%; position: relative; }
+.tbl-wrap::after { content: ''; position: absolute; top: 0; right: 0; bottom: 0; width: 32px; background: linear-gradient(90deg, transparent, var(--black)); pointer-events: none; opacity: 0.6; transition: opacity 0.3s; }
+.tbl-wrap.scrolled-end::after { opacity: 0; }
+.tbl { width: 100%; min-width: 500px; border-collapse: collapse; }
+.tbl th {
+  text-align: left; font-size: 0.56rem; font-weight: 600;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--gray-2); padding: 8px 12px; border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.tbl td { padding: 10px 12px; border-bottom: 1px solid rgba(255,255,255,0.03); font-size: 0.82rem; color: var(--gray-3); vertical-align: top; line-height: 1.45; transition: background 0.2s; }
+.tbl tbody tr:hover td { background: rgba(255,255,255,0.02); }
+.tbl td strong { color: var(--white); font-weight: 600; }
+
+/* ─── Badge ─── */
+.badge { display: inline-block; padding: 2px 8px; border-radius: 100px; font-size: 0.54rem; font-weight: 700; letter-spacing: 0.04em; }
+.badge-warm { background: rgba(232,164,69,0.12); color: var(--warm); }
+.badge-blue { background: rgba(41,151,255,0.1); color: var(--blue); }
+.badge-green { background: rgba(48,209,88,0.1); color: var(--green); }
+.badge-red { background: rgba(255,69,58,0.1); color: var(--red); }
+.badge-gray { background: rgba(255,255,255,0.06); color: var(--gray-3); }
+
+/* ─── Flow steps ─── */
+.flow-grid { display: grid; gap: 12px; margin-top: 28px; width: 100%; }
+.flow {
+  background: var(--dark); border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 16px; padding: 24px; position: relative;
+  transition: border-color 0.3s, transform 0.35s;
+}
+.flow:hover { border-color: rgba(255,255,255,0.12); transform: translateY(-2px); }
+.flow .num { font-weight: 700; font-size: 2.4rem; color: rgba(255,255,255,0.04); position: absolute; top: 12px; right: 18px; letter-spacing: -0.05em; }
+.flow h4 { font-weight: 600; font-size: 0.92rem; color: var(--white); margin-bottom: 4px; }
+.flow p { font-size: 0.8rem; color: var(--gray-3); line-height: 1.48; }
+
+/* ─── Budget bar ─── */
+.budget-bar { height: 6px; border-radius: 100px; overflow: hidden; display: flex; margin-top: 24px; max-width: 600px; }
+.budget-seg { height: 100%; transition: opacity 0.25s, transform 0.25s; cursor: default; }
+.budget-bar:hover .budget-seg { opacity: 0.4; }
+.budget-bar:hover .budget-seg:hover { opacity: 1; transform: scaleY(1.6); }
+.budget-legend { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 14px; }
+.budget-legend span { display: flex; align-items: center; gap: 6px; font-size: 0.72rem; color: var(--gray-3); }
+.budget-legend i { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
+
+/* ─── Burn gauge ─── */
+.burn-track { height: 3px; border-radius: 100px; background: var(--dark-2); overflow: hidden; max-width: 600px; }
+.burn-fill { height: 100%; border-radius: 100px; background: linear-gradient(90deg, var(--green), var(--warm), var(--red)); }
+
+/* ─── Gantt ─── */
+.gantt-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); width: 100%; }
+.gantt { width: 100%; min-width: 580px; border-collapse: separate; border-spacing: 0; }
+.gantt thead th {
+  padding: 8px 0; font-size: 0.52rem; font-weight: 600;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--gray-2); text-align: center;
+  border-bottom: 1px solid rgba(255,255,255,0.04); background: var(--dark);
+}
+.gantt thead th:first-child { text-align: left; padding-left: 14px; width: 160px; min-width: 160px; }
+.gantt tbody td { padding: 2px; border-bottom: 1px solid rgba(255,255,255,0.02); height: 22px; position: relative; }
+.gantt tbody td:first-child { font-size: 0.64rem; font-weight: 500; color: var(--gray-3); padding-left: 14px; white-space: nowrap; }
+.gantt-bar { height: 10px; border-radius: 100px; position: absolute; top: 50%; transform: translateY(-50%); opacity: 0.5; transition: opacity 0.25s, height 0.25s; }
+.gantt tbody tr:hover .gantt-bar { opacity: 0.85; height: 14px; }
+.gantt tbody tr:hover td:first-child { color: var(--white); }
+.gantt tbody tr:hover td:first-child { color: var(--white); }
+
+/* ─── Callout ─── */
+.callout { background: rgba(41,151,255,0.06); border: 1px solid rgba(41,151,255,0.1); border-radius: 12px; padding: 18px 20px; margin-top: 20px; }
+.callout p { color: var(--gray-4); font-size: 0.88rem; }
+.callout strong { color: var(--blue); }
+
+/* ─── Locked ─── */
+.locked {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: rgba(48,209,88,0.08); color: var(--green); font-weight: 600;
+  font-size: 0.64rem; padding: 4px 12px; border-radius: 100px; margin-top: 14px;
+  letter-spacing: 0.02em;
+}
+.locked::before { content: '✓'; }
+
+/* ─── Manifesto ─── */
+.manifesto {
+  font-weight: 300;
+  font-size: clamp(1.2rem, 2.5vw, 1.7rem);
+  line-height: 1.6; color: var(--gray-4);
+  max-width: 560px;
+}
+.manifesto strong { color: var(--white); font-weight: 600; }
+.manifesto em { font-style: italic; color: var(--gray-5); }
+
+/* ─── Quote slide ─── */
+.quote-text {
+  font-weight: 300;
+  font-size: clamp(1.4rem, 3.5vw, 2.4rem);
+  line-height: 1.4;
+  letter-spacing: -0.02em;
+  color: var(--gray-5);
+  max-width: 620px;
+}
+.quote-text strong { color: var(--white); font-weight: 600; }
+
+/* ─── Accent shimmer ─── */
+@keyframes shimmer {
+  0%, 100% { background-position: -200% center; }
+  50% { background-position: 200% center; }
+}
+.accent-shimmer {
+  background: linear-gradient(90deg, var(--warm) 0%, #f5d89a 40%, var(--warm) 80%);
+  background-size: 200% auto;
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 6s ease-in-out infinite;
+}
+
+/* ─── Footer ─── */
+.footer {
+  padding: 48px var(--pad) calc(72px + var(--safe-b));
+  text-align: center; border-top: 1px solid rgba(255,255,255,0.04);
+}
+.footer .wordmark { font-weight: 700; font-size: 1rem; color: var(--white); letter-spacing: -0.03em; }
+.footer p { font-size: 0.68rem; color: var(--gray-2); margin-top: 4px; }
+
+/* ─── Screen capture mockups ─── */
+.screen-capture-section {
+  padding: 72px var(--pad);
+  min-height: auto;
+}
+.capture-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 32px;
+  margin-top: 32px;
+  width: 100%;
+  max-width: 1100px;
+}
+.capture-frame {
+  background: var(--dark);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  transition: transform 0.4s cubic-bezier(0.25,1,0.5,1);
+}
+.capture-frame:hover { transform: translateY(-4px); }
+.capture-titlebar {
+  display: flex; align-items: center; gap: 7px;
+  padding: 10px 14px;
+  background: rgba(255,255,255,0.03);
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.capture-dot { width: 10px; height: 10px; border-radius: 50%; }
+.capture-dot.r-dot { background: #ff5f57; }
+.capture-dot.y-dot { background: #febc2e; }
+.capture-dot.g-dot { background: #28c840; }
+.capture-titlebar-text { font-size: 0.62rem; color: var(--gray-2); margin-left: 8px; letter-spacing: 0.02em; }
+.capture-body { padding: 0; overflow: hidden; }
+.capture-label {
+  font-size: 0.68rem; font-weight: 600; color: var(--gray-3);
+  letter-spacing: 0.06em; text-transform: uppercase;
+  margin-top: 12px; text-align: center;
+}
+
+/* ─── Notion mockup ─── */
+.notion-app { background: #191919; min-height: 320px; font-family: -apple-system, sans-serif; }
+.notion-sidebar { width: 200px; background: #1e1e1e; float: left; height: 320px; padding: 14px 10px; border-right: 1px solid rgba(255,255,255,0.05); }
+.notion-sidebar-item { padding: 5px 8px; font-size: 0.7rem; color: #999; border-radius: 4px; margin-bottom: 1px; display: flex; align-items: center; gap: 6px; cursor: default; }
+.notion-sidebar-item:hover { background: rgba(255,255,255,0.04); }
+.notion-sidebar-item.active { background: rgba(255,255,255,0.06); color: #fff; }
+.notion-sidebar-item svg { width: 14px; height: 14px; opacity: 0.5; }
+.notion-content { margin-left: 200px; padding: 28px 32px; }
+.notion-content h1 { font-size: 1.6rem; font-weight: 700; color: #e8e8e8; margin-bottom: 4px; letter-spacing: -0.02em; }
+.notion-content .notion-desc { font-size: 0.8rem; color: #666; margin-bottom: 20px; }
+.notion-prop-row { display: flex; gap: 0; font-size: 0.72rem; border-bottom: 1px solid rgba(255,255,255,0.04); }
+.notion-prop-label { color: #666; padding: 7px 12px; width: 120px; flex-shrink: 0; }
+.notion-prop-val { color: #aaa; padding: 7px 12px; }
+.notion-tag { display: inline-block; padding: 1px 7px; border-radius: 3px; font-size: 0.65rem; font-weight: 500; }
+.notion-tag.green { background: rgba(48,209,88,0.15); color: #4ade80; }
+.notion-tag.blue { background: rgba(41,151,255,0.12); color: #60a5fa; }
+.notion-tag.purple { background: rgba(168,85,247,0.15); color: #c084fc; }
+.notion-body-text { font-size: 0.8rem; color: #888; line-height: 1.6; margin-top: 18px; }
+
+/* ─── Kanban mockup ─── */
+.kanban-app { background: #1a1a2e; min-height: 320px; padding: 18px; font-family: -apple-system, sans-serif; }
+.kanban-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.kanban-header h3 { font-size: 0.88rem; font-weight: 600; color: #e0e0e0; }
+.kanban-cols { display: flex; gap: 12px; }
+.kanban-col { flex: 1; min-width: 0; }
+.kanban-col-head { font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; padding: 6px 8px; border-radius: 6px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+.kanban-col-head .cnt { font-size: 0.56rem; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 10px; }
+.kanban-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 10px; margin-bottom: 8px; }
+.kanban-card h5 { font-size: 0.72rem; font-weight: 600; color: #ddd; margin-bottom: 4px; }
+.kanban-card p { font-size: 0.62rem; color: #777; line-height: 1.4; }
+.kanban-card .tag { display: inline-block; font-size: 0.52rem; padding: 1px 6px; border-radius: 3px; margin-top: 6px; font-weight: 600; }
+
+/* ─── Cooking app mockup ─── */
+.cook-app { background: #1c1917; min-height: 320px; padding: 24px; font-family: -apple-system, sans-serif; }
+.cook-header { text-align: center; margin-bottom: 20px; }
+.cook-header h2 { font-size: 1.3rem; font-weight: 700; color: #fbbf24; letter-spacing: -0.02em; }
+.cook-header p { font-size: 0.72rem; color: #78716c; margin-top: 4px; }
+.cook-meta { display: flex; justify-content: center; gap: 24px; margin: 14px 0; }
+.cook-meta-item { text-align: center; }
+.cook-meta-item .val { font-size: 0.88rem; font-weight: 700; color: #e7e5e4; }
+.cook-meta-item .lbl { font-size: 0.56rem; color: #78716c; text-transform: uppercase; letter-spacing: 0.06em; margin-top: 1px; }
+.cook-divider { height: 1px; background: rgba(255,255,255,0.06); margin: 16px 0; }
+.cook-section-title { font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #a8a29e; margin-bottom: 10px; }
+.cook-ingredients { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 20px; }
+.cook-ing { display: flex; justify-content: space-between; font-size: 0.72rem; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.03); }
+.cook-ing .name { color: #d6d3d1; }
+.cook-ing .amt { color: #78716c; font-family: 'SF Mono', monospace; font-size: 0.66rem; }
+.cook-steps { margin-top: 14px; }
+.cook-step { display: flex; gap: 10px; margin-bottom: 8px; }
+.cook-step-num { width: 20px; height: 20px; border-radius: 50%; background: rgba(251,191,36,0.15); color: #fbbf24; font-size: 0.6rem; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+.cook-step p { font-size: 0.72rem; color: #a8a29e; line-height: 1.45; }
+
+/* ─── Desktop ─── */
+@media (min-width: 768px) {
+  :root { --pad: 64px; }
+  .card-grid.g2 { grid-template-columns: repeat(2, 1fr); }
+  .card-grid.g4 { grid-template-columns: repeat(4, 1fr); }
+  .app-grid { max-width: 600px; grid-template-columns: repeat(5, 1fr); }
+  .app-icon { width: 64px; height: 64px; }
+  .sprint-grid { grid-template-columns: repeat(2, 1fr); }
+  .flow-grid { grid-template-columns: repeat(2, 1fr); }
+  .capture-grid { grid-template-columns: 1fr 1fr; }
+  .capture-grid .capture-frame:first-child { grid-column: 1 / -1; }
+  .notion-sidebar { width: 180px; }
+  .notion-content { margin-left: 180px; }
+}
+@media (min-width: 1080px) {
+  :root { --pad: 10vw; }
+  .app-grid { max-width: 720px; grid-template-columns: repeat(6, 1fr); gap: 8px 6px; }
+  .app-icon { width: 68px; height: 68px; border-radius: 16px; }
+  .sprint-grid { grid-template-columns: repeat(4, 1fr); }
+  .flow-grid { grid-template-columns: repeat(4, 1fr); }
+  .capture-grid { grid-template-columns: 1fr 1fr 1fr; }
+  .capture-grid .capture-frame:first-child { grid-column: auto; }
+}
+@media (max-width: 600px) {
+  .notion-sidebar { display: none; }
+  .notion-content { margin-left: 0; }
+  .kanban-cols { flex-direction: column; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .r { transition: none; opacity: 1; transform: none; }
+  .card, .sprint, .rev, .flow, .capture-frame { transition: none; }
+  .card:hover, .sprint:hover, .rev:hover, .flow:hover, .capture-frame:hover { transform: none; }
+  html { scroll-behavior: auto; }
+}
+</style>
+</head>
+<body>
+
+<div class="progress" id="progressBar"></div>
+<nav class="dot-nav" id="dotNav" aria-label="Section navigation">
+  <a href="#s-opening" title="Opening"></a>
+  <a href="#s-snapshot" title="Snapshot"></a>
+  <a href="#s-thesis" title="Thesis"></a>
+  <a href="#s-product" title="Product"></a>
+  <a href="#s-library" title="Library"></a>
+  <a href="#s-distribution" title="Distribution"></a>
+  <a href="#s-revenue" title="Revenue"></a>
+  <a href="#s-sprints" title="Sprints"></a>
+  <a href="#s-decisions" title="Decisions"></a>
+</nav>
+
+<div class="ticker">
+  <span>Azure credits expire</span>
+  <span class="days" id="daysLeft">131</span>
+  <span>days remaining</span>
+  <span style="color:var(--gray-2);">·</span>
+  <span>July 22, 2026</span>
+</div>
+
+<main>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- SLIDE 1: THE OPENING -->
+<!-- ═══════════════════════════════════════════════ -->
+<section class="centered" id="s-opening">
+  <div class="hero-text r" style="margin-bottom: 20px;">Intranet</div>
+  <div class="r" style="font-weight: 700; font-size: clamp(1.4rem, 3.5vw, 2.2rem); color: var(--gray-5); letter-spacing: -0.03em; line-height: 1.1;">
+    <span id="daysHero">128</span> days.
+  </div>
+  <p class="deck r" style="margin-top: 24px;">$45K in Azure credits. 32 working solutions. One deadline.</p>
+  <p class="r" style="margin-top: 14px; font-size: 1.05rem; color: var(--warm); font-weight: 600; letter-spacing: -0.01em;">
+    Read this deck. Then let's decide what ships first.
+  </p>
+</section>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- SLIDE 2: THE BIG NUMBERS -->
+<!-- ═══════════════════════════════════════════════ -->
+<section class="centered half" id="s-snapshot">
+  <div class="kicker r">The snapshot</div>
+  <div class="stats-row r">
+    <div class="stat-item"><div class="num accent" id="daysStat">128</div><div class="label">Days left</div></div>
+    <div class="stat-item"><div class="num">$45K</div><div class="label">Azure credits</div></div>
+    <div class="stat-item"><div class="num blue">32</div><div class="label">Scrolls live</div></div>
+    <div class="stat-item"><div class="num">70+</div><div class="label">Target by July</div></div>
+    <div class="stat-item"><div class="num" style="color:var(--green);">2</div><div class="label">Revenue streams</div></div>
+  </div>
+  <div class="div-line r" style="margin-top: 36px;"></div>
+  <p class="r" style="margin-top: 16px; font-size: 0.84rem; color: var(--gray-3); max-width: 400px;">Everything above is real and running today. Below is how we scale it.</p>
+</section>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- SLIDE 3: THE THESIS -->
+<!-- ═══════════════════════════════════════════════ -->
+<section id="s-thesis">
+  <div class="kicker r">The thesis</div>
+  <div class="hero-sub r" style="max-width: 640px;">Software became a <span class="accent">landlord.</span><br>We're building tools<br>you actually <span class="accent">own.</span></div>
+  <p class="deck r" style="margin-top: 24px;">
+    Every app today demands an account, a subscription, and your attention. We believe the next wave of personal software is serverless, single-file, and yours the moment you open it.
+  </p>
+</section>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- SLIDE 4: THE BRIDGE -->
+<!-- ═══════════════════════════════════════════════ -->
+<section>
+  <div class="manifesto r">
+    There's a generation that remembers when tools were <strong>simple</strong>. When you opened something, used it, and moved on with your day. No notifications. No feeds. No upsells.
+  </div>
+  <div class="manifesto r" style="margin-top: 24px;">
+    Those people now run businesses, raise families, and make purchasing decisions. <strong>They're our customer.</strong> They don't want another platform. They want something that just works.
+  </div>
+  <div class="manifesto r" style="margin-top: 24px;">
+    That instinct — the preference for simplicity inside a world of complexity — is the market we're building for.
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- SLIDE 5: TWO WORLDS -->
+<!-- ═══════════════════════════════════════════════ -->
+<section class="centered">
+  <div class="hero-sub r">They carry two worlds<br>inside them.</div>
+  <p class="deck r" style="margin-top: 20px;">One that remembers simplicity. One that builds with everything new.<br>We're building where those worlds meet.</p>
+</section>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- SLIDE 6: WHAT WE'RE BUILDING -->
+<!-- ═══════════════════════════════════════════════ -->
+<section id="s-product">
+  <div class="kicker r">The product</div>
+  <div class="section-title r">We're not building<br>another platform that<br>demands your <span class="accent">attention.</span></div>
+  <p class="deck r" style="margin-top: 20px;">
+    We're building quiet tools that work in a single file. No accounts. No subscriptions. No tracking. No feed. Just the thing you needed, ready when you open it.
+  </p>
+  <p class="r" style="margin-top: 16px; font-size: 0.92rem; color: var(--gray-3); max-width: 500px;">
+    A recipe card that feels like your kitchen. A travel planner you send like a gift. A video call that just works, the way picking up the phone used to.
+  </p>
+  <p class="r" style="margin-top: 16px; font-size: 0.88rem; color: var(--gray-2); max-width: 500px;">
+    Technology got complicated because it was built to keep you. We're building technology designed to let you go.
+  </p>
+</section>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- SLIDE 7: THE NAME -->
+<!-- ═══════════════════════════════════════════════ -->
+<section class="centered">
+  <div class="kicker r">We call them</div>
+  <div class="hero-text r"><span class="accent accent-shimmer">Scrolls.</span></div>
+  <p class="deck r" style="margin-top: 20px;">A single document that contains everything — the tool, the data, the design. One file. No server. No account. Just open it.</p>
+  <div class="locked r">Decision locked</div>
+</section>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- SLIDE 8: TAGLINE -->
+<!-- ═══════════════════════════════════════════════ -->
+<section class="centered half">
+  <div class="hero-sub r" style="color: var(--gray-5);">"There's a Scroll<br>for <span style="color:var(--white);">that.</span>"</div>
+</section>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- SLIDE 9: DAY ONE -->
+<!-- ═══════════════════════════════════════════════ -->
+<section>
+  <div class="kicker r">Where we stand</div>
+  <div class="section-title r">This is Day One.<br>Not Day Zero.</div>
+  <p class="deck r" style="margin-top: 16px;">32 working Scrolls across five categories. The creation engine is proven. The question shifts from "can we build?" to how fast we distribute and monetize before July 22.</p>
+
+  <div class="card-grid g4 r" style="max-width: 1100px;">
+    <div class="card"><span class="icon">✓</span><h4>Already built</h4><p>P2P comms. Productivity suite. Creative tools. Lifestyle. AI hub. All working.</p></div>
+    <div class="card"><span class="icon">⏱</span><h4>The clock</h4><p><span id="daysCard">128</span> days. Credits expire July 22. Ammo with an expiration date.</p></div>
+    <div class="card"><span class="icon">◈</span><h4>New channels</h4><p>Podcasters. Automated demos. AI credits. Iframe embeds. P2P gifting.</p></div>
+    <div class="card"><span class="icon">△</span><h4>The format</h4><p>Not apps. Scrolls. Serverless HTML Solutions. A new category.</p></div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- SLIDE 10: THE NUMBER -->
+<!-- ═══════════════════════════════════════════════ -->
+<section class="centered">
+  <div class="big-num r">32</div>
+  <div class="big-label r">Scrolls. Live. Today.</div>
+</section>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- PORTFOLIO -->
+<!-- ═══════════════════════════════════════════════ -->
+<section class="auto centered" id="s-library">
+  <div class="kicker r">The library</div>
+  <div class="section-title r">Every one of these<br>works <span class="accent">today.</span></div>
+
+  <div class="app-grid r">
+
+    <div class="app-cat">Communication</div>
+    <a href="/scrolls/phone.html" class="app"><div class="app-icon comm"><svg viewBox="0 0 28 28" fill="none"><path d="M6 10a2 2 0 012-2h12a2 2 0 012 2v6a2 2 0 01-2 2h-3l-3 3-3-3H8a2 2 0 01-2-2v-6z" stroke="#fff" stroke-width="1.5" fill="none"/><circle cx="10" cy="13" r="1" fill="#fff"/><circle cx="14" cy="13" r="1" fill="#fff"/><circle cx="18" cy="13" r="1" fill="#fff"/></svg></div><div class="app-name">Phone</div></a>
+    <a href="/scrolls/reel.html" class="app"><div class="app-icon comm"><svg viewBox="0 0 28 28" fill="none"><rect x="5" y="6" width="18" height="14" rx="2" stroke="#fff" stroke-width="1.5" fill="none"/><path d="M5 10l9 5 9-5" stroke="#fff" stroke-width="1.2" fill="none"/></svg></div><div class="app-name">Reel</div></a>
+    <a href="/scrolls/teams.html" class="app"><div class="app-icon comm"><svg viewBox="0 0 28 28" fill="none"><rect x="4" y="7" width="20" height="13" rx="2" stroke="#fff" stroke-width="1.5" fill="none"/><circle cx="14" cy="13.5" r="3" stroke="#fff" stroke-width="1.2" fill="none"/><path d="M4 18l4-3h12l4 3" stroke="#fff" stroke-width="1" opacity="0.5"/></svg></div><div class="app-name">Teams</div></a>
+    <a href="/scrolls/chat.html" class="app"><div class="app-icon comm"><svg viewBox="0 0 28 28" fill="none"><path d="M7 8h14a2 2 0 012 2v7a2 2 0 01-2 2H7a2 2 0 01-2-2v-7a2 2 0 012-2z" stroke="#fff" stroke-width="1.5" fill="none"/><path d="M9 12h10M9 15h6" stroke="#fff" stroke-width="1.2" stroke-linecap="round"/></svg></div><div class="app-name">Chat</div></a>
+    <a href="/scrolls/frame.html" class="app"><div class="app-icon comm"><svg viewBox="0 0 28 28" fill="none"><rect x="5" y="5" width="18" height="18" rx="2" stroke="#fff" stroke-width="1.5" fill="none"/><line x1="14" y1="5" x2="14" y2="23" stroke="#fff" stroke-width="1" opacity="0.4"/><line x1="5" y1="14" x2="23" y2="14" stroke="#fff" stroke-width="1" opacity="0.4"/></svg></div><div class="app-name">Frame</div></a>
+
+    <div class="app-cat">Productivity</div>
+    <a href="/scrolls/docs.html" class="app"><div class="app-icon prod"><svg viewBox="0 0 28 28" fill="none"><rect x="6" y="5" width="16" height="18" rx="2" stroke="#fff" stroke-width="1.5" fill="none"/><path d="M10 10h8M10 13h8M10 16h5" stroke="#fff" stroke-width="1.2" stroke-linecap="round"/></svg></div><div class="app-name">Docs</div></a>
+    <a href="/scrolls/sheets.html" class="app"><div class="app-icon prod"><svg viewBox="0 0 28 28" fill="none"><rect x="5" y="6" width="18" height="16" rx="1.5" stroke="#fff" stroke-width="1.5" fill="none"/><line x1="5" y1="10" x2="23" y2="10" stroke="#fff" stroke-width="1"/><line x1="11" y1="6" x2="11" y2="22" stroke="#fff" stroke-width="1"/><line x1="17" y1="6" x2="17" y2="22" stroke="#fff" stroke-width="1"/><line x1="5" y1="15" x2="23" y2="15" stroke="#fff" stroke-width="0.5" opacity="0.4"/></svg></div><div class="app-name">Sheets</div></a>
+    <a href="/scrolls/slides.html" class="app"><div class="app-icon prod"><svg viewBox="0 0 28 28" fill="none"><rect x="4" y="8" width="20" height="12" rx="2" stroke="#fff" stroke-width="1.5" fill="none"/><rect x="8" y="11" width="4" height="6" rx="1" fill="#fff" opacity="0.3"/><rect x="14" y="13" width="4" height="4" rx="1" fill="#fff" opacity="0.3"/></svg></div><div class="app-name">Slides</div></a>
+    <a href="/scrolls/kanban.html" class="app"><div class="app-icon prod"><svg viewBox="0 0 28 28" fill="none"><rect x="4" y="6" width="6" height="16" rx="1.5" stroke="#fff" stroke-width="1.2" fill="none"/><rect x="11" y="6" width="6" height="16" rx="1.5" stroke="#fff" stroke-width="1.2" fill="none"/><rect x="18" y="6" width="6" height="16" rx="1.5" stroke="#fff" stroke-width="1.2" fill="none"/><rect x="5.5" y="8" width="3" height="2" rx="0.5" fill="#fff" opacity="0.3"/><rect x="12.5" y="8" width="3" height="2" rx="0.5" fill="#fff" opacity="0.3"/><rect x="12.5" y="12" width="3" height="2" rx="0.5" fill="#fff" opacity="0.3"/><rect x="19.5" y="8" width="3" height="2" rx="0.5" fill="#fff" opacity="0.3"/></svg></div><div class="app-name">Kanban</div></a>
+    <a href="/scrolls/projects.html" class="app"><div class="app-icon prod"><svg viewBox="0 0 28 28" fill="none"><rect x="5" y="5" width="18" height="18" rx="2" stroke="#fff" stroke-width="1.5" fill="none"/><path d="M5 11h18" stroke="#fff" stroke-width="1"/><circle cx="8" cy="8" r="1" fill="#fff" opacity="0.5"/><circle cx="11" cy="8" r="1" fill="#fff" opacity="0.5"/><path d="M9 15h10M9 18h6" stroke="#fff" stroke-width="1" stroke-linecap="round" opacity="0.5"/></svg></div><div class="app-name">Projects</div></a>
+    <a href="/scrolls/notion.html" class="app"><div class="app-icon prod"><svg viewBox="0 0 28 28" fill="none"><rect x="6" y="5" width="16" height="18" rx="2" stroke="#fff" stroke-width="1.5" fill="none"/><path d="M10 9h8" stroke="#fff" stroke-width="2" stroke-linecap="round"/><path d="M10 13h8M10 16h5" stroke="#fff" stroke-width="1" stroke-linecap="round" opacity="0.4"/></svg></div><div class="app-name">Notion</div></a>
+    <a href="/scrolls/nifi.html" class="app"><div class="app-icon prod"><svg viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="8" stroke="#fff" stroke-width="1.5" fill="none"/><path d="M10 14h8M14 10v8" stroke="#fff" stroke-width="1.2"/><circle cx="14" cy="14" r="2" fill="#fff" opacity="0.3"/></svg></div><div class="app-name">NiFi</div></a>
+    <a href="/scrolls/jam.html" class="app"><div class="app-icon prod"><svg viewBox="0 0 28 28" fill="none"><circle cx="10" cy="12" r="4" stroke="#fff" stroke-width="1.2" fill="none"/><circle cx="18" cy="12" r="4" stroke="#fff" stroke-width="1.2" fill="none"/><path d="M7 20c0-2 2-3 3-3h8c1 0 3 1 3 3" stroke="#fff" stroke-width="1.2" fill="none"/></svg></div><div class="app-name">Jam</div></a>
+    <a href="/scrolls/draw.html" class="app"><div class="app-icon prod"><svg viewBox="0 0 28 28" fill="none"><path d="M14 6l-8 14h16L14 6z" stroke="#fff" stroke-width="1.5" fill="none" stroke-linejoin="round"/><path d="M14 11v5" stroke="#fff" stroke-width="1.2" stroke-linecap="round"/></svg></div><div class="app-name">Draw</div></a>
+    <a href="/scrolls/pdf.html" class="app"><div class="app-icon prod"><svg viewBox="0 0 28 28" fill="none"><rect x="5" y="5" width="18" height="18" rx="2" stroke="#fff" stroke-width="1.5" fill="none"/><path d="M9 9h4v4H9zM15 9h4v4h-4zM9 15h4v4H9z" fill="#fff" opacity="0.2" stroke="#fff" stroke-width="0.8"/></svg></div><div class="app-name">PDF</div></a>
+
+    <div class="app-cat">Creative</div>
+    <a href="/scrolls/canvas.html" class="app"><div class="app-icon create"><svg viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="8" stroke="#fff" stroke-width="1.5" fill="none"/><circle cx="14" cy="10" r="2" fill="#ff6b6b"/><circle cx="10" cy="15" r="2" fill="#51cf66"/><circle cx="18" cy="15" r="2" fill="#339af0"/></svg></div><div class="app-name">Canvas</div></a>
+    <a href="/scrolls/loom.html" class="app"><div class="app-icon create"><svg viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="8" stroke="#fff" stroke-width="1.5" fill="none"/><polygon points="12,10 19,14 12,18" fill="#fff"/></svg></div><div class="app-name">Loom</div></a>
+    <a href="/scrolls/pins.html" class="app"><div class="app-icon create"><svg viewBox="0 0 28 28" fill="none"><rect x="6" y="6" width="16" height="16" rx="3" stroke="#fff" stroke-width="1.5" fill="none"/><circle cx="11" cy="11" r="2" stroke="#fff" stroke-width="1" fill="none"/><path d="M6 18l5-5 3 3 4-4 4 4" stroke="#fff" stroke-width="1.2" fill="none"/></svg></div><div class="app-name">Pins</div></a>
+    <a href="/scrolls/photos.html" class="app"><div class="app-icon create"><svg viewBox="0 0 28 28" fill="none"><rect x="5" y="7" width="18" height="14" rx="2" stroke="#fff" stroke-width="1.5" fill="none"/><circle cx="14" cy="14" r="4" stroke="#fff" stroke-width="1.2" fill="none"/><circle cx="14" cy="14" r="1.5" fill="#fff" opacity="0.4"/></svg></div><div class="app-name">Photos</div></a>
+    <a href="/scrolls/news.html" class="app"><div class="app-icon create"><svg viewBox="0 0 28 28" fill="none"><rect x="5" y="6" width="18" height="16" rx="2" stroke="#fff" stroke-width="1.5" fill="none"/><path d="M5 11h18" stroke="#fff" stroke-width="1"/><path d="M9 14h10M9 17h7" stroke="#fff" stroke-width="1" stroke-linecap="round" opacity="0.4"/></svg></div><div class="app-name">News</div></a>
+    <a href="/scrolls/watch.html" class="app"><div class="app-icon create"><svg viewBox="0 0 28 28" fill="none"><rect x="5" y="7" width="18" height="14" rx="2" stroke="#fff" stroke-width="1.5" fill="none"/><polygon points="12,11 18,14 12,17" fill="#fff"/></svg></div><div class="app-name">Watch</div></a>
+    <a href="/scrolls/wiki.html" class="app"><div class="app-icon create"><svg viewBox="0 0 28 28" fill="none"><path d="M7 6h14a1 1 0 011 1v14a1 1 0 01-1 1H7a1 1 0 01-1-1V7a1 1 0 011-1z" stroke="#fff" stroke-width="1.5" fill="none"/><path d="M10 10h8M10 13h8M10 16h5" stroke="#fff" stroke-width="1" stroke-linecap="round" opacity="0.5"/><path d="M6 6l2-2h12l2 2" stroke="#fff" stroke-width="1" opacity="0.3"/></svg></div><div class="app-name">Wiki</div></a>
+
+    <div class="app-cat">Lifestyle</div>
+    <a href="/scrolls/cook.html" class="app"><div class="app-icon life"><svg viewBox="0 0 28 28" fill="none"><circle cx="14" cy="16" r="6" stroke="#fff" stroke-width="1.5" fill="none"/><path d="M14 10V7M11 11l-2-2M17 11l2-2" stroke="#fff" stroke-width="1.2" stroke-linecap="round"/><path d="M11 15h6" stroke="#fff" stroke-width="1" stroke-linecap="round" opacity="0.5"/></svg></div><div class="app-name">Cook</div></a>
+    <a href="/scrolls/home.html" class="app"><div class="app-icon life"><svg viewBox="0 0 28 28" fill="none"><path d="M6 20l4-8h8l4 8" stroke="#fff" stroke-width="1.5" fill="none" stroke-linejoin="round"/><path d="M10 12V8h8v4" stroke="#fff" stroke-width="1.2" fill="none"/><line x1="14" y1="8" x2="14" y2="5" stroke="#fff" stroke-width="1"/></svg></div><div class="app-name">Home</div></a>
+    <a href="/scrolls/travel.html" class="app"><div class="app-icon life"><svg viewBox="0 0 28 28" fill="none"><path d="M6 20l8-14 8 14H6z" stroke="#fff" stroke-width="1.5" fill="none" stroke-linejoin="round"/><path d="M14 6l2-1" stroke="#fff" stroke-width="1" stroke-linecap="round"/><circle cx="14" cy="15" r="2" stroke="#fff" stroke-width="1" fill="none"/></svg></div><div class="app-name">Travel</div></a>
+    <a href="/scrolls/finance.html" class="app"><div class="app-icon life"><svg viewBox="0 0 28 28" fill="none"><rect x="6" y="8" width="16" height="12" rx="2" stroke="#fff" stroke-width="1.5" fill="none"/><path d="M10 8V6a4 4 0 018 0v2" stroke="#fff" stroke-width="1.2" fill="none"/><circle cx="14" cy="15" r="1.5" fill="#fff"/></svg></div><div class="app-name">Finance</div></a>
+    <a href="/scrolls/poker.html" class="app"><div class="app-icon life"><svg viewBox="0 0 28 28" fill="none"><path d="M14 7l2 4h5l-4 3 1.5 5L14 16l-4.5 3L11 14l-4-3h5l2-4z" stroke="#fff" stroke-width="1.2" fill="none" stroke-linejoin="round"/></svg></div><div class="app-name">Poker</div></a>
+
+    <div class="app-cat">AI-Powered</div>
+    <a href="/scrolls/aihub.html" class="app"><div class="app-icon ai"><svg viewBox="0 0 28 28" fill="none"><rect x="7" y="7" width="14" height="14" rx="3" stroke="#fff" stroke-width="1.5" fill="none"/><circle cx="11" cy="13" r="1.2" fill="#fff"/><circle cx="17" cy="13" r="1.2" fill="#fff"/><path d="M11 17c1 1 5 1 6 0" stroke="#fff" stroke-width="1" stroke-linecap="round" fill="none"/><path d="M10 7V5M18 7V5" stroke="#fff" stroke-width="1.2" stroke-linecap="round"/></svg></div><div class="app-name">AI Hub</div></a>
+    <a href="/scrolls/revise.html" class="app"><div class="app-icon ai"><svg viewBox="0 0 28 28" fill="none"><path d="M8 8l4 4-4 4" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 20l-4-4 4-4" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><line x1="16" y1="7" x2="12" y2="21" stroke="#fff" stroke-width="1" opacity="0.4"/></svg></div><div class="app-name">Revise</div></a>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- SCREEN CAPTURES — THE REAL APPS -->
+<!-- ═══════════════════════════════════════════════ -->
+<section class="auto centered">
+  <div class="kicker r">Inside the scrolls</div>
+  <div class="section-title r">This is what they<br>actually <span class="accent">look like.</span></div>
+  <p class="deck r" style="margin-top: 12px;">Real HTML apps. Not mockups. Not wireframes. These run in a single file.</p>
+
+  <div class="capture-grid r">
+
+    <!-- Notion-style Scroll -->
+    <div class="capture-frame">
+      <div class="capture-titlebar">
+        <div class="capture-dot r-dot"></div>
+        <div class="capture-dot y-dot"></div>
+        <div class="capture-dot g-dot"></div>
+        <span class="capture-titlebar-text">Notion Scroll — openintranet.com</span>
+      </div>
+      <div class="capture-body">
+        <div class="notion-app">
+          <div class="notion-sidebar">
+            <div class="notion-sidebar-item active"><svg viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.2"/></svg> Getting Started</div>
+            <div class="notion-sidebar-item"><svg viewBox="0 0 14 14" fill="none"><path d="M2 4h10M2 7h10M2 10h10" stroke="currentColor" stroke-width="1"/></svg> Tasks</div>
+            <div class="notion-sidebar-item"><svg viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.2"/></svg> Projects</div>
+            <div class="notion-sidebar-item"><svg viewBox="0 0 14 14" fill="none"><rect x="2" y="2" width="10" height="10" rx="1" stroke="currentColor" stroke-width="1"/><path d="M2 5h10" stroke="currentColor" stroke-width="0.8"/></svg> Calendar</div>
+            <div class="notion-sidebar-item"><svg viewBox="0 0 14 14" fill="none"><path d="M7 2v10M2 7h10" stroke="currentColor" stroke-width="1.2"/></svg> New Page</div>
+          </div>
+          <div class="notion-content">
+            <h1>Project Workspace</h1>
+            <div class="notion-desc">Your single-file command center — no server required.</div>
+            <div class="notion-prop-row">
+              <div class="notion-prop-label">Status</div>
+              <div class="notion-prop-val"><span class="notion-tag green">Active</span></div>
+            </div>
+            <div class="notion-prop-row">
+              <div class="notion-prop-label">Priority</div>
+              <div class="notion-prop-val"><span class="notion-tag purple">High</span></div>
+            </div>
+            <div class="notion-prop-row">
+              <div class="notion-prop-label">Category</div>
+              <div class="notion-prop-val"><span class="notion-tag blue">Productivity</span></div>
+            </div>
+            <div class="notion-prop-row">
+              <div class="notion-prop-label">Created</div>
+              <div class="notion-prop-val">March 14, 2026</div>
+            </div>
+            <div class="notion-body-text">
+              This workspace runs entirely in your browser. Create pages, manage tasks, and organize projects — all stored in a single HTML file. No account. No cloud dependency. Just open and work.
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="capture-label">Notion Scroll — Productivity</div>
+    </div>
+
+    <!-- Kanban Scroll -->
+    <div class="capture-frame">
+      <div class="capture-titlebar">
+        <div class="capture-dot r-dot"></div>
+        <div class="capture-dot y-dot"></div>
+        <div class="capture-dot g-dot"></div>
+        <span class="capture-titlebar-text">Kanban Scroll — openintranet.com</span>
+      </div>
+      <div class="capture-body">
+        <div class="kanban-app">
+          <div class="kanban-header">
+            <h3>Sprint Board</h3>
+          </div>
+          <div class="kanban-cols">
+            <div class="kanban-col">
+              <div class="kanban-col-head" style="color:#ff6b6b;background:rgba(255,107,107,0.08);"><span>Backlog</span><span class="cnt">3</span></div>
+              <div class="kanban-card"><h5>Show Notes Generator</h5><p>Auto-generate timestamped show notes from audio.</p><div class="tag" style="background:rgba(255,107,107,0.12);color:#ff6b6b;">Podcaster</div></div>
+              <div class="kanban-card"><h5>Invoice Builder</h5><p>Professional invoices. PDF export. Zero dependencies.</p><div class="tag" style="background:rgba(41,151,255,0.12);color:#60a5fa;">Finance</div></div>
+              <div class="kanban-card"><h5>Sponsor Rate Card</h5><p>Dynamic pricing calculator for ad slots.</p><div class="tag" style="background:rgba(255,107,107,0.12);color:#ff6b6b;">Podcaster</div></div>
+            </div>
+            <div class="kanban-col">
+              <div class="kanban-col-head" style="color:#fbbf24;background:rgba(251,191,36,0.08);"><span>In Progress</span><span class="cnt">2</span></div>
+              <div class="kanban-card"><h5>Audiogram Maker</h5><p>Waveform + transcript overlay for social clips.</p><div class="tag" style="background:rgba(251,191,36,0.12);color:#fbbf24;">Active</div></div>
+              <div class="kanban-card"><h5>Social Calendar</h5><p>Plan, preview, and schedule posts in one view.</p><div class="tag" style="background:rgba(251,191,36,0.12);color:#fbbf24;">Active</div></div>
+            </div>
+            <div class="kanban-col">
+              <div class="kanban-col-head" style="color:#4ade80;background:rgba(74,222,128,0.08);"><span>Done</span><span class="cnt">2</span></div>
+              <div class="kanban-card"><h5>Video Teams</h5><p>P2P video calls. WebRTC. No server.</p><div class="tag" style="background:rgba(74,222,128,0.12);color:#4ade80;">Shipped</div></div>
+              <div class="kanban-card"><h5>Docs Editor</h5><p>Rich text. Markdown. Export. All offline.</p><div class="tag" style="background:rgba(74,222,128,0.12);color:#4ade80;">Shipped</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="capture-label">Kanban Scroll — Project Management</div>
+    </div>
+
+    <!-- Cooking Scroll -->
+    <div class="capture-frame">
+      <div class="capture-titlebar">
+        <div class="capture-dot r-dot"></div>
+        <div class="capture-dot y-dot"></div>
+        <div class="capture-dot g-dot"></div>
+        <span class="capture-titlebar-text">Cook Scroll — openintranet.com</span>
+      </div>
+      <div class="capture-body">
+        <div class="cook-app">
+          <div class="cook-header">
+            <h2>Lemon Herb Chicken</h2>
+            <p>Bright, simple, and ready in 30 minutes</p>
+          </div>
+          <div class="cook-meta">
+            <div class="cook-meta-item"><div class="val">30m</div><div class="lbl">Total</div></div>
+            <div class="cook-meta-item"><div class="val">10m</div><div class="lbl">Prep</div></div>
+            <div class="cook-meta-item"><div class="val">4</div><div class="lbl">Servings</div></div>
+            <div class="cook-meta-item"><div class="val">340</div><div class="lbl">Calories</div></div>
+          </div>
+          <div class="cook-divider"></div>
+          <div class="cook-section-title">Ingredients</div>
+          <div class="cook-ingredients">
+            <div class="cook-ing"><span class="name">Chicken thighs</span><span class="amt">4 pcs</span></div>
+            <div class="cook-ing"><span class="name">Lemon</span><span class="amt">2 whole</span></div>
+            <div class="cook-ing"><span class="name">Garlic cloves</span><span class="amt">4 pcs</span></div>
+            <div class="cook-ing"><span class="name">Fresh thyme</span><span class="amt">4 sprigs</span></div>
+            <div class="cook-ing"><span class="name">Olive oil</span><span class="amt">3 tbsp</span></div>
+            <div class="cook-ing"><span class="name">Salt & pepper</span><span class="amt">to taste</span></div>
+          </div>
+          <div class="cook-divider"></div>
+          <div class="cook-section-title">Steps</div>
+          <div class="cook-steps">
+            <div class="cook-step"><div class="cook-step-num">1</div><p>Pat chicken dry. Season generously with salt and pepper.</p></div>
+            <div class="cook-step"><div class="cook-step-num">2</div><p>Heat olive oil in a cast iron skillet over medium-high heat.</p></div>
+            <div class="cook-step"><div class="cook-step-num">3</div><p>Sear skin-side down for 6 min until golden. Flip and add garlic, lemon halves, and thyme.</p></div>
+            <div class="cook-step"><div class="cook-step-num">4</div><p>Transfer to 425°F oven for 15 min. Rest 5 min before serving.</p></div>
+          </div>
+        </div>
+      </div>
+      <div class="capture-label">Cook Scroll — Lifestyle</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- BUDGET -->
+<!-- ═══════════════════════════════════════════════ -->
+<section class="centered">
+  <div class="big-num r" style="color:var(--warm);">$45K</div>
+  <div class="big-label r">Burn with intent.</div>
+</section>
+
+<section class="auto" id="s-budget">
+  <div class="kicker r">Budget allocation</div>
+  <p class="deck r">4.2 months. Every dollar produces a shipped Scroll, a demo, a distribution touchpoint, or a revenue experiment.</p>
+  <div class="budget-bar r">
+    <div class="budget-seg" style="width:45%;background:var(--warm);border-radius:100px 0 0 100px;"></div>
+    <div class="budget-seg" style="width:20%;background:var(--blue);"></div>
+    <div class="budget-seg" style="width:15%;background:var(--green);"></div>
+    <div class="budget-seg" style="width:10%;background:#bf5af2;"></div>
+    <div class="budget-seg" style="width:10%;background:var(--red);border-radius:0 100px 100px 0;"></div>
+  </div>
+  <div class="budget-legend r">
+    <span><i style="background:var(--warm);"></i>AI API $20K</span>
+    <span><i style="background:var(--blue);"></i>Hosting $9K</span>
+    <span><i style="background:var(--green);"></i>Compute $7K</span>
+    <span><i style="background:#bf5af2;"></i>Demos $4.5K</span>
+    <span><i style="background:var(--red);"></i>R&D $4.5K</span>
+  </div>
+  <p class="r" style="margin-top: 24px; max-width: 520px;"><strong style="color:var(--white);">$8K–$11K/mo</strong> months 1–3. Taper to <strong style="color:var(--white);">$4K–$5K</strong> in the final month.</p>
+  <div style="margin-top: 28px; max-width: 600px;" class="r">
+    <div style="display:flex;justify-content:space-between;font-size:0.66rem;color:var(--gray-2);margin-bottom:6px;"><span>Mar 13</span><span>Today</span><span>Jul 22</span></div>
+    <div class="burn-track"><div class="burn-fill" id="burnFill" style="width:2%;"></div></div>
+    <div style="display:flex;justify-content:space-between;font-size:0.62rem;color:var(--gray-1);margin-top:6px;"><span id="burnRemaining">$45K remaining</span><span>$0 target</span></div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- PODCASTERS -->
+<!-- ═══════════════════════════════════════════════ -->
+<section id="s-distribution">
+  <div class="kicker r">Distribution</div>
+  <div class="section-title r">The podcaster play.</div>
+  <p class="deck r" style="margin-top: 16px;">Every podcaster is a small business that needs tools. They're also natural amplifiers. Build something useful — they'll talk about it to thousands. Marketing that feels like a favor.</p>
+  <div class="card-grid g3 r" style="max-width: 900px;">
+    <div class="card"><span class="icon">🎙</span><h4>What they need</h4><p>Audiogram makers. Show notes generators. Guest trackers. Episode planners. Newsletter builders.</p></div>
+    <div class="card"><span class="icon">📢</span><h4>Why they'll share</h4><p>Save them 2 hours/week. They mention it on-air, in newsletters, in group chats. One tool unlocks a network.</p></div>
+    <div class="card"><span class="icon">🔄</span><h4>The flywheel</h4><p>Build → gift → promote → audience discovers → some are creators too → build more. Each cycle amplifies.</p></div>
+  </div>
+  <div class="callout r" style="max-width: 600px;"><p><strong>Target:</strong> 5–8 podcaster Scrolls by April. 10 mid-tier shows in business & tech.</p></div>
+  <div class="locked r">Business & tech podcasters first</div>
+</section>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- DEMO ENGINE -->
+<!-- ═══════════════════════════════════════════════ -->
+<section class="centered" id="s-demos">
+  <div class="kicker r">Demo engine</div>
+  <div class="section-title r">Every Scroll<br>sells <span class="accent">itself.</span></div>
+  <p class="deck r" style="margin-top: 16px;">Self-playing demos baked in. Hostable, embeddable, screen-capturable. No manual recording.</p>
+  <div class="flow-grid r" style="max-width: 900px; text-align: left;">
+    <div class="flow"><span class="num">01</span><h4>Script</h4><p>15–30 sec of clicks, typing, state changes.</p></div>
+    <div class="flow"><span class="num">02</span><h4>Embed</h4><p>JS animation baked in. Zero dependencies.</p></div>
+    <div class="flow"><span class="num">03</span><h4>Host</h4><p>Azure Static Web Apps. Iframe anywhere.</p></div>
+    <div class="flow"><span class="num">04</span><h4>Capture</h4><p>Playwright batch → 30+ social clips in one run.</p></div>
+  </div>
+  <div class="locked r">First 10: Teams, Canvas, Kanban, PM, Cooking, Travel, Slides, Docs, Loom, PDF</div>
+</section>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- REVENUE -->
+<!-- ═══════════════════════════════════════════════ -->
+<section id="s-revenue">
+  <div class="kicker r">Revenue</div>
+  <div class="section-title r">Potential revenue <span class="accent">streams.</span></div>
+  <p class="deck r" style="margin-top: 12px;">Two clear paths to recurring revenue. $500/mo by June validates the model.</p>
+  <div class="card-grid g2 r" style="max-width: 700px;">
+    <div class="rev" style="border-top-color:var(--warm);"><div class="rtag" style="color:var(--warm);">Stream 01</div><h4>AI Credit Sales</h4><p>Users buy credits to power AI features inside Scrolls. We proxy Azure OpenAI and sell the credits directly.</p><p style="margin-top: 8px;"><strong style="color:var(--white);">$5/50 · $20/250 · $50/750.</strong> 5 free to start.</p><div class="locked">Launches Sprint 2</div></div>
+    <div class="rev" style="border-top-color:var(--blue);"><div class="rtag" style="color:var(--blue);">Stream 02</div><h4>Custom Development</h4><p>Bespoke Scrolls built to spec. Detailed PM scoping + engineering. Partners or integrators can deliver these at scale.</p><p style="margin-top: 8px;"><strong style="color:var(--white);">$200–$2,000+</strong> per engagement.</p></div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- SPRINTS -->
+<!-- ═══════════════════════════════════════════════ -->
+<section class="auto" id="s-sprints">
+  <div class="kicker r">Sprint plan</div>
+  <div class="section-title r">The countdown.</div>
+  <div class="sprint-grid r" style="max-width: 1100px;">
+    <div class="sprint" style="border-top-color:var(--red);"><div class="stag" style="color:var(--red);">S1 · Days 0–14</div><h4>Lock & Load</h4><ul><li>Polish top 10 Scrolls</li><li>Build demo mode into all 10</li><li>Deploy catalog skeleton</li><li>10 demo videos</li><li>AI credit purchase flow</li><li>First 3 social posts</li></ul></div>
+    <div class="sprint" style="border-top-color:var(--warm);"><div class="stag" style="color:var(--warm);">S2 · Days 15–42</div><h4>Podcaster Blitz</h4><ul><li>5–8 podcaster Scrolls</li><li>Cold-outreach 10 podcasters</li><li>Full catalog with demos</li><li>Polish remaining 20+</li><li>30+ demo videos</li><li>AI credits live</li><li>Target: 40+ cataloged</li></ul></div>
+    <div class="sprint" style="border-top-color:var(--green);"><div class="stag" style="color:var(--green);">S3 · Days 43–84</div><h4>Amplification</h4><ul><li>15+ new Scrolls</li><li>Show HN + Product Hunt</li><li>YouTube series</li><li>3 custom dev clients</li><li>DocuSign + hash</li><li>Target: 55+, $1K rev</li></ul></div>
+    <div class="sprint" style="border-top-color:var(--blue);"><div class="stag" style="color:var(--blue);">S4 · Days 85–128</div><h4>Final Burn</h4><ul><li>Burn remaining credits</li><li>Pre-generate library</li><li>Lock pricing</li><li>Community Forge V3</li><li>Doccoin protocol</li><li>Target: 70+, sustainable</li></ul></div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- GANTT -->
+<!-- ═══════════════════════════════════════════════ -->
+<section class="auto" id="s-timeline">
+  <div class="kicker r">Timeline</div>
+  <div class="section-title r" style="font-size: clamp(1.2rem, 2.5vw, 1.8rem);"><span id="daysGantt">128</span>-day Gantt.</div>
+  <div class="gantt-wrap r" style="max-width: 1100px;">
+    <table class="gantt"><thead><tr><th>Workstream</th><th>Mar</th><th>Apr</th><th>May</th><th>Jun</th><th>Jul</th></tr></thead><tbody id="gantt-body"></tbody></table>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- ROADMAP -->
+<!-- ═══════════════════════════════════════════════ -->
+<section class="auto" id="s-roadmap">
+  <div class="kicker r">Next wave</div>
+  <div class="section-title r">What to build <span class="accent">next.</span></div>
+  <div class="tbl-wrap r" style="max-width: 1000px;">
+    <table class="tbl">
+      <thead><tr><th>Scroll</th><th>Category</th><th>Revenue</th><th>Sprint</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Audiogram Maker</strong></td><td>Podcaster</td><td><span class="badge badge-warm">High</span></td><td><span class="badge badge-red">S2</span></td></tr>
+        <tr><td><strong>Show Notes Gen</strong></td><td>Podcaster / AI</td><td><span class="badge badge-warm">High</span></td><td><span class="badge badge-red">S2</span></td></tr>
+        <tr><td><strong>Invoice Generator</strong></td><td>Professional</td><td><span class="badge badge-blue">Med</span></td><td><span class="badge badge-warm">S2</span></td></tr>
+        <tr><td><strong>Social Calendar</strong></td><td>Creator</td><td><span class="badge badge-blue">Med</span></td><td><span class="badge badge-warm">S2</span></td></tr>
+        <tr><td><strong>DocuSign + Hash</strong></td><td>Professional</td><td><span class="badge badge-warm">High</span></td><td><span class="badge badge-green">S3</span></td></tr>
+        <tr><td><strong>Sponsor Rate Card</strong></td><td>Podcaster</td><td><span class="badge badge-blue">Med</span></td><td><span class="badge badge-green">S3</span></td></tr>
+        <tr><td><strong>CRM / Leads</strong></td><td>Professional</td><td><span class="badge badge-blue">Med</span></td><td><span class="badge badge-green">S3</span></td></tr>
+        <tr><td><strong>Meeting Notes AI</strong></td><td>Productivity</td><td><span class="badge badge-warm">High</span></td><td><span class="badge badge-green">S3</span></td></tr>
+        <tr><td><strong>Newsletter Builder</strong></td><td>Creator</td><td><span class="badge badge-blue">Med</span></td><td><span class="badge badge-gray">S3</span></td></tr>
+        <tr><td><strong>Budget Tracker</strong></td><td>Finance</td><td><span class="badge badge-gray">Low</span></td><td><span class="badge badge-blue">S4</span></td></tr>
+        <tr><td><strong>Contract Builder</strong></td><td>Professional</td><td><span class="badge badge-warm">High</span></td><td><span class="badge badge-blue">S4</span></td></tr>
+        <tr><td><strong>Course Builder</strong></td><td>Education</td><td><span class="badge badge-warm">High</span></td><td><span class="badge badge-blue">S4</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- TACTICS -->
+<!-- ═══════════════════════════════════════════════ -->
+<section class="auto" id="s-growth">
+  <div class="kicker r">Growth</div>
+  <div class="section-title r">Seven moves.<br><span class="dim">Zero ad spend.</span></div>
+  <div class="tbl-wrap r" style="max-width: 900px;">
+    <table class="tbl">
+      <thead><tr><th>Tactic</th><th>How</th><th>Cost</th><th>When</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Podcaster Gift</strong></td><td>Build a custom Scroll for a show. Send it.</td><td>~$2</td><td>S2</td></tr>
+        <tr><td><strong>Self-Playing Demos</strong></td><td><span class="mono">?demo=true</span>. Embed anywhere.</td><td>$0</td><td>S1</td></tr>
+        <tr><td><strong>30-Video Blitz</strong></td><td>Playwright batch → 2–3/day on social.</td><td>~$10</td><td>S2</td></tr>
+        <tr><td><strong>Kindness Loop</strong></td><td>Travel, Reel, Finance — every send is marketing.</td><td>$0</td><td>Always</td></tr>
+        <tr><td><strong>Credit Hook</strong></td><td>5 free AI credits → experience → buy.</td><td>Offset</td><td>S2</td></tr>
+        <tr><td><strong>Iframe Seeding</strong></td><td>One-line embed for bloggers.</td><td>$0</td><td>S3</td></tr>
+        <tr><td><strong>"There's a Scroll for That"</strong></td><td>Reply to SaaS complaints with a free Scroll.</td><td>$0</td><td>Always</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="locked r">Social: Twitter/X + TikTok first</div>
+</section>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- INTAKE -->
+<!-- ═══════════════════════════════════════════════ -->
+<section class="centered">
+  <div class="kicker r">Creation engine</div>
+  <div class="section-title r">Problem to Scroll.<br><span class="accent">Minutes.</span></div>
+  <div class="flow-grid r" style="max-width: 900px; text-align: left;">
+    <div class="flow"><span class="num">01</span><h4>Capture</h4><p>Problem from social, podcasters, community.</p></div>
+    <div class="flow"><span class="num">02</span><h4>Generate</h4><p>Forge V2 → AI Scroll. Design tokens, responsive, offline. 10 min.</p></div>
+    <div class="flow"><span class="num">03</span><h4>Polish</h4><p>20% human: UX, edge cases, copy. Where taste lives.</p></div>
+    <div class="flow"><span class="num">04</span><h4>Ship</h4><p>Catalog → demo → social → iframe. Done.</p></div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- DECISIONS -->
+<!-- ═══════════════════════════════════════════════ -->
+<section class="auto" id="s-decisions">
+  <div class="kicker r">Decisions</div>
+  <div class="section-title r">Eight questions.<br><span class="blue">All answered.</span></div>
+  <div class="tbl-wrap r" style="max-width: 800px;">
+    <table class="tbl">
+      <thead><tr><th>Decision</th><th>Resolution</th><th></th></tr></thead>
+      <tbody>
+        <tr><td><strong>Name</strong></td><td>Scrolls. "There's a Scroll for that."</td><td><span class="badge badge-green">Locked</span></td></tr>
+        <tr><td><strong>Podcasters</strong></td><td>Business & tech. 10 mid-tier, 5K–50K.</td><td><span class="badge badge-green">Locked</span></td></tr>
+        <tr><td><strong>AI Pricing</strong></td><td>$5/50, $20/250, $50/750. 5 free.</td><td><span class="badge badge-green">Locked</span></td></tr>
+        <tr><td><strong>Demos</strong></td><td>Top 10 most visual Scrolls first.</td><td><span class="badge badge-green">Locked</span></td></tr>
+        <tr><td><strong>Domain</strong></td><td>openintranet.com. Eval consumer domain S2.</td><td><span class="badge badge-green">Locked</span></td></tr>
+        <tr><td><strong>Revenue</strong></td><td>Sprint 2. Aggressive. Validates the model.</td><td><span class="badge badge-green">Locked</span></td></tr>
+        <tr><td><strong>Social</strong></td><td>Twitter/X + TikTok first.</td><td><span class="badge badge-green">Locked</span></td></tr>
+        <tr><td><strong>DocuSign</strong></td><td>Signature + hash S3. Blockchain S4.</td><td><span class="badge badge-green">Locked</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- AND ONE MORE THING -->
+<!-- ═══════════════════════════════════════════════ -->
+<section class="centered">
+  <p class="r" style="color: var(--gray-2); font-size: 0.88rem; font-weight: 400;">And one more thing.</p>
+</section>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- CLOSING -->
+<!-- ═══════════════════════════════════════════════ -->
+<section class="centered">
+  <div class="quote-text r" style="text-align: center; margin: 0 auto;">
+    You carry two worlds inside you.<br>
+    One that remembers simplicity.<br>
+    One that builds with everything new.
+  </div>
+  <div class="hero-sub r" style="margin-top: 32px;"><span class="accent">We're building where<br>those worlds meet.</span></div>
+</section>
+
+<section class="centered half">
+  <div class="hero-text r" style="font-size: clamp(1.6rem, 3.5vw, 2.4rem); color: var(--gray-5); font-weight: 400; letter-spacing: -0.02em;">The clock started today.</div>
+</section>
+</main>
+
+<footer class="footer">
+  <div class="wordmark">Intranet</div>
+  <p>March 14, 2026</p>
+  <p style="margin-top: 2px;">Scrolls — Serverless HTML Solutions</p>
+</footer>
+
+<script>
+function updateCountdown() {
+  const diff = Math.ceil((new Date('2026-07-22') - new Date()) / 864e5);
+  const d = Math.max(0, diff);
+  document.getElementById('daysLeft').textContent = d;
+  document.getElementById('daysHero').textContent = d;
+  const ds = document.getElementById('daysStat'); if (ds) ds.textContent = d;
+  const dc = document.getElementById('daysCard'); if (dc) dc.textContent = d;
+  const dg = document.getElementById('daysGantt'); if (dg) dg.textContent = d;
+}
+updateCountdown(); setInterval(updateCountdown, 60000);
+
+// Dynamic burn gauge
+(function() {
+  const start = new Date('2026-03-13'), end = new Date('2026-07-22'), now = new Date();
+  const total = end - start, elapsed = Math.max(0, Math.min(now - start, total));
+  const pct = Math.round((elapsed / total) * 100);
+  const bf = document.getElementById('burnFill'); if (bf) bf.style.width = pct + '%';
+  const rem = Math.round(45 * (1 - elapsed / total));
+  const br = document.getElementById('burnRemaining'); if (br) br.textContent = '$' + Math.max(0, rem) + 'K remaining';
+})();
+
+const pb = document.getElementById('progressBar');
+window.addEventListener('scroll', () => {
+  const h = document.documentElement.scrollHeight - window.innerHeight;
+  pb.style.width = (h > 0 ? (window.scrollY / h) * 100 : 0) + '%';
+}, { passive: true });
+
+const obs = new IntersectionObserver(e => e.forEach(x => {
+  if (x.isIntersecting) {
+    const section = x.target.closest('section');
+    if (section && !section.dataset.revealed) {
+      section.dataset.revealed = '1';
+      const siblings = section.querySelectorAll('.r');
+      siblings.forEach((s, i) => { s.style.transitionDelay = (i * 120) + 'ms'; });
+      requestAnimationFrame(() => siblings.forEach(s => s.classList.add('v')));
+    } else {
+      x.target.classList.add('v');
+    }
+    const children = x.target.querySelectorAll('.card, .sprint, .rev, .flow, .stat-item, .app');
+    children.forEach((c, i) => { c.style.transitionDelay = (i * 60) + 'ms'; c.style.opacity = '0'; c.style.transform = 'translateY(12px)'; c.style.transition = 'opacity 0.6s ease, transform 0.6s ease'; requestAnimationFrame(() => { c.style.opacity = '1'; c.style.transform = 'translateY(0)'; }); });
+  }
+}), { threshold: 0.08, rootMargin: '0px 0px -20px 0px' });
+document.querySelectorAll('.r').forEach(el => obs.observe(el));
+
+document.querySelectorAll('.tbl-wrap').forEach(w => {
+  const check = () => { w.classList.toggle('scrolled-end', w.scrollLeft + w.clientWidth >= w.scrollWidth - 4); };
+  w.addEventListener('scroll', check, { passive: true });
+  check();
+});
+
+const dotNav = document.getElementById('dotNav');
+const dotLinks = dotNav.querySelectorAll('a');
+const dotTargets = Array.from(dotLinks).map(a => document.querySelector(a.getAttribute('href'))).filter(Boolean);
+const dotObs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      const id = e.target.id;
+      dotLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + id));
+    }
+  });
+}, { threshold: 0.3 });
+dotTargets.forEach(t => dotObs.observe(t));
+window.addEventListener('scroll', () => {
+  dotNav.classList.toggle('visible', window.scrollY > window.innerHeight * 0.5);
+}, { passive: true });
+
+const gd = [
+  { n: 'Scroll Polish', s: 0, e: 1, c: '#ff453a' },
+  { n: 'Demo Mode', s: 0, e: 1, c: '#ff453a' },
+  { n: 'Catalog Site', s: .5, e: 2, c: '#e8a445' },
+  { n: 'AI Credits', s: .5, e: 1.5, c: '#ffcc00' },
+  { n: 'Podcaster Scrolls', s: 1, e: 2.5, c: '#e8a445' },
+  { n: 'Podcaster Outreach', s: 1.5, e: 3, c: '#e8a445' },
+  { n: 'Demo Pipeline', s: .5, e: 4, c: '#bf5af2' },
+  { n: 'Social Content', s: 1, e: 5, c: '#bf5af2' },
+  { n: 'New Scrolls', s: 2, e: 3.5, c: '#30d158' },
+  { n: 'Show HN + PH', s: 2.5, e: 3, c: '#2997ff' },
+  { n: 'Custom Dev', s: 2, e: 3.5, c: '#ffcc00' },
+  { n: 'Custom Scrolls', s: 2.5, e: 5, c: '#ffcc00' },
+  { n: 'Adjacent Scrolls', s: 3, e: 5, c: '#30d158' },
+  { n: 'DocuSign', s: 3, e: 4.5, c: '#bf5af2' },
+  { n: 'Forge V3', s: 3.5, e: 5, c: '#2997ff' },
+  { n: 'Final Burn', s: 4, e: 5, c: '#ff453a' },
+  { n: 'Doccoin', s: 4, e: 5, c: '#555' },
+];
+const gb = document.getElementById('gantt-body');
+gd.forEach(i => {
+  const tr = document.createElement('tr');
+  const td0 = document.createElement('td');
+  td0.textContent = i.n; tr.appendChild(td0);
+  for (let m = 0; m < 5; m++) {
+    const td = document.createElement('td');
+    td.style.position = 'relative';
+    const ms = Math.floor(i.s), me = Math.ceil(i.e);
+    if (m >= ms && m < me) {
+      const b = document.createElement('div');
+      b.className = 'gantt-bar'; b.style.background = i.c;
+      if (m === ms && m === me-1) { b.style.left='3px';b.style.right='3px';b.style.borderRadius='100px'; }
+      else if (m === ms) { b.style.left='3px';b.style.right='0';b.style.borderRadius='100px 0 0 100px'; }
+      else if (m === me-1) { b.style.left='0';b.style.right='3px';b.style.borderRadius='0 100px 100px 0'; }
+      else { b.style.left='0';b.style.right='0'; }
+      td.appendChild(b);
+    }
+    tr.appendChild(td);
+  }
+  gb.appendChild(tr);
+});
+</script>
+</body>
+</html>

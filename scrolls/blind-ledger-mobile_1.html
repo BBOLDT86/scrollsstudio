@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="format-detection" content="telephone=no">
+<title>The Blind Ledger — Reunion Edition</title>
+<meta property="og:title" content="The Blind Ledger — Reunion Edition">
+<meta property="og:description" content="Only One Marriage Survives as Ohio's Blind Experiment Reaches Its Finale">
+<meta property="og:type" content="article">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html{font-size:16px;-webkit-text-size-adjust:100%}
+body{
+  background:#FBF7F0;color:#1A1714;
+  font-family:Georgia,'Times New Roman',serif;
+  -webkit-font-smoothing:antialiased;
+  -webkit-tap-highlight-color:transparent;
+  overflow-x:hidden;
+}
+:root{
+  --p:#FBF7F0;--pd:#F3EDE2;--ink:#1A1714;--il:#4A453D;--im:#7A746B;
+  --r:#C8BFB0;--rh:#8A8279;--a:#8B1A4A;--pos:#1B6B3A;--neg:#9B1B1B;
+  --hl:#F5E0EC;
+}
+
+/* ── ticker ── */
+.tk{background:var(--ink);color:var(--pd);padding:.4rem 0;overflow:hidden;font-family:'Courier New',Courier,monospace;font-size:.65rem;letter-spacing:.02em}
+.tk-t{display:flex;gap:1.8rem;animation:tkS 28s linear infinite;white-space:nowrap;width:max-content}
+@keyframes tkS{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.tk-i{display:inline-flex;align-items:center;gap:.25rem}
+.tk-i .u{color:#F9A8D4}.tk-i .d{color:#94A3B8}.tk-i .g{color:#FBBF24}
+
+/* ── masthead ── */
+.mh{text-align:center;padding:.9rem .8rem .5rem;border-bottom:3px double var(--rh)}
+.mh-top{display:flex;justify-content:space-between;font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.52rem;letter-spacing:.12em;text-transform:uppercase;color:var(--im);margin-bottom:.3rem}
+.mh-t{font-size:2rem;font-weight:bold;letter-spacing:.03em;line-height:1;text-transform:uppercase}
+.mh-s{font-style:italic;font-size:.75rem;color:var(--im);margin-top:.15rem}
+.mh-r{display:flex;align-items:center;gap:.5rem;margin-top:.4rem;font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.52rem;letter-spacing:.12em;text-transform:uppercase;color:var(--im)}
+.mh-r::before,.mh-r::after{content:'';flex:1;height:1px;background:var(--r)}
+
+/* ── stats grid ── */
+.ms{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid var(--r);background:var(--pd);padding:.35rem 0}
+.mi{text-align:center;padding:.2rem .25rem;border-right:1px solid var(--r);font-family:-apple-system,Helvetica,Arial,sans-serif}
+.mi:nth-child(4n){border-right:none}
+.mi:nth-child(n+5){border-top:1px solid var(--r)}
+.mi .lb{font-size:.48rem;text-transform:uppercase;letter-spacing:.08em;color:var(--im);line-height:1.15}
+.mi .vl{font-family:'Courier New',Courier,monospace;font-size:.8rem;font-weight:bold;color:var(--ink)}
+.mi .ch{font-size:.48rem;color:var(--im)}
+.mi .ch.up{color:var(--pos)}.mi .ch.dn{color:var(--neg)}
+
+/* ── content ── */
+.ca{padding:.9rem .85rem 1rem}
+.kk{font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.58rem;font-weight:bold;letter-spacing:.16em;text-transform:uppercase;color:var(--a);margin-bottom:.25rem}
+.lh{font-size:1.55rem;font-weight:bold;line-height:1.12;margin-bottom:.4rem;letter-spacing:-.01em}
+.ls{font-size:.9rem;line-height:1.38;color:var(--il);margin-bottom:.5rem}
+.by{font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.62rem;color:var(--im);letter-spacing:.04em;margin-bottom:.7rem;text-transform:uppercase}
+.dl{font-family:-apple-system,Helvetica,Arial,sans-serif;font-weight:bold;font-size:.68rem}
+.sb p{font-size:.92rem;line-height:1.65;margin-bottom:.7rem}
+.sb p:first-of-type::first-letter{float:left;font-size:3.2rem;line-height:.78;font-weight:bold;padding-right:.08em;padding-top:.05em;color:var(--a)}
+.pq{border-left:3px solid var(--a);padding:.75rem .9rem;margin:.9rem 0;background:var(--hl);border-radius:0 3px 3px 0}
+.pq-t{font-style:italic;font-size:1rem;line-height:1.4}
+.pq-a{font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.6rem;color:var(--im);margin-top:.35rem;letter-spacing:.06em;text-transform:uppercase}
+.div-h{border:none;border-top:2px solid var(--ink);margin:1.1rem 0}
+.div-l{border:none;border-top:1px solid var(--r);margin:.9rem 0}
+.sst{font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.56rem;letter-spacing:.2em;text-transform:uppercase;color:var(--a);font-weight:bold;padding-bottom:.35rem;border-bottom:2px solid var(--a);margin-bottom:.7rem}
+.sbr{padding-bottom:.6rem;margin-bottom:.6rem;border-bottom:1px solid var(--r)}
+.sbr:last-child{border-bottom:none;margin-bottom:0}
+.sbr h4{font-size:.85rem;font-weight:bold;line-height:1.22;margin-bottom:.1rem}
+.sbr p{font-size:.75rem;line-height:1.42;color:var(--il)}
+.sp-c{margin:.7rem 0;padding:.5rem;background:var(--pd);border:1px solid var(--r);border-radius:2px}
+.sp-l{font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.5rem;letter-spacing:.12em;text-transform:uppercase;color:var(--im);margin-bottom:.25rem}
+#sp-cv{width:100%;height:40px;display:block}
+.cs{display:grid;grid-template-columns:repeat(2,1fr);border-top:1px solid var(--r);border-bottom:1px solid var(--r);margin-bottom:1rem}
+.cc{text-align:center;padding:.35rem .25rem;border-right:1px solid var(--r);border-bottom:1px solid var(--r);font-family:-apple-system,Helvetica,Arial,sans-serif}
+.cc:nth-child(2n){border-right:none}
+.cc:nth-last-child(-n+2){border-bottom:none}
+.cc:last-child:nth-child(odd){grid-column:span 2;border-right:none}
+.cc .cn{font-size:.5rem;text-transform:uppercase;letter-spacing:.07em;color:var(--im)}
+.cc .cv{font-size:.7rem;font-weight:600;margin-top:.02rem}
+.cc .cv.up{color:var(--pos)}.cc .cv.dn{color:var(--neg)}
+.cs2{padding-bottom:.9rem;margin-bottom:.9rem;border-bottom:1px solid var(--r)}
+.cs2:last-child{border-bottom:none;margin-bottom:0;padding-bottom:1rem}
+.cs2 h3{font-size:1.15rem;font-weight:bold;line-height:1.16;margin-bottom:.2rem}
+.cs2 .su{font-size:.8rem;line-height:1.32;color:var(--il);margin-bottom:.35rem;font-style:italic}
+.cs2 .sb p{font-size:.88rem;line-height:1.58}
+.cs2 .sb p:first-of-type::first-letter{font-size:2.4rem;padding-top:.03em}
+.bsec{padding-bottom:.9rem;margin-bottom:.9rem;border-bottom:1px solid var(--r)}
+.bsec:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
+.mt{width:100%;border-collapse:collapse}
+.mt caption{font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.6rem;letter-spacing:.07em;text-transform:uppercase;color:var(--im);text-align:left;padding:.35rem 0 .2rem;font-weight:600}
+.mt td{padding:.3rem 0;font-size:.78rem;border-bottom:1px solid var(--pd)}
+.mt .ts{font-size:1.05rem;width:1.4rem}
+.mt .nc{color:var(--il);font-size:.75rem}
+.mt .pc{text-align:right;font-size:.7rem;font-weight:500;font-family:-apple-system,Helvetica,Arial,sans-serif}
+.et{width:100%;border-collapse:collapse}
+.et th{font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.48rem;letter-spacing:.08em;text-transform:uppercase;color:var(--im);text-align:left;padding:0 0 .3rem;border-bottom:1px solid var(--r);font-weight:600}
+.et th:not(:first-child){text-align:right}
+.et td{padding:.35rem 0;font-size:.74rem;border-bottom:1px solid var(--pd)}
+.et td:not(:first-child){text-align:right;font-family:'Courier New',Courier,monospace;font-size:.62rem}
+.et .en{font-weight:bold;font-size:.7rem}
+.et .etm{font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.58rem;color:var(--im)}
+.stb{display:inline-block;font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.48rem;letter-spacing:.06em;text-transform:uppercase;padding:.1rem .35rem;border-radius:2px}
+.stb.married{background:#E8F5E9;color:var(--pos)}
+.stb.split{background:#FDE8E8;color:var(--neg)}
+.stb.dating{background:var(--hl);color:var(--a)}
+.op h3{font-size:1.2rem;font-weight:bold;line-height:1.16;margin-bottom:.25rem}
+.op .bt{font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.6rem;color:var(--im);font-style:italic;margin-bottom:.6rem}
+.op .sb p{font-size:.88rem;line-height:1.58}
+.op .sb p:first-of-type::first-letter{font-size:2.6rem}
+.qd{text-align:center;padding:.9rem 1rem;background:var(--pd);border:1px solid var(--r);margin-bottom:.7rem;border-radius:2px}
+.qd-t{font-style:italic;font-size:.95rem;line-height:1.4}
+.qd-a{font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.58rem;color:var(--im);margin-top:.35rem;letter-spacing:.08em;text-transform:uppercase}
+.ft{text-align:center;padding:.7rem .8rem 1rem;border-top:3px double var(--rh);font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:.5rem;color:var(--im);letter-spacing:.08em;text-transform:uppercase;line-height:1.6}
+@supports(padding:env(safe-area-inset-top)){
+  .tk{padding-top:calc(.4rem + env(safe-area-inset-top))}
+  .ft{padding-bottom:calc(1rem + env(safe-area-inset-bottom))}
+}
+</style>
+</head>
+<body>
+
+<!-- Ticker -->
+<div class="tk"><div class="tk-t" id="tk"></div></div>
+
+<!-- Masthead -->
+<div class="mh">
+  <div class="mh-top"><span>Season X · No. 10</span><span>REUNION EDITION</span><span>Columbus, OH</span></div>
+  <div class="mh-t">The Blind Ledger</div>
+  <div class="mh-s">All the Love That's Fit to Print</div>
+  <div class="mh-r">Thursday, March 12, 2026</div>
+</div>
+
+<!-- Stats -->
+<div class="ms" id="ms"></div>
+
+<!-- Content -->
+<div class="ca">
+  <div class="kk">REUNION SPECIAL</div>
+  <h1 class="lh">Only One Marriage Survives as Ohio&#8217;s Blind Experiment Reaches Its Finale</h1>
+  <div class="ls">Vic and Christine stand alone as Season 10&#8217;s sole lasting couple; Amber storms off set after Jordan reveals four-month marriage ended in divorce</div>
+  <div class="by">By the Blind Ledger Staff</div>
+  <div class="sb" id="lead-body"></div>
+  <div class="pq">
+    <div class="pq-t">&#8220;We&#8217;re realistic with one another, and we have our faith. We both describe ourselves as boring, because the simplest things can bring us joy amid all the chaos.&#8221;</div>
+    <div class="pq-a">&#8212; Vic St. John, on his marriage to Christine</div>
+  </div>
+  <hr class="div-h">
+  <div class="sst">Pod Briefing</div>
+  <div id="briefs"></div>
+  <div class="sp-c">
+    <div class="sp-l">Drama Index &#8212; By Episode Week</div>
+    <canvas id="sp-cv"></canvas>
+  </div>
+  <hr class="div-l">
+  <div class="cs" id="cs"></div>
+  <div id="stories"></div>
+  <hr class="div-h">
+  <div class="bsec" id="movers"></div>
+  <div class="bsec" id="timeline"></div>
+  <div class="bsec op" id="opinion"></div>
+  <div class="qd">
+    <div class="qd-t">&#8220;I know I deserve something so much more extraordinary.&#8221;</div>
+    <div class="qd-a">&#8212; Ashley Carpenter, at the altar</div>
+  </div>
+</div>
+<div class="ft">&#169; 2026 The Blind Ledger · Thursday, March 12, 2026<br>Reunion Edition · Season X · Love Is Blind · Columbus, Ohio</div>
+
+<script>
+(function(){
+  // ── TICKER ──
+  var items=['VIC+CHRISTINE ❤️ MARRIED','BRI+CONNOR 💛 STILL DATING','JESS+HARAMOL ✨ NEW LOVE','AMBER+JORDAN 💔 DIVORCED 4 MO','EMMA+MIKE 🚫 SPLIT AT ALTAR','ASHLEY SAID NO 👑','CHRIS 🧘 PILATES ERA OVER','DEVO 👶 NEW BABY ANNOUNCED','COLUMBUS 🏠 THE REAL MVP','S10 RECORD: 7 ENGAGEMENTS 💍'];
+  var up=['❤️','💛','✨','👑','💍','🏠'];
+  var dn=['💔','🚫','🧘','👶'];
+  var h='';
+  for(var i=0;i<items.length;i++){
+    var c='g';
+    for(var j=0;j<up.length;j++){if(items[i].indexOf(up[j])!==-1){c='u';break;}}
+    if(c==='g'){for(var k=0;k<dn.length;k++){if(items[i].indexOf(dn[k])!==-1){c='d';break;}}}
+    h+='<span class="tk-i"><span class="'+c+'">'+items[i]+'</span></span>';
+  }
+  document.getElementById('tk').innerHTML=h+h;
+
+  // ── STATS ──
+  var sd=[['Pod Singles','32','16M / 16F',''],['Engagements','7','Record high','up'],['Made It to Altar','4','of 7 couples',''],['Weddings','2','Vic+Christine','up'],['Still Married','1','-50%','dn'],['Still Dating','2','Bri+Connor','up'],['Success Rate','14%','1 of 7','dn'],['Episodes','12+R','Feb 11\u2013Mar 11','']];
+  var sh='';
+  for(var i=0;i<sd.length;i++){sh+='<div class="mi"><div class="lb">'+sd[i][0]+'</div><div class="vl">'+sd[i][1]+'</div><div class="ch'+(sd[i][3]?' '+sd[i][3]:'')+'">'+sd[i][2]+'</div></div>';}
+  document.getElementById('ms').innerHTML=sh;
+
+  // ── LEAD BODY ──
+  var lp=[
+    '<span class="dl">COLUMBUS, OHIO \u2014 </span>Love Is Blind Season 10, the Netflix dating experiment\u2019s milestone Ohio chapter, concluded its run on Tuesday with a reunion special that left only one marriage intact from seven engagements \u2014 a 14% success rate that would make even the most optimistic dating coach wince.',
+    'Vic St. John and Christine Hamilton, the Brooklyn-born professor and his Cleveland counterpart who fell in love over their shared faith and community spirit, emerged as the season\u2019s unambiguous victors. The couple, now living together in Columbus, drew tears from co-host Vanessa Lachey, who called their bond \u2018one of the most pure\u2019 in the show\u2019s entire ten-season run.',
+    'The pair were the first to get engaged in the pods and never wavered. While the other six couples headed to Cabo San Lucas for a group retreat, Vic and Christine opted for a private trip to Malibu \u2014 a fitting metaphor for a couple who seemed to exist in their own world throughout the season.',
+    'The reunion brought a final gift: TurboTax surprised the newlyweds with a proper honeymoon abroad, their first international trip together. Vic\u2019s biggest complaint about married life? Christine wears socks to bed.',
+    'But the evening\u2019s dominant storyline was far less tender. Amber Morrison and Jordan Faeth, who exchanged vows in a wedding that had the groom visibly uncertain, confirmed their marriage lasted only four months. Jordan cited Amber\u2019s trust issues, while Amber accused him of never truly leaving Columbus to build a life with her in Mount Vernon. The confrontation escalated until Amber stormed off the reunion stage before eventually returning.'
+  ];
+  var lh='';for(var i=0;i<lp.length;i++){lh+='<p>'+lp[i]+'</p>';}
+  document.getElementById('lead-body').innerHTML=lh;
+
+  // ── BRIEFS ──
+  var br=[
+    ['Vic and Christine Now Neighbors With Bri and Connor in Columbus','The two couples live just doors apart and run into each other at local coffee shops.'],
+    ['Haramol Gill\u2019s Pod Footage Was Never Aired','The ER doctor and Jess originally connected in the pods but his storyline was cut from the final edit.'],
+    ['Devonta Arrives at Reunion Engaged With Baby on the Way','Brittany\u2019s father confronts him on stage, saying he failed to live up to his commitments.'],
+    ['Budd Dairy Food Hall Watch Parties Drew Hundreds of Fans','Columbus venues hosted weekly screenings with themed cocktails served in golden goblets.'],
+    ['TurboTax Surprises Vic and Christine With Honeymoon Abroad','The gift celebrated the couple\u2019s first time filing taxes as a married couple.']
+  ];
+  var bh='';for(var i=0;i<br.length;i++){bh+='<div class="sbr"><h4>'+br[i][0]+'</h4><p>'+br[i][1]+'</p></div>';}
+  document.getElementById('briefs').innerHTML=bh;
+
+  // ── SPARKLINE ──
+  var data=[20,25,35,50,42,55,70,85,75,90,95,80,100];
+  try{
+    var cv=document.getElementById('sp-cv');
+    if(cv&&cv.getContext){
+      var dpr=window.devicePixelRatio||1;
+      var rct=cv.getBoundingClientRect();
+      cv.width=rct.width*dpr;cv.height=rct.height*dpr;
+      var ctx=cv.getContext('2d');ctx.scale(dpr,dpr);
+      var w=rct.width,ht=rct.height,mn=20,mx=100,rng=80,st=w/(data.length-1);
+      ctx.beginPath();ctx.moveTo(0,ht);
+      for(var i=0;i<data.length;i++){ctx.lineTo(i*st,ht-((data[i]-mn)/rng)*(ht-8)-4);}
+      ctx.lineTo(w,ht);ctx.closePath();
+      var gd=ctx.createLinearGradient(0,0,0,ht);
+      gd.addColorStop(0,'rgba(139,26,74,.15)');gd.addColorStop(1,'rgba(139,26,74,.01)');
+      ctx.fillStyle=gd;ctx.fill();
+      ctx.beginPath();
+      for(var i=0;i<data.length;i++){var x=i*st,y=ht-((data[i]-mn)/rng)*(ht-8)-4;if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);}
+      ctx.strokeStyle='#8B1A4A';ctx.lineWidth=1.8;ctx.stroke();
+      var lx=(data.length-1)*st,ly=ht-((100-mn)/rng)*(ht-8)-4;
+      ctx.beginPath();ctx.arc(lx,ly,3,0,Math.PI*2);ctx.fillStyle='#8B1A4A';ctx.fill();
+    }
+  }catch(e){}
+
+  // ── COUPLES ──
+  var cp=[['Vic & Christine','Married ❤️','up'],['Bri & Connor','Dating 💛','up'],['Jess & Haramol','New Love ✨','up'],['Emma & Mike','Split 💔','dn'],['Amber & Jordan','Divorced','dn'],['Ashley & Alex','Altar No','dn'],['Brittany & Devo','Split Pre-Altar','dn']];
+  var ch='';for(var i=0;i<cp.length;i++){ch+='<div class="cc"><div class="cn">'+cp[i][0]+'</div><div class="cv '+cp[i][2]+'">'+cp[i][1]+'</div></div>';}
+  document.getElementById('cs').innerHTML=ch;
+
+  // ── SECONDARY STORIES ──
+  var sts=[
+    {k:'THE PILATES INCIDENT',h:'Chris Fusco Faces the Music Over Viral Body\u2011Shaming Breakup',su:'Former fianc\u00e9 apologizes on national television as Jessica Barrett reveals surprise new romance with fellow pod mate',by:'By the Blind Ledger Cultural Desk',b:['In what became the season\u2019s most viral moment, Chris Fusco ended his engagement to Jessica Barrett by telling her he struggled to find her attractive because she didn\u2019t do Pilates or CrossFit. The comment detonated across social media and became a cultural flashpoint about body image and dating.','At the reunion, Chris offered a tearful apology. He admitted he had prioritized physical chemistry over emotional connection and said watching his own behavior back on screen was difficult. Nick Lachey pressed him directly, and Chris largely stayed quiet and contrite.','But the real twist came when Jessica revealed she had found love after all \u2014 with Haramol Gill, a fellow pod squad member whose footage never aired. The two ER and infectious-disease doctors had connected in the pods originally but reconnected as friends afterward. Haramol delivered a speech from the audience that moved the room to tears.']},
+    {k:'ALTAR REJECTION',h:'Ashley Carpenter Rewrites the Script With Season\u2019s Most Defiant \u2018No\u2019',su:'Columbus single calls out Alex Henderson\u2019s credibility before he can speak, declaring \u2018Saying no to you is a win\u2019',by:'By the Blind Ledger Relationships Desk',b:['Ashley Carpenter arrived at White Willow Meadows having already decided that Alex Henderson was not the man she\u2019d been promised in the pods. After weeks of discovering what she described as inconsistencies in his stories about his living situation, career, and past relationship, Ashley took control of the ceremony before Alex could say a word.','Her speech at the altar became one of the most memorable moments in the show\u2019s ten-season history \u2014 a pointed rejection that doubled as a declaration of self-worth. Ashley\u2019s divorce-lawyer father watched approvingly from the front row.','Alex, a former professional soccer player, maintained that he and Ashley had already agreed off-camera to part ways amicably. Their competing versions of events spilled into the reunion, where the two continued to disagree on the basic facts of their relationship.']},
+    {k:'THE KIDS QUESTION',h:'Emma Says Yes, Mike Says No: A Wedding Agreement Falls Apart at the Altar',su:'Couple had secretly planned to both say no, but a last-second change of heart leads to the season\u2019s most poignant split',by:'By the Blind Ledger Features Desk',b:['Mike Gibney and Emma Betsinger had agreed, privately and even with Emma\u2019s parents, to say no at the altar and continue dating outside the experiment. Then Emma changed her mind. Standing before their families, she said yes, believing the gesture would signal her openness to the children Mike wanted.','Mike, stunned, said no. Their fundamental divide \u2014 he wanted kids, she was uncertain \u2014 proved too deep to bridge with a symbolic gesture. At the reunion, Mike arrived with a new girlfriend. Emma said she is single but that the experience changed her outlook on family.','The episode captured the strange alchemy of the show\u2019s premise: the gap between loving someone in a pod and building an actual life together remains as wide as ever.']}
+  ];
+  var sth='';
+  for(var s=0;s<sts.length;s++){
+    var st=sts[s];var bp='';
+    for(var i=0;i<st.b.length;i++){bp+='<p>'+st.b[i]+'</p>';}
+    sth+='<div class="cs2"><div class="kk">'+st.k+'</div><h3>'+st.h+'</h3>'+(st.su?'<div class="su">'+st.su+'</div>':'')+'<div class="by">'+st.by+'</div><div class="sb">'+bp+'</div></div>';
+  }
+  document.getElementById('stories').innerHTML=sth;
+
+  // ── MOVERS ──
+  var gain=[['❤️','Vic & Christine','Still together'],['💍','Jess & Haramol','Pod reunion'],['🌟','Ashley Carpenter','Fan favorite'],['🏆','Bri & Connor','Neighbors w/ Vic']];
+  var lose=[['😬','Chris Fusco','Viral shame'],['💬','Alex Henderson','Ashley\u2019s dad'],['💔','Jordan Faeth','Amber storms off'],['🙄','Devonta','Brittany blindsided']];
+  function tbl(list,cap,clr){
+    var h='<table class="mt"><caption>'+cap+'</caption>';
+    for(var i=0;i<list.length;i++){h+='<tr><td class="ts">'+list[i][0]+'</td><td class="nc">'+list[i][1]+'</td><td class="pc" style="color:'+clr+'">'+list[i][2]+'</td></tr>';}
+    return h+'</table>';
+  }
+  document.getElementById('movers').innerHTML='<div class="sst">Pod Movers</div>'+tbl(gain,'\u25b2 Rising Stock','var(--pos)')+'<div style="height:.5rem"></div>'+tbl(lose,'\u25bc Falling Stock','var(--neg)');
+
+  // ── TIMELINE ──
+  var ev=[['Feb 11','Episodes 1\u20136: Pods Open','32 singles','Connections','married'],['Feb 18','Episodes 7\u20139: Cabo & Real Life','7 engaged','Drama','dating'],['Feb 25','Episodes 10\u201311: Wedding Prep','Chris/Jess split','Bri says no','split'],['Mar 4','Episode 12: Finale Weddings','2 weddings','4 at altar','married'],['Mar 11','Reunion Special','1 still married','Amber storms off','split']];
+  var rows='';
+  for(var i=0;i<ev.length;i++){rows+='<tr><td><span class="en">'+ev[i][1]+'</span><br><span class="etm">'+ev[i][0]+'</span></td><td>'+ev[i][2]+'</td><td>'+ev[i][3]+'</td><td><span class="stb '+ev[i][4]+'">'+ev[i][4]+'</span></td></tr>';}
+  document.getElementById('timeline').innerHTML='<div class="sst">Season Timeline</div><table class="et"><thead><tr><th>Episode Drop</th><th>Key Event</th><th>Drama</th><th>Status</th></tr></thead><tbody>'+rows+'</tbody></table>';
+
+  // ── OPINION ──
+  var ops=['When Netflix announced that Love Is Blind was heading to Ohio, Columbus held its collective breath. The city has long suffered from a perception deficit \u2014 overshadowed by Cleveland\u2019s sports legacy and Cincinnati\u2019s cultural cachet, often dismissed as a \u2018cowtown\u2019 by coastal audiences who have never set foot on High Street. Season 10 changed that overnight.','From Topiary Park to the Schottenstein Center, from the Short North Arts District to White Willow Meadows, the cameras showed a city that is vibrant, photogenic, and unapologetically itself. Budd Dairy Food Hall hosted watch parties that felt like civic celebrations. The Columbus Welcome Center launched Love Is Blind-themed merchandise. Local bars served golden-goblet cocktails. For a city always asking to be taken seriously, this was the moment.'];
+  var obp='';for(var i=0;i<ops.length;i++){obp+='<p>'+ops[i]+'</p>';}
+  document.getElementById('opinion').innerHTML='<div class="sst">Opinion</div><h3>Columbus Was the Real Star of Season 10</h3><div class="by">By the Blind Ledger Editorial Board</div><div class="bt">View from the Short North</div><div class="sb">'+obp+'</div>';
+})();
+</script>
+</body>
+</html>

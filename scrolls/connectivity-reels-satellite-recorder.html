@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sankey Flow Builder</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3-sankey/0.12.3/d3-sankey.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,500;0,9..40,700;1,9..40,300&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  :root {
+    --bg: #0c0e13;
+    --surface: #14171e;
+    --surface2: #1a1e28;
+    --border: #262c3a;
+    --border-focus: #4a7cff;
+    --text: #e2e6f0;
+    --text-dim: #7a8299;
+    --text-muted: #4d5568;
+    --accent: #4a7cff;
+    --accent-glow: rgba(74, 124, 255, 0.15);
+    --danger: #ff5c5c;
+    --danger-bg: rgba(255, 92, 92, 0.08);
+    --success: #34d399;
+    --node-colors: #4a7cff, #f472b6, #34d399, #fbbf24, #a78bfa, #fb923c, #38bdf8, #f87171, #818cf8, #2dd4bf;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── LAYOUT ── */
+  .app {
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    grid-template-rows: auto 1fr;
+    height: 100vh;
+  }
+
+  .header {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 28px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+  }
+
+  .header h1 {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .header h1 .icon {
+    width: 28px;
+    height: 28px;
+    background: var(--accent);
+    border-radius: 7px;
+    display: grid;
+    place-items: center;
+  }
+
+  .header h1 .icon svg { width: 16px; height: 16px; }
+
+  .header-actions { display: flex; gap: 8px; }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .sidebar-section {
+    padding: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .sidebar-section:last-child { border-bottom: none; }
+
+  .section-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--text-dim);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  /* ── FLOW TABLE ── */
+  .flow-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  .flow-table th {
+    text-align: left;
+    font-size: 10px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--text-muted);
+    padding: 0 6px 8px;
+  }
+
+  .flow-table td { padding: 3px 4px; }
+
+  .flow-table input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    padding: 7px 10px;
+    border-radius: 6px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .flow-table input:focus { border-color: var(--border-focus); }
+
+  .flow-table input[type="number"] {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    text-align: right;
+    -moz-appearance: textfield;
+  }
+
+  .flow-table input[type="number"]::-webkit-inner-spin-button,
+  .flow-table input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+  }
+
+  .flow-row { position: relative; }
+
+  .flow-row .delete-btn {
+    position: absolute;
+    right: -6px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    background: var(--danger-bg);
+    border: none;
+    border-radius: 50%;
+    color: var(--danger);
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    opacity: 0;
+    transition: opacity 0.15s;
+    font-size: 14px;
+    line-height: 1;
+  }
+
+  .flow-row:hover .delete-btn { opacity: 1; }
+
+  /* ── BUTTONS ── */
+  .btn {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 8px 14px;
+    border-radius: 7px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text);
+    cursor: pointer;
+    transition: all 0.15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .btn:hover { border-color: var(--text-muted); background: var(--border); }
+
+  .btn-primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+    font-weight: 700;
+  }
+
+  .btn-primary:hover { background: #3a6aee; border-color: #3a6aee; }
+
+  .btn-sm { padding: 5px 10px; font-size: 11px; }
+
+  .btn-icon {
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    display: grid;
+    place-items: center;
+    border-radius: 6px;
+  }
+
+  /* ── PRESETS ── */
+  .preset-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .preset-chip {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    padding: 5px 11px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .preset-chip:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-glow);
+  }
+
+  /* ── CANVAS ── */
+  .canvas-area {
+    position: relative;
+    overflow: hidden;
+    background:
+      radial-gradient(circle at 50% 50%, rgba(74,124,255,0.03) 0%, transparent 70%),
+      var(--bg);
+  }
+
+  .canvas-area svg { width: 100%; height: 100%; }
+
+  .sankey-link {
+    fill: none;
+    stroke-opacity: 0.25;
+    transition: stroke-opacity 0.2s;
+  }
+
+  .sankey-link:hover { stroke-opacity: 0.55; }
+
+  .sankey-node rect {
+    rx: 3;
+    ry: 3;
+    stroke: rgba(255,255,255,0.06);
+    stroke-width: 1;
+    cursor: grab;
+    transition: filter 0.2s;
+  }
+
+  .sankey-node rect:hover { filter: brightness(1.2); }
+
+  .sankey-node text {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    fill: var(--text);
+    pointer-events: none;
+  }
+
+  .sankey-node .value-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    fill: var(--text-dim);
+  }
+
+  /* ── TOOLTIP ── */
+  .tooltip {
+    position: fixed;
+    padding: 8px 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 12px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s;
+    z-index: 100;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    max-width: 240px;
+  }
+
+  .tooltip.visible { opacity: 1; }
+
+  .tooltip .tt-source { color: var(--accent); font-weight: 600; }
+  .tooltip .tt-arrow { color: var(--text-muted); margin: 0 4px; }
+  .tooltip .tt-target { color: #f472b6; font-weight: 600; }
+  .tooltip .tt-value {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--text);
+    margin-top: 3px;
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  /* ── EMPTY STATE ── */
+  .empty-state {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    text-align: center;
+    color: var(--text-muted);
+  }
+
+  .empty-state .big-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.3;
+  }
+
+  .empty-state p { font-size: 14px; line-height: 1.6; }
+
+  /* ── OPTIONS ── */
+  .option-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 0;
+  }
+
+  .option-row label {
+    font-size: 13px;
+    color: var(--text-dim);
+  }
+
+  .option-row select,
+  .option-row input[type="number"] {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    padding: 5px 8px;
+    border-radius: 6px;
+    outline: none;
+    width: 120px;
+  }
+
+  .option-row select:focus,
+  .option-row input[type="number"]:focus {
+    border-color: var(--border-focus);
+  }
+
+  /* ── EXPORT PANEL ── */
+  .export-row { display: flex; gap: 6px; flex-wrap: wrap; }
+
+  /* ── SCROLLBAR ── */
+  .sidebar::-webkit-scrollbar { width: 5px; }
+  .sidebar::-webkit-scrollbar-track { background: transparent; }
+  .sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* ── PASTE MODAL ── */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(4px);
+    display: grid;
+    place-items: center;
+    z-index: 200;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+  }
+
+  .modal-overlay.open { opacity: 1; pointer-events: auto; }
+
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 28px;
+    width: 520px;
+    max-width: 90vw;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.5);
+  }
+
+  .modal h3 {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+
+  .modal p {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-bottom: 16px;
+    line-height: 1.5;
+  }
+
+  .modal textarea {
+    width: 100%;
+    height: 180px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    padding: 12px;
+    border-radius: 8px;
+    outline: none;
+    resize: vertical;
+    line-height: 1.6;
+  }
+
+  .modal textarea:focus { border-color: var(--border-focus); }
+
+  .modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 14px;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 860px) {
+    .app {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto 1fr 1fr;
+    }
+    .sidebar { border-right: none; border-bottom: 1px solid var(--border); max-height: 45vh; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- HEADER -->
+  <div class="header">
+    <h1>
+      <span class="icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round">
+          <path d="M3 6h4v12H3zM17 3h4v18h-4zM7 8l10-3M7 16l10 5"/>
+        </svg>
+      </span>
+      Sankey Flow Builder
+    </h1>
+    <div class="header-actions">
+      <button class="btn btn-sm" onclick="openPasteModal()" title="Import CSV/TSV data">⬆ Import</button>
+      <button class="btn btn-sm" onclick="exportCSV()" title="Export flows as CSV">⬇ CSV</button>
+      <button class="btn btn-sm" onclick="exportSVG()" title="Export diagram as SVG">⬇ SVG</button>
+      <button class="btn btn-sm" onclick="exportPNG()" title="Export diagram as PNG">⬇ PNG</button>
+    </div>
+  </div>
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <!-- PRESETS -->
+    <div class="sidebar-section">
+      <div class="section-title">Quick Start</div>
+      <div class="preset-chips">
+        <button class="preset-chip" onclick="loadPreset('energy')">Energy</button>
+        <button class="preset-chip" onclick="loadPreset('marketing')">Marketing Funnel</button>
+        <button class="preset-chip" onclick="loadPreset('budget')">Budget</button>
+        <button class="preset-chip" onclick="loadPreset('website')">Website Traffic</button>
+        <button class="preset-chip" onclick="loadPreset('supply')">Supply Chain</button>
+      </div>
+    </div>
+
+    <!-- FLOWS -->
+    <div class="sidebar-section" style="flex:1; overflow-y:auto;">
+      <div class="section-title">
+        Flows
+        <button class="btn btn-sm btn-primary" onclick="addFlow()">+ Add</button>
+      </div>
+      <table class="flow-table">
+        <thead>
+          <tr><th style="width:38%">Source</th><th style="width:38%">Target</th><th style="width:24%">Value</th></tr>
+        </thead>
+        <tbody id="flowBody"></tbody>
+      </table>
+    </div>
+
+    <!-- OPTIONS -->
+    <div class="sidebar-section">
+      <div class="section-title">Options</div>
+      <div class="option-row">
+        <label>Node Width</label>
+        <input type="number" id="optNodeWidth" value="22" min="4" max="60" onchange="render()">
+      </div>
+      <div class="option-row">
+        <label>Node Padding</label>
+        <input type="number" id="optNodePad" value="18" min="2" max="80" onchange="render()">
+      </div>
+      <div class="option-row">
+        <label>Alignment</label>
+        <select id="optAlign" onchange="render()">
+          <option value="justify">Justify</option>
+          <option value="left">Left</option>
+          <option value="right">Right</option>
+          <option value="center">Center</option>
+        </select>
+      </div>
+      <div class="option-row">
+        <label>Link Color</label>
+        <select id="optLinkColor" onchange="render()">
+          <option value="source">Source</option>
+          <option value="target">Target</option>
+          <option value="gradient">Gradient</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- CANVAS -->
+  <div class="canvas-area" id="canvasArea">
+    <div class="empty-state" id="emptyState">
+      <div>
+        <div class="big-icon">⛏</div>
+        <p>Add flows in the sidebar or pick a preset<br>to generate your Sankey diagram.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOOLTIP -->
+<div class="tooltip" id="tooltip"></div>
+
+<!-- PASTE MODAL -->
+<div class="modal-overlay" id="pasteModal">
+  <div class="modal">
+    <h3>Import Flow Data</h3>
+    <p>Paste CSV or tab-separated data. Each row: <code style="background:var(--surface2);padding:2px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:11px;">Source, Target, Value</code><br>Header row is optional and will be auto-detected.</p>
+    <textarea id="pasteArea" placeholder="Coal,Electricity,100&#10;Gas,Electricity,80&#10;Electricity,Residential,120&#10;Electricity,Commercial,60"></textarea>
+    <div class="modal-actions">
+      <button class="btn" onclick="closePasteModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="importPaste()">Import</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── STATE ──
+let flows = [];
+const COLORS = ['#4a7cff','#f472b6','#34d399','#fbbf24','#a78bfa','#fb923c','#38bdf8','#f87171','#818cf8','#2dd4bf','#e879f9','#86efac','#fca5a1','#7dd3fc','#d4d4d8'];
+
+// ── PRESETS ──
+const PRESETS = {
+  energy: [
+    ['Coal','Electricity',100],['Natural Gas','Electricity',80],['Nuclear','Electricity',60],
+    ['Solar','Electricity',30],['Wind','Electricity',25],
+    ['Electricity','Residential',120],['Electricity','Commercial',85],
+    ['Electricity','Industrial',70],['Natural Gas','Heating',45],
+    ['Heating','Residential',30],['Heating','Commercial',15]
+  ],
+  marketing: [
+    ['Social Ads','Landing Page',4500],['Search Ads','Landing Page',3200],['Email','Landing Page',1800],
+    ['Referral','Landing Page',900],
+    ['Landing Page','Sign Up',3800],['Landing Page','Bounce',6600],
+    ['Sign Up','Free Trial',2600],['Sign Up','Drop Off',1200],
+    ['Free Trial','Paid',1100],['Free Trial','Churn',1500]
+  ],
+  budget: [
+    ['Revenue','Operations',45],['Revenue','Payroll',30],['Revenue','Marketing',12],
+    ['Revenue','R&D',8],['Revenue','Savings',5],
+    ['Operations','Rent',18],['Operations','Utilities',7],['Operations','Supplies',10],['Operations','Travel',10],
+    ['Marketing','Digital',7],['Marketing','Events',5],
+    ['Payroll','Engineering',18],['Payroll','Sales',12]
+  ],
+  website: [
+    ['Google','Homepage',5000],['Direct','Homepage',3000],['Social','Homepage',2000],['Email','Blog',1500],
+    ['Homepage','Products',4200],['Homepage','Blog',2800],['Homepage','Pricing',1500],['Homepage','Exit',1500],
+    ['Products','Cart',2200],['Products','Exit',2000],
+    ['Cart','Checkout',1600],['Cart','Abandoned',600],
+    ['Blog','Products',800],['Blog','Exit',2500]
+  ],
+  supply: [
+    ['Supplier A','Factory',300],['Supplier B','Factory',250],['Supplier C','Factory',150],
+    ['Factory','Warehouse East',380],['Factory','Warehouse West',320],
+    ['Warehouse East','Retail',220],['Warehouse East','Online',160],
+    ['Warehouse West','Retail',180],['Warehouse West','Online',140],
+    ['Online','Customer',300],['Retail','Customer',400]
+  ]
+};
+
+// ── FLOW MANAGEMENT ──
+function addFlow(s='', t='', v='') {
+  flows.push({ source: s, target: t, value: v });
+  rebuildTable();
+  render();
+}
+
+function removeFlow(i) {
+  flows.splice(i, 1);
+  rebuildTable();
+  render();
+}
+
+function updateFlow(i, field, val) {
+  flows[i][field] = field === 'value' ? val : val;
+  render();
+}
+
+function rebuildTable() {
+  const tbody = document.getElementById('flowBody');
+  tbody.innerHTML = '';
+  flows.forEach((f, i) => {
+    const tr = document.createElement('tr');
+    tr.className = 'flow-row';
+    tr.innerHTML = `
+      <td><input type="text" value="${esc(f.source)}" placeholder="Source" oninput="updateFlow(${i},'source',this.value)"></td>
+      <td><input type="text" value="${esc(f.target)}" placeholder="Target" oninput="updateFlow(${i},'target',this.value)"></td>
+      <td style="position:relative"><input type="number" value="${f.value}" placeholder="0" min="0" oninput="updateFlow(${i},'value',this.value)">
+        <button class="delete-btn" onclick="removeFlow(${i})">×</button>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function esc(s) { return String(s).replace(/"/g, '&quot;'); }
+
+// ── RENDERING ──
+function render() {
+  const valid = flows.filter(f => f.source && f.target && parseFloat(f.value) > 0);
+  const area = document.getElementById('canvasArea');
+  const empty = document.getElementById('emptyState');
+
+  // Remove old SVG
+  area.querySelectorAll('svg').forEach(s => s.remove());
+
+  if (!valid.length) { empty.style.display = ''; return; }
+  empty.style.display = 'none';
+
+  // Build nodes & links
+  const nodeSet = new Set();
+  valid.forEach(f => { nodeSet.add(f.source); nodeSet.add(f.target); });
+  const nodeArr = [...nodeSet];
+  const nodeMap = {};
+  nodeArr.forEach((n, i) => nodeMap[n] = i);
+  const nodes = nodeArr.map(n => ({ name: n }));
+  const links = valid.map(f => ({
+    source: nodeMap[f.source],
+    target: nodeMap[f.target],
+    value: parseFloat(f.value)
+  }));
+
+  const rect = area.getBoundingClientRect();
+  const W = rect.width, H = rect.height;
+  const margin = { top: 24, right: 140, bottom: 24, left: 140 };
+
+  const alignMap = {
+    justify: d3.sankeyJustify,
+    left: d3.sankeyLeft,
+    right: d3.sankeyRight,
+    center: d3.sankeyCenter
+  };
+
+  const nodeWidth = parseInt(document.getElementById('optNodeWidth').value) || 22;
+  const nodePad = parseInt(document.getElementById('optNodePad').value) || 18;
+  const align = document.getElementById('optAlign').value;
+  const linkColorMode = document.getElementById('optLinkColor').value;
+
+  const sankey = d3.sankey()
+    .nodeId(d => d.index)
+    .nodeWidth(nodeWidth)
+    .nodePadding(nodePad)
+    .nodeAlign(alignMap[align] || d3.sankeyJustify)
+    .extent([[margin.left, margin.top], [W - margin.right, H - margin.bottom]]);
+
+  let graph;
+  try {
+    graph = sankey({ nodes: nodes.map(d => ({...d})), links: links.map(d => ({...d})) });
+  } catch(e) {
+    empty.style.display = '';
+    empty.querySelector('p').textContent = 'Circular reference detected — check your flows.';
+    return;
+  }
+
+  const svg = d3.select(area).append('svg')
+    .attr('width', W)
+    .attr('height', H);
+
+  // Defs for gradients
+  const defs = svg.append('defs');
+
+  function nodeColor(i) { return COLORS[i % COLORS.length]; }
+
+  // Links
+  const link = svg.append('g')
+    .selectAll('.sankey-link')
+    .data(graph.links)
+    .join('path')
+    .attr('class', 'sankey-link')
+    .attr('d', d3.sankeyLinkHorizontal())
+    .attr('stroke-width', d => Math.max(1, d.width));
+
+  if (linkColorMode === 'gradient') {
+    graph.links.forEach((l, i) => {
+      const grad = defs.append('linearGradient')
+        .attr('id', `lg-${i}`)
+        .attr('gradientUnits', 'userSpaceOnUse')
+        .attr('x1', l.source.x1).attr('x2', l.target.x0);
+      grad.append('stop').attr('offset', '0%').attr('stop-color', nodeColor(l.source.index));
+      grad.append('stop').attr('offset', '100%').attr('stop-color', nodeColor(l.target.index));
+    });
+    link.attr('stroke', (d, i) => `url(#lg-${i})`);
+  } else if (linkColorMode === 'target') {
+    link.attr('stroke', d => nodeColor(d.target.index));
+  } else {
+    link.attr('stroke', d => nodeColor(d.source.index));
+  }
+
+  // Link tooltip
+  const tooltip = document.getElementById('tooltip');
+  link.on('mousemove', (ev, d) => {
+    tooltip.innerHTML = `<span class="tt-source">${d.source.name}</span><span class="tt-arrow">→</span><span class="tt-target">${d.target.name}</span><div class="tt-value">${formatNum(d.value)}</div>`;
+    tooltip.className = 'tooltip visible';
+    tooltip.style.left = ev.clientX + 14 + 'px';
+    tooltip.style.top = ev.clientY - 10 + 'px';
+  }).on('mouseleave', () => { tooltip.className = 'tooltip'; });
+
+  // Nodes
+  const node = svg.append('g')
+    .selectAll('.sankey-node')
+    .data(graph.nodes)
+    .join('g')
+    .attr('class', 'sankey-node')
+    .attr('transform', d => `translate(${d.x0},${d.y0})`);
+
+  node.append('rect')
+    .attr('width', d => d.x1 - d.x0)
+    .attr('height', d => Math.max(1, d.y1 - d.y0))
+    .attr('fill', (d, i) => nodeColor(i));
+
+  // Drag
+  node.call(d3.drag()
+    .subject(d => d)
+    .on('start', function() { this.parentNode.appendChild(this); })
+    .on('drag', function(ev, d) {
+      const newY = Math.max(0, Math.min(H - (d.y1 - d.y0), ev.y));
+      const dy = newY - d.y0;
+      d.y0 += dy; d.y1 += dy;
+      d3.select(this).attr('transform', `translate(${d.x0},${d.y0})`);
+      sankey.update(graph);
+      link.attr('d', d3.sankeyLinkHorizontal());
+      // Update gradients
+      if (linkColorMode === 'gradient') {
+        graph.links.forEach((l, i) => {
+          defs.select(`#lg-${i}`).attr('x1', l.source.x1).attr('x2', l.target.x0);
+        });
+      }
+    })
+  );
+
+  // Labels
+  node.append('text')
+    .attr('x', d => (d.x0 < W / 2) ? (d.x1 - d.x0) + 8 : -8)
+    .attr('y', d => (d.y1 - d.y0) / 2)
+    .attr('dy', '0.35em')
+    .attr('text-anchor', d => (d.x0 < W / 2) ? 'start' : 'end')
+    .text(d => d.name);
+
+  node.append('text')
+    .attr('class', 'value-label')
+    .attr('x', d => (d.x0 < W / 2) ? (d.x1 - d.x0) + 8 : -8)
+    .attr('y', d => (d.y1 - d.y0) / 2 + 15)
+    .attr('text-anchor', d => (d.x0 < W / 2) ? 'start' : 'end')
+    .text(d => formatNum(d.value));
+}
+
+function formatNum(n) {
+  if (n >= 1e6) return (n/1e6).toFixed(1) + 'M';
+  if (n >= 1e3) return (n/1e3).toFixed(1) + 'K';
+  return n.toLocaleString();
+}
+
+// ── IMPORT / EXPORT ──
+function openPasteModal() { document.getElementById('pasteModal').classList.add('open'); document.getElementById('pasteArea').focus(); }
+function closePasteModal() { document.getElementById('pasteModal').classList.remove('open'); }
+
+function importPaste() {
+  const raw = document.getElementById('pasteArea').value.trim();
+  if (!raw) return;
+  const lines = raw.split('\n').map(l => l.trim()).filter(Boolean);
+  const parsed = [];
+  for (const line of lines) {
+    const parts = line.includes('\t') ? line.split('\t') : line.split(',');
+    if (parts.length >= 3) {
+      const s = parts[0].trim(), t = parts[1].trim(), v = parseFloat(parts[2].trim());
+      if (s && t && !isNaN(v) && v > 0) parsed.push({ source: s, target: t, value: v });
+    }
+  }
+  if (parsed.length) {
+    flows = parsed;
+    rebuildTable();
+    render();
+  }
+  closePasteModal();
+  document.getElementById('pasteArea').value = '';
+}
+
+function exportCSV() {
+  const valid = flows.filter(f => f.source && f.target && parseFloat(f.value) > 0);
+  if (!valid.length) return;
+  let csv = 'Source,Target,Value\n';
+  valid.forEach(f => csv += `"${f.source}","${f.target}",${f.value}\n`);
+  download(csv, 'sankey_flows.csv', 'text/csv');
+}
+
+function exportSVG() {
+  const svg = document.querySelector('.canvas-area svg');
+  if (!svg) return;
+  const clone = svg.cloneNode(true);
+  // Inject inline styles for portability
+  const style = document.createElement('style');
+  style.textContent = `
+    .sankey-link { fill: none; stroke-opacity: 0.3; }
+    .sankey-node rect { rx: 3; ry: 3; }
+    .sankey-node text { font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500; fill: #e2e6f0; }
+    .sankey-node .value-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; fill: #7a8299; }
+  `;
+  clone.insertBefore(style, clone.firstChild);
+  clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+  const blob = new Blob([clone.outerHTML], { type: 'image/svg+xml' });
+  download(URL.createObjectURL(blob), 'sankey_diagram.svg', null, true);
+}
+
+function exportPNG() {
+  const svg = document.querySelector('.canvas-area svg');
+  if (!svg) return;
+  const clone = svg.cloneNode(true);
+  const style = document.createElement('style');
+  style.textContent = `
+    .sankey-link { fill: none; stroke-opacity: 0.3; }
+    .sankey-node rect { rx: 3; ry: 3; }
+    .sankey-node text { font-family: sans-serif; font-size: 12px; font-weight: 500; fill: #e2e6f0; }
+    .sankey-node .value-label { font-family: monospace; font-size: 10px; fill: #7a8299; }
+  `;
+  clone.insertBefore(style, clone.firstChild);
+  clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+
+  // Add background rect
+  const bg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+  bg.setAttribute('width', '100%');
+  bg.setAttribute('height', '100%');
+  bg.setAttribute('fill', '#0c0e13');
+  clone.insertBefore(bg, clone.firstChild);
+
+  const data = new XMLSerializer().serializeToString(clone);
+  const img = new Image();
+  const scaleFactor = 2;
+  img.onload = () => {
+    const c = document.createElement('canvas');
+    c.width = img.width * scaleFactor;
+    c.height = img.height * scaleFactor;
+    const ctx = c.getContext('2d');
+    ctx.scale(scaleFactor, scaleFactor);
+    ctx.drawImage(img, 0, 0);
+    c.toBlob(blob => {
+      download(URL.createObjectURL(blob), 'sankey_diagram.png', null, true);
+    });
+  };
+  img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(data)));
+}
+
+function download(content, name, type, isUrl) {
+  const a = document.createElement('a');
+  a.href = isUrl ? content : URL.createObjectURL(new Blob([content], { type }));
+  a.download = name;
+  a.click();
+}
+
+// ── PRESETS ──
+function loadPreset(key) {
+  flows = PRESETS[key].map(([s, t, v]) => ({ source: s, target: t, value: String(v) }));
+  rebuildTable();
+  render();
+}
+
+// ── RESIZE ──
+window.addEventListener('resize', () => render());
+
+// ── KEYBOARD ──
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closePasteModal();
+});
+
+// ── INIT ──
+rebuildTable();
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ThriftHub — Curate · Compare · Conquer</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,500;0,9..40,700;1,9..40,300&family=Playfair+Display:wght@600;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0D0D0D;
+  --surface: #161616;
+  --surface2: #1E1E1E;
+  --surface3: #282828;
+  --border: #2A2A2A;
+  --border-hover: #3A3A3A;
+  --text: #E8E4DF;
+  --text-dim: #8A857F;
+  --text-muted: #5A5650;
+  --accent: #D4A853;
+  --accent-dim: #B8922F;
+  --accent-bg: rgba(212,168,83,0.08);
+  --red: #E84855;
+  --green: #4CAF50;
+  --blue: #5B9FE4;
+  --radius: 8px;
+  --radius-lg: 14px;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+::-webkit-scrollbar { width:6px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
+::-webkit-scrollbar-thumb:hover { background:var(--border-hover); }
+
+/* Layout */
+.app { display:flex; min-height:100vh; }
+.sidebar {
+  width:260px; min-width:260px; background:var(--surface);
+  border-right:1px solid var(--border); display:flex; flex-direction:column;
+  transition:all .3s; overflow:hidden; flex-shrink:0;
+}
+.sidebar.collapsed { width:0; min-width:0; }
+.main { flex:1; display:flex; flex-direction:column; min-width:0; }
+
+/* Sidebar */
+.logo-area { padding:24px 22px 20px; border-bottom:1px solid var(--border); }
+.logo { font-family:'Playfair Display',serif; font-size:26px; font-weight:800; letter-spacing:-.5px; }
+.logo span { color:var(--accent); }
+.logo-sub { font-size:11px; color:var(--text-muted); margin-top:4px; letter-spacing:.3px; }
+
+.stats-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:16px 22px; border-bottom:1px solid var(--border); }
+.stat-card { background:var(--surface2); border-radius:var(--radius); padding:10px 12px; }
+.stat-label { font-size:10px; color:var(--text-muted); letter-spacing:.4px; text-transform:uppercase; }
+.stat-value { font-family:'Playfair Display',serif; font-size:22px; font-weight:800; }
+.stat-green { color:var(--green); }
+
+.nav-area { padding:12px 10px; flex:1; overflow-y:auto; }
+.nav-btn {
+  display:flex; align-items:center; gap:10px; width:100%; padding:10px 14px;
+  background:transparent; border:none; border-radius:var(--radius); color:var(--text-dim);
+  font-size:13px; font-weight:500; font-family:inherit; cursor:pointer; margin-bottom:2px;
+  transition:all .15s; text-align:left;
+}
+.nav-btn:hover { background:var(--surface2); }
+.nav-btn.active { background:var(--accent-bg); color:var(--accent); }
+.nav-btn .count { font-size:11px; opacity:.6; margin-left:auto; }
+
+.section-header {
+  padding:16px 14px 8px; display:flex; align-items:center; justify-content:space-between;
+}
+.section-label { font-size:10px; font-weight:700; color:var(--text-muted); letter-spacing:.8px; text-transform:uppercase; }
+.section-add { background:none; border:none; cursor:pointer; color:var(--accent); display:flex; padding:2px; }
+
+.sidebar-bottom { padding:16px 16px 20px; border-top:1px solid var(--border); }
+
+/* Header */
+.top-bar {
+  display:flex; align-items:center; gap:12px; padding:16px 28px;
+  border-bottom:1px solid var(--border); background:var(--surface); flex-shrink:0; flex-wrap:wrap;
+}
+.menu-toggle { background:none; border:none; color:var(--text-dim); cursor:pointer; display:flex; padding:4px; }
+.view-title { font-family:'Playfair Display',serif; font-size:20px; font-weight:600; }
+.spacer { flex:1; }
+.search-box {
+  background:var(--surface2); border:1px solid var(--border); border-radius:20px;
+  padding:7px 14px; color:var(--text); font-size:12px; font-family:inherit; outline:none; width:180px;
+}
+.search-box:focus { border-color:var(--accent); }
+.filter-select {
+  background:var(--surface2); border:1px solid var(--border); border-radius:20px;
+  padding:7px 12px; color:var(--text); font-size:12px; font-family:inherit; cursor:pointer; outline:none;
+}
+
+/* Buttons */
+.btn {
+  display:inline-flex; align-items:center; gap:6px; border:none; cursor:pointer;
+  font-family:inherit; font-weight:500; border-radius:var(--radius); transition:all .2s; letter-spacing:.2px;
+}
+.btn-default { background:var(--surface2); color:var(--text); border:1px solid var(--border); padding:8px 18px; font-size:13px; }
+.btn-accent { background:var(--accent); color:#0D0D0D; font-weight:700; padding:8px 18px; font-size:13px; }
+.btn-accent:hover { filter:brightness(1.1); }
+.btn-accent-lg { background:var(--accent); color:#0D0D0D; font-weight:700; padding:12px 24px; font-size:14px; width:100%; justify-content:center; }
+.btn-ghost { background:transparent; color:var(--text-dim); padding:5px 12px; font-size:12px; }
+.btn-danger { background:rgba(232,72,85,0.1); color:var(--red); border:1px solid rgba(232,72,85,0.2); padding:5px 12px; font-size:12px; }
+.btn-sm { padding:5px 12px; font-size:12px; }
+
+/* Masonry */
+.masonry { column-count:3; column-gap:16px; padding:24px 28px; }
+@media(max-width:1200px) { .masonry { column-count:2; } }
+@media(max-width:700px) { .masonry { column-count:1; } }
+.masonry-item { break-inside:avoid; margin-bottom:16px; }
+
+/* Card */
+.card {
+  background:var(--surface); border-radius:var(--radius-lg); overflow:hidden;
+  border:1px solid var(--border); transition:all .25s; position:relative; cursor:pointer;
+}
+.card:hover { transform:translateY(-3px); box-shadow:0 12px 40px rgba(0,0,0,.4); border-color:var(--border-hover); }
+.card-img-placeholder {
+  width:100%; aspect-ratio:3/4; display:flex; align-items:center; justify-content:center;
+  position:relative; overflow:hidden;
+}
+.card-img-placeholder .pattern {
+  position:absolute; inset:0; opacity:.06;
+  background-image:repeating-linear-gradient(45deg, transparent, transparent 20px, rgba(255,255,255,.5) 20px, rgba(255,255,255,.5) 21px);
+}
+.card-img-placeholder .initial {
+  font-family:'Playfair Display',serif; font-size:48px; font-weight:800; user-select:none;
+}
+.card-img { width:100%; aspect-ratio:3/4; object-fit:cover; display:block; }
+.card-discount {
+  position:absolute; top:12px; left:12px; background:var(--green); color:white;
+  font-size:11px; font-weight:700; padding:3px 9px; border-radius:20px; z-index:1;
+}
+.card-overlay {
+  position:absolute; top:0; left:0; right:0; padding:10px; display:none; gap:6px;
+  justify-content:flex-end; background:linear-gradient(180deg, rgba(0,0,0,.6) 0%, transparent 100%); z-index:2;
+}
+.card:hover .card-overlay { display:flex; }
+.card-overlay .btn { background:rgba(0,0,0,.5); backdrop-filter:blur(8px); color:white; border:none; }
+.card-overlay .btn.del { color:var(--red); }
+.card-body { padding:14px 16px 16px; }
+.card-platform { display:flex; align-items:center; gap:6px; margin-bottom:6px; }
+.card-platform-icon { font-size:13px; }
+.card-platform-name { font-size:11px; color:var(--text-dim); font-weight:500; }
+.card-title { font-size:14px; font-weight:600; line-height:1.35; margin-bottom:4px; }
+.card-brand { font-size:11px; color:var(--text-dim); font-weight:500; letter-spacing:.3px; text-transform:uppercase; margin-bottom:8px; }
+.card-price { font-family:'Playfair Display',serif; font-size:22px; font-weight:800; color:var(--accent); }
+.card-orig-price { font-size:12px; color:var(--text-muted); text-decoration:line-through; margin-left:8px; }
+.card-offer { font-size:11px; color:var(--accent-dim); margin:6px 0; }
+.card-notes { font-size:11px; color:var(--text-dim); line-height:1.45; font-style:italic; border-top:1px solid var(--border); padding-top:8px; margin-top:4px; }
+.card-footer { display:flex; align-items:center; justify-content:space-between; margin-top:10px; }
+.card-date { font-size:10px; color:var(--text-muted); }
+.card-board-tag { font-size:9px; color:var(--text-muted); background:var(--surface2); padding:2px 7px; border-radius:10px; }
+
+/* Badges */
+.badge {
+  display:inline-flex; align-items:center; gap:4px; padding:3px 10px; border-radius:20px;
+  font-size:11px; font-weight:600; letter-spacing:.3px; white-space:nowrap;
+}
+.badge-default { background:var(--accent-bg); color:var(--accent); border:1px solid rgba(212,168,83,0.15); }
+.badge-blue { background:rgba(91,159,228,.12); color:var(--blue); border:1px solid rgba(91,159,228,.2); }
+.badge-accent { background:var(--accent-bg); color:var(--accent); border:1px solid rgba(212,168,83,.2); }
+.badge-orange { background:rgba(255,152,0,.12); color:#FF9800; border:1px solid rgba(255,152,0,.2); }
+.badge-green { background:rgba(76,175,80,.12); color:var(--green); border:1px solid rgba(76,175,80,.2); }
+.badge-red { background:rgba(232,72,85,.12); color:var(--red); border:1px solid rgba(232,72,85,.2); }
+.badge-muted { background:var(--surface2); color:var(--text-muted); border:1px solid var(--border); }
+
+.badges { display:flex; flex-wrap:wrap; gap:4px; margin-bottom:8px; }
+
+/* Modal */
+.modal-overlay {
+  position:fixed; inset:0; z-index:1000; display:none; align-items:center; justify-content:center; padding:20px;
+}
+.modal-overlay.open { display:flex; }
+.modal-backdrop { position:absolute; inset:0; background:rgba(0,0,0,.7); backdrop-filter:blur(4px); }
+.modal {
+  position:relative; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg);
+  max-width:95vw; max-height:85vh; overflow:auto; box-shadow:0 25px 80px rgba(0,0,0,.6);
+  animation:slideIn .35s ease both;
+}
+.modal-wide { width:700px; }
+.modal-normal { width:520px; }
+.modal-header {
+  display:flex; align-items:center; justify-content:space-between; padding:18px 24px;
+  border-bottom:1px solid var(--border); position:sticky; top:0; background:var(--surface); z-index:1;
+}
+.modal-header h3 { font-family:'Playfair Display',serif; font-size:20px; font-weight:600; }
+.modal-body { padding:20px 24px 24px; }
+
+/* Form */
+.form-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.form-full { grid-column:1 / -1; }
+.form-label { font-size:11px; font-weight:600; color:var(--text-dim); letter-spacing:.5px; text-transform:uppercase; margin-bottom:4px; display:block; }
+.form-input, .form-select, .form-textarea {
+  width:100%; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+  padding:9px 14px; color:var(--text); font-size:13px; font-family:inherit; outline:none; transition:border .2s;
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus { border-color:var(--accent); }
+.form-textarea { resize:vertical; min-height:60px; }
+.form-footer { display:flex; justify-content:flex-end; gap:10px; margin-top:20px; padding-top:16px; border-top:1px solid var(--border); }
+
+/* Board toggle buttons */
+.board-toggle {
+  padding:6px 14px; border-radius:20px; border:1px solid var(--border); background:var(--surface2);
+  color:var(--text-dim); font-size:12px; font-family:inherit; cursor:pointer; font-weight:500; transition:all .15s;
+}
+.board-toggle.active { border-color:var(--accent); background:var(--accent-bg); color:var(--accent); }
+
+/* Browse grid */
+.browse-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+@media(max-width:600px) { .browse-grid { grid-template-columns:1fr 1fr; } }
+.browse-card {
+  display:flex; align-items:center; gap:10px; padding:14px 16px; background:var(--surface2);
+  border:1px solid var(--border); border-radius:var(--radius); cursor:pointer; transition:all .15s; font-family:inherit;
+}
+.browse-card:hover { border-color:var(--accent); }
+.browse-card .emoji { font-size:24px; }
+.browse-card .name { font-size:14px; font-weight:600; color:var(--text); }
+.browse-card .sub { font-size:10px; color:var(--text-muted); }
+
+/* Empty state */
+.empty-state { display:flex; flex-direction:column; align-items:center; justify-content:center; height:50vh; gap:16px; opacity:.5; }
+.empty-state p { font-size:16px; color:var(--text-dim); }
+
+/* Board list in manage modal */
+.board-list-item {
+  display:flex; align-items:center; justify-content:space-between; padding:10px 14px;
+  background:var(--surface2); border-radius:var(--radius); border:1px solid var(--border); margin-bottom:6px;
+}
+
+@keyframes slideIn { from { opacity:0; transform:translateX(20px); } to { opacity:1; transform:translateX(0); } }
+@keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+.fade-up { animation:fadeUp .4s ease both; }
+
+/* Responsive */
+@media(max-width:768px) {
+  .sidebar { position:fixed; z-index:100; height:100vh; }
+  .top-bar { padding:12px 16px; }
+  .masonry { padding:16px; }
+  .browse-grid { grid-template-columns:1fr; }
+}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="logo-area">
+      <div class="logo"><span>Thrift</span>Hub</div>
+      <div class="logo-sub">Curate · Compare · Conquer</div>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Items</div>
+        <div class="stat-value" id="stat-items">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Saved</div>
+        <div class="stat-value stat-green" id="stat-savings">$0</div>
+      </div>
+    </div>
+    <nav class="nav-area" id="nav-area"></nav>
+    <div class="sidebar-bottom">
+      <button class="btn btn-accent-lg" onclick="openBrowseModal()">🔍 Browse Markets</button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <header class="top-bar">
+      <button class="menu-toggle" onclick="toggleSidebar()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+      </button>
+      <h2 class="view-title" id="view-title">All Items</h2>
+      <div class="spacer"></div>
+      <input class="search-box" id="search-box" placeholder="Search items..." oninput="renderItems()">
+      <select class="filter-select" id="platform-filter" onchange="renderItems()">
+        <option value="all">All Platforms</option>
+      </select>
+      <select class="filter-select" id="category-filter" onchange="renderItems()">
+        <option value="all">All Categories</option>
+      </select>
+      <button class="btn btn-accent" onclick="openAddModal()">＋ Add Item</button>
+    </header>
+    <div class="masonry" id="items-grid"></div>
+  </main>
+</div>
+
+<!-- ADD / EDIT MODAL -->
+<div class="modal-overlay" id="item-modal">
+  <div class="modal-backdrop" onclick="closeItemModal()"></div>
+  <div class="modal modal-wide">
+    <div class="modal-header">
+      <h3 id="modal-title">Clip New Item</h3>
+      <button class="btn btn-ghost" onclick="closeItemModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-full">
+          <label class="form-label">Item Title</label>
+          <input class="form-input" id="f-title" placeholder="e.g. Vintage Levi's 501 Selvedge">
+        </div>
+        <div>
+          <label class="form-label">Brand</label>
+          <input class="form-input" id="f-brand" placeholder="e.g. Levi's">
+        </div>
+        <div>
+          <label class="form-label">Platform</label>
+          <select class="form-select" id="f-platform"></select>
+        </div>
+        <div>
+          <label class="form-label">Asking Price</label>
+          <input class="form-input" id="f-price" type="number" placeholder="$">
+        </div>
+        <div>
+          <label class="form-label">Retail / Original Price</label>
+          <input class="form-input" id="f-origprice" type="number" placeholder="$">
+        </div>
+        <div>
+          <label class="form-label">Category</label>
+          <select class="form-select" id="f-category"></select>
+        </div>
+        <div>
+          <label class="form-label">Size</label>
+          <select class="form-select" id="f-size"></select>
+        </div>
+        <div class="form-full">
+          <label class="form-label">Item URL</label>
+          <input class="form-input" id="f-url" placeholder="Paste listing link">
+        </div>
+        <div class="form-full">
+          <label class="form-label">Image URL</label>
+          <input class="form-input" id="f-imgurl" placeholder="Right-click image → Copy image address">
+        </div>
+        <div>
+          <label class="form-label">Bid Status</label>
+          <select class="form-select" id="f-status"></select>
+        </div>
+        <div>
+          <label class="form-label">Your Offer</label>
+          <input class="form-input" id="f-offer" type="number" placeholder="$">
+        </div>
+        <div class="form-full">
+          <label class="form-label">Boards</label>
+          <div id="f-boards" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+        </div>
+        <div class="form-full">
+          <label class="form-label">Notes</label>
+          <textarea class="form-textarea" id="f-notes" placeholder="Condition details, sizing notes, negotiation strategy..."></textarea>
+        </div>
+      </div>
+      <div class="form-footer">
+        <button class="btn btn-default" onclick="closeItemModal()">Cancel</button>
+        <button class="btn btn-accent" onclick="saveItem()" style="min-width:120px" id="save-btn">Clip Item</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BROWSE MODAL -->
+<div class="modal-overlay" id="browse-modal">
+  <div class="modal-backdrop" onclick="closeBrowseModal()"></div>
+  <div class="modal modal-wide">
+    <div class="modal-header">
+      <h3>Browse Markets</h3>
+      <button class="btn btn-ghost" onclick="closeBrowseModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:var(--text-dim);margin-bottom:16px;line-height:1.5;">
+        Search across all platforms at once. Each opens in a new tab — find something you like, then come back and clip it with <strong style="color:var(--accent)">＋ Add Item</strong>.
+      </p>
+      <div style="display:flex;gap:10px;margin-bottom:20px;">
+        <input class="form-input" id="browse-search" placeholder="What are you looking for? e.g. 'vintage leather jacket'" style="flex:1;padding:12px 16px;font-size:14px;" onkeydown="if(event.key==='Enter')searchAll()">
+        <button class="btn btn-accent" onclick="searchAll()" style="padding:12px 20px;">🔍 Search All</button>
+      </div>
+      <div class="browse-grid" id="browse-grid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- BOARD MODAL -->
+<div class="modal-overlay" id="board-modal">
+  <div class="modal-backdrop" onclick="closeBoardModal()"></div>
+  <div class="modal modal-normal">
+    <div class="modal-header">
+      <h3>Manage Boards</h3>
+      <button class="btn btn-ghost" onclick="closeBoardModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="display:flex;gap:10px;margin-bottom:20px;">
+        <input class="form-input" id="new-board-name" placeholder="New board name..." onkeydown="if(event.key==='Enter')addBoard()">
+        <button class="btn btn-accent" onclick="addBoard()">＋ Create</button>
+      </div>
+      <div id="board-list"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ==================== DATA ====================
+const PLATFORMS = {
+  ebay:       { name:"eBay",       color:"#E53238", icon:"🏷️", search:"https://www.ebay.com/sch/i.html?_nkw=" },
+  mercari:    { name:"Mercari",    color:"#FF6459", icon:"🛍️", search:"https://www.mercari.com/search/?keyword=" },
+  poshmark:   { name:"Poshmark",   color:"#7F0353", icon:"👗", search:"https://poshmark.com/search?query=" },
+  depop:      { name:"Depop",      color:"#FF2300", icon:"🔥", search:"https://www.depop.com/search/?q=" },
+  therealreal:{ name:"TheRealReal",color:"#000000", icon:"💎", search:"https://www.therealreal.com/search?q=" },
+  grailed:    { name:"Grailed",    color:"#222",    icon:"🧥", search:"https://www.grailed.com/shop?query=" },
+  other:      { name:"Other",      color:"#666",    icon:"📦", search:"" }
+};
+const CATEGORIES = ["Tops","Bottoms","Outerwear","Shoes","Bags","Accessories","Dresses","Suits","Activewear","Other"];
+const SIZES = ["","XXS","XS","S","M","L","XL","XXL","One Size","6","7","8","9","10","11","12","28","29","30","31","32","33","34","36","38","40","42","44"];
+const STATUS_LIST = ["watching","offer_sent","counter","accepted","declined","won","lost"];
+const STATUS_MAP = {
+  watching:   { label:"Watching",    badge:"badge-blue" },
+  offer_sent: { label:"Offer Sent",  badge:"badge-accent" },
+  counter:    { label:"Counter",     badge:"badge-orange" },
+  accepted:   { label:"Accepted!",   badge:"badge-green" },
+  declined:   { label:"Declined",    badge:"badge-red" },
+  won:        { label:"Won!",        badge:"badge-green" },
+  lost:       { label:"Lost",        badge:"badge-muted" }
+};
+const HUE_MAP = { Tops:200, Bottoms:220, Outerwear:30, Shoes:350, Bags:45, Accessories:280, Dresses:320, Suits:180, Activewear:140, Other:0 };
+
+// State
+let items = [];
+let boards = ["Fall Rotation","Investment Pieces","Gift Ideas"];
+let currentView = "all";
+let editingId = null;
+let formBoards = [];
+
+// Persistence key
+const STORAGE_KEY = "thrifthub_data";
+
+function loadData() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const d = JSON.parse(raw);
+      items = d.items || [];
+      boards = d.boards || [];
+      return;
+    }
+  } catch(e) {}
+  // Default sample data
+  items = [
+    { id:"s1", title:"Vintage Levi's 501 Selvedge", platform:"ebay", price:45, originalPrice:120, imageUrl:"", category:"Bottoms", size:"32", brand:"Levi's", url:"https://ebay.com", bidStatus:"watching", offerAmount:null, notes:"Great fade, check inseam measurement", boards:["Fall Rotation"], dateAdded:Date.now()-86400000*3 },
+    { id:"s2", title:"APC Petit New Standard Raw Denim", platform:"grailed", price:85, originalPrice:220, imageUrl:"", category:"Bottoms", size:"30", brand:"APC", url:"", bidStatus:"offer_sent", offerAmount:70, notes:"Seller says minimal wear", boards:["Fall Rotation"], dateAdded:Date.now()-86400000*2 },
+    { id:"s3", title:"Barbour Beaufort Waxed Jacket", platform:"ebay", price:125, originalPrice:450, imageUrl:"", category:"Outerwear", size:"L", brand:"Barbour", url:"", bidStatus:"watching", offerAmount:null, notes:"Needs rewaxing but great bones", boards:["Fall Rotation","Investment Pieces"], dateAdded:Date.now()-86400000 },
+    { id:"s4", title:"Common Projects Achilles Low White", platform:"mercari", price:165, originalPrice:425, imageUrl:"", category:"Shoes", size:"42", brand:"Common Projects", url:"", bidStatus:"watching", offerAmount:null, notes:"Moderate wear, sole still good", boards:["Investment Pieces"], dateAdded:Date.now() },
+    { id:"s5", title:"Engineered Garments Bedford Jacket", platform:"grailed", price:195, originalPrice:540, imageUrl:"", category:"Outerwear", size:"M", brand:"Engineered Garments", url:"", bidStatus:"offer_sent", offerAmount:160, notes:"Navy ripstop, SS21", boards:["Investment Pieces"], dateAdded:Date.now()-86400000*5 },
+    { id:"s6", title:"Issey Miyake Pleats Please Top", platform:"therealreal", price:78, originalPrice:350, imageUrl:"", category:"Tops", size:"M", brand:"Issey Miyake", url:"", bidStatus:"watching", offerAmount:null, notes:"Black, excellent condition", boards:[], dateAdded:Date.now()-86400000 },
+  ];
+}
+
+function saveData() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ items, boards })); } catch(e) {}
+}
+
+// ==================== UTILITIES ====================
+function genId() { return Math.random().toString(36).slice(2,10); }
+function fmtPrice(n) { return n != null && n > 0 ? "$" + Math.round(n) : ""; }
+function disc(orig, cur) { return orig > 0 ? Math.round(((orig - cur) / orig) * 100) : 0; }
+function timeAgo(ts) {
+  const d = Math.floor((Date.now() - ts) / 86400000);
+  if (d === 0) return "Today";
+  if (d === 1) return "Yesterday";
+  return d + "d ago";
+}
+function esc(s) { const d = document.createElement("div"); d.textContent = s; return d.innerHTML; }
+
+// ==================== RENDERING ====================
+function renderNav() {
+  const area = document.getElementById("nav-area");
+  const allCount = items.length;
+  const dealsCount = items.filter(i => disc(i.originalPrice, i.price) >= 40).length;
+  const offersCount = items.filter(i => ["offer_sent","counter"].includes(i.bidStatus)).length;
+
+  let html = '';
+  const navItems = [
+    { key:"all", label:"All Items", icon:"⊞", count:allCount },
+    { key:"deals", label:"Best Deals", icon:"🏷", count:dealsCount },
+    { key:"offers", label:"Active Offers", icon:"💰", count:offersCount },
+  ];
+  navItems.forEach(n => {
+    html += `<button class="nav-btn ${currentView===n.key?'active':''}" onclick="setView('${n.key}')">
+      <span>${n.icon}</span> ${n.label} <span class="count">${n.count}</span>
+    </button>`;
+  });
+
+  html += `<div class="section-header">
+    <span class="section-label">Boards</span>
+    <button class="section-add" onclick="openBoardModal()">＋</button>
+  </div>`;
+
+  boards.forEach(b => {
+    const c = items.filter(i => i.boards && i.boards.includes(b)).length;
+    html += `<button class="nav-btn ${currentView===b?'active':''}" onclick="setView('${esc(b)}')">
+      <span>📋</span> ${esc(b)} <span class="count">${c}</span>
+    </button>`;
+  });
+
+  area.innerHTML = html;
+}
+
+function renderStats() {
+  document.getElementById("stat-items").textContent = items.length;
+  const totalSavings = items.reduce((a, i) => a + Math.max(0, (i.originalPrice || 0) - (i.price || 0)), 0);
+  document.getElementById("stat-savings").textContent = "$" + Math.round(totalSavings);
+}
+
+function renderItems() {
+  const grid = document.getElementById("items-grid");
+  const search = document.getElementById("search-box").value.toLowerCase();
+  const platF = document.getElementById("platform-filter").value;
+  const catF = document.getElementById("category-filter").value;
+
+  const filtered = items.filter(i => {
+    if (currentView === "deals" && disc(i.originalPrice, i.price) < 40) return false;
+    if (currentView === "offers" && !["offer_sent","counter"].includes(i.bidStatus)) return false;
+    if (currentView !== "all" && currentView !== "deals" && currentView !== "offers") {
+      if (!i.boards || !i.boards.includes(currentView)) return false;
+    }
+    if (platF !== "all" && i.platform !== platF) return false;
+    if (catF !== "all" && i.category !== catF) return false;
+    if (search) {
+      const hay = (i.title + " " + i.brand + " " + i.notes).toLowerCase();
+      if (!hay.includes(search)) return false;
+    }
+    return true;
+  });
+
+  if (filtered.length === 0) {
+    grid.innerHTML = `<div class="empty-state" style="column-span:all;">
+      <div style="font-size:48px;opacity:.3;">⊞</div>
+      <p>No items here yet — clip some finds!</p>
+      <button class="btn btn-accent" onclick="openAddModal()">＋ Add First Item</button>
+    </div>`;
+    return;
+  }
+
+  let html = '';
+  filtered.forEach((item, idx) => {
+    const p = PLATFORMS[item.platform] || PLATFORMS.other;
+    const d = disc(item.originalPrice, item.price);
+    const hue = HUE_MAP[item.category] || 200;
+    const st = STATUS_MAP[item.bidStatus] || STATUS_MAP.watching;
+
+    const imgHtml = item.imageUrl
+      ? `<img class="card-img" src="${esc(item.imageUrl)}" alt="${esc(item.title)}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+         <div class="card-img-placeholder" style="display:none;background:linear-gradient(135deg,hsl(${hue},15%,14%),hsl(${hue},20%,20%));">
+           <div class="pattern"></div>
+           <span class="initial" style="color:hsl(${hue},20%,35%)">${esc((item.brand||item.category||"?")[0])}</span>
+         </div>`
+      : `<div class="card-img-placeholder" style="background:linear-gradient(135deg,hsl(${hue},15%,14%),hsl(${hue},20%,20%));">
+           <div class="pattern"></div>
+           <span class="initial" style="color:hsl(${hue},20%,35%)">${esc((item.brand||item.category||"?")[0])}</span>
+         </div>`;
+
+    const boardTags = (item.boards||[]).map(b => `<span class="card-board-tag">${esc(b)}</span>`).join("");
+
+    html += `<div class="masonry-item fade-up" style="animation-delay:${idx*0.04}s">
+      <div class="card">
+        ${d >= 20 ? `<div class="card-discount">${d}% OFF</div>` : ''}
+        <div class="card-overlay">
+          ${item.url ? `<button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();window.open('${esc(item.url)}','_blank')">↗ View</button>` : ''}
+          <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();openEditModal('${item.id}')">✎</button>
+          <button class="btn btn-ghost btn-sm del" onclick="event.stopPropagation();removeItem('${item.id}')">🗑</button>
+        </div>
+        ${imgHtml}
+        <div class="card-body">
+          <div class="card-platform">
+            <span class="card-platform-icon">${p.icon}</span>
+            <span class="card-platform-name">${p.name}</span>
+            <span style="margin-left:auto"><span class="badge ${st.badge}">${st.label}</span></span>
+          </div>
+          <div class="card-title">${esc(item.title)}</div>
+          ${item.brand ? `<div class="card-brand">${esc(item.brand)}</div>` : ''}
+          <div style="margin-bottom:8px;">
+            <span class="card-price">${fmtPrice(item.price)}</span>
+            ${item.originalPrice > 0 ? `<span class="card-orig-price">${fmtPrice(item.originalPrice)}</span>` : ''}
+          </div>
+          ${item.offerAmount ? `<div class="card-offer">Your offer: $${Math.round(item.offerAmount)}</div>` : ''}
+          <div class="badges">
+            ${item.size ? `<span class="badge badge-default">${esc(item.size)}</span>` : ''}
+            ${item.category ? `<span class="badge badge-default">${esc(item.category)}</span>` : ''}
+          </div>
+          ${item.notes ? `<div class="card-notes">${esc(item.notes)}</div>` : ''}
+          <div class="card-footer">
+            <span class="card-date">${timeAgo(item.dateAdded)}</span>
+            <div style="display:flex;gap:3px;">${boardTags}</div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  });
+
+  grid.innerHTML = html;
+}
+
+function renderAll() {
+  renderNav();
+  renderStats();
+  renderItems();
+  saveData();
+}
+
+// ==================== VIEW SWITCHING ====================
+function setView(v) {
+  currentView = v;
+  const titles = { all:"All Items", deals:"Best Deals", offers:"Active Offers" };
+  document.getElementById("view-title").textContent = titles[v] || v;
+  renderAll();
+}
+
+function toggleSidebar() {
+  document.getElementById("sidebar").classList.toggle("collapsed");
+}
+
+// ==================== ITEM CRUD ====================
+function openAddModal() {
+  editingId = null;
+  formBoards = [];
+  document.getElementById("modal-title").textContent = "Clip New Item";
+  document.getElementById("save-btn").textContent = "Clip Item";
+  clearForm();
+  populateFormBoards();
+  document.getElementById("item-modal").classList.add("open");
+}
+
+function openEditModal(id) {
+  const item = items.find(i => i.id === id);
+  if (!item) return;
+  editingId = id;
+  formBoards = [...(item.boards || [])];
+  document.getElementById("modal-title").textContent = "Edit Item";
+  document.getElementById("save-btn").textContent = "Save Changes";
+
+  document.getElementById("f-title").value = item.title || "";
+  document.getElementById("f-brand").value = item.brand || "";
+  document.getElementById("f-platform").value = item.platform || "ebay";
+  document.getElementById("f-price").value = item.price || "";
+  document.getElementById("f-origprice").value = item.originalPrice || "";
+  document.getElementById("f-category").value = item.category || "Other";
+  document.getElementById("f-size").value = item.size || "";
+  document.getElementById("f-url").value = item.url || "";
+  document.getElementById("f-imgurl").value = item.imageUrl || "";
+  document.getElementById("f-status").value = item.bidStatus || "watching";
+  document.getElementById("f-offer").value = item.offerAmount || "";
+  document.getElementById("f-notes").value = item.notes || "";
+
+  populateFormBoards();
+  document.getElementById("item-modal").classList.add("open");
+}
+
+function closeItemModal() {
+  document.getElementById("item-modal").classList.remove("open");
+}
+
+function clearForm() {
+  ["f-title","f-brand","f-price","f-origprice","f-url","f-imgurl","f-offer","f-notes"].forEach(id => document.getElementById(id).value = "");
+  document.getElementById("f-platform").value = "ebay";
+  document.getElementById("f-category").value = "Other";
+  document.getElementById("f-size").value = "";
+  document.getElementById("f-status").value = "watching";
+}
+
+function populateFormBoards() {
+  const container = document.getElementById("f-boards");
+  container.innerHTML = boards.map(b => {
+    const active = formBoards.includes(b);
+    return `<button type="button" class="board-toggle ${active?'active':''}" onclick="toggleFormBoard(this,'${esc(b)}')">${esc(b)}</button>`;
+  }).join("");
+}
+
+function toggleFormBoard(el, name) {
+  const idx = formBoards.indexOf(name);
+  if (idx >= 0) { formBoards.splice(idx, 1); el.classList.remove("active"); }
+  else { formBoards.push(name); el.classList.add("active"); }
+}
+
+function saveItem() {
+  const title = document.getElementById("f-title").value.trim();
+  if (!title) { alert("Please enter a title"); return; }
+
+  const item = {
+    id: editingId || genId(),
+    title,
+    brand: document.getElementById("f-brand").value.trim(),
+    platform: document.getElementById("f-platform").value,
+    price: parseFloat(document.getElementById("f-price").value) || 0,
+    originalPrice: parseFloat(document.getElementById("f-origprice").value) || 0,
+    category: document.getElementById("f-category").value,
+    size: document.getElementById("f-size").value,
+    url: document.getElementById("f-url").value.trim(),
+    imageUrl: document.getElementById("f-imgurl").value.trim(),
+    bidStatus: document.getElementById("f-status").value,
+    offerAmount: parseFloat(document.getElementById("f-offer").value) || null,
+    notes: document.getElementById("f-notes").value.trim(),
+    boards: [...formBoards],
+    dateAdded: editingId ? (items.find(i => i.id === editingId)?.dateAdded || Date.now()) : Date.now()
+  };
+
+  if (editingId) {
+    items = items.map(i => i.id === editingId ? item : i);
+  } else {
+    items.unshift(item);
+  }
+
+  closeItemModal();
+  renderAll();
+}
+
+function removeItem(id) {
+  if (!confirm("Remove this item?")) return;
+  items = items.filter(i => i.id !== id);
+  renderAll();
+}
+
+// ==================== BROWSE MARKETS ====================
+function openBrowseModal() {
+  document.getElementById("browse-modal").classList.add("open");
+  renderBrowseGrid();
+}
+function closeBrowseModal() { document.getElementById("browse-modal").classList.remove("open"); }
+
+function renderBrowseGrid() {
+  const grid = document.getElementById("browse-grid");
+  grid.innerHTML = Object.entries(PLATFORMS).filter(([,v]) => v.search).map(([key, p]) => {
+    return `<button class="browse-card" onclick="searchPlatform('${key}')">
+      <span class="emoji">${p.icon}</span>
+      <div><div class="name">${p.name}</div><div class="sub">Open in new tab</div></div>
+      <span style="margin-left:auto;color:var(--text-muted);font-size:12px;">↗</span>
+    </button>`;
+  }).join("");
+}
+
+function searchPlatform(key) {
+  const q = document.getElementById("browse-search").value.trim();
+  const p = PLATFORMS[key];
+  if (!p || !p.search) return;
+  window.open(q ? p.search + encodeURIComponent(q) : p.search.split("?")[0].split("sch/")[0], "_blank");
+}
+
+function searchAll() {
+  const q = document.getElementById("browse-search").value.trim();
+  if (!q) return;
+  Object.values(PLATFORMS).forEach(p => {
+    if (p.search) window.open(p.search + encodeURIComponent(q), "_blank");
+  });
+}
+
+// ==================== BOARD MANAGEMENT ====================
+function openBoardModal() { document.getElementById("board-modal").classList.add("open"); renderBoardList(); }
+function closeBoardModal() { document.getElementById("board-modal").classList.remove("open"); }
+
+function renderBoardList() {
+  const el = document.getElementById("board-list");
+  if (boards.length === 0) {
+    el.innerHTML = '<p style="color:var(--text-muted);font-size:13px;text-align:center;padding:20px;">No boards yet. Create one above!</p>';
+    return;
+  }
+  el.innerHTML = boards.map(b => {
+    const c = items.filter(i => i.boards && i.boards.includes(b)).length;
+    return `<div class="board-list-item">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="color:var(--accent);">📋</span>
+        <span style="font-size:13px;font-weight:500;">${esc(b)}</span>
+        <span style="font-size:11px;color:var(--text-muted);">${c} items</span>
+      </div>
+      <button class="btn btn-danger btn-sm" onclick="removeBoard('${esc(b)}')">🗑</button>
+    </div>`;
+  }).join("");
+}
+
+function addBoard() {
+  const name = document.getElementById("new-board-name").value.trim();
+  if (!name || boards.includes(name)) return;
+  boards.push(name);
+  document.getElementById("new-board-name").value = "";
+  renderBoardList();
+  renderNav();
+  saveData();
+}
+
+function removeBoard(name) {
+  boards = boards.filter(b => b !== name);
+  items.forEach(i => { if(i.boards) i.boards = i.boards.filter(b => b !== name); });
+  if (currentView === name) setView("all");
+  renderBoardList();
+  renderAll();
+}
+
+// ==================== INIT ====================
+function initFilters() {
+  // Platform filter
+  const pf = document.getElementById("platform-filter");
+  Object.entries(PLATFORMS).forEach(([k,v]) => {
+    const opt = document.createElement("option");
+    opt.value = k; opt.textContent = v.icon + " " + v.name;
+    pf.appendChild(opt);
+  });
+
+  // Category filter
+  const cf = document.getElementById("category-filter");
+  CATEGORIES.forEach(c => {
+    const opt = document.createElement("option");
+    opt.value = c; opt.textContent = c;
+    cf.appendChild(opt);
+  });
+
+  // Form selects
+  const fp = document.getElementById("f-platform");
+  Object.entries(PLATFORMS).forEach(([k,v]) => {
+    const opt = document.createElement("option");
+    opt.value = k; opt.textContent = v.icon + " " + v.name;
+    fp.appendChild(opt);
+  });
+
+  const fc = document.getElementById("f-category");
+  CATEGORIES.forEach(c => {
+    const opt = document.createElement("option");
+    opt.value = c; opt.textContent = c;
+    fc.appendChild(opt);
+  });
+
+  const fs = document.getElementById("f-size");
+  SIZES.forEach(s => {
+    const opt = document.createElement("option");
+    opt.value = s; opt.textContent = s || "—";
+    fs.appendChild(opt);
+  });
+
+  const fst = document.getElementById("f-status");
+  STATUS_LIST.forEach(s => {
+    const opt = document.createElement("option");
+    opt.value = s;
+    opt.textContent = s.replace(/_/g," ").replace(/\b\w/g,l=>l.toUpperCase());
+    fst.appendChild(opt);
+  });
+}
+
+// Boot
+loadData();
+initFilters();
+renderAll();
+</script>
+</body>
+</html>

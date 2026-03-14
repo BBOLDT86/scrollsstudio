@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Secure Slides</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#e8eaed;--white:#fff;--text:#202124;--text2:#5f6368;
+  --accent:#f4b400;--accent-dk:#d89f00;--blue:#1a73e8;
+  --border:#dadce0;--panel:#f1f3f4;
+  --tb-bg:#edf2fa;--tb-hover:#d3e3fd;
+  --shadow:0 1px 3px rgba(60,64,67,.2),0 4px 8px rgba(60,64,67,.1);
+  --red:#d93025;--green:#188038;
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;overflow:hidden;-webkit-font-smoothing:antialiased}
+
+/* ── Lock Screen ── */
+#lockScreen{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#1a0a2e 0%,#3d1a6e 40%,#5c2d91 100%)}
+#lockScreen.hidden{display:none}
+.lock-card{background:rgba(255,255,255,.06);backdrop-filter:blur(30px);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:48px 44px;width:420px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.4)}
+.lock-icon{width:64px;height:64px;margin:0 auto 20px;background:rgba(255,255,255,.08);border-radius:50%;display:flex;align-items:center;justify-content:center}
+.lock-icon .material-icons-outlined{font-size:32px;color:#d4a5ff}
+.lock-card h2{color:#e0e0e0;font-size:22px;font-weight:600;margin-bottom:6px}
+.lock-card p{color:rgba(255,255,255,.5);font-size:13px;margin-bottom:24px}
+.lock-input-wrap{position:relative;margin-bottom:16px}
+.lock-input{width:100%;padding:14px 48px 14px 18px;border:1px solid rgba(255,255,255,.15);border-radius:12px;background:rgba(255,255,255,.06);color:#fff;font-size:15px;font-family:inherit;outline:none;transition:border-color .2s}
+.lock-input:focus{border-color:#d4a5ff}
+.lock-input::placeholder{color:rgba(255,255,255,.3)}
+.eye-btn{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:rgba(255,255,255,.4);display:flex;align-items:center}
+.eye-btn:hover{color:rgba(255,255,255,.7)}
+.lock-btn{width:100%;padding:13px;border:none;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .2s;margin-bottom:8px}
+.lock-btn.primary{background:linear-gradient(135deg,#d4a5ff,#9b59b6);color:#1a0a2e}
+.lock-btn.primary:hover{filter:brightness(1.1);transform:translateY(-1px)}
+.lock-error{color:#ff6b6b;font-size:12px;margin-top:8px;min-height:18px}
+.lock-footer{margin-top:20px;font-size:11px;color:rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;gap:6px}
+.lock-footer .material-icons-outlined{font-size:14px}
+.lock-strength{height:4px;border-radius:2px;background:rgba(255,255,255,.1);margin-top:8px;overflow:hidden}
+.lock-strength-bar{height:100%;border-radius:2px;transition:width .3s,background .3s;width:0}
+
+/* ── Security badge ── */
+.sec-badge{display:flex;align-items:center;gap:4px;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:600;cursor:pointer;border:none;background:rgba(24,128,56,.1);color:var(--green)}
+.sec-badge .material-icons-outlined{font-size:14px}
+.sec-badge:hover{background:rgba(24,128,56,.18)}
+
+/* ── Header ── */
+.hdr{display:flex;align-items:center;padding:6px 12px;gap:8px;background:var(--white);flex-shrink:0;border-bottom:1px solid var(--border)}
+.hdr-icon svg{width:28px;height:28px}
+#docTitle{font-size:16px;font-weight:500;border:none;outline:none;padding:3px 6px;border-radius:4px;background:transparent;color:var(--text);font-family:inherit}
+#docTitle:hover{background:#f1f3f4}
+#docTitle:focus{background:var(--white);box-shadow:0 0 0 2px var(--blue)}
+.hdr-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+.pres-btn{background:var(--accent);color:var(--text);border:none;border-radius:20px;padding:7px 20px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px}
+.pres-btn:hover{background:var(--accent-dk)}
+.share-btn{background:var(--blue);color:white;border:none;border-radius:20px;padding:7px 20px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px}
+.share-btn:hover{filter:brightness(.9)}
+.avatar{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#f4b400,#ea4335);display:flex;align-items:center;justify-content:center;color:white;font-size:12px;font-weight:600}
+
+/* ── Toolbar ── */
+.toolbar{display:flex;align-items:center;padding:3px 6px;background:var(--tb-bg);gap:1px;flex-shrink:0;overflow-x:auto;border-bottom:1px solid var(--border)}
+.tb-sep{width:1px;height:20px;background:#c4c7cc;margin:0 3px;flex-shrink:0}
+.tb-btn{width:28px;height:28px;display:flex;align-items:center;justify-content:center;border:none;background:none;cursor:pointer;border-radius:4px;color:var(--text2);flex-shrink:0}
+.tb-btn:hover{background:var(--tb-hover);color:var(--text)}
+.tb-btn .material-icons-outlined{font-size:18px}
+.tb-select{height:26px;border:1px solid var(--border);background:var(--white);font-size:12px;color:var(--text);padding:0 4px;border-radius:4px;font-family:inherit;outline:none;flex-shrink:0}
+.theme-dot{width:18px;height:18px;border-radius:3px;cursor:pointer;border:2px solid transparent}
+.theme-dot:hover,.theme-dot.on{border-color:var(--blue)}
+
+/* ── Main ── */
+.main{flex:1;display:flex;overflow:hidden}
+.panel{width:190px;background:var(--panel);border-right:1px solid var(--border);overflow-y:auto;padding:6px;flex-shrink:0}
+.panel::-webkit-scrollbar{width:6px}
+.panel::-webkit-scrollbar-thumb{background:#bdc1c6;border-radius:3px}
+.thumb{display:flex;align-items:flex-start;gap:4px;padding:3px;border-radius:5px;cursor:pointer;margin-bottom:2px}
+.thumb:hover{background:#e0e2e4}
+.thumb.on{background:var(--tb-hover)}
+.thumb-num{font-size:10px;color:var(--text2);min-width:14px;text-align:right;padding-top:4px}
+.thumb-box{width:152px;aspect-ratio:16/9;border:2px solid transparent;border-radius:3px;overflow:hidden;background:var(--white);box-shadow:0 1px 2px rgba(0,0,0,.1)}
+.thumb.on .thumb-box{border-color:var(--blue)}
+.thumb-box canvas{width:100%;height:100%}
+
+.canvas-area{flex:1;display:flex;align-items:center;justify-content:center;padding:16px;overflow:auto}
+#slideWrap{width:880px;height:495px;background:var(--white);box-shadow:var(--shadow);position:relative;flex-shrink:0;overflow:hidden;border-radius:2px}
+.el{position:absolute;cursor:move;user-select:none}
+.el.active{outline:2px solid var(--blue);outline-offset:1px}
+.el .handle{position:absolute;width:9px;height:9px;background:var(--blue);border:1.5px solid white;border-radius:50%;display:none;z-index:5}
+.el.active .handle{display:block}
+.handle.nw{top:-5px;left:-5px;cursor:nw-resize}
+.handle.ne{top:-5px;right:-5px;cursor:ne-resize}
+.handle.sw{bottom:-5px;left:-5px;cursor:sw-resize}
+.handle.se{bottom:-5px;right:-5px;cursor:se-resize}
+.el-text{outline:none;min-width:30px;min-height:20px;padding:4px 8px;cursor:text}
+
+/* Notes & Footer */
+.notes{height:90px;border-top:1px solid var(--border);display:flex;flex-shrink:0}
+.notes-label{writing-mode:vertical-rl;transform:rotate(180deg);font-size:10px;color:var(--text2);padding:6px 3px;background:var(--panel);border-right:1px solid var(--border)}
+#notes{flex:1;border:none;outline:none;padding:8px 12px;font-size:12px;font-family:inherit;resize:none;color:var(--text)}
+#notes::placeholder{color:#b0b3b8}
+.foot{height:24px;display:flex;align-items:center;justify-content:space-between;padding:0 12px;background:var(--white);border-top:1px solid var(--border);font-size:11px;color:var(--text2);flex-shrink:0}
+
+/* Presentation */
+#presMode{display:none;position:fixed;inset:0;background:#000;z-index:9998;align-items:center;justify-content:center;cursor:none}
+#presMode.on{display:flex}
+#presInner{position:relative;overflow:hidden}
+.pres-bar{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);display:flex;gap:6px;opacity:0;transition:opacity .3s;z-index:10000}
+#presMode:hover .pres-bar{opacity:1;cursor:default}
+.pres-bar button{background:rgba(255,255,255,.15);border:none;color:white;width:34px;height:34px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px)}
+.pres-bar button:hover{background:rgba(255,255,255,.3)}
+.pres-bar span{color:rgba(255,255,255,.6);font-size:13px;display:flex;align-items:center;padding:0 10px}
+
+/* Password dialog */
+#pwDialog{display:none;position:fixed;inset:0;z-index:8000;background:rgba(0,0,0,.4);align-items:center;justify-content:center}
+#pwDialog.show{display:flex}
+.pw-card{background:var(--white);border-radius:16px;padding:28px;width:380px;box-shadow:0 12px 40px rgba(0,0,0,.2)}
+.pw-card h3{font-size:16px;margin-bottom:16px}
+.pw-card label{font-size:12px;color:var(--text2);display:block;margin-bottom:4px;margin-top:12px}
+.pw-card input{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;outline:none}
+.pw-card input:focus{border-color:var(--blue)}
+.pw-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:20px}
+.pw-btns button{padding:9px 20px;border-radius:8px;font-size:13px;cursor:pointer;font-family:inherit;font-weight:500}
+.btn-cancel{border:1px solid var(--border);background:var(--white);color:var(--text)}
+.btn-ok{border:none;background:var(--blue);color:white}
+.pw-error{color:var(--red);font-size:12px;margin-top:8px;min-height:16px}
+</style>
+</head>
+<body>
+
+<!-- LOCK SCREEN -->
+<div id="lockScreen">
+  <div class="lock-card">
+    <div class="lock-icon"><span class="material-icons-outlined">shield</span></div>
+    <h2 id="lockTitle">Secure Presentation</h2>
+    <p id="lockSub">Your slides are encrypted with AES-256-GCM</p>
+    <div id="unlockView">
+      <div class="lock-input-wrap">
+        <input class="lock-input" type="password" id="pwUnlock" placeholder="Enter password" autocomplete="off">
+        <button class="eye-btn" onclick="toggleVis('pwUnlock')"><span class="material-icons-outlined" style="font-size:20px">visibility_off</span></button>
+      </div>
+      <button class="lock-btn primary" onclick="doUnlock()">Unlock</button>
+      <div class="lock-error" id="unlockErr"></div>
+    </div>
+    <div id="createView" style="display:none">
+      <div class="lock-input-wrap">
+        <input class="lock-input" type="password" id="pwCreate" placeholder="Choose a password" autocomplete="off" oninput="checkStr()">
+        <button class="eye-btn" onclick="toggleVis('pwCreate')"><span class="material-icons-outlined" style="font-size:20px">visibility_off</span></button>
+      </div>
+      <div class="lock-strength"><div class="lock-strength-bar" id="strBar"></div></div>
+      <div class="lock-input-wrap" style="margin-top:12px">
+        <input class="lock-input" type="password" id="pwConfirm" placeholder="Confirm password" autocomplete="off">
+      </div>
+      <button class="lock-btn primary" onclick="doCreate()">Create & Encrypt</button>
+      <div class="lock-error" id="createErr"></div>
+    </div>
+    <div class="lock-footer"><span class="material-icons-outlined">lock</span> AES-256-GCM · PBKDF2 · 100K iterations</div>
+  </div>
+</div>
+
+<!-- PW CHANGE -->
+<div id="pwDialog">
+  <div class="pw-card">
+    <h3>Change Password</h3>
+    <label>Current password</label><input type="password" id="pwOld">
+    <label>New password</label><input type="password" id="pwNew">
+    <label>Confirm</label><input type="password" id="pwNew2">
+    <div class="pw-error" id="pwDlgErr"></div>
+    <div class="pw-btns"><button class="btn-cancel" onclick="closePwDlg()">Cancel</button><button class="btn-ok" onclick="changePw()">Change</button></div>
+  </div>
+</div>
+
+<!-- HEADER -->
+<div class="hdr">
+  <div class="hdr-icon"><svg viewBox="0 0 48 48"><rect x="4" y="8" width="40" height="32" rx="3" fill="#f4b400"/><rect x="10" y="14" width="28" height="20" rx="1" fill="#fff"/><rect x="16" y="18" width="16" height="4" rx="1" fill="#f4b400" opacity=".6"/><rect x="16" y="25" width="12" height="3" rx="1" fill="#dadce0"/></svg></div>
+  <input id="docTitle" value="Untitled presentation" spellcheck="false">
+  <div class="hdr-right">
+    <button class="sec-badge" onclick="lockNow()" title="Lock"><span class="material-icons-outlined">lock_open</span><span>Encrypted</span></button>
+    <button class="pres-btn" onclick="startPres()"><span class="material-icons-outlined" style="font-size:16px">slideshow</span>Present</button>
+    <button class="share-btn"><span class="material-icons-outlined" style="font-size:16px">lock</span>Share</button>
+    <div class="avatar">B</div>
+  </div>
+</div>
+
+<!-- TOOLBAR -->
+<div class="toolbar">
+  <button class="tb-btn" onclick="doUndo()" title="Undo"><span class="material-icons-outlined">undo</span></button>
+  <button class="tb-btn" onclick="doRedo()" title="Redo"><span class="material-icons-outlined">redo</span></button>
+  <div class="tb-sep"></div>
+  <button class="tb-btn" onclick="addSlide()" title="New slide"><span class="material-icons-outlined">add</span></button>
+  <div class="tb-sep"></div>
+  <button class="tb-btn" onclick="addText()" title="Text"><span class="material-icons-outlined">text_fields</span></button>
+  <button class="tb-btn" onclick="addImg()" title="Image"><span class="material-icons-outlined">image</span></button>
+  <button class="tb-btn" onclick="addRect()" title="Rectangle"><span class="material-icons-outlined">crop_square</span></button>
+  <button class="tb-btn" onclick="addCircle()" title="Circle"><span class="material-icons-outlined">circle</span></button>
+  <button class="tb-btn" onclick="addLine()" title="Line"><span class="material-icons-outlined">horizontal_rule</span></button>
+  <div class="tb-sep"></div>
+  <select class="tb-select" onchange="fmtCmd('fontName',this.value)"><option>DM Sans</option><option>Arial</option><option>Georgia</option><option>Courier New</option></select>
+  <select class="tb-select" onchange="fmtCmd('fontSize',this.value)"><option value="2">12</option><option value="3" selected>16</option><option value="4">20</option><option value="5">28</option><option value="6">36</option><option value="7">48</option></select>
+  <div class="tb-sep"></div>
+  <button class="tb-btn" onclick="fmtCmd('bold')"><span class="material-icons-outlined">format_bold</span></button>
+  <button class="tb-btn" onclick="fmtCmd('italic')"><span class="material-icons-outlined">format_italic</span></button>
+  <button class="tb-btn" onclick="fmtCmd('underline')"><span class="material-icons-outlined">format_underlined</span></button>
+  <div class="tb-sep"></div>
+  <button class="tb-btn" onclick="fmtCmd('foreColor','#cc0000')"><span class="material-icons-outlined" style="color:#cc0000">format_color_text</span></button>
+  <button class="tb-btn" onclick="fmtCmd('foreColor','#ffffff')"><span class="material-icons-outlined" style="color:#999">format_color_text</span></button>
+  <button class="tb-btn" onclick="fmtCmd('foreColor','#202124')"><span class="material-icons-outlined">format_color_text</span></button>
+  <div class="tb-sep"></div>
+  <div style="display:flex;gap:3px;align-items:center;padding:0 4px">
+    <div class="theme-dot on" style="background:#fff;border-color:#ccc" onclick="setTheme('light',this)"></div>
+    <div class="theme-dot" style="background:#1a1a2e" onclick="setTheme('dark',this)"></div>
+    <div class="theme-dot" style="background:#0f4c75" onclick="setTheme('blue',this)"></div>
+    <div class="theme-dot" style="background:#fdf5e6" onclick="setTheme('cream',this)"></div>
+    <div class="theme-dot" style="background:#1b4332" onclick="setTheme('forest',this)"></div>
+  </div>
+  <div class="tb-sep"></div>
+  <button class="tb-btn" onclick="delEl()" title="Delete"><span class="material-icons-outlined">delete</span></button>
+  <button class="tb-btn" onclick="dupEl()" title="Duplicate"><span class="material-icons-outlined">content_copy</span></button>
+  <div class="tb-sep"></div>
+  <button class="tb-btn" onclick="lockNow()" title="Lock now"><span class="material-icons-outlined">lock</span></button>
+  <button class="tb-btn" onclick="openPwDlg()" title="Change password"><span class="material-icons-outlined">key</span></button>
+</div>
+
+<div class="main">
+  <div class="panel" id="panel"></div>
+  <div class="canvas-area"><div id="slideWrap"></div></div>
+</div>
+<div class="notes"><div class="notes-label">Speaker notes</div><textarea id="notes" placeholder="Click to add speaker notes…"></textarea></div>
+<div class="foot"><span id="slideInfo">Slide 1 of 1</span><span>16:9</span></div>
+
+<div id="presMode">
+  <div id="presInner"></div>
+  <div class="pres-bar">
+    <button onclick="presNav(-1)"><span class="material-icons-outlined">chevron_left</span></button>
+    <span id="presCount">1 / 1</span>
+    <button onclick="presNav(1)"><span class="material-icons-outlined">chevron_right</span></button>
+    <button onclick="endPres()"><span class="material-icons-outlined">close</span></button>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════
+// ENCRYPTION (AES-256-GCM + PBKDF2)
+// ═══════════════════════════════════════
+const STORE='secureSlides_v1',SALT_K='secureSlides_salt',ITER=100000;
+let cryptoKey=null,currentPw=null;
+
+async function getSalt(){let s=localStorage.getItem(SALT_K);if(s)return Uint8Array.from(atob(s),c=>c.charCodeAt(0));const salt=crypto.getRandomValues(new Uint8Array(16));localStorage.setItem(SALT_K,btoa(String.fromCharCode(...salt)));return salt;}
+async function deriveKey(pw){const e=new TextEncoder().encode(pw),salt=await getSalt(),base=await crypto.subtle.importKey('raw',e,'PBKDF2',false,['deriveKey']);return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:ITER,hash:'SHA-256'},base,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);}
+async function enc(data,key){const iv=crypto.getRandomValues(new Uint8Array(12)),encoded=new TextEncoder().encode(JSON.stringify(data)),cipher=await crypto.subtle.encrypt({name:'AES-GCM',iv},key,encoded),combined=new Uint8Array(iv.length+cipher.byteLength);combined.set(iv);combined.set(new Uint8Array(cipher),iv.length);return btoa(String.fromCharCode(...combined));}
+async function dec(b64,key){const bytes=Uint8Array.from(atob(b64),c=>c.charCodeAt(0)),iv=bytes.slice(0,12),cipher=bytes.slice(12),plain=await crypto.subtle.decrypt({name:'AES-GCM',iv},key,cipher);return JSON.parse(new TextDecoder().decode(plain));}
+function hasData(){return!!localStorage.getItem(STORE)}
+
+async function saveEnc(){if(!cryptoKey)return;saveNotes();const payload={slides,si,title:document.getElementById('docTitle').value};const b64=await enc(payload,cryptoKey);localStorage.setItem(STORE,b64);}
+
+// ── Lock Screen ──
+function toggleVis(id){const i=document.getElementById(id);i.type=i.type==='password'?'text':'password';}
+function checkStr(){const pw=document.getElementById('pwCreate').value,bar=document.getElementById('strBar');let sc=0;if(pw.length>=6)sc++;if(pw.length>=10)sc++;if(/[A-Z]/.test(pw)&&/[a-z]/.test(pw))sc++;if(/\d/.test(pw))sc++;if(/[^A-Za-z0-9]/.test(pw))sc++;bar.style.width=[0,20,40,60,80,100][sc]+'%';bar.style.background=['#ff4444','#ff4444','#ff9900','#ffcc00','#88cc00','#00cc44'][sc];}
+
+async function doUnlock(){
+  const pw=document.getElementById('pwUnlock').value;
+  if(!pw){document.getElementById('unlockErr').textContent='Enter your password';return;}
+  try{const key=await deriveKey(pw),data=await dec(localStorage.getItem(STORE),key);cryptoKey=key;currentPw=pw;if(data){slides=data.slides||[];si=data.si||0;if(data.title)document.getElementById('docTitle').value=data.title;}showApp();}catch(e){document.getElementById('unlockErr').textContent='Wrong password. Try again.';}
+}
+async function doCreate(){
+  const pw=document.getElementById('pwCreate').value,pw2=document.getElementById('pwConfirm').value;
+  if(pw.length<4){document.getElementById('createErr').textContent='Min 4 characters';return;}
+  if(pw!==pw2){document.getElementById('createErr').textContent='Passwords do not match';return;}
+  localStorage.removeItem(STORE);localStorage.removeItem(SALT_K);
+  cryptoKey=await deriveKey(pw);currentPw=pw;
+  initSlides();showApp();saveEnc();
+}
+function showApp(){
+  document.getElementById('lockScreen').classList.add('hidden');
+  renderSlide();
+  setInterval(saveEnc,5000);
+  let idle=0;const ri=()=>idle=0;document.addEventListener('mousemove',ri);document.addEventListener('keydown',ri);setInterval(()=>{idle++;if(idle>300)lockNow();},1000);
+}
+function lockNow(){cryptoKey=null;currentPw=null;slides=[];document.getElementById('slideWrap').innerHTML='';document.getElementById('panel').innerHTML='';document.getElementById('lockScreen').classList.remove('hidden');document.getElementById('pwUnlock').value='';document.getElementById('unlockErr').textContent='';}
+
+if(hasData()){document.getElementById('createView').style.display='none';document.getElementById('unlockView').style.display='block';document.getElementById('lockSub').textContent='Enter your password to decrypt';}
+else{document.getElementById('unlockView').style.display='none';document.getElementById('createView').style.display='block';document.getElementById('lockTitle').textContent='Set Up Encryption';document.getElementById('lockSub').textContent='Create a password to protect your slides';}
+
+document.getElementById('pwUnlock').addEventListener('keydown',e=>{if(e.key==='Enter')doUnlock();});
+document.getElementById('pwConfirm').addEventListener('keydown',e=>{if(e.key==='Enter')doCreate();});
+
+function openPwDlg(){document.getElementById('pwDialog').classList.add('show');}
+function closePwDlg(){document.getElementById('pwDialog').classList.remove('show');document.getElementById('pwDlgErr').textContent='';}
+async function changePw(){const o=document.getElementById('pwOld').value,n=document.getElementById('pwNew').value,n2=document.getElementById('pwNew2').value;if(o!==currentPw){document.getElementById('pwDlgErr').textContent='Wrong current password';return;}if(n.length<4){document.getElementById('pwDlgErr').textContent='Too short';return;}if(n!==n2){document.getElementById('pwDlgErr').textContent='No match';return;}localStorage.removeItem(SALT_K);cryptoKey=await deriveKey(n);currentPw=n;await saveEnc();closePwDlg();alert('Password changed.');}
+
+// ═══════════════════════════════════════
+// SLIDES ENGINE
+// ═══════════════════════════════════════
+const THEMES={light:{bg:'#ffffff',txt:'#202124',accent:'#1a73e8'},dark:{bg:'#1a1a2e',txt:'#eaeaea',accent:'#f4b400'},blue:{bg:'#0f4c75',txt:'#ffffff',accent:'#3282b8'},cream:{bg:'#fdf5e6',txt:'#3e2723',accent:'#bf360c'},forest:{bg:'#1b4332',txt:'#d8f3dc',accent:'#95d5b2'}};
+let slides=[],si=0,activeElDom=null,dragInfo=null,resizeInfo=null,undoStk=[],redoStk=[],idc=0;
+function uid(){return'e'+(++idc)}
+function mkSlide(els,notes,theme){return{id:uid(),els:els||[],notes:notes||'',theme:theme||'light'};}
+function mkEl(type,x,y,w,h,content,style){return{id:uid(),type,x,y,w,h,content:content||'',style:style||{}};}
+
+function initSlides(){
+  slides=[mkSlide([
+    mkEl('text',80,120,720,90,'<div style="font-size:42px;font-weight:700;text-align:center">Secure Presentation</div>',{color:'#202124'}),
+    mkEl('text',180,240,520,50,'<div style="font-size:20px;text-align:center;color:#5f6368">Your data is AES-256 encrypted</div>'),
+    mkEl('rect',340,340,200,8,'',{backgroundColor:'#1a73e8',borderRadius:'4px'}),
+  ]),mkSlide([
+    mkEl('text',60,40,760,60,'<div style="font-size:32px;font-weight:700">Add your content</div>'),
+    mkEl('text',60,120,760,280,'<div style="font-size:18px;line-height:1.8">Everything is encrypted at rest:<br>• Text, shapes, images<br>• Speaker notes<br>• Slide order & themes<br><br>Auto-saves every 5 seconds.<br>Auto-locks after 5 min idle.</div>'),
+  ])];
+}
+
+function renderSlide(){
+  const wrap=document.getElementById('slideWrap'),slide=slides[si],theme=THEMES[slide.theme];
+  wrap.style.background=theme.bg;wrap.innerHTML='';activeElDom=null;
+  slide.els.forEach(el=>{
+    const d=document.createElement('div');d.className='el';d.dataset.id=el.id;
+    d.style.left=el.x+'px';d.style.top=el.y+'px';d.style.width=el.w+'px';d.style.height=el.h+'px';
+    if(el.type==='text'){d.classList.add('el-text');d.contentEditable='true';d.style.color=el.style.color||theme.txt;d.style.fontSize=el.style.fontSize||'16px';d.style.fontFamily=el.style.fontFamily||'DM Sans,sans-serif';d.innerHTML=el.content;d.addEventListener('input',()=>{el.content=d.innerHTML;});d.addEventListener('mousedown',e=>{if(document.activeElement===d){e.stopPropagation();return;}});}
+    else if(el.type==='rect'){d.style.backgroundColor=el.style.backgroundColor||theme.accent;d.style.borderRadius=el.style.borderRadius||'6px';}
+    else if(el.type==='circle'){d.style.backgroundColor=el.style.backgroundColor||theme.accent;d.style.borderRadius='50%';}
+    else if(el.type==='line'){d.style.height='4px';d.style.backgroundColor=el.style.backgroundColor||theme.txt;d.style.borderRadius='2px';d.style.top=(el.y+el.h/2-2)+'px';}
+    else if(el.type==='image'){d.style.overflow='hidden';d.innerHTML=`<img src="${el.content}" style="width:100%;height:100%;object-fit:contain;pointer-events:none" draggable="false">`;}
+    ['nw','ne','sw','se'].forEach(pos=>{const h=document.createElement('div');h.className='handle '+pos;h.addEventListener('mousedown',e=>{e.stopPropagation();resizeInfo={el,dom:d,pos,startX:e.clientX,startY:e.clientY,origX:el.x,origY:el.y,origW:el.w,origH:el.h};e.preventDefault();});d.appendChild(h);});
+    d.addEventListener('mousedown',e=>{if(e.target.classList.contains('handle'))return;selEl(d);if(el.type==='text'&&document.activeElement===d)return;dragInfo={el,dom:d,startX:e.clientX,startY:e.clientY,origX:el.x,origY:el.y};e.preventDefault();});
+    wrap.appendChild(d);
+  });
+  document.getElementById('notes').value=slide.notes;document.getElementById('slideInfo').textContent=`Slide ${si+1} of ${slides.length}`;renderPanel();
+}
+
+function selEl(d){document.querySelectorAll('.el.active').forEach(e=>e.classList.remove('active'));if(d){d.classList.add('active');activeElDom=d;}else activeElDom=null;}
+document.addEventListener('mousemove',e=>{if(dragInfo){const{el,dom,startX,startY,origX,origY}=dragInfo;el.x=Math.max(0,origX+(e.clientX-startX));el.y=Math.max(0,origY+(e.clientY-startY));dom.style.left=el.x+'px';dom.style.top=el.y+'px';}if(resizeInfo){const{el,dom,pos,startX,startY,origX,origY,origW,origH}=resizeInfo;const dx=e.clientX-startX,dy=e.clientY-startY;if(pos.includes('e'))el.w=Math.max(30,origW+dx);if(pos.includes('w')){el.w=Math.max(30,origW-dx);el.x=origX+dx;}if(pos.includes('s'))el.h=Math.max(20,origH+dy);if(pos.includes('n')){el.h=Math.max(20,origH-dy);el.y=origY+dy;}dom.style.left=el.x+'px';dom.style.top=el.y+'px';dom.style.width=el.w+'px';dom.style.height=el.h+'px';}});
+document.addEventListener('mouseup',()=>{if(dragInfo||resizeInfo)renderThumbs();dragInfo=null;resizeInfo=null;});
+document.getElementById('slideWrap').addEventListener('mousedown',e=>{if(e.target.id==='slideWrap')selEl(null);});
+
+function renderPanel(){const p=document.getElementById('panel');p.innerHTML='';slides.forEach((s,i)=>{const d=document.createElement('div');d.className='thumb'+(i===si?' on':'');d.innerHTML=`<div class="thumb-num">${i+1}</div><div class="thumb-box"><canvas data-i="${i}"></canvas></div>`;d.addEventListener('click',()=>{saveNotes();si=i;renderSlide();});p.appendChild(d);});renderThumbs();}
+function renderThumbs(){document.querySelectorAll('.thumb-box canvas').forEach(cvs=>{const i=+cvs.dataset.i,slide=slides[i];if(!slide)return;const box=cvs.parentElement.getBoundingClientRect(),dpr=window.devicePixelRatio||1;cvs.width=box.width*dpr;cvs.height=box.height*dpr;cvs.style.width=box.width+'px';cvs.style.height=box.height+'px';const ctx=cvs.getContext('2d');ctx.scale(dpr,dpr);const theme=THEMES[slide.theme];ctx.fillStyle=theme.bg;ctx.fillRect(0,0,box.width,box.height);const sx=box.width/880,sy=box.height/495;slide.els.forEach(el=>{ctx.save();if(el.type==='text'){ctx.fillStyle=el.style.color||theme.txt;const fs=parseInt(el.style.fontSize)||16;ctx.font=Math.max(5,fs*sx)+'px DM Sans';ctx.fillText(el.content.replace(/<[^>]*>/g,'').substring(0,50),el.x*sx+2,(el.y+fs*1.2)*sy,el.w*sx-4);}else if(el.type==='rect'){ctx.fillStyle=el.style.backgroundColor||theme.accent;ctx.fillRect(el.x*sx,el.y*sy,el.w*sx,el.h*sy);}else if(el.type==='circle'){ctx.fillStyle=el.style.backgroundColor||theme.accent;ctx.beginPath();ctx.arc((el.x+el.w/2)*sx,(el.y+el.h/2)*sy,el.w/2*sx,0,Math.PI*2);ctx.fill();}else if(el.type==='line'){ctx.strokeStyle=el.style.backgroundColor||theme.txt;ctx.lineWidth=3*sx;ctx.beginPath();ctx.moveTo(el.x*sx,(el.y+el.h/2)*sy);ctx.lineTo((el.x+el.w)*sx,(el.y+el.h/2)*sy);ctx.stroke();}ctx.restore();});});}
+
+function addText(){pushU();slides[si].els.push(mkEl('text',80+Math.random()*60,100+Math.random()*40,340,60,'<div style="font-size:20px">Double-click to edit</div>'));renderSlide();}
+function addRect(){pushU();slides[si].els.push(mkEl('rect',120+Math.random()*80,100+Math.random()*60,180,120,'',{backgroundColor:THEMES[slides[si].theme].accent}));renderSlide();}
+function addCircle(){pushU();slides[si].els.push(mkEl('circle',200+Math.random()*80,100+Math.random()*60,140,140,'',{backgroundColor:THEMES[slides[si].theme].accent}));renderSlide();}
+function addLine(){pushU();slides[si].els.push(mkEl('line',100,240,300,4,'',{backgroundColor:THEMES[slides[si].theme].txt}));renderSlide();}
+function addImg(){const inp=document.createElement('input');inp.type='file';inp.accept='image/*';inp.onchange=()=>{const f=inp.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{pushU();slides[si].els.push(mkEl('image',120,60,400,280,rd.result));renderSlide();};rd.readAsDataURL(f);};inp.click();}
+function delEl(){if(!activeElDom)return;pushU();slides[si].els=slides[si].els.filter(e=>e.id!==activeElDom.dataset.id);activeElDom=null;renderSlide();}
+function dupEl(){if(!activeElDom)return;pushU();const src=slides[si].els.find(e=>e.id===activeElDom.dataset.id);if(!src)return;const cp=JSON.parse(JSON.stringify(src));cp.id=uid();cp.x+=20;cp.y+=20;slides[si].els.push(cp);renderSlide();}
+
+function addSlide(){pushU();saveNotes();slides.splice(si+1,0,mkSlide([],''  ,slides[si].theme));si++;renderSlide();}
+function saveNotes(){if(slides[si])slides[si].notes=document.getElementById('notes').value;}
+function setTheme(n,dot){slides[si].theme=n;document.querySelectorAll('.theme-dot').forEach(d=>d.classList.remove('on'));if(dot)dot.classList.add('on');renderSlide();}
+function fmtCmd(cmd,val){document.execCommand(cmd,false,val||null);}
+
+function pushU(){saveNotes();undoStk.push(JSON.stringify(slides));redoStk=[];if(undoStk.length>30)undoStk.shift();}
+function doUndo(){if(!undoStk.length)return;saveNotes();redoStk.push(JSON.stringify(slides));slides=JSON.parse(undoStk.pop());renderSlide();}
+function doRedo(){if(!redoStk.length)return;undoStk.push(JSON.stringify(slides));slides=JSON.parse(redoStk.pop());renderSlide();}
+
+let presI=0;
+function startPres(){saveNotes();presI=si;document.getElementById('presMode').classList.add('on');renderPres();document.documentElement.requestFullscreen?.();}
+function endPres(){document.getElementById('presMode').classList.remove('on');document.exitFullscreen?.();}
+function renderPres(){const inner=document.getElementById('presInner'),slide=slides[presI];if(!slide)return;const theme=THEMES[slide.theme],scX=window.innerWidth/880,scY=window.innerHeight/495,sc=Math.min(scX,scY);inner.style.width='880px';inner.style.height='495px';inner.style.transform=`scale(${sc})`;inner.style.transformOrigin='center center';inner.style.background=theme.bg;inner.innerHTML='';slide.els.forEach(el=>{const d=document.createElement('div');d.style.position='absolute';d.style.left=el.x+'px';d.style.top=el.y+'px';d.style.width=el.w+'px';d.style.height=el.h+'px';if(el.type==='text'){d.style.color=el.style.color||theme.txt;d.innerHTML=el.content;}else if(el.type==='rect'){d.style.backgroundColor=el.style.backgroundColor||theme.accent;d.style.borderRadius='6px';}else if(el.type==='circle'){d.style.backgroundColor=el.style.backgroundColor||theme.accent;d.style.borderRadius='50%';}else if(el.type==='line'){d.style.height='4px';d.style.backgroundColor=el.style.backgroundColor||theme.txt;d.style.top=(el.y+el.h/2-2)+'px';}else if(el.type==='image'){d.innerHTML=`<img src="${el.content}" style="width:100%;height:100%;object-fit:contain">`;}inner.appendChild(d);});document.getElementById('presCount').textContent=`${presI+1} / ${slides.length}`;}
+function presNav(dir){presI=Math.max(0,Math.min(slides.length-1,presI+dir));renderPres();}
+
+document.addEventListener('keydown',e=>{if(document.getElementById('presMode').classList.contains('on')){if(e.key==='Escape')endPres();if(e.key==='ArrowRight'||e.key===' '){e.preventDefault();presNav(1);}if(e.key==='ArrowLeft')presNav(-1);return;}if(document.getElementById('lockScreen').classList.contains('hidden')===false)return;const ed=document.activeElement?.contentEditable==='true';if((e.key==='Delete'||e.key==='Backspace')&&!ed&&activeElDom){e.preventDefault();delEl();}if((e.ctrlKey||e.metaKey)&&e.key==='m'){e.preventDefault();addSlide();}if((e.ctrlKey||e.metaKey)&&e.key==='d'&&!ed){e.preventDefault();dupEl();}if((e.ctrlKey||e.metaKey)&&e.key==='z'){e.preventDefault();doUndo();}if((e.ctrlKey||e.metaKey)&&e.key==='y'){e.preventDefault();doRedo();}if((e.ctrlKey||e.metaKey)&&e.key==='l'){e.preventDefault();lockNow();}});
+
+document.getElementById('notes').addEventListener('input',saveNotes);
+</script>
+</body>
+</html>

@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RunwayRewards — Fashion Discovery & Savings</title>
+<meta name="description" content="AI-powered fashion discovery, style ideation, and savings tracker. Serverless. Single file. Your data stays yours.">
+<meta name="theme-color" content="#0b0a0d">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500&family=Outfit:wght@200;300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0b0a0d;
+  --surface: #141216;
+  --surface-2: #1b181f;
+  --surface-3: #221f26;
+  --border: rgba(255,255,255,0.05);
+  --border-hover: rgba(255,255,255,0.1);
+  --white: #f4f0eb;
+  --off-white: #c8c0b6;
+  --muted: #7a7380;
+  --dim: #3d3745;
+  --rose: #d4a0a0;
+  --rose-deep: #b07878;
+  --gold: #c9a96e;
+  --gold-light: #e8d5a8;
+  --gold-glow: rgba(201,169,110,0.08);
+  --blush: #e8b4b8;
+  --sage: #8fad8b;
+  --lavender: #b0a0d4;
+  --sky: #89b4d4;
+  --coral: #d4906e;
+  --pad: clamp(20px, 5vw, 80px);
+  --max: 1200px;
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-body: 'Outfit', -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --radius: 12px;
+  --radius-lg: 20px;
+  --radius-pill: 100px;
+}
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--white);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  line-height: 1.6;
+}
+body::after {
+  content:''; position:fixed; inset:0; z-index:9998; pointer-events:none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity:0.025; mix-blend-mode:overlay;
+}
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--dim); border-radius: 8px; }
+::selection { background: rgba(201,169,110,0.25); color: var(--white); }
+
+.r {
+  opacity:0; transform:translateY(24px);
+  transition: opacity 0.8s cubic-bezier(0.16,1,0.3,1), transform 0.8s cubic-bezier(0.16,1,0.3,1);
+}
+.r.v { opacity:1; transform:translateY(0); }
+
+/* NAV */
+.nav {
+  position:fixed; top:0; left:0; right:0; z-index:1000;
+  padding: 0 var(--pad); height: 60px;
+  display:flex; align-items:center; justify-content:space-between;
+  background: rgba(11,10,13,0);
+  backdrop-filter: blur(0px); -webkit-backdrop-filter: blur(0px);
+  border-bottom: 1px solid transparent;
+  transition: all 0.5s cubic-bezier(0.16,1,0.3,1);
+}
+.nav.scrolled {
+  background: rgba(11,10,13,0.85);
+  backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px);
+  border-bottom-color: var(--border);
+}
+.nav-brand { display: flex; align-items: center; gap: 10px; }
+.nav-logo {
+  font-family: var(--font-display);
+  font-size: 1.1rem; font-weight: 600; color: var(--white);
+  letter-spacing: -0.02em;
+}
+.nav-logo em { font-style: italic; color: var(--gold); }
+.nav-tag {
+  font-size: 0.52rem; font-weight: 600; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--dim);
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  padding: 3px 8px; border-radius: var(--radius-pill);
+}
+.nav-links { display: flex; align-items: center; gap: 6px; }
+.nav-link {
+  font-size: 0.75rem; font-weight: 500; color: var(--muted);
+  padding: 7px 14px; border-radius: var(--radius-pill);
+  text-decoration: none; cursor: pointer; border: none; background: none;
+  transition: color 0.3s, background 0.3s;
+}
+.nav-link:hover { color: var(--white); background: rgba(255,255,255,0.04); }
+.nav-link.active { color: var(--gold); }
+.nav-cta {
+  font-size: 0.72rem; font-weight: 600; font-family: var(--font-body);
+  background: linear-gradient(135deg, var(--gold), var(--gold-light));
+  color: #0b0a0d; padding: 8px 20px; border-radius: var(--radius-pill);
+  border: none; cursor: pointer; text-decoration: none;
+  transition: transform 0.2s, box-shadow 0.3s; margin-left: 8px;
+}
+.nav-cta:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(201,169,110,0.25); }
+@media (max-width:768px) {
+  .nav-links .nav-link { display: none; }
+  .nav-tag { display: none; }
+}
+
+/* SECTIONS */
+section { padding: 0 var(--pad); display: flex; flex-direction: column; }
+.section-full { min-height: 100svh; justify-content: center; }
+.section-block { padding-top: clamp(80px, 10vh, 130px); padding-bottom: clamp(80px, 10vh, 130px); }
+.centered { align-items: center; text-align: center; }
+.inner { max-width: var(--max); width: 100%; margin: 0 auto; }
+
+/* TYPOGRAPHY */
+.kicker {
+  font-size: 0.65rem; font-weight: 600; color: var(--gold);
+  letter-spacing: 0.16em; text-transform: uppercase; margin-bottom: 14px;
+}
+.headline {
+  font-family: var(--font-display);
+  font-size: clamp(2.8rem, 9vw, 6.5rem);
+  line-height: 0.93; letter-spacing: -0.03em;
+  color: var(--white); font-weight: 400;
+}
+.headline em {
+  font-style: italic;
+  background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 40%, var(--rose) 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer-gold 6s ease-in-out infinite;
+}
+@keyframes shimmer-gold {
+  0%,100% { background-position: -200% center; }
+  50% { background-position: 200% center; }
+}
+.subhead {
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 4vw, 3rem);
+  line-height: 1.08; letter-spacing: -0.02em;
+  color: var(--white); font-weight: 400;
+}
+.body-lg {
+  font-size: clamp(1rem, 1.4vw, 1.15rem);
+  line-height: 1.7; color: var(--off-white);
+  max-width: 520px; font-weight: 300;
+}
+.body-md {
+  font-size: 0.88rem; line-height: 1.65;
+  color: var(--muted); max-width: 480px;
+}
+.accent { color: var(--gold); }
+
+/* HERO */
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 0.68rem; font-weight: 500; color: var(--muted);
+  background: var(--surface); border: 1px solid var(--border);
+  padding: 6px 16px; border-radius: var(--radius-pill); margin-bottom: 24px;
+}
+.hero-badge .dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--sage); animation: pulse 2s ease infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.35;} }
+
+.hero-features {
+  display: flex; gap: 1px;
+  background: var(--border); border-radius: var(--radius-lg); overflow: hidden;
+  margin-top: 48px; max-width: 820px; width: 100%;
+}
+.hero-feat {
+  flex: 1; background: var(--surface); padding: 28px 22px;
+  text-align: center; transition: background 0.3s;
+}
+.hero-feat:hover { background: var(--surface-2); }
+.hero-feat-icon {
+  width: 40px; height: 40px; border-radius: 10px; margin: 0 auto 12px;
+  display: flex; align-items: center; justify-content: center; font-size: 1.3rem;
+}
+.hero-feat h4 { font-weight: 600; font-size: 0.82rem; color: var(--white); margin-bottom: 4px; }
+.hero-feat p { font-size: 0.72rem; color: var(--muted); line-height: 1.4; }
+@media (max-width:640px) { .hero-features { flex-direction: column; } }
+
+/* MANIFESTO */
+.manifesto {
+  font-family: var(--font-display);
+  font-size: clamp(1.2rem, 2.6vw, 1.9rem);
+  line-height: 1.5; letter-spacing: -0.01em;
+  color: var(--off-white); font-weight: 400; max-width: 660px;
+}
+.manifesto strong { color: var(--white); font-weight: 600; }
+.manifesto em { font-style: italic; color: var(--gold); }
+
+/* TICKER */
+.ticker-wrap {
+  overflow: hidden; padding: 14px 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  margin: 0 calc(-1 * var(--pad));
+}
+.ticker {
+  display: flex; gap: 40px; white-space: nowrap;
+  animation: ticker-scroll 30s linear infinite;
+}
+.ticker-item {
+  font-family: var(--font-display);
+  font-size: 0.82rem; color: var(--dim);
+  font-style: italic; flex-shrink: 0;
+}
+.ticker-item .sep { color: var(--gold); margin: 0 0 0 40px; font-style: normal; }
+@keyframes ticker-scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* CATEGORY GRID */
+.cat-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 12px; max-width: var(--max); width: 100%; margin-top: 40px;
+}
+.cat-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 24px 18px;
+  text-align: center; cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.16,1,0.3,1);
+  position: relative; overflow: hidden;
+}
+.cat-card::before {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(circle at 50% 120%, var(--card-glow, rgba(201,169,110,0.06)), transparent 70%);
+  opacity: 0; transition: opacity 0.4s;
+}
+.cat-card:hover { transform: translateY(-4px); border-color: var(--border-hover); }
+.cat-card:hover::before { opacity: 1; }
+.cat-icon { font-size: 2rem; margin-bottom: 10px; display: block; filter: grayscale(0.15); position: relative; }
+.cat-card h4 {
+  font-family: var(--font-display); font-weight: 500;
+  font-size: 0.92rem; color: var(--white); margin-bottom: 3px; position: relative;
+}
+.cat-card p { font-size: 0.68rem; color: var(--muted); position: relative; }
+.cat-count {
+  font-size: 0.56rem; font-weight: 600; color: var(--dim);
+  font-family: var(--font-mono); margin-top: 8px;
+  letter-spacing: 0.04em; position: relative;
+}
+
+/* AI CARDS */
+.ai-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px; max-width: var(--max); width: 100%; margin-top: 44px;
+}
+.ai-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.16,1,0.3,1);
+}
+.ai-card:hover { transform: translateY(-3px); border-color: var(--border-hover); }
+.ai-card-head { padding: 24px 24px 0; display: flex; align-items: flex-start; gap: 14px; }
+.ai-card-icon {
+  width: 44px; height: 44px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.2rem; flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08);
+}
+.ai-card-head h3 {
+  font-family: var(--font-display); font-weight: 600;
+  font-size: 1.05rem; color: var(--white); letter-spacing: -0.02em;
+}
+.ai-card-head p { font-size: 0.76rem; color: var(--muted); margin-top: 3px; line-height: 1.45; }
+.ai-card-preview {
+  margin: 18px; padding: 18px;
+  background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.03);
+  border-radius: var(--radius); font-size: 0.72rem;
+  color: var(--muted); line-height: 1.6; font-family: var(--font-mono);
+}
+.ai-line { display: flex; gap: 8px; margin-bottom: 6px; align-items: flex-start; }
+.ai-role {
+  font-size: 0.58rem; font-weight: 600; letter-spacing: 0.06em;
+  text-transform: uppercase; flex-shrink: 0; padding-top: 1px;
+}
+.ai-role.user { color: var(--blush); }
+.ai-role.ai { color: var(--gold); }
+.ai-text { color: var(--off-white); font-family: var(--font-body); }
+.ai-card-tag {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 0.6rem; font-weight: 600; color: var(--gold);
+  padding: 5px 12px; margin: 0 18px 18px;
+  background: var(--gold-glow); border-radius: var(--radius-pill);
+  letter-spacing: 0.04em;
+}
+.ai-card-tag .sparkle { animation: sparkle-spin 3s linear infinite; display: inline-block; }
+@keyframes sparkle-spin {
+  0%,100% { transform: scale(1) rotate(0deg); }
+  50% { transform: scale(1.2) rotate(180deg); }
+}
+.ic-style { background: linear-gradient(145deg, var(--rose), var(--rose-deep)); }
+.ic-deal { background: linear-gradient(145deg, var(--gold), #a8853a); }
+.ic-board { background: linear-gradient(145deg, var(--lavender), #7a64a8); }
+.ic-trend { background: linear-gradient(145deg, var(--sage), #5e8058); }
+.ic-wardrobe { background: linear-gradient(145deg, var(--sky), #5a8ab0); }
+.ic-outfit { background: linear-gradient(145deg, var(--coral), #b06a48); }
+
+/* SAVINGS DASHBOARD */
+.dash-mock {
+  max-width: 900px; width: 100%; margin: 44px auto 0;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); overflow: hidden;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.5);
+}
+.dash-bar {
+  display: flex; align-items: center; gap: 7px;
+  padding: 10px 16px; background: rgba(255,255,255,0.015);
+  border-bottom: 1px solid var(--border);
+}
+.dash-dot { width: 9px; height: 9px; border-radius: 50%; }
+.dash-dot.rd { background: #ff5f57; }
+.dash-dot.yl { background: #febc2e; }
+.dash-dot.gn { background: #28c840; }
+.dash-url { font-size: 0.56rem; color: var(--dim); margin-left: 8px; font-family: var(--font-mono); }
+.dash-body { padding: 28px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+.dash-stat {
+  background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.03);
+  border-radius: var(--radius); padding: 20px; text-align: center;
+}
+.dash-stat-val {
+  font-family: var(--font-display); font-size: 1.8rem;
+  font-weight: 700; letter-spacing: -0.03em;
+}
+.dash-stat-val.gold { color: var(--gold); }
+.dash-stat-val.sage { color: var(--sage); }
+.dash-stat-val.rose { color: var(--blush); }
+.dash-stat-label {
+  font-size: 0.62rem; color: var(--muted); margin-top: 4px;
+  text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600;
+}
+.dash-chart {
+  grid-column: 1 / -1; background: rgba(0,0,0,0.2);
+  border: 1px solid rgba(255,255,255,0.03);
+  border-radius: var(--radius); padding: 20px;
+}
+.dash-chart-title {
+  font-size: 0.68rem; color: var(--muted); font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 16px;
+}
+.dash-chart-bars { display: flex; align-items: flex-end; gap: 6px; height: 100px; }
+.dash-chart-bar {
+  flex: 1; border-radius: 4px 4px 0 0;
+  transition: opacity 0.3s; position: relative;
+}
+.dash-chart-bar:hover { opacity: 0.8; }
+.dash-chart-bar .bar-label {
+  position: absolute; bottom: -18px; left: 50%; transform: translateX(-50%);
+  font-size: 0.48rem; color: var(--dim); white-space: nowrap;
+}
+@media (max-width:640px) { .dash-body { grid-template-columns: 1fr; } }
+
+/* STEPS */
+.steps {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px;
+  background: var(--border); border-radius: var(--radius-lg); overflow: hidden;
+  max-width: 900px; width: 100%; margin-top: 44px;
+}
+.step {
+  background: var(--surface); padding: 32px 24px;
+  position: relative; transition: background 0.3s;
+}
+.step:hover { background: var(--surface-2); }
+.step-num {
+  font-family: var(--font-display);
+  font-size: 2.6rem; color: rgba(255,255,255,0.035);
+  position: absolute; top: 10px; right: 14px;
+  letter-spacing: -0.05em; font-weight: 700;
+}
+.step h4 { font-weight: 600; font-size: 0.85rem; color: var(--white); margin-bottom: 5px; }
+.step p { font-size: 0.72rem; color: var(--muted); line-height: 1.5; }
+@media (max-width:768px) { .steps { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width:480px) { .steps { grid-template-columns: 1fr; } }
+
+/* SETUP */
+.setup-box {
+  max-width: 580px; width: 100%; margin: 40px auto 0;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 32px; text-align: left;
+}
+.setup-field { margin-bottom: 18px; }
+.setup-label {
+  font-size: 0.68rem; font-weight: 600; color: var(--muted);
+  letter-spacing: 0.06em; text-transform: uppercase;
+  margin-bottom: 6px; display: block;
+}
+.setup-input {
+  width: 100%; padding: 12px 16px;
+  font-family: var(--font-mono); font-size: 0.78rem;
+  background: rgba(0,0,0,0.3); color: var(--white);
+  border: 1px solid var(--border); border-radius: var(--radius);
+  outline: none; transition: border-color 0.3s;
+}
+.setup-input:focus { border-color: var(--gold); }
+.setup-input::placeholder { color: var(--dim); }
+.setup-select {
+  width: 100%; padding: 12px 16px;
+  font-family: var(--font-body); font-size: 0.78rem;
+  background: rgba(0,0,0,0.3); color: var(--white);
+  border: 1px solid var(--border); border-radius: var(--radius);
+  outline: none; cursor: pointer; -webkit-appearance: none;
+}
+.setup-select option { background: var(--surface); }
+.setup-hint { font-size: 0.64rem; color: var(--dim); margin-top: 5px; line-height: 1.4; }
+.setup-actions { display: flex; gap: 10px; margin-top: 24px; flex-wrap: wrap; }
+.btn-gold {
+  font-family: var(--font-body); font-size: 0.78rem; font-weight: 600;
+  background: linear-gradient(135deg, var(--gold), var(--gold-light));
+  color: #0b0a0d; padding: 11px 28px; border-radius: var(--radius-pill);
+  border: none; cursor: pointer; transition: transform 0.2s, box-shadow 0.3s;
+}
+.btn-gold:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(201,169,110,0.25); }
+.btn-ghost {
+  font-family: var(--font-body); font-size: 0.78rem; font-weight: 500;
+  background: transparent; color: var(--muted);
+  padding: 11px 20px; border-radius: var(--radius-pill);
+  border: 1px solid var(--border); cursor: pointer;
+  transition: color 0.3s, border-color 0.3s;
+}
+.btn-ghost:hover { color: var(--white); border-color: var(--border-hover); }
+.setup-status {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 0.72rem; margin-top: 16px; padding: 10px 14px;
+  border-radius: var(--radius);
+}
+.setup-status.connected {
+  background: rgba(143,173,139,0.08); border: 1px solid rgba(143,173,139,0.15); color: var(--sage);
+}
+.setup-status.disconnected {
+  background: rgba(212,160,160,0.06); border: 1px solid rgba(212,160,160,0.1); color: var(--rose);
+}
+
+/* CTA */
+.cta-box {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: clamp(36px, 5vw, 64px);
+  max-width: 700px; width: 100%; text-align: center;
+  position: relative; overflow: hidden;
+}
+.cta-box::before {
+  content:''; position:absolute; top:-50%; left:-50%; width:200%; height:200%;
+  background: radial-gradient(circle at 50% 80%, var(--gold-glow), transparent 50%);
+  pointer-events: none;
+}
+.cta-btn {
+  display: inline-block; font-size: 0.88rem; font-weight: 600; font-family: var(--font-body);
+  background: linear-gradient(135deg, var(--gold), var(--gold-light));
+  color: #0b0a0d; padding: 14px 36px; border-radius: var(--radius-pill);
+  border: none; cursor: pointer; text-decoration: none; margin-top: 24px;
+  transition: transform 0.2s, box-shadow 0.3s;
+}
+.cta-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(201,169,110,0.25); }
+.cta-secondary {
+  display: inline-block; margin-top: 12px;
+  font-size: 0.74rem; color: var(--muted);
+  text-decoration: none; transition: color 0.2s;
+}
+.cta-secondary:hover { color: var(--white); }
+
+/* FOOTER */
+footer {
+  padding: 44px var(--pad) 56px; text-align: center;
+  border-top: 1px solid var(--border);
+}
+footer .wordmark {
+  font-family: var(--font-display); font-size: 0.9rem; color: var(--white); font-weight: 600;
+}
+footer .wordmark em { font-style: italic; color: var(--gold); }
+footer p { font-size: 0.6rem; color: var(--dim); margin-top: 4px; }
+footer .foot-links { display: flex; justify-content: center; gap: 20px; margin-top: 12px; }
+footer .foot-link { font-size: 0.62rem; color: var(--muted); text-decoration: none; transition: color 0.2s; }
+footer .foot-link:hover { color: var(--white); }
+
+@media (prefers-reduced-motion: reduce) {
+  .r { transition: none; opacity:1; transform: none; }
+  html { scroll-behavior: auto; }
+  .ticker { animation: none; }
+  .headline em { animation: none; }
+  .ai-card-tag .sparkle { animation: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav" id="nav">
+  <div class="nav-brand">
+    <div class="nav-logo">Runway<em>Rewards</em></div>
+    <span class="nav-tag">Scrolls</span>
+  </div>
+  <div class="nav-links">
+    <a href="#discover" class="nav-link active">Discover</a>
+    <a href="#ai" class="nav-link">AI Studio</a>
+    <a href="#savings" class="nav-link">Savings</a>
+    <a href="#setup" class="nav-link">Setup</a>
+    <a href="#setup" class="nav-cta">Connect AI</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="section-full centered" style="padding-top:80px;">
+  <div class="hero-badge r"><span class="dot"></span> Serverless &middot; Single File &middot; AI-Powered</div>
+  <div class="headline r" style="margin-bottom:18px;">
+    Your style.<br><em>Rewarded.</em>
+  </div>
+  <p class="body-lg r" style="text-align:center; margin:24px auto 0;">
+    Fashion discovery, deal tracking, and outfit ideation — powered by your own AI. No accounts. No subscriptions. No server. Just bring your API key.
+  </p>
+  <div class="hero-features r">
+    <div class="hero-feat">
+      <div class="hero-feat-icon">&#x1F50D;</div>
+      <h4>Discover</h4>
+      <p>Browse curated fashion categories and trending styles</p>
+    </div>
+    <div class="hero-feat">
+      <div class="hero-feat-icon">&#x2728;</div>
+      <h4>AI Ideation</h4>
+      <p>Style advice, outfit builds, and trend analysis via your API</p>
+    </div>
+    <div class="hero-feat">
+      <div class="hero-feat-icon">&#x1F4B0;</div>
+      <h4>Save Smart</h4>
+      <p>Track deals, set price alerts, and maximize your budget</p>
+    </div>
+    <div class="hero-feat">
+      <div class="hero-feat-icon">&#x1F512;</div>
+      <h4>You Own It</h4>
+      <p>Runs in your browser. Your data never leaves your device</p>
+    </div>
+  </div>
+</section>
+
+<!-- TICKER -->
+<div class="ticker-wrap">
+  <div class="ticker">
+    <span class="ticker-item">Spring / Summer 2026 <span class="sep">&#x2726;</span></span>
+    <span class="ticker-item">Quiet Luxury <span class="sep">&#x2726;</span></span>
+    <span class="ticker-item">Capsule Wardrobes <span class="sep">&#x2726;</span></span>
+    <span class="ticker-item">Sustainable Fashion <span class="sep">&#x2726;</span></span>
+    <span class="ticker-item">Vintage Revival <span class="sep">&#x2726;</span></span>
+    <span class="ticker-item">Streetwear Evolution <span class="sep">&#x2726;</span></span>
+    <span class="ticker-item">Dopamine Dressing <span class="sep">&#x2726;</span></span>
+    <span class="ticker-item">AI-Curated Looks <span class="sep">&#x2726;</span></span>
+    <span class="ticker-item">Resort Wear <span class="sep">&#x2726;</span></span>
+    <span class="ticker-item">Minimalist Maximalism <span class="sep">&#x2726;</span></span>
+    <span class="ticker-item">Spring / Summer 2026 <span class="sep">&#x2726;</span></span>
+    <span class="ticker-item">Quiet Luxury <span class="sep">&#x2726;</span></span>
+    <span class="ticker-item">Capsule Wardrobes <span class="sep">&#x2726;</span></span>
+    <span class="ticker-item">Sustainable Fashion <span class="sep">&#x2726;</span></span>
+    <span class="ticker-item">Vintage Revival <span class="sep">&#x2726;</span></span>
+    <span class="ticker-item">Streetwear Evolution <span class="sep">&#x2726;</span></span>
+    <span class="ticker-item">Dopamine Dressing <span class="sep">&#x2726;</span></span>
+    <span class="ticker-item">AI-Curated Looks <span class="sep">&#x2726;</span></span>
+    <span class="ticker-item">Resort Wear <span class="sep">&#x2726;</span></span>
+    <span class="ticker-item">Minimalist Maximalism <span class="sep">&#x2726;</span></span>
+  </div>
+</div>
+
+<!-- MANIFESTO -->
+<section class="section-block">
+  <div class="inner">
+    <div class="manifesto r">
+      Fashion discovery used to be <strong>personal</strong>. You'd browse, get inspired, find a deal — all on your own terms.
+    </div>
+    <div class="manifesto r" style="margin-top:24px;">
+      Now every platform wants your data, your attention, and your <em>wallet</em>. We think your style deserves better infrastructure.
+    </div>
+    <div class="manifesto r" style="margin-top:24px;">
+      <strong>RunwayRewards</strong> is a single-file fashion command center — <em>powered by AI you control</em>. Bring your own API key. Your ideas, your deals, your data. All local. All yours.
+    </div>
+  </div>
+</section>
+
+<!-- DISCOVER -->
+<section class="section-block centered" id="discover">
+  <div class="kicker r">Discover</div>
+  <div class="subhead r">Browse by <span class="accent">aesthetic.</span></div>
+  <p class="body-md r" style="margin:10px auto 0;">Fashion discovery organized by the way you actually shop — by vibe, not algorithm.</p>
+  <div class="cat-grid r">
+    <div class="cat-card" style="--card-glow:rgba(212,160,160,0.08);"><span class="cat-icon">&#x1F338;</span><h4>Quiet Luxury</h4><p>Understated elegance</p><div class="cat-count">142 items</div></div>
+    <div class="cat-card" style="--card-glow:rgba(176,160,212,0.08);"><span class="cat-icon">&#x1F30C;</span><h4>Streetwear</h4><p>Urban edge</p><div class="cat-count">218 items</div></div>
+    <div class="cat-card" style="--card-glow:rgba(143,173,139,0.08);"><span class="cat-icon">&#x1F33F;</span><h4>Sustainable</h4><p>Eco-conscious picks</p><div class="cat-count">97 items</div></div>
+    <div class="cat-card" style="--card-glow:rgba(201,169,110,0.08);"><span class="cat-icon">&#x2728;</span><h4>Evening Wear</h4><p>After-dark glamour</p><div class="cat-count">83 items</div></div>
+    <div class="cat-card" style="--card-glow:rgba(137,180,212,0.08);"><span class="cat-icon">&#x1F3D6;&#xFE0F;</span><h4>Resort</h4><p>Vacation ready</p><div class="cat-count">115 items</div></div>
+    <div class="cat-card" style="--card-glow:rgba(212,144,110,0.08);"><span class="cat-icon">&#x1F45F;</span><h4>Athleisure</h4><p>Sport meets style</p><div class="cat-count">174 items</div></div>
+    <div class="cat-card" style="--card-glow:rgba(232,180,184,0.08);"><span class="cat-icon">&#x1F484;</span><h4>Y2K Revival</h4><p>Nostalgia reimagined</p><div class="cat-count">129 items</div></div>
+    <div class="cat-card" style="--card-glow:rgba(201,169,110,0.08);"><span class="cat-icon">&#x1F454;</span><h4>Capsule</h4><p>Build your core</p><div class="cat-count">48 items</div></div>
+    <div class="cat-card" style="--card-glow:rgba(176,160,212,0.08);"><span class="cat-icon">&#x1F451;</span><h4>Vintage</h4><p>Timeless finds</p><div class="cat-count">206 items</div></div>
+    <div class="cat-card" style="--card-glow:rgba(143,173,139,0.08);"><span class="cat-icon">&#x1F9E5;</span><h4>Workwear</h4><p>Office elegance</p><div class="cat-count">91 items</div></div>
+  </div>
+</section>
+
+<!-- AI STUDIO -->
+<section class="section-block centered" id="ai">
+  <div class="kicker r">AI Studio</div>
+  <div class="subhead r">Your personal <span class="accent">style intelligence.</span></div>
+  <p class="body-md r" style="margin:10px auto 0;">Powered by your own API key. Every feature runs client-side — the AI works for you, not a platform.</p>
+  <div class="ai-grid r">
+    <div class="ai-card">
+      <div class="ai-card-head"><div class="ai-card-icon ic-style">&#x1F48E;</div><div><h3>Style Advisor</h3><p>Get personalized outfit recommendations, color palette analysis, and style direction based on your preferences.</p></div></div>
+      <div class="ai-card-preview">
+        <div class="ai-line"><span class="ai-role user">You</span><span class="ai-text">I have a navy blazer and tan chinos — what shoes work for a creative office?</span></div>
+        <div class="ai-line"><span class="ai-role ai">AI</span><span class="ai-text">Minimal white leather sneakers keep it modern. For a sharper look, cognac suede loafers bridge the blazer's formality with chino ease...</span></div>
+      </div>
+      <div class="ai-card-tag"><span class="sparkle">&#x2728;</span> Conversational AI</div>
+    </div>
+    <div class="ai-card">
+      <div class="ai-card-head"><div class="ai-card-icon ic-deal">&#x1F4B8;</div><div><h3>Deal Scanner</h3><p>Describe what you're looking for. AI finds alternatives, price comparisons, and upcoming sale predictions.</p></div></div>
+      <div class="ai-card-preview">
+        <div class="ai-line"><span class="ai-role user">You</span><span class="ai-text">Looking for a quality trench coat under $300</span></div>
+        <div class="ai-line"><span class="ai-role ai">AI</span><span class="ai-text">Three options: Arket's water-repellent trench ($249), Uniqlo U oversized cotton ($189), COS belted version currently 30% off at $210...</span></div>
+      </div>
+      <div class="ai-card-tag"><span class="sparkle">&#x2728;</span> Smart Discovery</div>
+    </div>
+    <div class="ai-card">
+      <div class="ai-card-head"><div class="ai-card-icon ic-board">&#x1F3A8;</div><div><h3>Mood Board Builder</h3><p>Describe an aesthetic or occasion. AI generates a complete style concept with palettes and piece suggestions.</p></div></div>
+      <div class="ai-card-preview">
+        <div class="ai-line"><span class="ai-role user">You</span><span class="ai-text">Italian summer — Amalfi Coast vibes</span></div>
+        <div class="ai-line"><span class="ai-role ai">AI</span><span class="ai-text">Palette: terracotta, linen white, cerulean blue, aged gold. Key pieces: relaxed linen shirt, woven sandals, structured straw tote...</span></div>
+      </div>
+      <div class="ai-card-tag"><span class="sparkle">&#x2728;</span> Creative Ideation</div>
+    </div>
+    <div class="ai-card">
+      <div class="ai-card-head"><div class="ai-card-icon ic-trend">&#x1F4C8;</div><div><h3>Trend Decoder</h3><p>Understand what's trending and why. Longevity predictions and how trends fit your personal style.</p></div></div>
+      <div class="ai-card-preview">
+        <div class="ai-line"><span class="ai-role user">You</span><span class="ai-text">What's "quiet luxury" and is it worth investing in?</span></div>
+        <div class="ai-line"><span class="ai-role ai">AI</span><span class="ai-text">Quality-forward dressing over logos. Investment-worthy — cashmere knits, tailored wool, clean silhouettes transcend trend cycles...</span></div>
+      </div>
+      <div class="ai-card-tag"><span class="sparkle">&#x2728;</span> Trend Analysis</div>
+    </div>
+    <div class="ai-card">
+      <div class="ai-card-head"><div class="ai-card-icon ic-wardrobe">&#x1F5C4;&#xFE0F;</div><div><h3>Wardrobe Audit</h3><p>List your pieces and get a gap analysis, missed combinations, and strategic next purchases.</p></div></div>
+      <div class="ai-card-preview">
+        <div class="ai-line"><span class="ai-role user">You</span><span class="ai-text">3 blazers, 6 tees, 2 jeans, 1 dress shoe, 2 sneakers</span></div>
+        <div class="ai-line"><span class="ai-role ai">AI</span><span class="ai-text">Strong on tops but limited in bottoms and footwear. An olive chino plus a versatile loafer unlocks 12+ new outfits...</span></div>
+      </div>
+      <div class="ai-card-tag"><span class="sparkle">&#x2728;</span> Smart Analysis</div>
+    </div>
+    <div class="ai-card">
+      <div class="ai-card-head"><div class="ai-card-icon ic-outfit">&#x1F457;</div><div><h3>Outfit Engine</h3><p>Give it the occasion, weather, and mood. Get a complete outfit from head to toe with styling notes.</p></div></div>
+      <div class="ai-card-preview">
+        <div class="ai-line"><span class="ai-role user">You</span><span class="ai-text">First date, rooftop bar, 72&#xB0;F, confident but not overdressed</span></div>
+        <div class="ai-line"><span class="ai-role ai">AI</span><span class="ai-text">Dark wash slim jeans, textured knit polo in cream, clean white sneakers. Add a minimal watch — the knit's texture carries the look...</span></div>
+      </div>
+      <div class="ai-card-tag"><span class="sparkle">&#x2728;</span> Outfit Generator</div>
+    </div>
+  </div>
+</section>
+
+<!-- SAVINGS -->
+<section class="section-block centered" id="savings">
+  <div class="kicker r">Savings</div>
+  <div class="subhead r">Track every <span class="accent">dollar saved.</span></div>
+  <p class="body-md r" style="margin:10px auto 0;">A personal dashboard that tracks your fashion spending, deal wins, and savings over time.</p>
+  <div class="dash-mock r">
+    <div class="dash-bar">
+      <div class="dash-dot rd"></div><div class="dash-dot yl"></div><div class="dash-dot gn"></div>
+      <span class="dash-url">runwayrewards.shop/savings</span>
+    </div>
+    <div class="dash-body">
+      <div class="dash-stat"><div class="dash-stat-val gold">$1,247</div><div class="dash-stat-label">Total Saved</div></div>
+      <div class="dash-stat"><div class="dash-stat-val sage">34</div><div class="dash-stat-label">Deals Found</div></div>
+      <div class="dash-stat"><div class="dash-stat-val rose">8</div><div class="dash-stat-label">Price Alerts Active</div></div>
+      <div class="dash-chart">
+        <div class="dash-chart-title">Monthly Savings</div>
+        <div class="dash-chart-bars">
+          <div class="dash-chart-bar" style="height:35%;background:var(--gold);opacity:0.3;"><span class="bar-label">Oct</span></div>
+          <div class="dash-chart-bar" style="height:52%;background:var(--gold);opacity:0.4;"><span class="bar-label">Nov</span></div>
+          <div class="dash-chart-bar" style="height:78%;background:var(--gold);opacity:0.55;"><span class="bar-label">Dec</span></div>
+          <div class="dash-chart-bar" style="height:45%;background:var(--gold);opacity:0.4;"><span class="bar-label">Jan</span></div>
+          <div class="dash-chart-bar" style="height:62%;background:var(--gold);opacity:0.5;"><span class="bar-label">Feb</span></div>
+          <div class="dash-chart-bar" style="height:95%;background:linear-gradient(to top,var(--gold),var(--gold-light));opacity:0.8;"><span class="bar-label">Mar</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="section-block centered">
+  <div class="kicker r">How it works</div>
+  <div class="subhead r">Four steps. <span class="accent">Yours forever.</span></div>
+  <div class="steps r">
+    <div class="step"><div class="step-num">1</div><h4>Open the file</h4><p>One HTML file. Open it in any browser. No install, no sign-up, no server.</p></div>
+    <div class="step"><div class="step-num">2</div><h4>Add your API key</h4><p>Paste your Anthropic or OpenAI key. It stays in your browser — never transmitted elsewhere.</p></div>
+    <div class="step"><div class="step-num">3</div><h4>Discover & ideate</h4><p>Browse fashion, get AI style advice, build mood boards, track deals — all locally.</p></div>
+    <div class="step"><div class="step-num">4</div><h4>Save & share</h4><p>Bookmark it. Save the file. Send it to a friend. It works forever.</p></div>
+  </div>
+</section>
+
+<!-- SETUP -->
+<section class="section-block centered" id="setup">
+  <div class="kicker r">Setup</div>
+  <div class="subhead r">Connect your <span class="accent">AI.</span></div>
+  <p class="body-md r" style="margin:10px auto 0;">Bring your own API key. Stored locally in your browser — never sent to any server (we don't have one).</p>
+  <div class="setup-box r">
+    <div class="setup-field">
+      <label class="setup-label">AI Provider</label>
+      <select class="setup-select" id="ai-provider">
+        <option value="anthropic">Anthropic (Claude)</option>
+        <option value="openai">OpenAI (GPT)</option>
+      </select>
+      <div class="setup-hint">Choose your preferred AI provider. Both work for all features.</div>
+    </div>
+    <div class="setup-field">
+      <label class="setup-label">API Key</label>
+      <input type="password" class="setup-input" id="api-key" placeholder="sk-ant-... or sk-...">
+      <div class="setup-hint">Your key is stored in localStorage only. It never leaves your browser.</div>
+    </div>
+    <div class="setup-field">
+      <label class="setup-label">Model Preference</label>
+      <select class="setup-select" id="ai-model">
+        <option value="auto">Auto (recommended)</option>
+        <option value="claude-sonnet-4-20250514">Claude Sonnet 4</option>
+        <option value="claude-haiku-4-5-20251001">Claude Haiku 4.5 (faster)</option>
+        <option value="gpt-4o">GPT-4o</option>
+        <option value="gpt-4o-mini">GPT-4o Mini (faster)</option>
+      </select>
+    </div>
+    <div class="setup-field">
+      <label class="setup-label">Style Preferences</label>
+      <input type="text" class="setup-input" id="style-prefs" placeholder="e.g., minimalist, earth tones, sustainable brands, size M">
+      <div class="setup-hint">Optional — helps AI personalize style recommendations to you.</div>
+    </div>
+    <div class="setup-field">
+      <label class="setup-label">Monthly Budget</label>
+      <input type="text" class="setup-input" id="budget" placeholder="e.g., $500">
+      <div class="setup-hint">Optional — enables budget-aware deal recommendations and savings tracking.</div>
+    </div>
+    <div class="setup-actions">
+      <button class="btn-gold" onclick="saveSetup()">Save Configuration</button>
+      <button class="btn-ghost" onclick="testConnection()">Test Connection</button>
+      <button class="btn-ghost" onclick="clearSetup()">Clear Data</button>
+    </div>
+    <div class="setup-status disconnected" id="api-status">
+      <span>&#x26A0;&#xFE0F;</span> No API key configured — AI features are offline
+    </div>
+  </div>
+</section>
+
+<!-- CLOSING -->
+<section class="section-block centered">
+  <div class="manifesto r" style="text-align:center; margin:0 auto; max-width:580px;">
+    Fashion platforms were built to keep you <em>scrolling.</em>
+  </div>
+  <div class="subhead r" style="margin-top:28px;">
+    We built one to keep you <span style="background:linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 40%, var(--rose) 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;background-size:200% auto;animation:shimmer-gold 6s ease-in-out infinite;">saving.</span>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="section-block centered" id="try">
+  <div class="cta-box r">
+    <div class="kicker" style="margin-bottom:10px;">Ready?</div>
+    <div class="subhead" style="font-size:clamp(1.3rem,2.8vw,2rem);">Start discovering smarter.</div>
+    <p class="body-md" style="margin:10px auto 0;">Add your API key above and unlock every AI feature. Or just browse — no key required for discovery.</p>
+    <a href="#setup" class="cta-btn">Connect Your AI</a><br>
+    <a href="https://runwayrewards.shop" class="cta-secondary">runwayrewards.shop &#x2192;</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="wordmark">Runway<em>Rewards</em></div>
+  <p>Serverless Fashion Intelligence — A Scrolls Intranet App</p>
+  <p style="margin-top:2px;">runwayrewards.shop</p>
+  <div class="foot-links">
+    <a href="#discover" class="foot-link">Discover</a>
+    <a href="#ai" class="foot-link">AI Studio</a>
+    <a href="#savings" class="foot-link">Savings</a>
+    <a href="#setup" class="foot-link">Setup</a>
+  </div>
+</footer>
+
+<script>
+// Nav scroll
+const nav = document.getElementById('nav');
+window.addEventListener('scroll', () => {
+  nav.classList.toggle('scrolled', window.scrollY > 50);
+}, { passive: true });
+
+// Reveal on scroll
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      const section = e.target.closest('section') || e.target.closest('.ticker-wrap');
+      if (section && !section.dataset.revealed) {
+        section.dataset.revealed = '1';
+        const els = section.querySelectorAll('.r');
+        els.forEach((el, i) => { el.style.transitionDelay = (i * 100) + 'ms'; });
+        requestAnimationFrame(() => els.forEach(el => el.classList.add('v')));
+      } else {
+        e.target.classList.add('v');
+      }
+    }
+  });
+}, { threshold: 0.05, rootMargin: '0px 0px -20px 0px' });
+document.querySelectorAll('.r').forEach(el => obs.observe(el));
+
+// Active nav tracking
+const sections = document.querySelectorAll('section[id]');
+const navLinks = document.querySelectorAll('.nav-link');
+const navObs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      navLinks.forEach(l => l.classList.remove('active'));
+      const link = document.querySelector('.nav-link[href="#' + e.target.id + '"]');
+      if (link) link.classList.add('active');
+    }
+  });
+}, { threshold: 0.3, rootMargin: '-80px 0px -40% 0px' });
+sections.forEach(s => { if (s.id) navObs.observe(s); });
+
+// Setup management
+function loadSetup() {
+  try {
+    const cfg = JSON.parse(localStorage.getItem('rr_config') || '{}');
+    if (cfg.provider) document.getElementById('ai-provider').value = cfg.provider;
+    if (cfg.apiKey) document.getElementById('api-key').value = cfg.apiKey;
+    if (cfg.model) document.getElementById('ai-model').value = cfg.model;
+    if (cfg.prefs) document.getElementById('style-prefs').value = cfg.prefs;
+    if (cfg.budget) document.getElementById('budget').value = cfg.budget;
+    updateStatus(!!cfg.apiKey);
+  } catch(e) {}
+}
+
+function saveSetup() {
+  const cfg = {
+    provider: document.getElementById('ai-provider').value,
+    apiKey: document.getElementById('api-key').value,
+    model: document.getElementById('ai-model').value,
+    prefs: document.getElementById('style-prefs').value,
+    budget: document.getElementById('budget').value,
+    savedAt: new Date().toISOString()
+  };
+  localStorage.setItem('rr_config', JSON.stringify(cfg));
+  updateStatus(!!cfg.apiKey);
+}
+
+function clearSetup() {
+  if (confirm('Clear all saved configuration and data?')) {
+    localStorage.removeItem('rr_config');
+    document.getElementById('api-key').value = '';
+    document.getElementById('style-prefs').value = '';
+    document.getElementById('budget').value = '';
+    updateStatus(false);
+  }
+}
+
+async function testConnection() {
+  const key = document.getElementById('api-key').value;
+  const provider = document.getElementById('ai-provider').value;
+  const status = document.getElementById('api-status');
+  if (!key) {
+    status.className = 'setup-status disconnected';
+    status.innerHTML = '<span>&#x26A0;&#xFE0F;</span> Please enter an API key first';
+    return;
+  }
+  status.className = 'setup-status disconnected';
+  status.innerHTML = '<span>&#x23F3;</span> Testing connection...';
+  try {
+    let ok = false;
+    if (provider === 'anthropic') {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': key,
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-direct-browser-access': 'true'
+        },
+        body: JSON.stringify({
+          model: 'claude-haiku-4-5-20251001',
+          max_tokens: 20,
+          messages: [{ role: 'user', content: 'Say "connected" in one word.' }]
+        })
+      });
+      ok = res.ok;
+    } else {
+      const res = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + key
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o-mini',
+          max_tokens: 20,
+          messages: [{ role: 'user', content: 'Say "connected" in one word.' }]
+        })
+      });
+      ok = res.ok;
+    }
+    if (ok) {
+      status.className = 'setup-status connected';
+      status.innerHTML = '<span>&#x2705;</span> Connected — AI features are live';
+    } else {
+      status.className = 'setup-status disconnected';
+      status.innerHTML = '<span>&#x274C;</span> Connection failed — check your API key';
+    }
+  } catch(e) {
+    status.className = 'setup-status disconnected';
+    status.innerHTML = '<span>&#x274C;</span> Network error — check your connection';
+  }
+}
+
+function updateStatus(connected) {
+  const status = document.getElementById('api-status');
+  if (connected) {
+    status.className = 'setup-status connected';
+    status.innerHTML = '<span>&#x2705;</span> API key saved — AI features ready';
+  } else {
+    status.className = 'setup-status disconnected';
+    status.innerHTML = '<span>&#x26A0;&#xFE0F;</span> No API key configured — AI features are offline';
+  }
+}
+
+loadSetup();
+
+// Category interactions
+document.querySelectorAll('.cat-card').forEach(card => {
+  card.addEventListener('click', () => {
+    const name = card.querySelector('h4').textContent;
+    const cfg = JSON.parse(localStorage.getItem('rr_config') || '{}');
+    if (cfg.apiKey) {
+      alert('AI Discovery for "' + name + '" — This feature connects to your ' + (cfg.provider === 'anthropic' ? 'Claude' : 'GPT') + ' API to curate personalized picks.\n\nFull interactive version coming to runwayrewards.shop');
+    } else {
+      alert('Browsing "' + name + '" — Connect your AI in Setup to unlock personalized recommendations for this category.');
+    }
+  });
+});
+</script>
+</body>
+</html>

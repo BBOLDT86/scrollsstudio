@@ -1,0 +1,1735 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>AE Workspace — NYC Labor Day Trip Planner</title>
+<link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700&family=DM+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f5f5f7;
+  --sidebar-bg: rgba(245,245,247,0.72);
+  --card-bg: #ffffff;
+  --glass: rgba(255,255,255,0.78);
+  --glass-border: rgba(0,0,0,0.08);
+  --text-primary: #1d1d1f;
+  --text-secondary: #6e6e73;
+  --text-tertiary: #aeaeb2;
+  --accent: #0071e3;
+  --accent-hover: #0077ED;
+  --accent-soft: rgba(0,113,227,0.08);
+  --red: #ff3b30;
+  --orange: #ff9500;
+  --green: #34c759;
+  --yellow: #ffcc00;
+  --purple: #af52de;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
+  --shadow-lg: 0 12px 40px rgba(0,0,0,0.12);
+  --shadow-window: 0 24px 80px rgba(0,0,0,0.18), 0 0 0 0.5px rgba(0,0,0,0.06);
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --dock-height: 68px;
+  --topbar-height: 52px;
+  --sidebar-width: 240px;
+  --font: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+html, body { height:100%; overflow:hidden; font-family:var(--font); background:var(--bg); color:var(--text-primary); -webkit-font-smoothing:antialiased; }
+
+::selection { background:var(--accent); color:#fff; }
+::-webkit-scrollbar { width:6px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:rgba(0,0,0,0.15); border-radius:3px; }
+::-webkit-scrollbar-thumb:hover { background:rgba(0,0,0,0.25); }
+
+/* ── WALLPAPER ── */
+.wallpaper {
+  position:fixed; inset:0; z-index:0;
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba(0,113,227,0.04) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 20%, rgba(175,82,222,0.03) 0%, transparent 50%),
+    radial-gradient(ellipse at 60% 80%, rgba(52,199,89,0.03) 0%, transparent 50%),
+    var(--bg);
+}
+
+/* ── TOP BAR ── */
+.topbar {
+  position:fixed; top:0; left:0; right:0; height:var(--topbar-height); z-index:1000;
+  background:rgba(255,255,255,0.72); backdrop-filter:blur(40px) saturate(180%);
+  border-bottom:0.5px solid rgba(0,0,0,0.09);
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 20px;
+  -webkit-app-region:drag;
+}
+.topbar-left { display:flex; align-items:center; gap:16px; }
+.topbar-brand { font-weight:700; font-size:15px; letter-spacing:-0.3px; color:var(--text-primary); display:flex; align-items:center; gap:8px; }
+.topbar-brand svg { opacity:0.85; }
+.topbar-breadcrumb { display:flex; align-items:center; gap:4px; font-size:13px; color:var(--text-secondary); }
+.topbar-breadcrumb span { cursor:pointer; padding:3px 8px; border-radius:6px; transition:all 0.15s; }
+.topbar-breadcrumb span:hover { background:rgba(0,0,0,0.04); color:var(--text-primary); }
+.topbar-breadcrumb .sep { color:var(--text-tertiary); padding:0 2px; cursor:default; }
+.topbar-breadcrumb .sep:hover { background:none; color:var(--text-tertiary); }
+.topbar-breadcrumb .current { color:var(--text-primary); font-weight:600; cursor:default; }
+.topbar-breadcrumb .current:hover { background:none; }
+
+.topbar-center { flex:1; max-width:480px; margin:0 auto; }
+.search-box {
+  width:100%; height:34px; border-radius:10px;
+  background:rgba(0,0,0,0.04); border:1px solid transparent;
+  display:flex; align-items:center; gap:8px; padding:0 12px;
+  transition:all 0.2s;
+}
+.search-box:focus-within { background:#fff; border-color:var(--accent); box-shadow:0 0 0 3px rgba(0,113,227,0.12); }
+.search-box svg { flex-shrink:0; color:var(--text-tertiary); }
+.search-box input { flex:1; border:none; background:none; outline:none; font-size:13px; font-family:var(--font); color:var(--text-primary); }
+.search-box input::placeholder { color:var(--text-tertiary); }
+
+.topbar-right { display:flex; align-items:center; gap:6px; }
+.topbar-btn {
+  width:34px; height:34px; border-radius:8px; border:none; background:none;
+  cursor:pointer; display:flex; align-items:center; justify-content:center;
+  color:var(--text-secondary); transition:all 0.15s;
+}
+.topbar-btn:hover { background:rgba(0,0,0,0.05); color:var(--text-primary); }
+.topbar-btn.active { background:var(--accent-soft); color:var(--accent); }
+.view-toggle { display:flex; background:rgba(0,0,0,0.04); border-radius:8px; padding:2px; }
+.view-toggle button {
+  width:30px; height:28px; border-radius:6px; border:none; background:none;
+  cursor:pointer; display:flex; align-items:center; justify-content:center;
+  color:var(--text-secondary); transition:all 0.15s; font-size:12px;
+}
+.view-toggle button.active { background:#fff; color:var(--text-primary); box-shadow:var(--shadow-sm); }
+
+.user-avatar {
+  width:30px; height:30px; border-radius:50%; background:linear-gradient(135deg, var(--accent), var(--purple));
+  display:flex; align-items:center; justify-content:center; color:#fff; font-size:12px; font-weight:600;
+  cursor:pointer; margin-left:6px;
+}
+
+/* ── SIDEBAR ── */
+.sidebar {
+  position:fixed; top:var(--topbar-height); left:0; bottom:var(--dock-height);
+  width:var(--sidebar-width); z-index:100;
+  background:var(--sidebar-bg); backdrop-filter:blur(40px) saturate(180%);
+  border-right:0.5px solid rgba(0,0,0,0.06);
+  padding:16px 12px; overflow-y:auto;
+  display:flex; flex-direction:column; gap:2px;
+}
+.sidebar-section { margin-bottom:16px; }
+.sidebar-section-title { font-size:11px; font-weight:600; color:var(--text-tertiary); text-transform:uppercase; letter-spacing:0.5px; padding:4px 12px; margin-bottom:4px; }
+.sidebar-item {
+  display:flex; align-items:center; gap:10px; padding:7px 12px; border-radius:8px;
+  cursor:pointer; transition:all 0.15s; font-size:13px; color:var(--text-secondary);
+  font-weight:500; user-select:none;
+}
+.sidebar-item:hover { background:rgba(0,0,0,0.04); color:var(--text-primary); }
+.sidebar-item.active { background:var(--accent-soft); color:var(--accent); }
+.sidebar-item svg { flex-shrink:0; width:18px; height:18px; }
+.sidebar-item .badge { margin-left:auto; font-size:11px; background:var(--accent); color:#fff; border-radius:10px; padding:1px 7px; font-weight:600; }
+.sidebar-item .folder-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+
+.sidebar-bottom { margin-top:auto; padding-top:12px; border-top:0.5px solid rgba(0,0,0,0.06); }
+.storage-bar { margin:8px 12px; }
+.storage-bar-track { height:4px; background:rgba(0,0,0,0.06); border-radius:2px; overflow:hidden; }
+.storage-bar-fill { height:100%; background:linear-gradient(90deg, var(--accent), var(--purple)); border-radius:2px; transition:width 0.3s; }
+.storage-label { font-size:11px; color:var(--text-tertiary); margin-top:6px; }
+
+/* ── MAIN AREA ── */
+.main {
+  position:fixed; top:var(--topbar-height); left:var(--sidebar-width); right:0; bottom:var(--dock-height);
+  overflow-y:auto; padding:24px 28px;
+}
+
+.section-title { font-size:13px; font-weight:600; color:var(--text-secondary); margin-bottom:14px; display:flex; align-items:center; gap:8px; }
+.section-title::after { content:''; flex:1; height:0.5px; background:rgba(0,0,0,0.06); }
+
+/* ── GRID VIEW ── */
+.file-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(150px, 1fr)); gap:12px; margin-bottom:32px; }
+.file-card {
+  background:var(--card-bg); border-radius:var(--radius-md); border:1px solid var(--glass-border);
+  padding:16px 14px 12px; cursor:pointer; transition:all 0.2s; position:relative;
+  display:flex; flex-direction:column; align-items:center; text-align:center;
+}
+.file-card:hover { border-color:rgba(0,113,227,0.25); box-shadow:0 2px 12px rgba(0,113,227,0.06); transform:translateY(-1px); }
+.file-card.selected { border-color:var(--accent); box-shadow:0 0 0 2px rgba(0,113,227,0.15); }
+.file-card .icon-wrap { width:56px; height:56px; border-radius:14px; display:flex; align-items:center; justify-content:center; margin-bottom:10px; position:relative; }
+.file-card .icon-wrap.folder { background:linear-gradient(135deg, #64B5F6, #42A5F5); }
+.file-card .icon-wrap.doc { background:linear-gradient(135deg, #5C9CE5, #3D7DD4); }
+.file-card .icon-wrap.sheet { background:linear-gradient(135deg, #66BB6A, #43A047); }
+.file-card .icon-wrap.slide { background:linear-gradient(135deg, #FFA726, #FB8C00); }
+.file-card .icon-wrap.pdf { background:linear-gradient(135deg, #EF5350, #E53935); }
+.file-card .icon-wrap.image { background:linear-gradient(135deg, #AB47BC, #8E24AA); }
+.file-card .icon-wrap.other { background:linear-gradient(135deg, #BDBDBD, #9E9E9E); }
+.file-card .icon-wrap svg { color:#fff; }
+.file-card .file-name { font-size:12px; font-weight:500; color:var(--text-primary); line-height:1.3; word-break:break-word; max-width:100%; overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; }
+.file-card .file-meta { font-size:10px; color:var(--text-tertiary); margin-top:4px; }
+.file-card .file-star { position:absolute; top:8px; right:8px; opacity:0; transition:opacity 0.15s; cursor:pointer; color:var(--yellow); }
+.file-card:hover .file-star { opacity:0.5; }
+.file-card .file-star:hover { opacity:1 !important; }
+.file-card .file-star.starred { opacity:1; }
+
+/* ── LIST VIEW ── */
+.file-list { margin-bottom:32px; }
+.file-list-header {
+  display:grid; grid-template-columns:1fr 120px 140px 100px 40px;
+  padding:8px 16px; font-size:11px; font-weight:600; color:var(--text-tertiary);
+  text-transform:uppercase; letter-spacing:0.3px; border-bottom:0.5px solid rgba(0,0,0,0.06);
+}
+.file-list-row {
+  display:grid; grid-template-columns:1fr 120px 140px 100px 40px;
+  padding:10px 16px; align-items:center; border-radius:10px;
+  cursor:pointer; transition:all 0.15s; font-size:13px;
+}
+.file-list-row:hover { background:rgba(0,0,0,0.03); }
+.file-list-row.selected { background:var(--accent-soft); }
+.file-list-row .row-name { display:flex; align-items:center; gap:10px; font-weight:500; }
+.file-list-row .row-name .mini-icon { width:28px; height:28px; border-radius:7px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.file-list-row .row-name .mini-icon svg { width:14px; height:14px; color:#fff; }
+.file-list-row .row-name .mini-icon.folder { background:linear-gradient(135deg, #64B5F6, #42A5F5); }
+.file-list-row .row-name .mini-icon.doc { background:linear-gradient(135deg, #5C9CE5, #3D7DD4); }
+.file-list-row .row-name .mini-icon.sheet { background:linear-gradient(135deg, #66BB6A, #43A047); }
+.file-list-row .row-name .mini-icon.slide { background:linear-gradient(135deg, #FFA726, #FB8C00); }
+.file-list-row .row-name .mini-icon.pdf { background:linear-gradient(135deg, #EF5350, #E53935); }
+.file-list-row .row-name .mini-icon.image { background:linear-gradient(135deg, #AB47BC, #8E24AA); }
+.file-list-row .row-name .mini-icon.other { background:linear-gradient(135deg, #BDBDBD, #9E9E9E); }
+.file-list-row .row-owner { color:var(--text-secondary); font-size:12px; }
+.file-list-row .row-modified { color:var(--text-secondary); font-size:12px; }
+.file-list-row .row-size { color:var(--text-tertiary); font-size:12px; }
+.file-list-row .row-more { opacity:0; transition:opacity 0.15s; }
+.file-list-row:hover .row-more { opacity:1; }
+
+/* ── FLOATING WINDOW ── */
+.float-window {
+  position:fixed; z-index:500; min-width:520px; min-height:380px;
+  background:var(--card-bg); border-radius:var(--radius-lg);
+  box-shadow:var(--shadow-window);
+  display:flex; flex-direction:column; overflow:hidden;
+  animation:windowIn 0.28s cubic-bezier(0.16,1,0.3,1);
+}
+@keyframes windowIn {
+  from { opacity:0; transform:scale(0.92) translateY(12px); }
+  to { opacity:1; transform:scale(1) translateY(0); }
+}
+.float-window.closing { animation:windowOut 0.2s ease forwards; }
+@keyframes windowOut {
+  to { opacity:0; transform:scale(0.95) translateY(8px); }
+}
+.win-titlebar {
+  height:44px; display:flex; align-items:center; padding:0 16px;
+  background:rgba(245,245,247,0.85); border-bottom:0.5px solid rgba(0,0,0,0.06);
+  cursor:grab; user-select:none; flex-shrink:0;
+}
+.win-titlebar:active { cursor:grabbing; }
+.win-dots { display:flex; gap:7px; margin-right:14px; }
+.win-dot { width:12px; height:12px; border-radius:50%; cursor:pointer; transition:all 0.15s; position:relative; }
+.win-dot.close { background:#ff5f57; }
+.win-dot.minimize { background:#febc2e; }
+.win-dot.maximize { background:#28c840; }
+.win-dot:hover { filter:brightness(0.9); }
+.win-dot::after { content:''; position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:9px; color:rgba(0,0,0,0.5); opacity:0; transition:opacity 0.1s; }
+.win-titlebar:hover .win-dot.close::after { content:'×'; opacity:1; font-size:13px; line-height:12px; text-align:center; }
+.win-titlebar:hover .win-dot.minimize::after { content:'−'; opacity:1; font-size:13px; line-height:12px; text-align:center; }
+.win-titlebar:hover .win-dot.maximize::after { content:'+'; opacity:1; font-size:11px; line-height:12px; text-align:center; }
+.win-title { font-size:13px; font-weight:600; color:var(--text-primary); flex:1; text-align:center; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.win-title-icon { display:inline-flex; width:16px; height:16px; border-radius:4px; align-items:center; justify-content:center; margin-right:6px; vertical-align:middle; }
+.win-title-icon svg { width:10px; height:10px; color:#fff; }
+.win-actions { display:flex; gap:4px; }
+.win-action { width:28px; height:28px; border:none; background:none; border-radius:6px; cursor:pointer; display:flex; align-items:center; justify-content:center; color:var(--text-secondary); transition:all 0.15s; }
+.win-action:hover { background:rgba(0,0,0,0.05); }
+
+.win-toolbar {
+  display:flex; align-items:center; gap:4px; padding:8px 16px;
+  border-bottom:0.5px solid rgba(0,0,0,0.04); flex-shrink:0;
+}
+.toolbar-btn {
+  height:30px; padding:0 10px; border:none; background:none; border-radius:6px;
+  cursor:pointer; font-size:12px; font-family:var(--font); color:var(--text-secondary);
+  display:flex; align-items:center; gap:5px; transition:all 0.15s; font-weight:500;
+}
+.toolbar-btn:hover { background:rgba(0,0,0,0.05); color:var(--text-primary); }
+.toolbar-btn.active { background:var(--accent-soft); color:var(--accent); }
+.toolbar-sep { width:1px; height:20px; background:rgba(0,0,0,0.06); margin:0 4px; }
+.toolbar-select {
+  height:30px; padding:0 8px; border:1px solid rgba(0,0,0,0.08); border-radius:6px;
+  background:none; font-size:12px; font-family:var(--font); color:var(--text-primary);
+  cursor:pointer; outline:none;
+}
+
+.win-body { flex:1; overflow:auto; }
+
+/* Document Editor */
+.doc-editor {
+  padding:40px 56px; min-height:100%; outline:none; font-size:15px; line-height:1.7;
+  color:var(--text-primary); caret-color:var(--accent);
+}
+.doc-editor:empty::before { content:attr(data-placeholder); color:var(--text-tertiary); }
+.doc-editor h1 { font-size:28px; font-weight:700; margin-bottom:8px; line-height:1.3; }
+.doc-editor h2 { font-size:22px; font-weight:600; margin-bottom:6px; line-height:1.35; }
+.doc-editor h3 { font-size:17px; font-weight:600; margin-bottom:4px; }
+.doc-editor p { margin-bottom:12px; }
+.doc-editor ul, .doc-editor ol { margin-left:24px; margin-bottom:12px; }
+.doc-editor blockquote { border-left:3px solid var(--accent); padding-left:16px; color:var(--text-secondary); margin-bottom:12px; }
+
+/* Spreadsheet */
+.sheet-wrap { width:100%; height:100%; overflow:auto; }
+.sheet-table { border-collapse:collapse; width:max-content; min-width:100%; }
+.sheet-table th {
+  background:rgba(245,245,247,0.9); position:sticky; top:0; z-index:2;
+  font-size:11px; font-weight:600; color:var(--text-tertiary); padding:6px 12px;
+  border:0.5px solid rgba(0,0,0,0.06); min-width:100px; text-align:center;
+  user-select:none;
+}
+.sheet-table th.row-header { position:sticky; left:0; z-index:3; min-width:50px; background:rgba(245,245,247,0.95); }
+.sheet-table th.corner { position:sticky; left:0; top:0; z-index:4; min-width:50px; }
+.sheet-table td {
+  border:0.5px solid rgba(0,0,0,0.06); padding:0; font-size:13px; height:30px;
+  min-width:100px; position:relative;
+}
+.sheet-table td.row-num { background:rgba(245,245,247,0.9); text-align:center; font-size:11px; color:var(--text-tertiary); font-weight:500; position:sticky; left:0; z-index:1; min-width:50px; padding:6px; user-select:none; }
+.sheet-cell {
+  width:100%; height:100%; border:none; outline:none; padding:4px 10px;
+  font-size:13px; font-family:var(--font); background:transparent; color:var(--text-primary);
+}
+.sheet-cell:focus { box-shadow:inset 0 0 0 2px var(--accent); border-radius:1px; }
+
+/* ── NEW FILE MENU ── */
+.new-menu {
+  position:fixed; z-index:2000;
+  background:var(--glass); backdrop-filter:blur(40px) saturate(180%);
+  border:0.5px solid var(--glass-border); border-radius:var(--radius-md);
+  box-shadow:var(--shadow-lg); padding:6px; min-width:200px;
+  animation:menuIn 0.15s ease;
+}
+@keyframes menuIn { from { opacity:0; transform:translateY(-4px); } }
+.new-menu-item {
+  display:flex; align-items:center; gap:10px; padding:8px 12px; border-radius:8px;
+  cursor:pointer; font-size:13px; font-weight:500; transition:all 0.1s; color:var(--text-primary);
+}
+.new-menu-item:hover { background:var(--accent); color:#fff; }
+.new-menu-item:hover .nmi-icon { color:#fff; }
+.nmi-icon { width:24px; height:24px; border-radius:6px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.nmi-icon.folder { background:rgba(66,165,245,0.12); color:#42A5F5; }
+.nmi-icon.doc { background:rgba(61,125,212,0.12); color:#3D7DD4; }
+.nmi-icon.sheet { background:rgba(67,160,71,0.12); color:#43A047; }
+.nmi-icon.slide { background:rgba(251,140,0,0.12); color:#FB8C00; }
+.menu-sep { height:0.5px; background:rgba(0,0,0,0.06); margin:4px 8px; }
+
+/* ── CONTEXT MENU ── */
+.ctx-menu {
+  position:fixed; z-index:3000;
+  background:var(--glass); backdrop-filter:blur(40px) saturate(180%);
+  border:0.5px solid var(--glass-border); border-radius:var(--radius-md);
+  box-shadow:var(--shadow-lg); padding:6px; min-width:180px;
+  animation:menuIn 0.12s ease;
+}
+.ctx-item {
+  display:flex; align-items:center; gap:10px; padding:7px 12px; border-radius:7px;
+  cursor:pointer; font-size:13px; transition:all 0.1s; color:var(--text-primary);
+}
+.ctx-item:hover { background:var(--accent); color:#fff; }
+.ctx-item.danger:hover { background:var(--red); }
+.ctx-item .shortcut { margin-left:auto; font-size:11px; color:var(--text-tertiary); font-family:var(--mono); }
+.ctx-item:hover .shortcut { color:rgba(255,255,255,0.7); }
+
+/* ── DOCK ── */
+.dock-wrap {
+  position:fixed; bottom:0; left:0; right:0; height:var(--dock-height); z-index:900;
+  display:flex; align-items:center; justify-content:center;
+  background:rgba(255,255,255,0.65); backdrop-filter:blur(40px) saturate(180%);
+  border-top:0.5px solid rgba(0,0,0,0.06);
+}
+.dock {
+  display:flex; align-items:center; gap:4px; padding:8px 16px;
+  background:rgba(255,255,255,0.5); border-radius:18px;
+}
+.dock-item {
+  width:44px; height:44px; border-radius:12px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  transition:all 0.2s cubic-bezier(0.16,1,0.3,1); position:relative;
+}
+.dock-item:hover { transform:translateY(-4px) scale(1.12); }
+.dock-item.active::after { content:''; position:absolute; bottom:-4px; width:4px; height:4px; border-radius:50%; background:var(--text-secondary); }
+.dock-item svg { width:24px; height:24px; }
+.dock-sep { width:1px; height:32px; background:rgba(0,0,0,0.08); margin:0 6px; }
+
+.dock-item .dock-icon { width:44px; height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center; }
+.dock-icon.home-icon { background:linear-gradient(135deg, #5AC8FA, #007AFF); color:#fff; }
+.dock-icon.doc-icon { background:linear-gradient(135deg, #5C9CE5, #3D7DD4); color:#fff; }
+.dock-icon.sheet-icon { background:linear-gradient(135deg, #66BB6A, #43A047); color:#fff; }
+.dock-icon.slide-icon { background:linear-gradient(135deg, #FFA726, #FB8C00); color:#fff; }
+.dock-icon.trash-icon { background:linear-gradient(135deg, #BDBDBD, #9E9E9E); color:#fff; }
+
+/* ── RENAME INPUT ── */
+.rename-input {
+  font-size:12px; font-weight:500; font-family:var(--font); border:1.5px solid var(--accent);
+  border-radius:4px; padding:2px 6px; outline:none; text-align:center; width:120px;
+  box-shadow:0 0 0 3px rgba(0,113,227,0.12);
+}
+
+/* ── EMPTY STATE ── */
+.empty-state { text-align:center; padding:80px 40px; }
+.empty-state svg { margin-bottom:16px; color:var(--text-tertiary); }
+.empty-state h3 { font-size:17px; font-weight:600; color:var(--text-primary); margin-bottom:6px; }
+.empty-state p { font-size:13px; color:var(--text-secondary); max-width:320px; margin:0 auto; }
+
+/* ── TOOLTIP ── */
+.tooltip {
+  position:fixed; z-index:4000; background:var(--text-primary); color:#fff;
+  font-size:11px; font-weight:500; padding:4px 10px; border-radius:6px;
+  pointer-events:none; animation:menuIn 0.12s ease; white-space:nowrap;
+}
+
+/* ── NOTIFICATION ── */
+.notif {
+  position:fixed; bottom:calc(var(--dock-height) + 16px); left:50%; transform:translateX(-50%);
+  z-index:5000; background:var(--text-primary); color:#fff; padding:10px 20px;
+  border-radius:12px; font-size:13px; font-weight:500; box-shadow:var(--shadow-lg);
+  animation:notifIn 0.3s cubic-bezier(0.16,1,0.3,1);
+}
+@keyframes notifIn { from { opacity:0; transform:translateX(-50%) translateY(12px); } }
+.notif.out { animation:notifOut 0.2s ease forwards; }
+@keyframes notifOut { to { opacity:0; transform:translateX(-50%) translateY(12px); } }
+
+/* Drag ghost */
+.drag-ghost { position:fixed; pointer-events:none; z-index:9999; opacity:0.85; }
+</style>
+</head>
+<body>
+
+<div class="wallpaper"></div>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="topbar-brand">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/></svg>
+      AE Workspace — NYC Trip
+    </div>
+    <div class="topbar-breadcrumb" id="breadcrumb"></div>
+  </div>
+  <div class="topbar-center">
+    <div class="search-box">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <input type="text" id="searchInput" placeholder="Search files and folders…" oninput="handleSearch(this.value)">
+    </div>
+  </div>
+  <div class="topbar-right">
+    <div class="view-toggle">
+      <button id="gridViewBtn" class="active" onclick="setView('grid')" title="Grid view">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+      </button>
+      <button id="listViewBtn" onclick="setView('list')" title="List view">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="4" cy="6" r="1" fill="currentColor"/><circle cx="4" cy="12" r="1" fill="currentColor"/><circle cx="4" cy="18" r="1" fill="currentColor"/></svg>
+      </button>
+    </div>
+    <button class="topbar-btn" onclick="sortFiles()" title="Sort">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 5h10M11 9h7M11 13h4M3 17l3 3 3-3M6 18V4"/></svg>
+    </button>
+    <button class="topbar-btn" id="newBtn" onclick="showNewMenu(event)" title="New">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    </button>
+    <div class="user-avatar" id="userAvatar" onclick="promptUser()">?</div>
+  </div>
+</div>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sidebar-section">
+    <div class="sidebar-item active" onclick="navTo('root')" data-nav="root">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Home
+    </div>
+    <div class="sidebar-item" onclick="navTo('recent')" data-nav="recent">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      Recent
+    </div>
+    <div class="sidebar-item" onclick="navTo('starred')" data-nav="starred">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      Starred
+      <span class="badge" id="starBadge" style="display:none">0</span>
+    </div>
+    <div class="sidebar-item" onclick="navTo('trash')" data-nav="trash">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+      Trash
+    </div>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-title">Workspaces</div>
+    <div id="sidebarFolders"></div>
+  </div>
+
+  <div class="sidebar-bottom">
+    <div class="sidebar-item" style="font-size:12px; color:var(--text-tertiary);">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+      Storage
+    </div>
+    <div class="storage-bar">
+      <div class="storage-bar-track"><div class="storage-bar-fill" id="storageBar" style="width:0%"></div></div>
+      <div class="storage-label" id="storageLabel">0 items</div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="main" id="mainArea" oncontextmenu="showCtxMenu(event)"></div>
+
+<!-- DOCK -->
+<div class="dock-wrap">
+  <div class="dock">
+    <div class="dock-item active" onclick="navTo('root')" title="Home">
+      <div class="dock-icon home-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      </div>
+    </div>
+    <div class="dock-item" onclick="createFile('doc')" title="New Document">
+      <div class="dock-icon doc-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      </div>
+    </div>
+    <div class="dock-item" onclick="createFile('sheet')" title="New Spreadsheet">
+      <div class="dock-icon sheet-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>
+      </div>
+    </div>
+    <div class="dock-item" onclick="createFile('slide')" title="New Presentation">
+      <div class="dock-icon slide-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+      </div>
+    </div>
+    <div class="dock-sep"></div>
+    <div class="dock-item" onclick="navTo('trash')" title="Trash">
+      <div class="dock-icon trash-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+//  AE WORKSPACE — Rev 4
+//  File system + Document/Sheet editor
+// ═══════════════════════════════════════════════
+
+// ── DATA LAYER ──
+const LS_KEY = 'ae_ws_nyc_trip_v1';
+const COLORS = ['#42A5F5','#66BB6A','#FFA726','#EF5350','#AB47BC','#26A69A','#EC407A','#7E57C2'];
+
+let STATE = load();
+let currentPath = []; // array of folder IDs = breadcrumb
+let currentView = 'grid';
+let openWindows = [];
+let winZ = 500;
+let selectedIds = new Set();
+let clipBoard = null;
+let currentSection = 'root'; // root | recent | starred | trash
+let userName = '';
+let sortMode = 'name'; // name | modified | type
+
+function defaultState() {
+  return {
+    files: {},
+    trash: {},
+    nextId: 1,
+    user: ''
+  };
+}
+
+function load() {
+  try { const d = JSON.parse(localStorage.getItem(LS_KEY)); return d && d.files ? d : defaultState(); }
+  catch { return defaultState(); }
+}
+function save() { localStorage.setItem(LS_KEY, JSON.stringify(STATE)); updateStorage(); }
+
+function genId() { return 'f' + (STATE.nextId++); }
+
+function now() { return new Date().toISOString(); }
+
+function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+// ── FILE OPS ──
+function getFile(id) { return STATE.files[id] || STATE.trash[id]; }
+
+function getChildren(parentId) {
+  return Object.values(STATE.files).filter(f => f.parent === (parentId || null));
+}
+
+function getCurrentParent() {
+  return currentPath.length ? currentPath[currentPath.length - 1] : null;
+}
+
+function createItem(type, name, parent) {
+  const id = genId();
+  const item = {
+    id, type, name,
+    parent: parent || null,
+    created: now(),
+    modified: now(),
+    starred: false,
+    owner: STATE.user || 'Me',
+    content: type === 'sheet' ? makeEmptySheet() : '',
+    size: type === 'folder' ? null : '0 KB'
+  };
+  STATE.files[id] = item;
+  save();
+  return item;
+}
+
+function makeEmptySheet() {
+  const rows = 20, cols = 8;
+  const data = [];
+  for (let r = 0; r < rows; r++) {
+    const row = [];
+    for (let c = 0; c < cols; c++) row.push('');
+    data.push(row);
+  }
+  return JSON.stringify(data);
+}
+
+function renameItem(id, newName) {
+  if (STATE.files[id]) { STATE.files[id].name = newName; STATE.files[id].modified = now(); save(); }
+}
+
+function trashItem(id) {
+  const f = STATE.files[id];
+  if (!f) return;
+  // also trash children
+  if (f.type === 'folder') {
+    getChildren(id).forEach(c => trashItem(c.id));
+  }
+  delete STATE.files[id];
+  STATE.trash[id] = f;
+  save();
+}
+
+function restoreItem(id) {
+  const f = STATE.trash[id];
+  if (!f) return;
+  delete STATE.trash[id];
+  // if parent doesn't exist, move to root
+  if (f.parent && !STATE.files[f.parent]) f.parent = null;
+  STATE.files[id] = f;
+  save();
+}
+
+function permDelete(id) {
+  delete STATE.trash[id];
+  save();
+}
+
+function toggleStar(id) {
+  if (STATE.files[id]) {
+    STATE.files[id].starred = !STATE.files[id].starred;
+    save();
+  }
+}
+
+function moveItem(id, newParent) {
+  if (STATE.files[id]) {
+    STATE.files[id].parent = newParent;
+    STATE.files[id].modified = now();
+    save();
+  }
+}
+
+function duplicateItem(id) {
+  const orig = STATE.files[id];
+  if (!orig) return;
+  const dup = createItem(orig.type, orig.name + ' copy', orig.parent);
+  dup.content = orig.content;
+  save();
+  return dup;
+}
+
+// ── NAVIGATION ──
+function navTo(section, folderId) {
+  closeAllMenus();
+  currentSection = section;
+  selectedIds.clear();
+
+  if (section === 'root') {
+    if (folderId) {
+      // build path
+      const path = [];
+      let cur = folderId;
+      while (cur) {
+        path.unshift(cur);
+        const f = STATE.files[cur];
+        cur = f ? f.parent : null;
+      }
+      currentPath = path;
+    } else {
+      currentPath = [];
+    }
+  } else {
+    currentPath = [];
+  }
+
+  updateSidebar();
+  renderMain();
+  updateBreadcrumb();
+}
+
+function openFolder(id) {
+  navTo('root', id);
+}
+
+// ── RENDER ──
+function renderMain() {
+  const area = document.getElementById('mainArea');
+  let items = [];
+
+  if (currentSection === 'root') {
+    items = getChildren(getCurrentParent());
+  } else if (currentSection === 'recent') {
+    items = Object.values(STATE.files).filter(f => f.type !== 'folder')
+      .sort((a, b) => new Date(b.modified) - new Date(a.modified)).slice(0, 30);
+  } else if (currentSection === 'starred') {
+    items = Object.values(STATE.files).filter(f => f.starred);
+  } else if (currentSection === 'trash') {
+    items = Object.values(STATE.trash);
+  }
+
+  // search filter
+  const q = document.getElementById('searchInput').value.toLowerCase().trim();
+  if (q) {
+    items = items.filter(f => f.name.toLowerCase().includes(q));
+  }
+
+  // sort
+  items = sortItems(items);
+
+  if (!items.length) {
+    const msgs = {
+      root: { t: 'This folder is empty', s: 'Create a new file or folder to get started' },
+      recent: { t: 'No recent files', s: 'Files you open will appear here' },
+      starred: { t: 'No starred items', s: 'Star important files for quick access' },
+      trash: { t: 'Trash is empty', s: 'Deleted files will appear here' }
+    };
+    const m = msgs[currentSection] || msgs.root;
+    area.innerHTML = `<div class="empty-state">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+        <path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/>
+      </svg>
+      <h3>${m.t}</h3><p>${m.s}</p>
+    </div>`;
+    return;
+  }
+
+  const folders = items.filter(i => i.type === 'folder');
+  const files = items.filter(i => i.type !== 'folder');
+
+  let html = '';
+
+  if (currentView === 'grid') {
+    if (folders.length) {
+      html += `<div class="section-title">Folders</div><div class="file-grid">`;
+      folders.forEach(f => html += renderGridCard(f));
+      html += `</div>`;
+    }
+    if (files.length) {
+      html += `<div class="section-title">Files</div><div class="file-grid">`;
+      files.forEach(f => html += renderGridCard(f));
+      html += `</div>`;
+    }
+  } else {
+    html += `<div class="file-list">`;
+    html += `<div class="file-list-header"><span>Name</span><span>Owner</span><span>Modified</span><span>Size</span><span></span></div>`;
+    folders.forEach(f => html += renderListRow(f));
+    files.forEach(f => html += renderListRow(f));
+    html += `</div>`;
+  }
+
+  area.innerHTML = html;
+}
+
+function renderGridCard(f) {
+  const sel = selectedIds.has(f.id) ? ' selected' : '';
+  const starCls = f.starred ? ' starred' : '';
+  return `<div class="file-card${sel}" data-id="${f.id}"
+    onclick="handleClick(event,'${f.id}')"
+    ondblclick="handleDblClick('${f.id}')"
+    oncontextmenu="showFileCtx(event,'${f.id}')">
+    <span class="file-star${starCls}" onclick="event.stopPropagation();toggleStar('${f.id}');renderMain();updateStarBadge();">★</span>
+    <div class="icon-wrap ${f.type}">${getIcon(f.type)}</div>
+    <div class="file-name">${esc(f.name)}</div>
+    <div class="file-meta">${timeAgo(f.modified)}</div>
+  </div>`;
+}
+
+function renderListRow(f) {
+  const sel = selectedIds.has(f.id) ? ' selected' : '';
+  return `<div class="file-list-row${sel}" data-id="${f.id}"
+    onclick="handleClick(event,'${f.id}')"
+    ondblclick="handleDblClick('${f.id}')"
+    oncontextmenu="showFileCtx(event,'${f.id}')">
+    <span class="row-name"><span class="mini-icon ${f.type}">${getIcon(f.type, 14)}</span>${esc(f.name)}</span>
+    <span class="row-owner">${esc(f.owner || 'Me')}</span>
+    <span class="row-modified">${formatDate(f.modified)}</span>
+    <span class="row-size">${f.size || '—'}</span>
+    <span class="row-more">
+      <button style="border:none;background:none;cursor:pointer;color:var(--text-tertiary)" onclick="event.stopPropagation();showFileCtx(event,'${f.id}')">⋯</button>
+    </span>
+  </div>`;
+}
+
+function getIcon(type, size = 24) {
+  const s = size;
+  const icons = {
+    folder: `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/></svg>`,
+    doc: `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>`,
+    sheet: `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/></svg>`,
+    slide: `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>`,
+    pdf: `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><polyline points="14 2 14 8 20 8"/></svg>`,
+    image: `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>`,
+    other: `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><polyline points="14 2 14 8 20 8"/></svg>`
+  };
+  return icons[type] || icons.other;
+}
+
+// ── SORTING ──
+function sortItems(items) {
+  return items.sort((a, b) => {
+    if (sortMode === 'name') return a.name.localeCompare(b.name);
+    if (sortMode === 'modified') return new Date(b.modified) - new Date(a.modified);
+    if (sortMode === 'type') return a.type.localeCompare(b.type);
+    return 0;
+  });
+}
+
+function sortFiles() {
+  const modes = ['name', 'modified', 'type'];
+  const idx = modes.indexOf(sortMode);
+  sortMode = modes[(idx + 1) % modes.length];
+  showNotif(`Sorted by ${sortMode}`);
+  renderMain();
+}
+
+// ── INTERACTIONS ──
+function handleClick(e, id) {
+  if (e.metaKey || e.ctrlKey) {
+    selectedIds.has(id) ? selectedIds.delete(id) : selectedIds.add(id);
+  } else {
+    selectedIds.clear();
+    selectedIds.add(id);
+  }
+  renderMain();
+}
+
+function handleDblClick(id) {
+  const f = getFile(id);
+  if (!f) return;
+  if (currentSection === 'trash') return;
+  if (f.type === 'folder') {
+    openFolder(id);
+  } else {
+    openFileWindow(id);
+  }
+}
+
+function handleSearch(val) { renderMain(); }
+
+// ── BREADCRUMB ──
+function updateBreadcrumb() {
+  const bc = document.getElementById('breadcrumb');
+  if (currentSection !== 'root') {
+    const labels = { recent: 'Recent', starred: 'Starred', trash: 'Trash' };
+    bc.innerHTML = `<span class="sep">›</span><span class="current">${labels[currentSection]}</span>`;
+    return;
+  }
+  let html = `<span onclick="navTo('root')">Home</span>`;
+  currentPath.forEach((pid, i) => {
+    const f = STATE.files[pid];
+    if (!f) return;
+    const isLast = i === currentPath.length - 1;
+    html += `<span class="sep">›</span>`;
+    html += isLast
+      ? `<span class="current">${esc(f.name)}</span>`
+      : `<span onclick="navTo('root','${pid}')">${esc(f.name)}</span>`;
+  });
+  bc.innerHTML = html;
+}
+
+// ── SIDEBAR ──
+function updateSidebar() {
+  // Highlight
+  document.querySelectorAll('.sidebar-item[data-nav]').forEach(el => {
+    el.classList.toggle('active', el.dataset.nav === currentSection);
+  });
+
+  // Folder shortcuts
+  const folders = Object.values(STATE.files).filter(f => f.type === 'folder' && !f.parent);
+  const container = document.getElementById('sidebarFolders');
+  container.innerHTML = folders.map(f => {
+    const color = COLORS[parseInt(f.id.replace('f','')) % COLORS.length];
+    return `<div class="sidebar-item" onclick="openFolder('${f.id}')">
+      <span class="folder-dot" style="background:${color}"></span>
+      ${esc(f.name)}
+    </div>`;
+  }).join('');
+
+  updateStarBadge();
+}
+
+function updateStarBadge() {
+  const ct = Object.values(STATE.files).filter(f => f.starred).length;
+  const badge = document.getElementById('starBadge');
+  if (ct) { badge.style.display = ''; badge.textContent = ct; }
+  else { badge.style.display = 'none'; }
+}
+
+function updateStorage() {
+  const count = Object.keys(STATE.files).length;
+  const pct = Math.min(100, (count / 100) * 100);
+  document.getElementById('storageBar').style.width = pct + '%';
+  document.getElementById('storageLabel').textContent = `${count} item${count !== 1 ? 's' : ''} · ${(JSON.stringify(STATE).length / 1024).toFixed(1)} KB used`;
+}
+
+// ── VIEW TOGGLE ──
+function setView(v) {
+  currentView = v;
+  document.getElementById('gridViewBtn').classList.toggle('active', v === 'grid');
+  document.getElementById('listViewBtn').classList.toggle('active', v === 'list');
+  renderMain();
+}
+
+// ── NEW MENU ──
+let activeMenu = null;
+function showNewMenu(e) {
+  e.stopPropagation();
+  closeAllMenus();
+  const r = e.currentTarget.getBoundingClientRect();
+  const menu = document.createElement('div');
+  menu.className = 'new-menu';
+  menu.style.top = (r.bottom + 6) + 'px';
+  menu.style.right = (window.innerWidth - r.right) + 'px';
+  menu.innerHTML = `
+    <div class="new-menu-item" onclick="createFile('folder');closeAllMenus()"><span class="nmi-icon folder">${getIcon('folder',14)}</span> New Folder</div>
+    <div class="menu-sep"></div>
+    <div class="new-menu-item" onclick="createFile('doc');closeAllMenus()"><span class="nmi-icon doc">${getIcon('doc',14)}</span> Document</div>
+    <div class="new-menu-item" onclick="createFile('sheet');closeAllMenus()"><span class="nmi-icon sheet">${getIcon('sheet',14)}</span> Spreadsheet</div>
+    <div class="new-menu-item" onclick="createFile('slide');closeAllMenus()"><span class="nmi-icon slide">${getIcon('slide',14)}</span> Presentation</div>
+  `;
+  document.body.appendChild(menu);
+  activeMenu = menu;
+}
+
+function createFile(type) {
+  closeAllMenus();
+  const names = { folder: 'Untitled folder', doc: 'Untitled document', sheet: 'Untitled spreadsheet', slide: 'Untitled presentation' };
+  const parent = currentSection === 'root' ? getCurrentParent() : null;
+  const item = createItem(type, names[type], parent);
+
+  if (currentSection !== 'root' || currentPath.length > 0) {
+    if (parent === null && currentSection !== 'root') navTo('root');
+  }
+
+  renderMain();
+  updateSidebar();
+
+  // Auto-open for docs/sheets
+  if (type !== 'folder') {
+    setTimeout(() => openFileWindow(item.id), 150);
+  } else {
+    // Start rename
+    setTimeout(() => startRename(item.id), 100);
+  }
+}
+
+// ── CONTEXT MENUS ──
+function showFileCtx(e, id) {
+  e.preventDefault();
+  e.stopPropagation();
+  closeAllMenus();
+  if (!selectedIds.has(id)) { selectedIds.clear(); selectedIds.add(id); renderMain(); }
+
+  const f = getFile(id);
+  const inTrash = !!STATE.trash[id];
+  const menu = document.createElement('div');
+  menu.className = 'ctx-menu';
+  menu.style.top = e.clientY + 'px';
+  menu.style.left = e.clientX + 'px';
+
+  if (inTrash) {
+    menu.innerHTML = `
+      <div class="ctx-item" onclick="restoreItem('${id}');closeAllMenus();renderMain();">↩ Restore</div>
+      <div class="ctx-item danger" onclick="permDelete('${id}');closeAllMenus();renderMain();">🗑 Delete Permanently</div>
+    `;
+  } else {
+    menu.innerHTML = `
+      ${f.type !== 'folder' ? `<div class="ctx-item" onclick="openFileWindow('${id}');closeAllMenus();">Open</div>` : `<div class="ctx-item" onclick="openFolder('${id}');closeAllMenus();">Open</div>`}
+      <div class="ctx-item" onclick="startRename('${id}');closeAllMenus();">Rename <span class="shortcut">⏎</span></div>
+      <div class="ctx-item" onclick="duplicateItem('${id}');closeAllMenus();renderMain();">Duplicate</div>
+      <div class="ctx-item" onclick="toggleStar('${id}');closeAllMenus();renderMain();updateStarBadge();">${f.starred ? '★ Unstar' : '☆ Star'}</div>
+      <div class="menu-sep"></div>
+      <div class="ctx-item" onclick="copyItem('${id}');closeAllMenus();">Copy <span class="shortcut">⌘C</span></div>
+      ${clipBoard ? `<div class="ctx-item" onclick="pasteItem();closeAllMenus();renderMain();">Paste <span class="shortcut">⌘V</span></div>` : ''}
+      <div class="menu-sep"></div>
+      <div class="ctx-item danger" onclick="trashItem('${id}');closeAllMenus();renderMain();updateSidebar();">Move to Trash <span class="shortcut">⌫</span></div>
+    `;
+  }
+
+  document.body.appendChild(menu);
+  activeMenu = menu;
+
+  // Keep in viewport
+  requestAnimationFrame(() => {
+    const rect = menu.getBoundingClientRect();
+    if (rect.right > window.innerWidth) menu.style.left = (window.innerWidth - rect.width - 8) + 'px';
+    if (rect.bottom > window.innerHeight) menu.style.top = (window.innerHeight - rect.height - 8) + 'px';
+  });
+}
+
+function showCtxMenu(e) {
+  if (e.target.closest('.file-card') || e.target.closest('.file-list-row')) return;
+  e.preventDefault();
+  closeAllMenus();
+  const menu = document.createElement('div');
+  menu.className = 'ctx-menu';
+  menu.style.top = e.clientY + 'px';
+  menu.style.left = e.clientX + 'px';
+  menu.innerHTML = `
+    <div class="ctx-item" onclick="createFile('folder');closeAllMenus();">New Folder</div>
+    <div class="ctx-item" onclick="createFile('doc');closeAllMenus();">New Document</div>
+    <div class="ctx-item" onclick="createFile('sheet');closeAllMenus();">New Spreadsheet</div>
+    <div class="menu-sep"></div>
+    ${clipBoard ? `<div class="ctx-item" onclick="pasteItem();closeAllMenus();renderMain();">Paste</div>` : ''}
+    <div class="ctx-item" onclick="sortFiles();closeAllMenus();">Sort by…</div>
+  `;
+  document.body.appendChild(menu);
+  activeMenu = menu;
+}
+
+function closeAllMenus() {
+  document.querySelectorAll('.new-menu,.ctx-menu').forEach(m => m.remove());
+  activeMenu = null;
+}
+document.addEventListener('click', closeAllMenus);
+
+// ── CLIPBOARD ──
+function copyItem(id) { clipBoard = id; showNotif('Copied to clipboard'); }
+function pasteItem() {
+  if (!clipBoard) return;
+  const orig = STATE.files[clipBoard];
+  if (!orig) return;
+  const dup = createItem(orig.type, orig.name + ' copy', getCurrentParent());
+  dup.content = orig.content;
+  save();
+  renderMain();
+}
+
+// ── RENAME ──
+function startRename(id) {
+  const card = document.querySelector(`[data-id="${id}"]`);
+  if (!card) return;
+  const nameEl = card.querySelector('.file-name') || card.querySelector('.row-name');
+  if (!nameEl) return;
+  const f = getFile(id);
+  const input = document.createElement('input');
+  input.className = 'rename-input';
+  input.value = f.name;
+  input.onclick = e => e.stopPropagation();
+  input.ondblclick = e => e.stopPropagation();
+  input.onkeydown = e => {
+    if (e.key === 'Enter') { finishRename(id, input.value); }
+    if (e.key === 'Escape') { renderMain(); }
+  };
+  input.onblur = () => { finishRename(id, input.value); };
+
+  if (card.classList.contains('file-card')) {
+    const fn = card.querySelector('.file-name');
+    fn.innerHTML = '';
+    fn.appendChild(input);
+  } else {
+    const span = nameEl.childNodes[1] || nameEl;
+    if (nameEl.querySelector('.mini-icon')) {
+      const textNode = nameEl.lastChild;
+      const wrapper = document.createElement('span');
+      wrapper.appendChild(input);
+      textNode.replaceWith(wrapper);
+    }
+  }
+  input.focus();
+  input.select();
+}
+
+function finishRename(id, val) {
+  if (val.trim()) renameItem(id, val.trim());
+  renderMain();
+  updateSidebar();
+}
+
+// ── FILE WINDOWS ──
+function openFileWindow(id) {
+  const f = getFile(id);
+  if (!f || f.type === 'folder') return;
+
+  // Check if already open
+  const existing = openWindows.find(w => w.fileId === id);
+  if (existing) { bringToFront(existing.el); return; }
+
+  const win = document.createElement('div');
+  win.className = 'float-window';
+  const w = Math.min(740, window.innerWidth - 100);
+  const h = Math.min(520, window.innerHeight - 160);
+  const l = 120 + openWindows.length * 30;
+  const t = 80 + openWindows.length * 25;
+  win.style.cssText = `width:${w}px;height:${h}px;left:${l}px;top:${t}px;z-index:${++winZ}`;
+
+  const typeBg = { doc: '#3D7DD4', sheet: '#43A047', slide: '#FB8C00', pdf: '#E53935', image: '#8E24AA', other: '#9E9E9E' };
+
+  let toolbar = '';
+  if (f.type === 'doc') {
+    toolbar = `<div class="win-toolbar">
+      <select class="toolbar-select" onchange="execCmd('formatBlock',this.value)">
+        <option value="p">Paragraph</option>
+        <option value="h1">Heading 1</option>
+        <option value="h2">Heading 2</option>
+        <option value="h3">Heading 3</option>
+      </select>
+      <div class="toolbar-sep"></div>
+      <button class="toolbar-btn" onclick="execCmd('bold')" title="Bold"><strong>B</strong></button>
+      <button class="toolbar-btn" onclick="execCmd('italic')" title="Italic"><em>I</em></button>
+      <button class="toolbar-btn" onclick="execCmd('underline')" title="Underline"><u>U</u></button>
+      <button class="toolbar-btn" onclick="execCmd('strikeThrough')" title="Strike"><s>S</s></button>
+      <div class="toolbar-sep"></div>
+      <button class="toolbar-btn" onclick="execCmd('insertUnorderedList')" title="Bullet list">•≡</button>
+      <button class="toolbar-btn" onclick="execCmd('insertOrderedList')" title="Numbered list">1.</button>
+      <button class="toolbar-btn" onclick="execCmd('formatBlock','blockquote')" title="Quote">❝</button>
+      <div class="toolbar-sep"></div>
+      <button class="toolbar-btn" onclick="execCmd('justifyLeft')">⫷</button>
+      <button class="toolbar-btn" onclick="execCmd('justifyCenter')">☰</button>
+      <button class="toolbar-btn" onclick="execCmd('justifyRight')">⫸</button>
+    </div>`;
+  } else if (f.type === 'sheet') {
+    toolbar = `<div class="win-toolbar">
+      <button class="toolbar-btn" onclick="addSheetRow('${id}',this)">+ Row</button>
+      <button class="toolbar-btn" onclick="addSheetCol('${id}',this)">+ Column</button>
+      <div class="toolbar-sep"></div>
+      <span style="font-size:11px;color:var(--text-tertiary)">Click cell to edit · Tab to move</span>
+    </div>`;
+  }
+
+  let body = '';
+  if (f.type === 'doc') {
+    body = `<div class="doc-editor" contenteditable="true" data-placeholder="Start typing…" data-file-id="${id}" oninput="saveDocContent('${id}',this)">${f.content || ''}</div>`;
+  } else if (f.type === 'sheet') {
+    body = buildSheetHTML(id);
+  } else {
+    body = `<div style="padding:40px;text-align:center;color:var(--text-tertiary)"><p style="font-size:15px;margin-bottom:8px">Preview not available</p><p style="font-size:13px">${esc(f.name)}</p></div>`;
+  }
+
+  win.innerHTML = `
+    <div class="win-titlebar" onmousedown="startDrag(event,'${id}')">
+      <div class="win-dots">
+        <div class="win-dot close" onclick="closeWindow('${id}')"></div>
+        <div class="win-dot minimize" onclick="minimizeWindow('${id}')"></div>
+        <div class="win-dot maximize" onclick="maximizeWindow(this,'${id}')"></div>
+      </div>
+      <span class="win-title">
+        <span class="win-title-icon" style="background:${typeBg[f.type]}">${getIcon(f.type, 10)}</span>
+        ${esc(f.name)}
+      </span>
+      <div class="win-actions"></div>
+    </div>
+    ${toolbar}
+    <div class="win-body">${body}</div>
+  `;
+
+  document.body.appendChild(win);
+  openWindows.push({ fileId: id, el: win });
+  win.onmousedown = () => bringToFront(win);
+
+  // Update modified
+  STATE.files[id] && (STATE.files[id].modified = now());
+  save();
+}
+
+function buildSheetHTML(id) {
+  const f = getFile(id);
+  let data;
+  try { data = JSON.parse(f.content); } catch { data = JSON.parse(makeEmptySheet()); }
+  const cols = data[0] ? data[0].length : 8;
+  const colLetters = Array.from({ length: cols }, (_, i) => String.fromCharCode(65 + i));
+
+  let html = `<div class="sheet-wrap"><table class="sheet-table"><thead><tr><th class="corner"></th>`;
+  colLetters.forEach(l => html += `<th>${l}</th>`);
+  html += `</tr></thead><tbody>`;
+  data.forEach((row, ri) => {
+    html += `<tr><td class="row-num">${ri + 1}</td>`;
+    row.forEach((cell, ci) => {
+      html += `<td><input class="sheet-cell" value="${esc(cell)}" data-file="${id}" data-r="${ri}" data-c="${ci}" onchange="saveSheetCell(this)" onfocus="this.select()"></td>`;
+    });
+    html += `</tr>`;
+  });
+  html += `</tbody></table></div>`;
+  return html;
+}
+
+function saveDocContent(id, el) {
+  if (STATE.files[id]) {
+    STATE.files[id].content = el.innerHTML;
+    STATE.files[id].modified = now();
+    STATE.files[id].size = (new Blob([el.innerHTML]).size / 1024).toFixed(1) + ' KB';
+    save();
+  }
+}
+
+function saveSheetCell(input) {
+  const id = input.dataset.file;
+  const r = parseInt(input.dataset.r);
+  const c = parseInt(input.dataset.c);
+  const f = STATE.files[id];
+  if (!f) return;
+  let data;
+  try { data = JSON.parse(f.content); } catch { return; }
+  if (data[r]) { data[r][c] = input.value; }
+  f.content = JSON.stringify(data);
+  f.modified = now();
+  f.size = (new Blob([f.content]).size / 1024).toFixed(1) + ' KB';
+  save();
+}
+
+function addSheetRow(id, btn) {
+  const f = STATE.files[id];
+  if (!f) return;
+  let data;
+  try { data = JSON.parse(f.content); } catch { return; }
+  const cols = data[0] ? data[0].length : 8;
+  data.push(Array(cols).fill(''));
+  f.content = JSON.stringify(data);
+  save();
+  // Re-render sheet in window
+  const win = openWindows.find(w => w.fileId === id);
+  if (win) win.el.querySelector('.win-body').innerHTML = buildSheetHTML(id);
+}
+
+function addSheetCol(id, btn) {
+  const f = STATE.files[id];
+  if (!f) return;
+  let data;
+  try { data = JSON.parse(f.content); } catch { return; }
+  data.forEach(row => row.push(''));
+  f.content = JSON.stringify(data);
+  save();
+  const win = openWindows.find(w => w.fileId === id);
+  if (win) win.el.querySelector('.win-body').innerHTML = buildSheetHTML(id);
+}
+
+function execCmd(cmd, val) {
+  document.execCommand(cmd, false, val || null);
+}
+
+function closeWindow(id) {
+  const idx = openWindows.findIndex(w => w.fileId === id);
+  if (idx === -1) return;
+  const win = openWindows[idx];
+  win.el.classList.add('closing');
+  setTimeout(() => { win.el.remove(); openWindows.splice(idx, 1); }, 200);
+}
+
+function minimizeWindow(id) {
+  const win = openWindows.find(w => w.fileId === id);
+  if (!win) return;
+  win.el.style.transition = 'all 0.3s cubic-bezier(0.16,1,0.3,1)';
+  win.el.style.transform = 'scale(0.1)';
+  win.el.style.opacity = '0';
+  setTimeout(() => {
+    win.el.style.display = 'none';
+    win.el.style.transform = '';
+    win.el.style.opacity = '';
+    win.el.style.transition = '';
+  }, 300);
+}
+
+function maximizeWindow(btn, id) {
+  const win = openWindows.find(w => w.fileId === id);
+  if (!win) return;
+  const el = win.el;
+  if (el.dataset.maximized === 'true') {
+    el.style.cssText = el.dataset.prevStyle + `;z-index:${++winZ}`;
+    el.dataset.maximized = 'false';
+  } else {
+    el.dataset.prevStyle = el.style.cssText;
+    el.style.cssText = `left:${parseInt(getComputedStyle(document.querySelector('.sidebar')).width)}px;top:${parseInt(getComputedStyle(document.querySelector('.topbar')).height)}px;right:0;bottom:${parseInt(getComputedStyle(document.querySelector('.dock-wrap')).height)}px;width:auto;height:auto;border-radius:0;z-index:${++winZ}`;
+    el.dataset.maximized = 'true';
+  }
+}
+
+function bringToFront(el) { el.style.zIndex = ++winZ; }
+
+// ── WINDOW DRAG ──
+let dragWin = null, dragOff = { x: 0, y: 0 };
+function startDrag(e, id) {
+  const win = openWindows.find(w => w.fileId === id);
+  if (!win) return;
+  if (win.el.dataset.maximized === 'true') return;
+  dragWin = win.el;
+  bringToFront(dragWin);
+  dragOff.x = e.clientX - dragWin.offsetLeft;
+  dragOff.y = e.clientY - dragWin.offsetTop;
+  document.addEventListener('mousemove', onDrag);
+  document.addEventListener('mouseup', stopDrag);
+}
+function onDrag(e) {
+  if (!dragWin) return;
+  dragWin.style.left = (e.clientX - dragOff.x) + 'px';
+  dragWin.style.top = (e.clientY - dragOff.y) + 'px';
+}
+function stopDrag() { dragWin = null; document.removeEventListener('mousemove', onDrag); document.removeEventListener('mouseup', stopDrag); }
+
+// ── NOTIFICATIONS ──
+function showNotif(msg) {
+  document.querySelectorAll('.notif').forEach(n => n.remove());
+  const n = document.createElement('div');
+  n.className = 'notif';
+  n.textContent = msg;
+  document.body.appendChild(n);
+  setTimeout(() => { n.classList.add('out'); setTimeout(() => n.remove(), 200); }, 2000);
+}
+
+// ── TIME HELPERS ──
+function timeAgo(iso) {
+  const d = new Date(iso);
+  const diff = Date.now() - d.getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return 'Just now';
+  if (mins < 60) return mins + 'm ago';
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return hrs + 'h ago';
+  const days = Math.floor(hrs / 24);
+  if (days < 30) return days + 'd ago';
+  return d.toLocaleDateString();
+}
+function formatDate(iso) {
+  return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+// ── USER ──
+function promptUser() {
+  const name = prompt('Your name:', STATE.user || '');
+  if (name !== null) { STATE.user = name.trim(); save(); updateUserAvatar(); }
+}
+function updateUserAvatar() {
+  const av = document.getElementById('userAvatar');
+  av.textContent = STATE.user ? STATE.user.charAt(0).toUpperCase() : '?';
+}
+
+// ── KEYBOARD ──
+document.addEventListener('keydown', e => {
+  // Delete / Backspace
+  if ((e.key === 'Delete' || e.key === 'Backspace') && !e.target.closest('[contenteditable]') && !e.target.closest('input') && selectedIds.size) {
+    e.preventDefault();
+    selectedIds.forEach(id => {
+      if (currentSection === 'trash') permDelete(id);
+      else trashItem(id);
+    });
+    selectedIds.clear();
+    renderMain(); updateSidebar();
+  }
+  // Cmd+A
+  if ((e.metaKey || e.ctrlKey) && e.key === 'a' && !e.target.closest('[contenteditable]') && !e.target.closest('input')) {
+    e.preventDefault();
+    const items = currentSection === 'trash' ? Object.values(STATE.trash) : getChildren(getCurrentParent());
+    items.forEach(f => selectedIds.add(f.id));
+    renderMain();
+  }
+  // Escape
+  if (e.key === 'Escape') { selectedIds.clear(); closeAllMenus(); renderMain(); }
+  // Cmd+N
+  if ((e.metaKey || e.ctrlKey) && e.key === 'n') { e.preventDefault(); createFile('doc'); }
+});
+
+// ── SEED DATA ──
+function seedIfEmpty() {
+  if (Object.keys(STATE.files).length > 0) return;
+
+  // ── TOP-LEVEL FOLDERS ──
+  const flights = createItem('folder', '✈️ Flights — CMH → NYC', null);
+  const hotels  = createItem('folder', '🏨 Hotels & Amex Benefits', null);
+  const events  = createItem('folder', '🎉 Labor Day Events & Activities', null);
+  const dining  = createItem('folder', '🍽️ Dining & Reservations', null);
+  const logistics = createItem('folder', '📋 Logistics & Packing', null);
+
+  // ═══════════════════════════════════════════════
+  // FLIGHTS FOLDER
+  // ═══════════════════════════════════════════════
+
+  const f1 = createItem('doc', 'AA Flight Options — CMH to NYC', flights.id);
+  f1.content = '<h1>✈️ AA Flights: Columbus (CMH) → New York</h1>' +
+    '<h2>Route Overview</h2>' +
+    '<p><strong>Dates:</strong> Fri Sep 4, 2026 → Mon Sep 7, 2026 (Labor Day Weekend)</p>' +
+    '<p><strong>Airports:</strong> American Airlines flies nonstop CMH → LGA (LaGuardia) with ~37 weekly frequencies. JFK service typically connects through CLT, DFW, or PHL. For Avios bookings, LGA nonstops are the sweet spot.</p>' +
+    '<p><strong>Flight Time:</strong> ~1h 45m nonstop to LGA</p>' +
+    '<p><strong>Earliest Departure:</strong> ~5:00 AM on AA (arrives ~7:00 AM)</p>' +
+    '<p><strong>Cash Fares (typical):</strong> Round-trip economy on AA around $180–$300 depending on advance purchase. Holiday weekends may push closer to $250–$350.</p>' +
+    '<h2>Recommended Itinerary</h2>' +
+    '<p><strong>✦ Outbound — Fri Sep 4:</strong> Target a morning AA nonstop CMH → LGA departing ~7:00–9:00 AM. Arrive by 11 AM to maximize the day.</p>' +
+    '<p><strong>✦ Return — Mon Sep 7 (Labor Day):</strong> Evening nonstop LGA → CMH departing ~6:00–8:00 PM. Enjoy the full holiday before heading home.</p>' +
+    '<h2>Action Items</h2>' +
+    '<p>☐ Search award availability on ba.com (British Airways Avios) for AA-operated CMH → LGA nonstops</p>' +
+    '<p>☐ Cross-check AAdvantage dynamic pricing at aa.com for same flights</p>' +
+    '<p>☐ If Avios is cheaper, transfer MR → BA at 1:1 ratio</p>' +
+    '<p>☐ Book at least 6–8 weeks in advance for best award availability on a holiday weekend</p>';
+  f1.starred = true;
+
+  const f2 = createItem('doc', 'Points Strategy — Avios vs. AAdvantage', flights.id);
+  f2.content = '<h1>🏆 Points Booking Strategy: MR → Avios vs. AAdvantage</h1>' +
+    '<h2>Option A: Transfer MR → British Airways Avios (Recommended)</h2>' +
+    '<p><strong>Route distance CMH → LGA:</strong> ~479 miles (Zone 1 for partner chart)</p>' +
+    '<p><strong>Cost per segment (economy):</strong> 13,500 Avios + $5.60 taxes one-way on AA-operated nonstops under the updated BA partner chart. This is the current rate after the Dec 2025 devaluation — previously was ~7,500–12,000 Avios.</p>' +
+    '<p><strong>Round-trip total:</strong> ~27,000 Avios + ~$11.20 in taxes/fees</p>' +
+    '<p><strong>Transfer ratio:</strong> Amex MR → BA Avios at 1:1 (instant transfer)</p>' +
+    '<p><strong>Effective cost:</strong> 27,000 MR points + $11.20</p>' +
+    '<p><strong>Value:</strong> If cash fare is ~$280 RT, you\'re getting ~1.0¢/point. Decent for a domestic short-haul but not spectacular.</p>' +
+    '<h2>Option B: Transfer MR → AAdvantage (Not Direct)</h2>' +
+    '<p>Amex MR does <strong>not</strong> transfer directly to AAdvantage. However, you can:</p>' +
+    '<p>• Book through the Amex Travel portal at 1¢/point using Pay With Points (a $280 fare = 28,000 MR)</p>' +
+    '<p>• Use the 5x MR earning on flights booked through Amex Travel with Platinum</p>' +
+    '<h2>Option C: AAdvantage Miles (if you have them)</h2>' +
+    '<p>AA\'s dynamic pricing starts at 7,500 miles one-way for off-peak domestic economy. However, Labor Day weekend flights could price at 12,000–20,000+ miles each way due to peak demand and dynamic pricing.</p>' +
+    '<p>For a holiday weekend, Avios via BA often beats AA dynamic pricing since BA uses a fixed distance-based chart rather than demand-based pricing.</p>' +
+    '<h2>Verdict</h2>' +
+    '<p><strong>Best play:</strong> Search ba.com first for nonstop CMH→LGA availability. If 13,500 Avios/segment shows for your dates, transfer 27,000 MR → BA Avios and book. If AA dynamic pricing is showing 7,500–10,000 miles/segment (unlikely on Labor Day weekend), AAdvantage may win — but you\'d need those miles from another source since MR doesn\'t transfer to AA directly.</p>' +
+    '<h2>Step-by-Step Booking via BA</h2>' +
+    '<p>1. Go to <strong>ba.com</strong> → "Book a flight with Avios"</p>' +
+    '<p>2. Search CMH → LGA, Sep 4, 2026 (one-way)</p>' +
+    '<p>3. Look for AA-operated nonstop results showing Avios pricing</p>' +
+    '<p>4. If availability exists, note exact Avios cost per segment</p>' +
+    '<p>5. Repeat for return LGA → CMH, Sep 7, 2026</p>' +
+    '<p>6. Transfer required MR → BA (usually instant)</p>' +
+    '<p>7. Complete booking on ba.com — taxes/fees will be ~$5.60/segment</p>' +
+    '<p><em>Pro tip: BA Avios award tickets on AA give you Priority Access boarding!</em></p>';
+  f2.starred = true;
+
+  const f3 = createItem('doc', 'Centurion Lounge — LGA', flights.id);
+  f3.content = '<h1>🍸 Amex Centurion Lounge — LaGuardia (LGA)</h1>' +
+    '<h2>Location</h2>' +
+    '<p><strong>Terminal B</strong> — The lounge is located in Terminal B, which is the terminal American Airlines uses at LaGuardia. Perfect for our trip.</p>' +
+    '<h2>Access Rules (2026)</h2>' +
+    '<p>• Entry within <strong>3 hours of departure</strong> only (Centurion Card holders exempt from this rule)</p>' +
+    '<p>• Show your <strong>Platinum Card + boarding pass</strong></p>' +
+    '<p>• <strong>Guests:</strong> $50/adult, $30/child (ages 2–17), free under 2</p>' +
+    '<p>• Spend $75K+/year on Platinum for complimentary guest access</p>' +
+    '<p>• Mobile check-in via Amex app if you forget your card</p>' +
+    '<h2>Amenities</h2>' +
+    '<p>• Complimentary food & cocktails (menu curated by local chefs)</p>' +
+    '<p>• Shower suites</p>' +
+    '<p>• High-speed Wi-Fi</p>' +
+    '<p>• Phone rooms for private calls</p>' +
+    '<h2>Game Plan</h2>' +
+    '<p>For the <strong>return flight (Mon Sep 7)</strong>: Arrive at LGA ~3 hours before departure. Use Centurion Lounge for a relaxed end to the trip — have dinner and drinks before boarding.</p>' +
+    '<p><em>Note: Labor Day can be busy at lounges. Arrive when it opens or right at the 3-hour window for best seating.</em></p>';
+
+  // ═══════════════════════════════════════════════
+  // HOTELS FOLDER
+  // ═══════════════════════════════════════════════
+
+  const h1 = createItem('doc', 'Hotel Strategy — FHR vs. Hilton vs. Marriott', hotels.id);
+  h1.content = '<h1>🏨 NYC Hotel Strategy — Maximizing Amex Platinum</h1>' +
+    '<p><strong>Dates:</strong> 3 nights — Fri Sep 4 → Mon Sep 7, 2026</p>' +
+    '<h2>Option 1: Amex Fine Hotels + Resorts (FHR) — Best Value Play</h2>' +
+    '<p>FHR is the strongest hotel benefit on the Platinum Card for a trip like this. Benefits include:</p>' +
+    '<p>• Room upgrade at check-in (when available)</p>' +
+    '<p>• <strong>$100 property credit</strong> (food/bev/spa — charged to room)</p>' +
+    '<p>• Daily breakfast for two (minimum $60/day value)</p>' +
+    '<p>• Noon check-in / guaranteed 4 PM late checkout</p>' +
+    '<p>• 5x MR points per dollar when booking with Platinum through Amex Travel</p>' +
+    '<p><strong>$600 Hotel Credit:</strong> Up to $300 back semi-annually for prepaid FHR bookings through Amex Travel. A 3-night FHR stay should fully trigger one $300 credit.</p>' +
+    '<h3>Top FHR Picks in NYC</h3>' +
+    '<p><strong>The Langham, Fifth Avenue</strong> — Midtown, steps from Empire State Building. Great central location.</p>' +
+    '<p><strong>Baccarat Hotel</strong> — Midtown West near MoMA. Stunning property. Check for special $250+ F&B credits on FHR.</p>' +
+    '<p><strong>Conrad New York Midtown</strong> (Hilton portfolio) — Midtown. This is a double-dip: FHR benefits PLUS Hilton Gold status from Platinum Card.</p>' +
+    '<p><strong>The Greenwich Hotel</strong> — Tribeca. Boutique luxury, Robert De Niro\'s property.</p>' +
+    '<p><strong>1 Hotel Brooklyn Bridge</strong> — Brooklyn waterfront. Great views, eco-conscious.</p>' +
+    '<p><em>Use <a href="https://maxfhr.com">MaxFHR.com</a> to compare rates and find "Exceptional Value" badges.</em></p>' +
+    '<h2>Option 2: Hilton — Gold Status via Platinum Card</h2>' +
+    '<p>Your Platinum Card gives automatic <strong>Hilton Gold</strong> status:</p>' +
+    '<p>• Complimentary breakfast</p>' +
+    '<p>• Room upgrades (including to executive floor when available)</p>' +
+    '<p>• 5th night free on award stays</p>' +
+    '<p>Good NYC Hilton options: Conrad New York Downtown, New York Hilton Midtown, Tempo by Hilton Times Square</p>' +
+    '<h2>Option 3: Marriott — Gold Status via Platinum Card</h2>' +
+    '<p>Platinum Card gives automatic <strong>Marriott Gold</strong>:</p>' +
+    '<p>• 25% bonus points on stays</p>' +
+    '<p>• Room upgrades, 2 PM late checkout</p>' +
+    '<p>• Note: Gold does NOT include breakfast at most Marriott brands</p>' +
+    '<p>Decent NYC Marriott options: The Ritz-Carlton New York (NoMad), W New York, The Westin New York</p>' +
+    '<h2>Recommendation</h2>' +
+    '<p><strong>Go FHR.</strong> For a 3-night stay, you get ~$100 property credit + ~$180+ in breakfast value + room upgrade + $300 Amex hotel credit. That\'s easily $500+ in total benefits on top of the room rate. No Hilton or Marriott loyalty play comes close for a short stay like this.</p>';
+  h1.starred = true;
+
+  const h2 = createItem('doc', 'FHR Booking Checklist', hotels.id);
+  h2.content = '<h1>✅ FHR Booking Checklist</h1>' +
+    '<p>☐ Log into <strong>AmexTravel.com</strong> with Platinum credentials</p>' +
+    '<p>☐ Search FHR properties in New York for Sep 4–7, 2026</p>' +
+    '<p>☐ Filter by "Exceptional Value" badge for guaranteed best rates</p>' +
+    '<p>☐ Check for special offers: complimentary 3rd night, extra property credits, rate discounts</p>' +
+    '<p>☐ Compare FHR rate vs. direct booking rate — FHR averages ~6% more but the $100 credit + breakfast usually more than offset</p>' +
+    '<p>☐ Book and <strong>prepay</strong> with Platinum to trigger the $300 semi-annual hotel credit</p>' +
+    '<p>☐ Earn 5x MR points per dollar on the booking</p>' +
+    '<p>☐ At check-in: mention FHR booking for room upgrade</p>' +
+    '<p>☐ Charge all food/bev/spa to room to use the $100 property credit</p>' +
+    '<p>☐ At checkout: confirm 4 PM late checkout is guaranteed</p>' +
+    '<p><em>Important: Benefits are per room, per stay (max 3 rooms). Back-to-back stays at the same property won\'t earn double benefits.</em></p>';
+
+  // ═══════════════════════════════════════════════
+  // EVENTS & ACTIVITIES FOLDER
+  // ═══════════════════════════════════════════════
+
+  const e1 = createItem('doc', 'Labor Day Weekend Events — NYC 2026', events.id);
+  e1.content = '<h1>🎉 NYC Labor Day Weekend Events — Sep 4–7, 2026</h1>' +
+    '<p>Labor Day 2026 falls on <strong>Monday, September 7</strong>. Most restaurants, shops, and museums are open. Government offices and schools closed.</p>' +
+    '<h2>🎾 US Open Tennis (MUST DO)</h2>' +
+    '<p><strong>Dates:</strong> Main draw Aug 24 – Sep 7. Labor Day weekend = Men\'s & Women\'s Round of 16 and Quarterfinals.</p>' +
+    '<p><strong>Where:</strong> Billie Jean King National Tennis Center, Flushing Meadows, Queens</p>' +
+    '<p><strong>Getting There:</strong> 7 train from Grand Central to Mets-Willets Point (~35 min)</p>' +
+    '<p><strong>Tickets:</strong> Grounds passes start ~$70–90, Arthur Ashe Stadium seats $100+. Book early — Labor Day sessions sell out.</p>' +
+    '<p><em>Tip: Evening sessions have the best atmosphere. Bring layers — it cools down at night.</em></p>' +
+    '<h2>🎭 West Indian Day Parade (Caribbean Carnival)</h2>' +
+    '<p><strong>Date:</strong> Monday, September 7 (always on Labor Day)</p>' +
+    '<p><strong>Where:</strong> Eastern Parkway, Crown Heights, Brooklyn. 2–3 million spectators expected.</p>' +
+    '<p><strong>What:</strong> The biggest Caribbean cultural celebration in North America. Costumes, floats, steel drums, jerk chicken, doubles, and incredible energy.</p>' +
+    '<p><strong>Time:</strong> Parade starts ~11 AM. J\'ouvert celebration starts before dawn.</p>' +
+    '<h2>🎵 Met Opera Summer HD Festival</h2>' +
+    '<p><strong>Where:</strong> Josie Robertson Plaza, Lincoln Center</p>' +
+    '<p><strong>What:</strong> Free nightly outdoor screenings of Met Opera\'s Live in HD series. ~3,000 seats available each night. No tickets required.</p>' +
+    '<p><strong>Time:</strong> ~8 PM nightly, runs through Labor Day</p>' +
+    '<h2>⚾ Baseball</h2>' +
+    '<p>Check Mets schedule — Citi Field is excellent and accessible via 7 train (same line as US Open). Yankees may be home at Yankee Stadium (B/D/4 train).</p>' +
+    '<h2>🏖️ Beaches & Outdoors</h2>' +
+    '<p>• <strong>Coney Island</strong> — Beach + Luna Park rides. Last big beach weekend of summer. N/Q/D/F trains.</p>' +
+    '<p>• <strong>Governors Island</strong> — Ferry from Lower Manhattan (free before noon). Biking, art installations, NYC skyline views.</p>' +
+    '<p>• <strong>Central Park</strong> — Bike rentals, Bethesda Fountain, picnics on the Great Lawn.</p>' +
+    '<p>• <strong>The High Line</strong> — Elevated park walk through Chelsea/Meatpacking. Great sunset spot.</p>' +
+    '<h2>🍔 Smorgasburg Food Market</h2>' +
+    '<p>• Williamsburg (Saturday) | Prospect Park (Sunday) — 70+ vendors, open through October.</p>' +
+    '<h2>🌇 Rooftop Bars</h2>' +
+    '<p>• Ink48 Hotel Rooftop — near Intrepid Museum</p>' +
+    '<p>• The Ready @ Moxy East Village</p>' +
+    '<p>• Westlight (William Vale Hotel, Williamsburg) — incredible skyline views</p>';
+  e1.starred = true;
+
+  const e2 = createItem('doc', 'US Open — Planning Notes', events.id);
+  e2.content = '<h1>🎾 US Open 2026 — Detailed Planning</h1>' +
+    '<h2>Key Dates (Labor Day Weekend)</h2>' +
+    '<p>• <strong>Sat Sep 5:</strong> Women\'s QF / Men\'s 4th Round (Day session + Night session)</p>' +
+    '<p>• <strong>Sun Sep 6:</strong> Men\'s QF / Women\'s SF (Day + Night)</p>' +
+    '<p>• <strong>Mon Sep 7:</strong> Women\'s Final / Men\'s SF (Day + Night) — LABOR DAY</p>' +
+    '<p><em>Exact schedule TBD by USTA, but QF/SF rounds typically fall on this weekend.</em></p>' +
+    '<h2>Ticket Strategy</h2>' +
+    '<p>• <strong>Grounds Pass:</strong> Access to all courts EXCEPT Arthur Ashe Stadium. Great for early rounds, practice courts, food village. ~$70–90.</p>' +
+    '<p>• <strong>Arthur Ashe Session Ticket:</strong> Includes grounds access + reserved seat. Day sessions from ~$100+. Night sessions from ~$150+.</p>' +
+    '<p>• <strong>Amex Platinum Perk:</strong> Check for exclusive Amex cardholder experiences at the US Open (hospitality tents, early entry, special seating). Amex is a major sponsor.</p>' +
+    '<p>• Buy tickets through Ticketmaster or the US Open app. Resale on StubHub for sold-out sessions.</p>' +
+    '<h2>Logistics</h2>' +
+    '<p>• Take the <strong>7 train</strong> from Grand Central–42nd St to Mets-Willets Point (direct, ~35 min)</p>' +
+    '<p>• Arrive 60–90 min before your session for security lines</p>' +
+    '<p>• Bring sunscreen and a hat for day sessions — no shade in upper deck</p>' +
+    '<p>• Food inside is pricey ($15+ for a sandwich). The Honey Deuce cocktail (Grey Goose, lemonade, frozen raspberries) is the signature drink — ~$23.</p>';
+
+  // ═══════════════════════════════════════════════
+  // DINING FOLDER
+  // ═══════════════════════════════════════════════
+
+  const d1 = createItem('doc', 'Restaurant Picks — NYC Sep 2026', dining.id);
+  d1.content = '<h1>🍽️ NYC Restaurant Recommendations</h1>' +
+    '<p><em>Make reservations 2–4 weeks in advance. Labor Day weekend is busy but many New Yorkers leave the city.</em></p>' +
+    '<h2>Upscale (Use FHR $100 Credit or Resy Credit)</h2>' +
+    '<p><strong>Atomix</strong> — Korean tasting menu, 2 Michelin stars. Upper East Side. ~$375/person. Book via Resy.</p>' +
+    '<p><strong>Le Bernardin</strong> — Legendary French seafood, 3 Michelin stars. Midtown West. Jacket suggested.</p>' +
+    '<p><strong>Saga</strong> — 63rd floor prix fixe with skyline views. FiDi. One of the most memorable dining experiences in NYC.</p>' +
+    '<p><strong>Don Angie</strong> — Italian, West Village. Always packed. Book early on Resy.</p>' +
+    '<h2>Casual & Classic</h2>' +
+    '<p><strong>Joe\'s Pizza</strong> — Greenwich Village. The quintessential NYC slice. Cash only.</p>' +
+    '<p><strong>Katz\'s Delicatessen</strong> — Lower East Side. Pastrami on rye since 1888.</p>' +
+    '<p><strong>Los Tacos No. 1</strong> — Chelsea Market. Fast, authentic, and cheap.</p>' +
+    '<p><strong>Prince Street Pizza</strong> — NoLita. Famous pepperoni square. Expect a line.</p>' +
+    '<p><strong>Xi\'an Famous Foods</strong> — Multiple locations. Hand-pulled noodles, spicy cumin lamb.</p>' +
+    '<h2>Brunch Spots (for the Weekend)</h2>' +
+    '<p><strong>Sadelle\'s</strong> — SoHo. Bagels, lox towers, the whole nine. Very Instagrammable.</p>' +
+    '<p><strong>Balthazar</strong> — SoHo French brasserie. Classic NYC brunch scene.</p>' +
+    '<p><strong>Clinton St. Baking Co.</strong> — LES. Famous blueberry pancakes.</p>' +
+    '<h2>Amex Dining Perks</h2>' +
+    '<p>• <strong>Resy Credit:</strong> Quarterly credit triggered by paying at any Resy-affiliated restaurant with Platinum. No reservation needed — just pay with the card.</p>' +
+    '<p>• <strong>Amex Offers:</strong> Check your app for targeted 10–20% back at specific NYC restaurants.</p>' +
+    '<p>• <strong>Rakuten Stacking:</strong> Some restaurants participate in Rakuten — link your Amex card for extra MR cashback on dining.</p>' +
+    '<p>• <strong>Note:</strong> Platinum only earns 1x MR on dining. If you carry the Amex Gold (4x dining), use Gold for meals NOT covered by FHR or other Platinum-specific credits.</p>';
+
+  const d2 = createItem('doc', 'Reservation Tracker', dining.id);
+  d2.content = '<h1>📅 Reservation Tracker</h1>' +
+    '<h2>Friday, Sep 4</h2>' +
+    '<p>☐ <strong>Dinner:</strong> _________________ — Time: _____ — Confirm #: _____</p>' +
+    '<h2>Saturday, Sep 5</h2>' +
+    '<p>☐ <strong>Brunch:</strong> _________________ — Time: _____ — Confirm #: _____</p>' +
+    '<p>☐ <strong>Dinner:</strong> _________________ — Time: _____ — Confirm #: _____</p>' +
+    '<h2>Sunday, Sep 6</h2>' +
+    '<p>☐ <strong>Brunch:</strong> _________________ — Time: _____ — Confirm #: _____</p>' +
+    '<p>☐ <strong>Dinner:</strong> _________________ — Time: _____ — Confirm #: _____</p>' +
+    '<h2>Monday, Sep 7 (Labor Day)</h2>' +
+    '<p>☐ <strong>Lunch:</strong> _________________ — Time: _____ — Confirm #: _____</p>' +
+    '<p><em>Fill in as reservations are confirmed. Screenshot confirm numbers from Resy/OpenTable.</em></p>';
+
+  // ═══════════════════════════════════════════════
+  // LOGISTICS FOLDER
+  // ═══════════════════════════════════════════════
+
+  const l1 = createItem('doc', 'Trip Budget & Points Summary', logistics.id);
+  l1.content = '<h1>💰 Trip Budget — NYC Labor Day 2026</h1>' +
+    '<h2>Flights</h2>' +
+    '<table style="width:100%;border-collapse:collapse;"><tr style="border-bottom:1px solid #ddd"><td><strong>Route</strong></td><td><strong>Method</strong></td><td><strong>Points</strong></td><td><strong>Cash</strong></td></tr>' +
+    '<tr style="border-bottom:1px solid #eee"><td>CMH → LGA (Sep 4)</td><td>BA Avios via MR</td><td>13,500 MR</td><td>$5.60</td></tr>' +
+    '<tr style="border-bottom:1px solid #eee"><td>LGA → CMH (Sep 7)</td><td>BA Avios via MR</td><td>13,500 MR</td><td>$5.60</td></tr>' +
+    '<tr style="border-bottom:1px solid #ddd;font-weight:bold"><td>Flight Total</td><td></td><td>27,000 MR</td><td>$11.20</td></tr></table>' +
+    '<h2>Hotel (3 Nights FHR)</h2>' +
+    '<table style="width:100%;border-collapse:collapse;"><tr style="border-bottom:1px solid #ddd"><td><strong>Item</strong></td><td><strong>Estimate</strong></td><td><strong>Offset</strong></td></tr>' +
+    '<tr style="border-bottom:1px solid #eee"><td>FHR Nightly Rate (avg NYC)</td><td>$350–550/night</td><td></td></tr>' +
+    '<tr style="border-bottom:1px solid #eee"><td>3-Night Total</td><td>$1,050–1,650</td><td></td></tr>' +
+    '<tr style="border-bottom:1px solid #eee"><td>Amex $300 Hotel Credit</td><td></td><td style="color:green">−$300</td></tr>' +
+    '<tr style="border-bottom:1px solid #eee"><td>FHR $100 Property Credit</td><td></td><td style="color:green">−$100</td></tr>' +
+    '<tr style="border-bottom:1px solid #eee"><td>Breakfast Value (3 days × $60)</td><td></td><td style="color:green">−$180</td></tr>' +
+    '<tr style="border-bottom:1px solid #ddd;font-weight:bold"><td>Effective Hotel Cost</td><td>$470–1,070</td><td style="color:green">−$580 in perks</td></tr></table>' +
+    '<h2>Activities</h2>' +
+    '<p>• US Open tickets: ~$100–200/person</p>' +
+    '<p>• Subway: $33 unlimited 7-day MetroCard (or OMNY pay-per-ride $2.90)</p>' +
+    '<p>• Museums, attractions: $0–40 each</p>' +
+    '<h2>Dining</h2>' +
+    '<p>• Budget $75–150/day for meals not covered by FHR breakfast</p>' +
+    '<p>• Use Resy credit + Amex Offers for savings</p>' +
+    '<h2>Total Points Needed</h2>' +
+    '<p><strong>27,000 Membership Rewards points</strong> (transferred to BA Avios at 1:1)</p>' +
+    '<p>At ~2¢/point valuation, that\'s $540 in equivalent value for flights worth ~$280 cash — about 1.0¢/point. Not the best MR redemption, but the convenience of fixed award pricing on a holiday weekend has real value.</p>';
+  l1.starred = true;
+
+  const l2 = createItem('doc', 'Packing List — NYC September', logistics.id);
+  l2.content = '<h1>🧳 Packing List — NYC, Early September</h1>' +
+    '<h2>Weather Expectations</h2>' +
+    '<p>NYC in early September: Highs around 78–84°F, lows around 65–70°F. Possible afternoon thunderstorms. Still feels like summer.</p>' +
+    '<h2>Clothing</h2>' +
+    '<p>☐ Lightweight pants × 2</p>' +
+    '<p>☐ Shorts × 2</p>' +
+    '<p>☐ T-shirts / polos × 4</p>' +
+    '<p>☐ Button-down shirt (for dinners) × 1</p>' +
+    '<p>☐ Light jacket or hoodie (for AC and evenings)</p>' +
+    '<p>☐ Comfortable walking shoes — you WILL walk 15,000+ steps/day</p>' +
+    '<p>☐ Nicer shoes for dinner × 1 pair</p>' +
+    '<p>☐ Sunglasses, hat (essential for US Open day sessions)</p>' +
+    '<h2>Tech & Cards</h2>' +
+    '<p>☐ Amex Platinum Card (Centurion Lounge, FHR, dining credits)</p>' +
+    '<p>☐ Amex Gold Card (4x dining)</p>' +
+    '<p>☐ Phone charger + portable battery (critical for navigation)</p>' +
+    '<p>☐ AirPods / headphones</p>' +
+    '<h2>Travel Documents</h2>' +
+    '<p>☐ Boarding passes (mobile via AA app or BA app)</p>' +
+    '<p>☐ Hotel confirmation (FHR booking via Amex Travel)</p>' +
+    '<p>☐ US Open tickets (on phone)</p>' +
+    '<p>☐ Restaurant reservations (Resy app / OpenTable)</p>' +
+    '<h2>Reminders</h2>' +
+    '<p>☐ Add all Amex Offers to card before trip</p>' +
+    '<p>☐ Download offline NYC subway map</p>' +
+    '<p>☐ Set up OMNY on Apple Wallet for tap-to-pay subway</p>';
+
+  const l3 = createItem('doc', 'Day-by-Day Itinerary', logistics.id);
+  l3.content = '<h1>📋 Day-by-Day Itinerary — Labor Day NYC</h1>' +
+    '<h2>Friday, Sep 4 — Arrival Day</h2>' +
+    '<p>🛫 <strong>AM:</strong> AA nonstop CMH → LGA. Arrive ~11 AM.</p>' +
+    '<p>🏨 <strong>Noon:</strong> Check into FHR hotel (noon early check-in benefit). Drop bags.</p>' +
+    '<p>🚶 <strong>Afternoon:</strong> Explore the neighborhood. Walk the High Line → Chelsea Market → Meatpacking District.</p>' +
+    '<p>🍽️ <strong>Evening:</strong> Nice dinner — use Resy credit. Try Don Angie, Saga, or similar.</p>' +
+    '<h2>Saturday, Sep 5 — US Open Day</h2>' +
+    '<p>🥐 <strong>AM:</strong> FHR complimentary breakfast at hotel.</p>' +
+    '<p>🎾 <strong>Day/Evening:</strong> US Open at Billie Jean King Tennis Center. Take 7 train from Grand Central. QF matches — electric atmosphere. Honey Deuce cocktail required.</p>' +
+    '<p>🌃 <strong>Late Night:</strong> Rooftop bar back in Manhattan — Westlight or The Ready.</p>' +
+    '<h2>Sunday, Sep 6 — Culture & Food Day</h2>' +
+    '<p>🥞 <strong>AM:</strong> Brunch at Sadelle\'s or Balthazar (SoHo).</p>' +
+    '<p>🏛️ <strong>Afternoon:</strong> MoMA or The Met. Walk through Central Park.</p>' +
+    '<p>🍕 <strong>Late Afternoon:</strong> Smorgasburg Prospect Park (Sundays) — graze through 70+ food vendors.</p>' +
+    '<p>🎶 <strong>Evening:</strong> Free Met Opera screening at Lincoln Center Plaza (8 PM). Or try for a Broadway show.</p>' +
+    '<h2>Monday, Sep 7 — Labor Day</h2>' +
+    '<p>🥐 <strong>AM:</strong> FHR breakfast. Pack up.</p>' +
+    '<p>🎭 <strong>Late Morning:</strong> Option A: West Indian Day Parade in Crown Heights (starts 11 AM). Option B: Governors Island (free ferry before noon) for bikes and skyline views.</p>' +
+    '<p>☕ <strong>Afternoon:</strong> Use FHR $100 property credit on a nice hotel lunch/spa before 4 PM late checkout.</p>' +
+    '<p>🍸 <strong>Late Afternoon:</strong> Head to LGA. Centurion Lounge in Terminal B — dinner and drinks before flight.</p>' +
+    '<p>🛬 <strong>Evening:</strong> AA nonstop LGA → CMH. Home.</p>';
+  l3.starred = true;
+
+  // ═══════════════════════════════════════════════
+  // SPREADSHEETS
+  // ═══════════════════════════════════════════════
+
+  const s1 = createItem('sheet', 'Avios Pricing Quick Reference', flights.id);
+  s1.content = JSON.stringify([
+    ['Zone', 'Distance (mi)', 'Economy OW', 'Business OW', 'Notes'],
+    ['AA Zone 1', '0–1,150', '13,500 Avios', '26,500 Avios', 'CMH→LGA is 479mi — falls here'],
+    ['AA Zone 2', '1,151–2,000', '18,000 Avios', '36,000 Avios', 'e.g. MIA→LGA'],
+    ['AA Zone 3', '2,001–3,000', '25,750 Avios', '51,500 Avios', 'e.g. LAX→HNL, coast-to-coast'],
+    ['AA Zone 4', '3,001–4,000', '34,000 Avios', '68,000 Avios', 'e.g. LAX→JFK wide-body routes'],
+    ['', '', '', '', ''],
+    ['Route', 'CMH→LGA', '~479 mi', 'Nonstop AA', 'Zone 1'],
+    ['RT Cost', '', '27,000 Avios', '+$11.20 taxes', 'Transfer MR→BA 1:1'],
+    ['', '', '', '', ''],
+    ['COMPARE', 'AAdvantage', 'Off-peak 7,500/way', 'Peak 12K–20K+/way', 'Dynamic pricing'],
+    ['', 'Avios (BA)', '13,500/way fixed', 'Not dynamic', 'Better for holidays']
+  ]);
+
+  const s2 = createItem('sheet', 'Amex Platinum Benefits Tracker', hotels.id);
+  s2.content = JSON.stringify([
+    ['Benefit', 'Value', 'Status', 'Notes'],
+    ['$600 Hotel Credit (FHR/THC)', '$300/half', '☐ Use for this trip', 'Prepay FHR via Amex Travel'],
+    ['$100 FHR Property Credit', '$100/stay', '☐ Charge to room', 'Dining/spa/minibar'],
+    ['FHR Daily Breakfast', '~$60/day', '☐ 3 days = $180', 'Charged to room at checkout'],
+    ['FHR Room Upgrade', 'Varies', '☐ Request at check-in', 'Subject to availability'],
+    ['FHR 4PM Late Checkout', 'Guaranteed', '☐ Confirm day-of', 'Big deal for Mon departure'],
+    ['Centurion Lounge (LGA)', 'Free entry', '☐ Use on return', 'Terminal B, 3hr window'],
+    ['Hilton Gold Status', 'Auto', '—', 'Backup if not using FHR'],
+    ['Marriott Gold Status', 'Auto', '—', 'Backup option'],
+    ['Resy Dining Credit', 'Quarterly', '☐ Dine at Resy spot', 'Just pay with Platinum'],
+    ['5x MR on Flights', '5x/dollar', 'Auto', 'Book flights via Amex Travel'],
+    ['5x MR on Hotels', '5x/dollar', 'Auto', 'Prepaid FHR bookings'],
+    ['Cell Phone Protection', '$800/claim', '—', 'Phone bill must be on Platinum'],
+    ['Trip Delay Insurance', '$500', '—', '6+ hour delay coverage'],
+    ['Trip Cancellation', '$10K/trip', '—', 'All travel must be on Platinum']
+  ]);
+
+  // ═══════════════════════════════════════════════
+  // ROOT-LEVEL QUICK NOTES
+  // ═══════════════════════════════════════════════
+
+  const qn = createItem('doc', '⚡ Quick Reference — Key Links', null);
+  qn.content = '<h1>⚡ Quick Reference Links</h1>' +
+    '<h2>Booking</h2>' +
+    '<p>• <strong>BA Avios Search:</strong> ba.com → "Book a flight with Avios"</p>' +
+    '<p>• <strong>AA Award Search:</strong> aa.com → "Book with miles"</p>' +
+    '<p>• <strong>Amex FHR:</strong> amextravel.com → Fine Hotels + Resorts</p>' +
+    '<p>• <strong>MaxFHR.com:</strong> Compare FHR rates & find cheapest options</p>' +
+    '<h2>Events & Tickets</h2>' +
+    '<p>• <strong>US Open Tickets:</strong> usopen.org or Ticketmaster</p>' +
+    '<p>• <strong>Broadway:</strong> TodayTix app for last-minute discounts</p>' +
+    '<p>• <strong>Resy:</strong> resy.com for restaurant reservations</p>' +
+    '<h2>Transportation</h2>' +
+    '<p>• <strong>NYC Subway:</strong> OMNY tap-to-pay or $33 unlimited 7-day MetroCard</p>' +
+    '<p>• <strong>LGA → Manhattan:</strong> Take the Q70 bus (free) to 74th St–Broadway, then E/F/M/R trains. Or rideshare ~$30–50.</p>' +
+    '<p>• <strong>Governors Island Ferry:</strong> Free before noon from Lower Manhattan</p>' +
+    '<h2>Key Dates</h2>' +
+    '<p>• <strong>Trip:</strong> Fri Sep 4 → Mon Sep 7, 2026</p>' +
+    '<p>• <strong>Labor Day:</strong> Monday, September 7, 2026</p>' +
+    '<p>• <strong>US Open:</strong> Aug 24 – Sep 7, 2026</p>';
+  qn.starred = true;
+
+  save();
+}
+
+// ── INIT ──
+seedIfEmpty();
+updateUserAvatar();
+navTo('root');
+updateStorage();
+</script>
+</body>
+</html>
