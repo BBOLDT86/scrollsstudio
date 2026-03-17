@@ -2,994 +2,571 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Scrolls — Edition 02</title>
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#000000">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Scrolls — Open it. It works.</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 <style>
-:root {
-  --black: #000000;
-  --near-black: #08080a;
-  --dark: #111113;
-  --dark-2: #19191d;
-  --dark-3: #222228;
-  --gray-1: #333340;
-  --gray-2: #55556a;
-  --gray-3: #8888a0;
-  --gray-4: #aaaabb;
-  --gray-5: #ccccd8;
-  --white: #ffffff;
-  --off-white: #f2f2f8;
-  --blue: #3b82f6;
-  --warm: #f59e0b;
-  --green: #22c55e;
-  --red: #ef4444;
-  --purple: #a855f7;
-  --cyan: #06b6d4;
-  --pad: 24px;
-  --safe-b: env(safe-area-inset-bottom, 0px);
-  --font: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
-  --mono: 'DM Mono', 'SF Mono', SFMono-Regular, monospace;
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --black:#000;--near:#08080a;--d1:#111113;--d2:#19191d;--d3:#222228;
+  --g1:#333340;--g2:#55556a;--g3:#8888a0;--g4:#aaaabb;--g5:#ccccd8;
+  --white:#fff;--off:#f2f2f8;
+  --dream:#f59e0b;--dream-bg:rgba(245,158,11,.06);--dream-glow:rgba(245,158,11,.25);
+  --discover:#ef4444;--discover-bg:rgba(239,68,68,.06);--discover-glow:rgba(239,68,68,.25);
+  --unwind:#ec4899;--unwind-bg:rgba(236,72,153,.06);--unwind-glow:rgba(236,72,153,.25);
+  --create:#a855f7;--create-bg:rgba(168,85,247,.06);--create-glow:rgba(168,85,247,.25);
+  --connect:#22c55e;--connect-bg:rgba(34,197,94,.06);--connect-glow:rgba(34,197,94,.25);
+  --produce:#3b82f6;--produce-bg:rgba(59,130,246,.06);--produce-glow:rgba(59,130,246,.25);
+  --grow:#06b6d4;--grow-bg:rgba(6,182,212,.06);--grow-glow:rgba(6,182,212,.25);
+  --rule:rgba(255,255,255,.05);
+  --font:'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif;
+  --mono:'DM Mono','SF Mono',monospace;
+  --serif:'Instrument Serif',Georgia,serif;
+  --pad:clamp(20px,4vw,48px);
+  --safe-b:env(safe-area-inset-bottom,0px);
 }
+html{scroll-behavior:smooth}
+body{font-family:var(--font);background:var(--black);color:var(--white);-webkit-font-smoothing:antialiased;overflow-x:hidden;text-rendering:optimizeLegibility}
+a{color:inherit;text-decoration:none}
 
-*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-html { scroll-behavior: smooth; }
+/* Grain */
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:.02;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-size:200px}
 
-body {
-  font-family: var(--font);
-  background: var(--black);
-  color: var(--white);
-  -webkit-font-smoothing: antialiased;
-  overflow-x: hidden;
-  text-rendering: optimizeLegibility;
-}
+/* Progress */
+.progress{position:fixed;top:0;left:0;height:2px;z-index:9999;background:linear-gradient(90deg,var(--dream),var(--create),var(--grow));width:0%;transition:width 80ms linear;opacity:.7}
 
-/* ─── Progress ─── */
-.progress {
-  position: fixed; top: 0; left: 0; height: 2px; z-index: 9999;
-  background: linear-gradient(90deg, var(--blue), var(--purple), var(--warm));
-  width: 0%; transition: width 80ms linear; opacity: 0.7;
-}
+/* Nav */
+.nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:16px var(--pad);display:flex;align-items:center;justify-content:space-between;background:rgba(0,0,0,0);backdrop-filter:blur(0px);-webkit-backdrop-filter:blur(0px);transition:background .5s,backdrop-filter .5s;border-bottom:1px solid transparent}
+.nav.scrolled{background:rgba(8,8,10,.85);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);border-bottom-color:rgba(255,255,255,.04)}
+.nav-brand{font-weight:700;font-size:1rem;letter-spacing:-.03em;display:flex;align-items:center;gap:8px}
+.nav-brand .ed{opacity:.3;font-weight:400;font-size:.72rem;letter-spacing:.05em}
+.nav-links{display:flex;gap:4px}
+.nav-links a{font-size:.68rem;font-weight:500;color:var(--g3);padding:6px 12px;border-radius:100px;transition:color .3s,background .3s;letter-spacing:.01em}
+.nav-links a:hover{color:var(--white);background:rgba(255,255,255,.06)}
 
-/* ─── Navigation ─── */
-.nav {
-  position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
-  padding: 16px var(--pad);
-  display: flex; align-items: center; justify-content: space-between;
-  background: rgba(0,0,0,0);
-  backdrop-filter: blur(0px); -webkit-backdrop-filter: blur(0px);
-  transition: background 0.5s, backdrop-filter 0.5s;
-  border-bottom: 1px solid transparent;
-}
-.nav.scrolled {
-  background: rgba(8,8,10,0.8);
-  backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px);
-  border-bottom-color: rgba(255,255,255,0.04);
-}
-.nav-brand {
-  font-weight: 700; font-size: 1rem; letter-spacing: -0.03em;
-  color: var(--white);
-  display: flex; align-items: center; gap: 8px;
-}
-.nav-brand span { opacity: 0.3; font-weight: 400; font-size: 0.75rem; letter-spacing: 0.05em; }
-.nav-links { display: flex; gap: 6px; }
-.nav-links a {
-  font-size: 0.72rem; font-weight: 500; color: var(--gray-3);
-  text-decoration: none; padding: 6px 14px; border-radius: 100px;
-  transition: color 0.3s, background 0.3s;
-  letter-spacing: 0.01em;
-}
-.nav-links a:hover { color: var(--white); background: rgba(255,255,255,0.06); }
+/* Ticker */
+.ticker{position:fixed;bottom:0;left:0;right:0;z-index:900;background:rgba(0,0,0,.88);backdrop-filter:blur(30px);-webkit-backdrop-filter:blur(30px);border-top:.5px solid rgba(255,255,255,.05);padding:12px var(--pad);padding-bottom:calc(12px + var(--safe-b));display:flex;align-items:center;justify-content:center;gap:24px;font-size:.68rem;color:var(--g2);letter-spacing:.02em}
+.ticker .hl{font-family:var(--mono);font-weight:500;font-size:.8rem;letter-spacing:-.02em}
+.ticker .hl.amber{color:var(--dream)}
+.ticker .hl.blue{color:var(--produce)}
 
-/* ─── Bottom ticker ─── */
-.ticker {
-  position: fixed; bottom: 0; left: 0; right: 0; z-index: 900;
-  background: rgba(0,0,0,0.85); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
-  border-top: 0.5px solid rgba(255,255,255,0.05);
-  padding: 12px var(--pad); padding-bottom: calc(12px + var(--safe-b));
-  display: flex; align-items: center; justify-content: center; gap: 24px;
-  font-size: 0.7rem; color: var(--gray-2); letter-spacing: 0.02em;
-}
-.ticker .days {
-  font-family: var(--mono); font-weight: 500; font-size: 0.85rem;
-  color: var(--warm); letter-spacing: -0.02em;
-}
+/* Reveal */
+.r{opacity:0;transform:translateY(28px);transition:opacity .9s cubic-bezier(.16,1,.3,1),transform .9s cubic-bezier(.16,1,.3,1)}
+.r.v{opacity:1;transform:translateY(0)}
+.r.d1{transition-delay:.08s}.r.d2{transition-delay:.16s}.r.d3{transition-delay:.24s}.r.d4{transition-delay:.32s}.r.d5{transition-delay:.4s}
 
-/* ─── Reveal ─── */
-.r { opacity: 0; transform: translateY(30px); transition: opacity 0.9s cubic-bezier(0.16,1,0.3,1), transform 0.9s cubic-bezier(0.16,1,0.3,1); }
-.r.v { opacity: 1; transform: translateY(0); }
-.r.d1 { transition-delay: 0.08s; }
-.r.d2 { transition-delay: 0.16s; }
-.r.d3 { transition-delay: 0.24s; }
-.r.d4 { transition-delay: 0.32s; }
+/* Sections */
+section{min-height:100svh;display:flex;flex-direction:column;justify-content:center;padding:100px var(--pad);position:relative}
+section.half{min-height:55svh}
+section.auto{min-height:auto;padding:80px var(--pad)}
+section.centered{align-items:center;text-align:center}
+section.centered p{margin-left:auto;margin-right:auto}
 
-/* ─── Typography ─── */
-.hero-text {
-  font-weight: 700; font-size: clamp(3rem, 12vw, 8rem);
-  line-height: 0.95; letter-spacing: -0.05em; color: var(--white);
-}
-.hero-sub {
-  font-weight: 700; font-size: clamp(1.8rem, 5vw, 3.5rem);
-  line-height: 1.06; letter-spacing: -0.035em; color: var(--white);
-}
-.section-title {
-  font-weight: 700; font-size: clamp(1.6rem, 4vw, 2.8rem);
-  line-height: 1.06; letter-spacing: -0.03em;
-}
-.kicker {
-  font-family: var(--mono); font-weight: 500; font-size: 0.68rem;
-  color: var(--gray-2); letter-spacing: 0.1em; text-transform: uppercase;
-  margin-bottom: 14px;
-}
-p { font-size: 1rem; line-height: 1.72; color: var(--gray-4); font-weight: 400; }
-p.deck { font-size: clamp(1.05rem, 1.8vw, 1.22rem); line-height: 1.62; color: var(--gray-4); max-width: 540px; }
-.accent { color: var(--warm); }
-.blue { color: var(--blue); }
-.dim { color: var(--gray-1); }
-.mono { font-family: var(--mono); font-size: 0.78em; color: var(--gray-3); background: var(--dark-2); padding: 2px 8px; border-radius: 4px; }
+/* Typography */
+.hero-text{font-weight:700;font-size:clamp(3.2rem,13vw,9rem);line-height:.92;letter-spacing:-.06em}
+.hero-sub{font-weight:700;font-size:clamp(1.6rem,4.5vw,3rem);line-height:1.06;letter-spacing:-.035em}
+.section-title{font-weight:700;font-size:clamp(1.5rem,3.5vw,2.4rem);line-height:1.06;letter-spacing:-.03em}
+.kicker{font-family:var(--mono);font-weight:500;font-size:.64rem;color:var(--g2);letter-spacing:.12em;text-transform:uppercase;margin-bottom:14px}
+p{font-size:.95rem;line-height:1.72;color:var(--g4);font-weight:400}
+p.deck{font-size:clamp(1rem,1.6vw,1.15rem);line-height:1.62;color:var(--g4);max-width:520px;margin-top:18px}
+.dim{color:var(--g1)}
 
-/* ─── Sections ─── */
-section { min-height: 100svh; display: flex; flex-direction: column; justify-content: center; padding: 100px var(--pad); position: relative; }
-section.half { min-height: 55svh; }
-section.auto { min-height: auto; padding: 80px var(--pad); }
-section.centered { align-items: center; text-align: center; }
-section.centered p { margin-left: auto; margin-right: auto; }
+/* Big number */
+.big-num{font-family:var(--serif);font-weight:400;font-size:clamp(7rem,25vw,18rem);line-height:.8;letter-spacing:-.04em;background:linear-gradient(135deg,var(--dream),var(--create),var(--grow));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.big-label{font-size:clamp(.85rem,1.3vw,1rem);color:var(--g3);font-weight:400;margin-top:12px}
 
-/* ─── Big number ─── */
-.big-num {
-  font-weight: 700; font-size: clamp(6rem, 22vw, 16rem);
-  line-height: 0.82; letter-spacing: -0.06em; color: var(--white);
-}
-.big-label { font-size: clamp(0.88rem, 1.5vw, 1.1rem); color: var(--gray-3); font-weight: 400; margin-top: 10px; letter-spacing: -0.01em; }
+/* Stats row */
+.stats-row{display:flex;flex-wrap:wrap;gap:40px;margin-top:44px;justify-content:center}
+.stat-item{text-align:center}
+.stat-item .num{font-weight:700;font-size:clamp(1.8rem,4vw,2.6rem);letter-spacing:-.04em;color:var(--white)}
+.stat-item .label{font-family:var(--mono);font-size:.6rem;color:var(--g2);margin-top:4px;letter-spacing:.04em}
 
-/* ─── Stats row ─── */
-.stats-row { display: flex; flex-wrap: wrap; gap: 40px; margin-top: 44px; justify-content: center; }
-.stat-item { text-align: center; }
-.stat-item .num { font-weight: 700; font-size: clamp(2rem, 4.5vw, 3rem); letter-spacing: -0.04em; color: var(--white); }
-.stat-item .label { font-family: var(--mono); font-size: 0.65rem; color: var(--gray-2); margin-top: 4px; letter-spacing: 0.04em; }
+/* ═══ SCROLL CARDS ═══ */
+.scroll-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;margin-top:40px;width:100%;max-width:1100px}
+.scroll-card{background:var(--d1);border:1px solid var(--rule);border-radius:20px;padding:32px 28px 24px;transition:border-color .4s,transform .5s cubic-bezier(.16,1,.3,1),box-shadow .4s;position:relative;overflow:hidden;cursor:pointer}
+.scroll-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;opacity:0;transition:opacity .4s}
+.scroll-card:hover{border-color:rgba(255,255,255,.1);transform:translateY(-4px);box-shadow:0 24px 64px rgba(0,0,0,.5)}
+.scroll-card:hover::before{opacity:1}
+.scroll-card[data-scroll="dream"]::before{background:var(--dream)}
+.scroll-card[data-scroll="discover"]::before{background:var(--discover)}
+.scroll-card[data-scroll="unwind"]::before{background:var(--unwind)}
+.scroll-card[data-scroll="create"]::before{background:var(--create)}
+.scroll-card[data-scroll="connect"]::before{background:var(--connect)}
+.scroll-card[data-scroll="produce"]::before{background:var(--produce)}
+.scroll-card[data-scroll="grow"]::before{background:var(--grow)}
 
-/* ─── Cards ─── */
-.card-grid { display: grid; gap: 12px; margin-top: 32px; width: 100%; }
-.card-grid.g2 { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
-.card-grid.g3 { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
-.card-grid.g4 { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
-.card {
-  background: var(--dark); border: 1px solid rgba(255,255,255,0.05);
-  border-radius: 18px; padding: 28px;
-  transition: border-color 0.35s, transform 0.4s cubic-bezier(0.16,1,0.3,1), box-shadow 0.35s;
-}
-.card:hover { border-color: rgba(255,255,255,0.1); transform: translateY(-3px); box-shadow: 0 20px 60px rgba(0,0,0,0.4); }
-.card .icon { font-size: 1.1rem; margin-bottom: 14px; display: block; }
-.card h4 { font-weight: 600; font-size: 0.95rem; color: var(--white); margin-bottom: 6px; letter-spacing: -0.02em; }
-.card p { font-size: 0.82rem; color: var(--gray-3); line-height: 1.52; }
+.scroll-header{display:flex;align-items:center;gap:14px;margin-bottom:18px}
+.scroll-icon{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;box-shadow:0 4px 16px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.12)}
+.scroll-icon.dream{background:linear-gradient(145deg,#f59e0b,#d97706)}
+.scroll-icon.discover{background:linear-gradient(145deg,#ef4444,#dc2626)}
+.scroll-icon.unwind{background:linear-gradient(145deg,#ec4899,#db2777)}
+.scroll-icon.create{background:linear-gradient(145deg,#a855f7,#7c3aed)}
+.scroll-icon.connect{background:linear-gradient(145deg,#22c55e,#16a34a)}
+.scroll-icon.produce{background:linear-gradient(145deg,#3b82f6,#2563eb)}
+.scroll-icon.grow{background:linear-gradient(145deg,#06b6d4,#0891b2)}
 
-/* ═══════════════════════════════════════════════════ */
-/* APP GRID — iOS Springboard                        */
-/* ═══════════════════════════════════════════════════ */
-.app-grid {
-  display: grid; grid-template-columns: repeat(4, 1fr);
-  gap: 6px 2px; margin-top: 40px; width: 100%; max-width: 520px;
-}
-.app {
-  display: flex; flex-direction: column; align-items: center;
-  padding: 10px 4px 8px; cursor: pointer; text-decoration: none;
-  -webkit-tap-highlight-color: transparent; border-radius: 16px;
-  transition: background 0.3s, transform 0.3s cubic-bezier(0.16,1,0.3,1);
-}
-.app:hover { background: rgba(255,255,255,0.03); transform: scale(1.04); }
-.app:active { transform: scale(0.96); }
-.app-icon {
-  width: 58px; height: 58px; border-radius: 14px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 1.5rem; position: relative;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.12);
-  transition: transform 0.35s cubic-bezier(0.16,1,0.3,1);
-}
-.app:hover .app-icon { transform: scale(1.08); }
-.app-name {
-  font-size: 0.6rem; font-weight: 500; color: var(--gray-4);
-  margin-top: 7px; text-align: center; line-height: 1.15;
-  letter-spacing: -0.01em; max-width: 72px;
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-}
+.scroll-name{font-weight:700;font-size:1.1rem;letter-spacing:-.02em}
+.scroll-mode{font-family:var(--mono);font-size:.58rem;color:var(--g2);letter-spacing:.08em;text-transform:uppercase;margin-top:2px}
+.scroll-desc{font-size:.82rem;color:var(--g3);line-height:1.55;margin-bottom:18px}
 
-/* Icon themes */
-.app-icon.comm { background: linear-gradient(145deg, #22c55e 0%, #16a34a 100%); }
-.app-icon.prod { background: linear-gradient(145deg, #3b82f6 0%, #2563eb 100%); }
-.app-icon.create { background: linear-gradient(145deg, #a855f7 0%, #7c3aed 100%); }
-.app-icon.life { background: linear-gradient(145deg, #f97316 0%, #ea580c 100%); }
-.app-icon.ai { background: linear-gradient(145deg, #f59e0b 0%, #d97706 100%); }
-.app-icon.ent { background: linear-gradient(145deg, #ec4899 0%, #db2777 100%); }
-.app-icon.shop { background: linear-gradient(145deg, #06b6d4 0%, #0891b2 100%); }
-.app-icon.news { background: linear-gradient(145deg, #ef4444 0%, #dc2626 100%); }
-.app-icon.build { background: linear-gradient(145deg, #64748b 0%, #475569 100%); }
-.app-icon.mkt { background: linear-gradient(145deg, #8b5cf6 0%, #6d28d9 100%); }
+/* Sub-tools grid inside card */
+.sub-tools{display:flex;flex-wrap:wrap;gap:6px}
+.sub-tool{font-size:.62rem;font-weight:500;color:var(--g3);background:var(--d2);border:1px solid rgba(255,255,255,.04);padding:4px 10px;border-radius:100px;transition:color .3s,border-color .3s,background .3s;white-space:nowrap}
+.scroll-card:hover .sub-tool{border-color:rgba(255,255,255,.08)}
+.scroll-card[data-scroll="dream"]:hover .sub-tool:hover{color:var(--dream);border-color:var(--dream-glow);background:var(--dream-bg)}
+.scroll-card[data-scroll="discover"]:hover .sub-tool:hover{color:var(--discover);border-color:var(--discover-glow);background:var(--discover-bg)}
+.scroll-card[data-scroll="unwind"]:hover .sub-tool:hover{color:var(--unwind);border-color:var(--unwind-glow);background:var(--unwind-bg)}
+.scroll-card[data-scroll="create"]:hover .sub-tool:hover{color:var(--create);border-color:var(--create-glow);background:var(--create-bg)}
+.scroll-card[data-scroll="connect"]:hover .sub-tool:hover{color:var(--connect);border-color:var(--connect-glow);background:var(--connect-bg)}
+.scroll-card[data-scroll="produce"]:hover .sub-tool:hover{color:var(--produce);border-color:var(--produce-glow);background:var(--produce-bg)}
+.scroll-card[data-scroll="grow"]:hover .sub-tool:hover{color:var(--grow);border-color:var(--grow-glow);background:var(--grow-bg)}
 
-/* AI glow */
-.app-icon.ai::after {
-  content: ''; position: absolute; inset: -3px; border-radius: 17px;
-  background: linear-gradient(145deg, rgba(245,158,11,0.35), transparent 60%);
-  z-index: -1; opacity: 0; transition: opacity 0.35s;
-}
-.app:hover .app-icon.ai::after { opacity: 1; }
+.scroll-footer{display:flex;align-items:center;justify-content:space-between;margin-top:16px;padding-top:14px;border-top:1px solid var(--rule)}
+.scroll-count{font-family:var(--mono);font-size:.6rem;color:var(--g2)}
+.scroll-size{font-family:var(--mono);font-size:.6rem;color:var(--g1)}
+.scroll-open{font-size:.72rem;font-weight:600;color:var(--g3);display:flex;align-items:center;gap:6px;transition:color .3s}
+.scroll-card:hover .scroll-open{color:var(--white)}
 
-/* Category label */
-.app-cat {
-  grid-column: 1 / -1;
-  font-family: var(--mono); font-size: 0.52rem; font-weight: 500;
-  letter-spacing: 0.14em; text-transform: uppercase; color: var(--gray-1);
-  padding: 22px 0 4px 6px;
-}
-.app-cat:first-child { padding-top: 0; }
+/* ═══ MANIFESTO ═══ */
+.manifesto{max-width:600px}
+.manifesto p{font-family:var(--serif);font-style:italic;font-size:clamp(1.1rem,2.2vw,1.5rem);line-height:1.65;color:var(--g4)}
+.manifesto p + p{margin-top:1.2em}
+.manifesto .sig{font-family:var(--mono);font-style:normal;font-size:.65rem;color:var(--g2);margin-top:2rem;letter-spacing:.08em;text-transform:uppercase}
 
-/* ─── Sprint cards ─── */
-.sprint-grid { display: grid; gap: 12px; margin-top: 28px; width: 100%; }
-.sprint {
-  background: var(--dark); border: 1px solid rgba(255,255,255,0.05);
-  border-radius: 18px; padding: 28px; border-top: 2px solid transparent;
-}
-.sprint .stag { font-family: var(--mono); font-size: 0.56rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 8px; }
-.sprint h4 { font-weight: 700; font-size: 1.05rem; color: var(--white); margin-bottom: 12px; letter-spacing: -0.02em; }
-.sprint ul { list-style: none; }
-.sprint ul li {
-  font-size: 0.8rem; color: var(--gray-3); padding: 5px 0;
-  border-bottom: 1px solid rgba(255,255,255,0.025);
-  padding-left: 16px; position: relative; line-height: 1.45;
-}
-.sprint ul li:last-child { border: none; }
-.sprint ul li::before { content: ''; width: 3px; height: 3px; border-radius: 50%; background: var(--gray-2); position: absolute; left: 0; top: 12px; }
-.sprint ul li.done { color: var(--green); }
-.sprint ul li.done::before { background: var(--green); }
-.sprint ul li.active { color: var(--warm); }
-.sprint ul li.active::before { background: var(--warm); }
+/* ═══ SPEC SECTION ═══ */
+.spec-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:32px;width:100%;max-width:900px}
+.spec-card{background:var(--d1);border:1px solid var(--rule);border-radius:14px;padding:22px 20px;transition:border-color .35s}
+.spec-card:hover{border-color:rgba(255,255,255,.08)}
+.spec-card h4{font-size:.85rem;font-weight:600;margin-bottom:6px;letter-spacing:-.01em}
+.spec-card p{font-size:.75rem;color:var(--g3);line-height:1.5}
 
-/* ─── Revenue ─── */
-.rev {
-  background: var(--dark); border: 1px solid rgba(255,255,255,0.05);
-  border-radius: 18px; padding: 28px; border-top: 2px solid transparent;
-}
-.rev .rtag { font-family: var(--mono); font-size: 0.54rem; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 4px; }
-.rev h4 { font-weight: 600; font-size: 1rem; color: var(--white); margin-bottom: 6px; }
-.rev p { font-size: 0.82rem; line-height: 1.52; }
+/* ═══ TIMELINE ═══ */
+.timeline{display:flex;flex-direction:column;gap:0;margin-top:36px;width:100%;max-width:700px;position:relative}
+.timeline::before{content:'';position:absolute;left:7px;top:12px;bottom:12px;width:1px;background:var(--rule)}
+.tl-item{display:flex;gap:20px;padding:16px 0;position:relative}
+.tl-dot{width:15px;height:15px;border-radius:50%;border:2px solid var(--g1);background:var(--black);flex-shrink:0;margin-top:3px;z-index:1;transition:border-color .3s,background .3s}
+.tl-item:hover .tl-dot{border-color:var(--dream);background:var(--dream)}
+.tl-content{}
+.tl-date{font-family:var(--mono);font-size:.6rem;color:var(--g2);letter-spacing:.06em;margin-bottom:4px}
+.tl-title{font-weight:600;font-size:.88rem;letter-spacing:-.01em;margin-bottom:4px}
+.tl-desc{font-size:.78rem;color:var(--g3);line-height:1.5}
 
-/* ─── Table ─── */
-.tbl-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 24px; width: 100%; }
-.tbl { width: 100%; min-width: 500px; border-collapse: collapse; }
-.tbl th {
-  text-align: left; font-family: var(--mono); font-size: 0.52rem; font-weight: 500;
-  letter-spacing: 0.12em; text-transform: uppercase;
-  color: var(--gray-1); padding: 8px 12px; border-bottom: 1px solid rgba(255,255,255,0.06);
-}
-.tbl td { padding: 10px 12px; border-bottom: 1px solid rgba(255,255,255,0.025); font-size: 0.8rem; color: var(--gray-3); vertical-align: top; line-height: 1.45; }
-.tbl td strong { color: var(--white); font-weight: 600; }
+/* ═══ CTA ═══ */
+.cta-btn{display:inline-flex;align-items:center;gap:10px;padding:14px 32px;background:var(--white);color:var(--black);font-weight:700;font-size:.88rem;border-radius:100px;letter-spacing:-.02em;transition:transform .3s cubic-bezier(.16,1,.3,1),box-shadow .3s;cursor:pointer;border:none;margin-top:32px}
+.cta-btn:hover{transform:scale(1.04);box-shadow:0 0 60px rgba(255,255,255,.15)}
+.cta-ghost{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;background:transparent;color:var(--g4);font-weight:500;font-size:.82rem;border:1px solid var(--g1);border-radius:100px;letter-spacing:-.01em;transition:color .3s,border-color .3s;cursor:pointer;margin-top:16px}
+.cta-ghost:hover{color:var(--white);border-color:var(--g3)}
 
-/* ─── Badge ─── */
-.badge { display: inline-block; padding: 2px 8px; border-radius: 100px; font-size: 0.52rem; font-weight: 600; letter-spacing: 0.04em; }
-.badge-warm { background: rgba(245,158,11,0.12); color: var(--warm); }
-.badge-blue { background: rgba(59,130,246,0.1); color: var(--blue); }
-.badge-green { background: rgba(34,197,94,0.1); color: var(--green); }
-.badge-red { background: rgba(239,68,68,0.1); color: var(--red); }
-.badge-gray { background: rgba(255,255,255,0.05); color: var(--gray-3); }
+/* Footer */
+.footer{text-align:center;padding:60px var(--pad) 100px;border-top:1px solid var(--rule)}
+.footer-brand{font-weight:700;font-size:1.1rem;letter-spacing:-.03em;margin-bottom:8px}
+.footer p{font-size:.72rem;color:var(--g2);line-height:1.6}
+.footer .colophon{font-family:var(--mono);font-size:.5rem;color:var(--g1);margin-top:16px;letter-spacing:.06em}
 
-/* ─── Flow steps ─── */
-.flow-grid { display: grid; gap: 12px; margin-top: 28px; width: 100%; }
-.flow {
-  background: var(--dark); border: 1px solid rgba(255,255,255,0.05);
-  border-radius: 18px; padding: 24px; position: relative; overflow: hidden;
-}
-.flow .num { font-weight: 700; font-size: 2.6rem; color: rgba(255,255,255,0.03); position: absolute; top: 10px; right: 16px; letter-spacing: -0.05em; }
-.flow h4 { font-weight: 600; font-size: 0.92rem; color: var(--white); margin-bottom: 4px; }
-.flow p { font-size: 0.78rem; color: var(--gray-2); line-height: 1.48; }
-
-/* ─── Budget ─── */
-.budget-bar { height: 6px; border-radius: 100px; overflow: hidden; display: flex; margin-top: 24px; max-width: 600px; }
-.budget-seg { height: 100%; }
-.budget-legend { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 14px; }
-.budget-legend span { display: flex; align-items: center; gap: 6px; font-size: 0.7rem; color: var(--gray-3); }
-.budget-legend i { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
-
-/* ─── Burn gauge ─── */
-.burn-track { height: 4px; border-radius: 100px; background: var(--dark-2); overflow: hidden; max-width: 600px; }
-.burn-fill { height: 100%; border-radius: 100px; background: linear-gradient(90deg, var(--green), var(--warm), var(--red)); }
-
-/* ─── Gantt ─── */
-.gantt-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 20px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.04); width: 100%; }
-.gantt { width: 100%; min-width: 580px; border-collapse: separate; border-spacing: 0; }
-.gantt thead th {
-  padding: 10px 0; font-family: var(--mono); font-size: 0.5rem; font-weight: 500;
-  letter-spacing: 0.1em; text-transform: uppercase;
-  color: var(--gray-2); text-align: center;
-  border-bottom: 1px solid rgba(255,255,255,0.04); background: var(--dark);
-}
-.gantt thead th:first-child { text-align: left; padding-left: 14px; width: 160px; min-width: 160px; }
-.gantt tbody td { padding: 2px; border-bottom: 1px solid rgba(255,255,255,0.015); height: 24px; position: relative; }
-.gantt tbody td:first-child { font-size: 0.62rem; font-weight: 500; color: var(--gray-3); padding-left: 14px; white-space: nowrap; }
-.gantt-bar { height: 12px; border-radius: 100px; position: absolute; top: 50%; transform: translateY(-50%); opacity: 0.45; }
-
-/* ─── Callout ─── */
-.callout { background: rgba(59,130,246,0.05); border: 1px solid rgba(59,130,246,0.08); border-radius: 14px; padding: 20px 22px; margin-top: 20px; }
-.callout p { color: var(--gray-4); font-size: 0.86rem; }
-.callout strong { color: var(--blue); }
-
-/* ─── Locked ─── */
-.locked {
-  display: inline-flex; align-items: center; gap: 5px;
-  background: rgba(34,197,94,0.08); color: var(--green); font-weight: 600;
-  font-size: 0.62rem; padding: 5px 14px; border-radius: 100px; margin-top: 14px;
-  letter-spacing: 0.02em;
-}
-.locked::before { content: '✓'; }
-
-/* ─── Manifesto ─── */
-.manifesto {
-  font-weight: 300; font-size: clamp(1.2rem, 2.5vw, 1.7rem);
-  line-height: 1.6; color: var(--gray-4); max-width: 560px;
-}
-.manifesto strong { color: var(--white); font-weight: 600; }
-.manifesto em { font-style: italic; color: var(--gray-5); }
-
-/* ─── Quote slide ─── */
-.quote-text {
-  font-weight: 300; font-size: clamp(1.4rem, 3.5vw, 2.4rem);
-  line-height: 1.4; letter-spacing: -0.02em; color: var(--gray-5); max-width: 620px;
-}
-.quote-text strong { color: var(--white); font-weight: 600; }
-
-/* ─── Footer ─── */
-.footer {
-  padding: 56px var(--pad) calc(80px + var(--safe-b));
-  text-align: center; border-top: 1px solid rgba(255,255,255,0.03);
-}
-.footer .wordmark { font-weight: 700; font-size: 1.05rem; color: var(--white); letter-spacing: -0.03em; }
-.footer p { font-size: 0.66rem; color: var(--gray-1); margin-top: 4px; }
-
-/* ─── Glow orb ambient background ─── */
-.orb {
-  position: absolute; border-radius: 50%; filter: blur(120px);
-  pointer-events: none; opacity: 0.07;
-}
-
-/* ─── Modal/Drawer for app launch ─── */
-.app-drawer {
-  position: fixed; inset: 0; z-index: 2000;
-  background: rgba(0,0,0,0.92);
-  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-  display: none; flex-direction: column; align-items: center;
-  opacity: 0; transition: opacity 0.35s;
-}
-.app-drawer.open { display: flex; opacity: 1; }
-.app-drawer-header {
-  width: 100%; max-width: 1200px; padding: 20px 24px;
-  display: flex; align-items: center; justify-content: space-between;
-}
-.app-drawer-close {
-  width: 36px; height: 36px; border-radius: 50%;
-  background: rgba(255,255,255,0.08); border: none; cursor: pointer;
-  color: var(--white); font-size: 1.1rem;
-  display: flex; align-items: center; justify-content: center;
-  transition: background 0.25s;
-}
-.app-drawer-close:hover { background: rgba(255,255,255,0.15); }
-.app-drawer-title { font-weight: 600; font-size: 0.9rem; color: var(--white); }
-.app-drawer-frame {
-  flex: 1; width: 100%; max-width: 1200px; margin: 0 auto;
-  border-radius: 16px 16px 0 0; overflow: hidden;
-  border: 1px solid rgba(255,255,255,0.06);
-  border-bottom: none;
-}
-.app-drawer-frame iframe {
-  width: 100%; height: 100%; border: none; background: #fff;
-}
-.app-drawer-actions {
-  padding: 8px 24px 12px; display: flex; gap: 8px;
-}
-.btn-open {
-  font-family: var(--font); font-size: 0.7rem; font-weight: 600;
-  padding: 8px 20px; border-radius: 100px;
-  background: var(--blue); color: white; border: none; cursor: pointer;
-  transition: opacity 0.25s; text-decoration: none;
-}
-.btn-open:hover { opacity: 0.85; }
-
-/* ─── Desktop ─── */
-@media (min-width: 768px) {
-  :root { --pad: 64px; }
-  .app-grid { max-width: 600px; grid-template-columns: repeat(5, 1fr); }
-  .app-icon { width: 64px; height: 64px; font-size: 1.6rem; }
-  .sprint-grid { grid-template-columns: repeat(2, 1fr); }
-  .flow-grid { grid-template-columns: repeat(2, 1fr); }
-  .nav-links { display: flex; }
-}
-@media (min-width: 1080px) {
-  :root { --pad: 10vw; }
-  .app-grid { max-width: 740px; grid-template-columns: repeat(6, 1fr); gap: 8px 4px; }
-  .app-icon { width: 70px; height: 70px; border-radius: 17px; font-size: 1.8rem; }
-  .sprint-grid { grid-template-columns: repeat(4, 1fr); }
-  .flow-grid { grid-template-columns: repeat(4, 1fr); }
-}
-@media (max-width: 767px) {
-  .nav-links { display: none; }
+/* Responsive */
+@media(max-width:640px){
+  .scroll-grid{grid-template-columns:1fr}
+  .nav-links{display:none}
+  section{padding:80px var(--pad)}
 }
 </style>
 </head>
 <body>
 
-<div class="progress" id="progressBar"></div>
+<div class="progress" id="progress"></div>
 
-<!-- ─── Navigation ─── -->
+<!-- NAV -->
 <nav class="nav" id="nav">
-  <div class="nav-brand">Scrolls <span>Ed. 02</span></div>
+  <div class="nav-brand">Scrolls <span class="ed">Edition 03</span></div>
   <div class="nav-links">
     <a href="#library">Library</a>
-    <a href="#status">Status</a>
-    <a href="#revenue">Revenue</a>
+    <a href="#spec">Spec</a>
     <a href="#timeline">Timeline</a>
-    <a href="#builder">Builder</a>
+    <a href="#manifesto">Manifesto</a>
   </div>
 </nav>
 
-<!-- ─── Ticker ─── -->
+<!-- ═══ HERO ═══ -->
+<section class="centered" style="min-height:100svh">
+  <div class="kicker r">The Serverless Application Platform</div>
+  <div class="hero-text r d1">Scrolls.</div>
+  <p class="deck r d2">Seven single-file applications that replace every tool you pay monthly for. No servers. No accounts. No feed. Open it.&nbsp;It&nbsp;works.</p>
+  <div class="stats-row r d3">
+    <div class="stat-item"><div class="num">7</div><div class="label">Scrolls</div></div>
+    <div class="stat-item"><div class="num">80+</div><div class="label">Tools Inside</div></div>
+    <div class="stat-item"><div class="num">0</div><div class="label">Servers</div></div>
+    <div class="stat-item"><div class="num">$0</div><div class="label">Per Month</div></div>
+  </div>
+  <button class="cta-btn r d4" onclick="document.getElementById('library').scrollIntoView({behavior:'smooth'})">Open the Library →</button>
+</section>
+
+<!-- ═══ THESIS ═══ -->
+<section class="centered half">
+  <div class="kicker r">The Thesis</div>
+  <div class="hero-sub r d1" style="max-width:700px">Everything simple became<br><span style="color:var(--dream)">a subscription.</span></div>
+  <p class="deck r d2">Every small, human task got captured by a platform that wants your email, your data, and $10 a month. We built the exit door.</p>
+</section>
+
+<!-- ═══ BIG NUMBER ═══ -->
+<section class="centered half">
+  <div class="big-num r">7</div>
+  <div class="big-label r d1">Parent Scrolls · 80+ tools inside · One HTML file each</div>
+</section>
+
+<!-- ═══ THE LIBRARY ═══ -->
+<section class="centered auto" id="library">
+  <div class="kicker r">The Library</div>
+  <div class="section-title r d1">Seven scrolls. Everything you need.</div>
+  <p class="deck r d2">Each Scroll is a single HTML file containing a complete suite of tools. Open it in any browser. Works offline. Own it forever.</p>
+
+  <div class="scroll-grid">
+    <!-- DREAM -->
+    <div class="scroll-card r d1" data-scroll="dream" onclick="window.location='dream.html'">
+      <div class="scroll-header">
+        <div class="scroll-icon dream">✦</div>
+        <div><div class="scroll-name">Dream</div><div class="scroll-mode">Aspiration & Planning</div></div>
+      </div>
+      <div class="scroll-desc">Plan trips, set goals, track benefits, build vision boards. Everything for the life you're designing.</div>
+      <div class="sub-tools">
+        <span class="sub-tool">Travel Planner</span>
+        <span class="sub-tool">Trip Builder</span>
+        <span class="sub-tool">Concierge</span>
+        <span class="sub-tool">Vision Board</span>
+        <span class="sub-tool">Benefits</span>
+        <span class="sub-tool">Life Slate</span>
+        <span class="sub-tool">Goal Planner</span>
+      </div>
+      <div class="scroll-footer">
+        <span class="scroll-count">7 tools</span>
+        <span class="scroll-open">Open →</span>
+      </div>
+    </div>
+
+    <!-- DISCOVER -->
+    <div class="scroll-card r d2" data-scroll="discover" onclick="window.location='discover.html'">
+      <div class="scroll-header">
+        <div class="scroll-icon discover">◉</div>
+        <div><div class="scroll-name">Discover</div><div class="scroll-mode">Curiosity & Learning</div></div>
+      </div>
+      <div class="scroll-desc">Read news, explore libraries, research topics, build knowledge. Your private window to the world.</div>
+      <div class="sub-tools">
+        <span class="sub-tool">News Dispatch</span>
+        <span class="sub-tool">Library Reader</span>
+        <span class="sub-tool">Wiki</span>
+        <span class="sub-tool">Intel Dashboard</span>
+        <span class="sub-tool">Hollywood</span>
+        <span class="sub-tool">Pitch Viewer</span>
+        <span class="sub-tool">Navigator</span>
+      </div>
+      <div class="scroll-footer">
+        <span class="scroll-count">7 tools</span>
+        <span class="scroll-open">Open →</span>
+      </div>
+    </div>
+
+    <!-- UNWIND -->
+    <div class="scroll-card r d3" data-scroll="unwind" onclick="window.location='unwind.html'">
+      <div class="scroll-header">
+        <div class="scroll-icon unwind">♫</div>
+        <div><div class="scroll-name">Unwind</div><div class="scroll-mode">Leisure & Play</div></div>
+      </div>
+      <div class="scroll-desc">Listen to music, watch video, cook meals, play poker, run brackets. Entertainment without the algorithm.</div>
+      <div class="sub-tools">
+        <span class="sub-tool">Music Player</span>
+        <span class="sub-tool">Video Player</span>
+        <span class="sub-tool">Projector</span>
+        <span class="sub-tool">Poker</span>
+        <span class="sub-tool">Brackets</span>
+        <span class="sub-tool">Sports</span>
+        <span class="sub-tool">Reels</span>
+        <span class="sub-tool">Cook</span>
+        <span class="sub-tool">Meals</span>
+        <span class="sub-tool">Ledger</span>
+      </div>
+      <div class="scroll-footer">
+        <span class="scroll-count">10 tools</span>
+        <span class="scroll-open">Open →</span>
+      </div>
+    </div>
+
+    <!-- CREATE -->
+    <div class="scroll-card r d4" data-scroll="create" onclick="window.location='create.html'">
+      <div class="scroll-header">
+        <div class="scroll-icon create">◆</div>
+        <div><div class="scroll-name">Create</div><div class="scroll-mode">Making & Designing</div></div>
+      </div>
+      <div class="scroll-desc">Design slides, edit photos, draw on whiteboards, build charts, make cards. Your creative studio in one file.</div>
+      <div class="sub-tools">
+        <span class="sub-tool">Pinboard</span>
+        <span class="sub-tool">Photo Editor</span>
+        <span class="sub-tool">Vision AI</span>
+        <span class="sub-tool">Charts</span>
+        <span class="sub-tool">Card Maker</span>
+        <span class="sub-tool">Video Kit</span>
+        <span class="sub-tool">Whiteboard</span>
+        <span class="sub-tool">Slides</span>
+        <span class="sub-tool">Docs</span>
+      </div>
+      <div class="scroll-footer">
+        <span class="scroll-count">9 tools</span>
+        <span class="scroll-open">Open →</span>
+      </div>
+    </div>
+
+    <!-- CONNECT -->
+    <div class="scroll-card r d1" data-scroll="connect" onclick="window.location='connect.html'">
+      <div class="scroll-header">
+        <div class="scroll-icon connect">⬡</div>
+        <div><div class="scroll-name">Connect</div><div class="scroll-mode">Communication & Community</div></div>
+      </div>
+      <div class="scroll-desc">Message friends, video call, share photos, run forums. Real connection without the surveillance.</div>
+      <div class="sub-tools">
+        <span class="sub-tool">PhoneLink</span>
+        <span class="sub-tool">Video Calls</span>
+        <span class="sub-tool">Messenger</span>
+        <span class="sub-tool">Social Feed</span>
+        <span class="sub-tool">Photo Gallery</span>
+        <span class="sub-tool">Forum</span>
+      </div>
+      <div class="scroll-footer">
+        <span class="scroll-count">6 tools</span>
+        <span class="scroll-open">Open →</span>
+      </div>
+    </div>
+
+    <!-- PRODUCE -->
+    <div class="scroll-card r d2" data-scroll="produce" onclick="window.location='produce.html'">
+      <div class="scroll-header">
+        <div class="scroll-icon produce">▣</div>
+        <div><div class="scroll-name">Produce</div><div class="scroll-mode">Work & Execution</div></div>
+      </div>
+      <div class="scroll-desc">Write documents, manage projects, track time, organize files. The entire office in a single file.</div>
+      <div class="sub-tools">
+        <span class="sub-tool">Docs Editor</span>
+        <span class="sub-tool">Spreadsheet</span>
+        <span class="sub-tool">Calendar</span>
+        <span class="sub-tool">File Manager</span>
+        <span class="sub-tool">Workspace</span>
+        <span class="sub-tool">PM Board</span>
+        <span class="sub-tool">Forge</span>
+        <span class="sub-tool">Wiki Editor</span>
+        <span class="sub-tool">Planner</span>
+        <span class="sub-tool">Debate</span>
+      </div>
+      <div class="scroll-footer">
+        <span class="scroll-count">10 tools</span>
+        <span class="scroll-open">Open →</span>
+      </div>
+    </div>
+
+    <!-- GROW -->
+    <div class="scroll-card r d3" data-scroll="grow" onclick="window.location='grow.html'">
+      <div class="scroll-header">
+        <div class="scroll-icon grow">△</div>
+        <div><div class="scroll-name">Grow</div><div class="scroll-mode">Business & Scale</div></div>
+      </div>
+      <div class="scroll-desc">Run storefronts, manage customers, schedule meetings, analyze data, deploy AI. Your business engine.</div>
+      <div class="sub-tools">
+        <span class="sub-tool">Storefront</span>
+        <span class="sub-tool">ThriftHub</span>
+        <span class="sub-tool">Marketplace</span>
+        <span class="sub-tool">CRM</span>
+        <span class="sub-tool">Analytics</span>
+        <span class="sub-tool">AI Lab</span>
+        <span class="sub-tool">Scheduling</span>
+        <span class="sub-tool">Marketing Hub</span>
+        <span class="sub-tool">Runway</span>
+      </div>
+      <div class="scroll-footer">
+        <span class="scroll-count">9 tools</span>
+        <span class="scroll-open">Open →</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ SPEC ═══ -->
+<section class="centered auto" id="spec">
+  <div class="kicker r">Architecture</div>
+  <div class="section-title r d1">Each Scroll is one file.</div>
+  <p class="deck r d2">No frameworks. No build step. No dependencies. A single HTML document that contains the tool, the data layer, the design system, and the demo engine.</p>
+
+  <div class="spec-grid">
+    <div class="spec-card r d1">
+      <h4>~400KB per Scroll</h4>
+      <p>Complete app suite including all sub-tools, styles, scripts, and demo sequences in a single file.</p>
+    </div>
+    <div class="spec-card r d2">
+      <h4>Tab Navigation Shell</h4>
+      <p>Shared sidebar/tab UI switches between sub-tools. Cmd+K command palette for instant access.</p>
+    </div>
+    <div class="spec-card r d3">
+      <h4>IndexedDB Storage</h4>
+      <p>All data lives in the browser. Zero server calls. Export/import JSON for full portability.</p>
+    </div>
+    <div class="spec-card r d1">
+      <h4>Standalone Extract</h4>
+      <p>Any sub-tool can be exported as its own independent HTML file with one click.</p>
+    </div>
+    <div class="spec-card r d2">
+      <h4>Demo Engine</h4>
+      <p>Self-playing demo mode built in. Screen-capturable. Hostable. No manual recording needed.</p>
+    </div>
+    <div class="spec-card r d3">
+      <h4>Unified Design System</h4>
+      <p>Each Scroll has a category accent color. All sub-tools share typography, spacing, components.</p>
+    </div>
+    <div class="spec-card r d4">
+      <h4>Works Everywhere</h4>
+      <p>Any browser. Any OS. Online or offline. From a USB stick, email attachment, or shared folder.</p>
+    </div>
+    <div class="spec-card r d5">
+      <h4>E2E Encrypted</h4>
+      <p>When connected, all sync is end-to-end encrypted. Protocol layer planned for Scrolls that discover each other.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ PARENT APP SPECIFICATION ═══ -->
+<section class="auto" id="parentspec" style="max-width:800px;margin:0 auto">
+  <div class="kicker r">Parent App Blueprint</div>
+  <div class="section-title r d1">Single HTML. Complete suite.</div>
+  <p class="deck r d2">Each parent Scroll follows this exact architecture pattern. One file. All tools. Zero dependencies.</p>
+
+  <div style="margin-top:36px;background:var(--d1);border:1px solid var(--rule);border-radius:16px;padding:28px;font-family:var(--mono);font-size:.72rem;color:var(--g3);line-height:2" class="r d3">
+    <div style="color:var(--g2);margin-bottom:8px;font-size:.6rem;letter-spacing:.1em">ARCHITECTURE — EACH PARENT SCROLL</div>
+    <div><span style="color:var(--dream)">scroll-[name].html</span></div>
+    <div style="padding-left:20px">├── <span style="color:var(--white)">Shell</span> — nav bar, tab switcher, Cmd+K palette, settings, theme toggle</div>
+    <div style="padding-left:20px">├── <span style="color:var(--white)">Sub-Tool Modules</span> — each tool is a JS closure, lazy-loaded on tab switch</div>
+    <div style="padding-left:20px">├── <span style="color:var(--white)">Design Tokens</span> — CSS variables: category color, typography, spacing, radius</div>
+    <div style="padding-left:20px">├── <span style="color:var(--white)">Data Layer</span> — IndexedDB wrapper, JSON import/export, localStorage fallback</div>
+    <div style="padding-left:20px">├── <span style="color:var(--white)">Demo Engine</span> — auto-play sequences for each sub-tool, screen-capture ready</div>
+    <div style="padding-left:20px">├── <span style="color:var(--white)">Extract Mode</span> — export any sub-tool as standalone HTML</div>
+    <div style="padding-left:20px">└── <span style="color:var(--white)">Share Layer</span> — file-native sharing: download, AirDrop, email, embed link</div>
+    <div style="margin-top:16px;color:var(--g2);border-top:1px solid var(--rule);padding-top:12px">
+      <div><span style="color:var(--g4)">Tab switching:</span> show/hide DOM sections — no router</div>
+      <div><span style="color:var(--g4)">Sub-tool isolation:</span> each tool is an IIFE with scoped state</div>
+      <div><span style="color:var(--g4)">Target size:</span> &lt;500KB including all sub-tools</div>
+      <div><span style="color:var(--g4)">Browser support:</span> Chrome, Safari, Firefox, Edge — last 2 versions</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ TIMELINE ═══ -->
+<section class="centered auto" id="timeline">
+  <div class="kicker r">The Sprint</div>
+  <div class="section-title r d1">March 14 → July 22</div>
+  <p class="deck r d2">130 days. Every day ships something.</p>
+
+  <div class="timeline" style="text-align:left">
+    <div class="tl-item r d1">
+      <div class="tl-dot"></div>
+      <div class="tl-content">
+        <div class="tl-date">MAR 14 – MAR 28</div>
+        <div class="tl-title">Consolidate</div>
+        <div class="tl-desc">Merge 80 individual tools into 7 parent Scrolls. New homepage live. Brand unified under "Scrolls" everywhere.</div>
+      </div>
+    </div>
+    <div class="tl-item r d2">
+      <div class="tl-dot"></div>
+      <div class="tl-content">
+        <div class="tl-date">MAR 29 – APR 18</div>
+        <div class="tl-title">Polish</div>
+        <div class="tl-desc">Demo engines in all 7 Scrolls. Self-playing sequences. Screenshot and video assets generated. Creator kits assembled.</div>
+      </div>
+    </div>
+    <div class="tl-item r d3">
+      <div class="tl-dot"></div>
+      <div class="tl-content">
+        <div class="tl-date">APR 19 – MAY 9</div>
+        <div class="tl-title">Seed</div>
+        <div class="tl-desc">Reddit, Hacker News, Dev.to launches. 50 creator kits shipped. Revenue experiments go live — Pro, Library, Commissions.</div>
+      </div>
+    </div>
+    <div class="tl-item r d4">
+      <div class="tl-dot"></div>
+      <div class="tl-content">
+        <div class="tl-date">MAY 10 – MAY 24</div>
+        <div class="tl-title">Launch</div>
+        <div class="tl-desc">Product Hunt. Full press push. 150 more creator kits. Community feedback loop running. First revenue target: $500/mo.</div>
+      </div>
+    </div>
+    <div class="tl-item r d5">
+      <div class="tl-dot"></div>
+      <div class="tl-content">
+        <div class="tl-date">MAY 25 – JUL 22</div>
+        <div class="tl-title">Scale</div>
+        <div class="tl-desc">Double down on winning channel. Iterate on pricing. Prepare Edition 04. Build the protocol layer for Scroll-to-Scroll discovery.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ MANIFESTO ═══ -->
+<section class="auto" id="manifesto" style="display:flex;align-items:center;justify-content:center;min-height:80svh">
+  <div class="manifesto">
+    <div class="kicker r">Manifesto</div>
+    <p class="r d1">The web was supposed to be documents. Somewhere along the way, every simple thing became a platform with a login screen, a pricing page, and a terms-of-service longer than the tool itself.</p>
+    <p class="r d2">We're going back. A Scroll is a single file that contains everything — the tool, the data, the design. You own it the way you own a photograph or a letter. No server can shut it down. No company can revoke access. No subscription can expire.</p>
+    <p class="r d3">Seven files. Eighty tools. Zero dependencies. This is software that belongs to you.</p>
+    <p class="r d4" style="color:var(--dream)">Open it. It works.</p>
+    <div class="sig r d5">— The Scrolls Team · March 2026</div>
+  </div>
+</section>
+
+<!-- ═══ CTA ═══ -->
+<section class="centered half">
+  <div class="section-title r">Start with one Scroll.</div>
+  <p class="deck r d1">Pick the one that matches what you need right now. Every tool inside it works immediately.</p>
+  <button class="cta-btn r d2" onclick="document.getElementById('library').scrollIntoView({behavior:'smooth'})">Browse the Library →</button>
+  <a href="scrolls-unified-strategy.md" class="cta-ghost r d3">Read the Strategy Doc ↗</a>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-brand">Scrolls</div>
+  <p>Single-file tools · No servers · No accounts · No subscriptions</p>
+  <p style="margin-top:4px">scrolls.app · scrolls@proton.me</p>
+  <div class="colophon">7 Scrolls · 80+ tools · Zero servers · One platform · Edition 03</div>
+</footer>
+
+<!-- TICKER -->
 <div class="ticker">
-  <span>Azure credits expire</span>
-  <span class="days" id="daysLeft">—</span>
-  <span>days remaining</span>
-  <span style="color:var(--gray-1);">·</span>
-  <span>July 22, 2026</span>
-</div>
-
-<!-- ─── App Drawer ─── -->
-<div class="app-drawer" id="appDrawer">
-  <div class="app-drawer-header">
-    <div class="app-drawer-title" id="drawerTitle"></div>
-    <button class="app-drawer-close" onclick="closeDrawer()">✕</button>
-  </div>
-  <div class="app-drawer-frame">
-    <iframe id="drawerFrame" sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe>
-  </div>
-  <div class="app-drawer-actions">
-    <a class="btn-open" id="drawerOpen" href="#" target="_blank">Open in New Tab ↗</a>
-  </div>
-</div>
-
-<!-- ═══════════════════════════════════════════════ -->
-<!-- HERO -->
-<!-- ═══════════════════════════════════════════════ -->
-<section class="centered" style="position:relative; overflow:hidden;">
-  <div class="orb" style="width:600px;height:600px;background:var(--blue);top:-200px;right:-100px;"></div>
-  <div class="orb" style="width:400px;height:400px;background:var(--warm);bottom:-100px;left:-100px;"></div>
-  <div class="kicker r">Scrolls · Edition 02 · March 14, 2026</div>
-  <div class="hero-text r d1">80 Scrolls.</div>
-  <p class="deck r d2" style="margin-top: 24px;">$45K in Azure credits. Eighty working solutions. One deadline.<br>The creation engine isn't slowing down. <em>It's accelerating.</em></p>
-</section>
-
-<!-- ═══════════════════════════════════════════════ -->
-<!-- BIG NUMBERS -->
-<!-- ═══════════════════════════════════════════════ -->
-<section class="centered half" id="status">
-  <div class="stats-row r">
-    <div class="stat-item"><div class="num accent" id="daysNum">—</div><div class="label">Days left</div></div>
-    <div class="stat-item"><div class="num">$45K</div><div class="label">Azure credits</div></div>
-    <div class="stat-item"><div class="num blue">80</div><div class="label">Built today</div></div>
-    <div class="stat-item"><div class="num">120+</div><div class="label">Target July</div></div>
-    <div class="stat-item"><div class="num" style="color:var(--green);">3</div><div class="label">Revenue paths</div></div>
-  </div>
-</section>
-
-<!-- ═══════════════════════════════════════════════ -->
-<!-- THE BRIDGE -->
-<!-- ═══════════════════════════════════════════════ -->
-<section>
-  <div class="kicker r">The thesis</div>
-  <div class="hero-sub r" style="max-width:640px;">You remember when<br>friendship meant knocking<br>on someone's <span class="accent">door.</span></div>
-</section>
-
-<section>
-  <div class="manifesto r">
-    When Saturday mornings were made for cartoons, not scrolling feeds. When happiness came from mixtapes, bike rides, and street lights telling you it was time to go home.
-  </div>
-  <div class="manifesto r" style="margin-top:24px;">
-    But here's what makes your generation different. <strong>You were the Bridge.</strong> The last to know life without technology. And the first to grow up adapting to it.
-  </div>
-</section>
-
-<section class="centered">
-  <div class="quote-text r">
-    Maybe that's why people born in the '80s and '90s carry a certain <strong>ache</strong>. A nostalgia for simplicity. A quiet wish that joy could still feel as easy as it once did.
-  </div>
-</section>
-
-<!-- ═══════════════════════════════════════════════ -->
-<!-- THE PRODUCT -->
-<!-- ═══════════════════════════════════════════════ -->
-<section>
-  <div class="kicker r">The product</div>
-  <div class="section-title r">We're not building<br>another platform that<br>demands your <span class="accent">attention.</span></div>
-  <p class="deck r" style="margin-top:20px;">We're building quiet tools that work in a single file. No accounts. No subscriptions. No tracking. No feed. Just the thing you needed, ready when you open it.</p>
-  <p class="r" style="margin-top:14px;font-size:0.88rem;color:var(--gray-2);max-width:500px;">Technology got complicated because it was built to keep you. We're building technology designed to let you go.</p>
-</section>
-
-<section class="centered">
-  <div class="kicker r">We call them</div>
-  <div class="hero-text r"><span class="accent">Scrolls.</span></div>
-  <p class="deck r" style="margin-top:20px;">A single document that contains everything — the tool, the data, the design. One file. No server. No account. Just open it.</p>
-  <div class="locked r">Decision locked</div>
-</section>
-
-<section class="centered half">
-  <div class="hero-sub r" style="color:var(--gray-5);">"There's a Scroll<br>for <span style="color:var(--white);">that.</span>"</div>
-</section>
-
-<!-- ═══════════════════════════════════════════════ -->
-<!-- DAY ONE → DAY TWO -->
-<!-- ═══════════════════════════════════════════════ -->
-<section>
-  <div class="kicker r">Where we stand</div>
-  <div class="section-title r">This is no longer Day One.<br>This is <span class="accent">Day Two.</span></div>
-  <p class="deck r" style="margin-top:16px;">80 working Scrolls across ten categories. The creation engine has tripled output since Edition 01. Sprint 1 is shipping. The question is no longer "can we build?" — it's how fast we flood every channel before July 22.</p>
-
-  <div class="card-grid g4 r" style="max-width:1100px;">
-    <div class="card"><span class="icon">✓</span><h4>80 built</h4><p>Comms. Productivity. Creative. Shopping. Entertainment. News. Lifestyle. Builder tools. Marketing. AI.</p></div>
-    <div class="card"><span class="icon">⏱</span><h4>The clock</h4><p id="clockCard">— days. Credits expire July 22. Every day produces at least one Scroll.</p></div>
-    <div class="card"><span class="icon">◈</span><h4>Distribution live</h4><p>Podcaster tools built. Demo mode active. Investor decks shipping. Social content pipeline running.</p></div>
-    <div class="card"><span class="icon">△</span><h4>The format</h4><p>Not apps. Scrolls. Serverless HTML Solutions. An entirely new category.</p></div>
-  </div>
-</section>
-
-<!-- ═══════════════════════════════════════════════ -->
-<!-- THE NUMBER -->
-<!-- ═══════════════════════════════════════════════ -->
-<section class="centered" style="position:relative;overflow:hidden;">
-  <div class="orb" style="width:500px;height:500px;background:var(--purple);top:50%;left:50%;transform:translate(-50%,-50%);"></div>
-  <div class="big-num r">80</div>
-  <div class="big-label r">Scrolls. Live. Today.</div>
-</section>
-
-<!-- ═══════════════════════════════════════════════ -->
-<!-- THE LIBRARY — clickable app grid -->
-<!-- ═══════════════════════════════════════════════ -->
-<section class="auto centered" id="library">
-  <div class="kicker r">The library</div>
-  <div class="section-title r">Tap any icon.<br>It <span class="accent">works.</span></div>
-
-  <div class="app-grid r">
-
-    <div class="app-cat">Communication</div>
-    <a class="app" onclick="openApp('scrolls/community-PhoneLinkP2P.html','PhoneLink P2P')"><div class="app-icon comm">📞</div><div class="app-name">PhoneLink</div></a>
-    <a class="app" onclick="openApp('scrolls/community-video-calls.html','Video Calls')"><div class="app-icon comm">📹</div><div class="app-name">Video Calls</div></a>
-    <a class="app" onclick="openApp('scrolls/community-messenger.html','Messenger')"><div class="app-icon comm">💬</div><div class="app-name">Messenger</div></a>
-    <a class="app" onclick="openApp('scrolls/community-social-feed.html','Social Feed')"><div class="app-icon comm">📱</div><div class="app-name">Social</div></a>
-    <a class="app" onclick="openApp('scrolls/community-p2p-instagram.html','P2P Instagram')"><div class="app-icon comm">📸</div><div class="app-name">Instagram</div></a>
-    <a class="app" onclick="openApp('scrolls/community-reel-cards-builder.html','Reel Cards')"><div class="app-icon comm">🎬</div><div class="app-name">Reels</div></a>
-
-    <div class="app-cat">Productivity</div>
-    <a class="app" onclick="openApp('scrolls/docs.html','SimpleDoc')"><div class="app-icon prod">📝</div><div class="app-name">Docs</div></a>
-    <a class="app" onclick="openApp('scrolls/docs2.html','Docs Clone')"><div class="app-icon prod">📄</div><div class="app-name">Docs 2</div></a>
-    <a class="app" onclick="openApp('scrolls/google-slides-clone-secure.html','Secure Slides')"><div class="app-icon prod">📊</div><div class="app-name">Slides</div></a>
-    <a class="app" onclick="openApp('scrolls/calendar.html','Calendar')"><div class="app-icon prod">📅</div><div class="app-name">Calendar</div></a>
-    <a class="app" onclick="openApp('scrolls/file-manager.html','File Manager')"><div class="app-icon prod">📁</div><div class="app-name">Files</div></a>
-    <a class="app" onclick="openApp('scrolls/productivity-whiteboard.html','Whiteboard')"><div class="app-icon prod">🖊</div><div class="app-name">Whiteboard</div></a>
-    <a class="app" onclick="openApp('scrolls/workspace-workspace-rev5_1.html','Workspace')"><div class="app-icon prod">🗂</div><div class="app-name">Workspace</div></a>
-    <a class="app" onclick="openApp('scrolls/document-knowledgebase.html','Knowledge Base')"><div class="app-icon prod">📚</div><div class="app-name">Wiki</div></a>
-    <a class="app" onclick="openApp('scrolls/internaltools-project-intel-1.html','Project Intel')"><div class="app-icon prod">🧠</div><div class="app-name">Intel</div></a>
-    <a class="app" onclick="openApp('scrolls/internaltools-project-planner.html','Project Planner')"><div class="app-icon prod">📋</div><div class="app-name">Planner</div></a>
-    <a class="app" onclick="openApp('scrolls/internaltools-project-intel_1.html','PM Workspace')"><div class="app-icon prod">🏗</div><div class="app-name">PM</div></a>
-    <a class="app" onclick="openApp('scrolls/internaltools-project-intel-r1.html','Debate Engine')"><div class="app-icon prod">⚡</div><div class="app-name">Debate</div></a>
-
-    <div class="app-cat">Creative</div>
-    <a class="app" onclick="openApp('scrolls/discover-pins-2-visionboard.html','Pinboard')"><div class="app-icon create">📌</div><div class="app-name">Pinboard</div></a>
-    <a class="app" onclick="openApp('scrolls/community-photo-gallery.html','Photo Gallery')"><div class="app-icon create">📷</div><div class="app-name">Photos</div></a>
-    <a class="app" onclick="openApp('scrolls/dream-pins-2-visionboard.html','Vision Board')"><div class="app-icon create">✨</div><div class="app-name">Vision</div></a>
-    <a class="app" onclick="openApp('scrolls/connectivity-reels-satellite-recorder.html','Sankey Flow')"><div class="app-icon create">🔀</div><div class="app-name">Sankey</div></a>
-    <a class="app" onclick="openApp('scrolls/community-reels-landingvideo-card-guide.html','Video Cards')"><div class="app-icon create">🎴</div><div class="app-name">Cards</div></a>
-    <a class="app" onclick="openApp('scrolls/community-reels-landing-video-card-guide_1.html','Video Kit')"><div class="app-icon create">🎞</div><div class="app-name">Video Kit</div></a>
-
-    <div class="app-cat">Shopping</div>
-    <a class="app" onclick="openApp('scrolls/community-shopping-storefront.html','Storefront')"><div class="app-icon shop">🏪</div><div class="app-name">Store</div></a>
-    <a class="app" onclick="openApp('scrolls/community-shopping-thrift-hub.html','ThriftHub')"><div class="app-icon shop">👗</div><div class="app-name">ThriftHub</div></a>
-    <a class="app" onclick="openApp('scrolls/community-shopping-p2p-thrift-hub_1.html','P2P Thrift')"><div class="app-icon shop">🛍</div><div class="app-name">P2P Thrift</div></a>
-    <a class="app" onclick="openApp('scrolls/discovery-shopping-fashion-runwayrewards.html','RunwayRewards')"><div class="app-icon shop">👠</div><div class="app-name">Runway</div></a>
-
-    <div class="app-cat">Lifestyle</div>
-    <a class="app" onclick="openApp('scrolls/home-cooking.html','Cookbook')"><div class="app-icon life">🍳</div><div class="app-name">Cook</div></a>
-    <a class="app" onclick="openApp('scrolls/home-cooking-delicousness.html','Concierge')"><div class="app-icon life">🍷</div><div class="app-name">Concierge</div></a>
-    <a class="app" onclick="openApp('scrolls/home-meal-planner.html','Meal Planner')"><div class="app-icon life">🥗</div><div class="app-name">Meals</div></a>
-    <a class="app" onclick="openApp('scrolls/Workspace - Trip Planning.html','Trip Planner')"><div class="app-icon life">✈️</div><div class="app-name">Travel</div></a>
-    <a class="app" onclick="openApp('scrolls/workspace-tripplanning.html','Trip Workspace')"><div class="app-icon life">🗺</div><div class="app-name">Trips</div></a>
-    <a class="app" onclick="openApp('scrolls/blog-creditcardbenefits.html','Credit Card Benefits')"><div class="app-icon life">💳</div><div class="app-name">Benefits</div></a>
-    <a class="app" onclick="openApp('scrolls/community-hobby-poker.html','Poker')"><div class="app-icon life">♠️</div><div class="app-name">Poker</div></a>
-    <a class="app" onclick="openApp('scrolls/home-hobby-poker.html','Design Surface')"><div class="app-icon life">🎨</div><div class="app-name">Slate</div></a>
-
-    <div class="app-cat">Entertainment</div>
-    <a class="app" onclick="openApp('scrolls/entertainment-music-player.html','Music Player')"><div class="app-icon ent">🎵</div><div class="app-name">Music</div></a>
-    <a class="app" onclick="openApp('scrolls/entertainment-video.html','Video Player')"><div class="app-icon ent">▶️</div><div class="app-name">Video</div></a>
-    <a class="app" onclick="openApp('scrolls/entertainment-projector-player.html','Projector')"><div class="app-icon ent">📽</div><div class="app-name">Projector</div></a>
-    <a class="app" onclick="openApp('scrolls/community-sportsleagues-majorevents.html','March Madness')"><div class="app-icon ent">🏀</div><div class="app-name">Brackets</div></a>
-    <a class="app" onclick="openApp('scrolls/community-hobby-sports-pro-hub_1.html','Sports Hub')"><div class="app-icon ent">⚽</div><div class="app-name">Sports</div></a>
-    <a class="app" onclick="openApp('scrolls/blind-ledger-mobile_1.html','Blind Ledger')"><div class="app-icon ent">🎭</div><div class="app-name">Ledger</div></a>
-
-    <div class="app-cat">News & Blogs</div>
-    <a class="app" onclick="openApp('scrolls/community-news-sorocaba-dispatch-march-2026.html','Sorocaba Dispatch')"><div class="app-icon news">📰</div><div class="app-name">Dispatch</div></a>
-    <a class="app" onclick="openApp('scrolls/community-blog-news-Travel_Dispatch_1.html','Travel Dispatch')"><div class="app-icon news">🌍</div><div class="app-name">Travel</div></a>
-    <a class="app" onclick="openApp('scrolls/blog-hollywood.html','Hollywood')"><div class="app-icon news">🎬</div><div class="app-name">Hollywood</div></a>
-    <a class="app" onclick="openApp('scrolls/community-p2p-news-pitch.html','News Pitch')"><div class="app-icon news">📢</div><div class="app-name">Pitch</div></a>
-    <a class="app" onclick="openApp('scrolls/community-news-sorocaba-dispatch-march-2026_updated.html','Library')"><div class="app-icon news">📖</div><div class="app-name">Library</div></a>
-
-    <div class="app-cat">Builder Tools</div>
-    <a class="app" onclick="openApp('scrolls/forge.html','Forge')"><div class="app-icon build">🔨</div><div class="app-name">Forge</div></a>
-    <a class="app" onclick="openApp('scrolls/forge-intranet.html','Forge Intranet')"><div class="app-icon build">⚙️</div><div class="app-name">Forge 2</div></a>
-    <a class="app" onclick="openApp('scrolls/flowforge-azure-html-editor.html','FlowForge')"><div class="app-icon build">🔧</div><div class="app-name">FlowForge</div></a>
-    <a class="app" onclick="openApp('scrolls/azure-html-editor_1.html','Azure Workshop')"><div class="app-icon build">☁️</div><div class="app-name">Azure</div></a>
-    <a class="app" onclick="openApp('scrolls/internaltools-html-packager-v2_1_1.html','HTML Packager')"><div class="app-icon build">📦</div><div class="app-name">Packager</div></a>
-    <a class="app" onclick="openApp('scrolls/internaltools-localllm_htmlworkshop.html','LLM Workshop')"><div class="app-icon build">🤖</div><div class="app-name">LLM Lab</div></a>
-
-    <div class="app-cat">Marketing & Decks</div>
-    <a class="app" onclick="openApp('scrolls/marketing-25apps.html','App Hub')"><div class="app-icon mkt">🚀</div><div class="app-name">Hub</div></a>
-    <a class="app" onclick="openApp('scrolls/marketing-investordecks-Open_Intranet_Apple_x_Napster_5.html','Investor Deck')"><div class="app-icon mkt">💼</div><div class="app-name">Investors</div></a>
-    <a class="app" onclick="openApp('scrolls/DocChain_Presentation.html','DocChain Deck')"><div class="app-icon mkt">⛓</div><div class="app-name">DocChain</div></a>
-    <a class="app" onclick="openApp('scrolls/internaltools-scrolls-launch-dashboard.html','Launch Dashboard')"><div class="app-icon mkt">📈</div><div class="app-name">Launch</div></a>
-    <a class="app" onclick="openApp('scrolls/internaltools-productmanagement-the-method.html','The Method')"><div class="app-icon mkt">🧩</div><div class="app-name">Method</div></a>
-    <a class="app" onclick="openApp('scrolls/marketing-docchainplan-crypto.html','Crypto Plan')"><div class="app-icon mkt">🪙</div><div class="app-name">Crypto</div></a>
-
-    <div class="app-cat">AI-Powered</div>
-    <a class="app" onclick="openApp('scrolls/ae-intranet-feedback.html','AE Navigator')"><div class="app-icon ai">🧭</div><div class="app-name">Navigator</div></a>
-    <a class="app" onclick="openApp('scrolls/internaltools-locallllm-html-workshop.html','AI Workshop')"><div class="app-icon ai">🤖</div><div class="app-name">AI Lab</div></a>
-    <a class="app" onclick="openApp('scrolls/discovery-p2p-pinterest_modified.html','AI Pins')"><div class="app-icon ai">🔮</div><div class="app-name">AI Pins</div></a>
-
-  </div>
-</section>
-
-<!-- ═══════════════════════════════════════════════ -->
-<!-- BUDGET -->
-<!-- ═══════════════════════════════════════════════ -->
-<section class="centered" style="position:relative;overflow:hidden;">
-  <div class="orb" style="width:500px;height:500px;background:var(--warm);top:50%;left:50%;transform:translate(-50%,-50%);"></div>
-  <div class="big-num r" style="color:var(--warm);">$45K</div>
-  <div class="big-label r">Burn with intent.</div>
-</section>
-
-<section class="auto">
-  <div class="kicker r">Budget allocation</div>
-  <p class="deck r">4.2 months. Every dollar produces a shipped Scroll, a demo, a distribution touchpoint, or a revenue experiment.</p>
-  <div class="budget-bar r">
-    <div class="budget-seg" style="width:45%;background:var(--warm);border-radius:100px 0 0 100px;"></div>
-    <div class="budget-seg" style="width:20%;background:var(--blue);"></div>
-    <div class="budget-seg" style="width:15%;background:var(--green);"></div>
-    <div class="budget-seg" style="width:10%;background:var(--purple);"></div>
-    <div class="budget-seg" style="width:10%;background:var(--red);border-radius:0 100px 100px 0;"></div>
-  </div>
-  <div class="budget-legend r">
-    <span><i style="background:var(--warm);"></i>AI API $20K</span>
-    <span><i style="background:var(--blue);"></i>Hosting $9K</span>
-    <span><i style="background:var(--green);"></i>Compute $7K</span>
-    <span><i style="background:var(--purple);"></i>Demos $4.5K</span>
-    <span><i style="background:var(--red);"></i>R&D $4.5K</span>
-  </div>
-  <p class="r" style="margin-top:24px;max-width:520px;"><strong style="color:var(--white);">$8K–$11K/mo</strong> months 1–3. Taper to <strong style="color:var(--white);">$4K–$5K</strong> in the final month.</p>
-  <div style="margin-top:28px;max-width:600px;" class="r">
-    <div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:0.6rem;color:var(--gray-2);margin-bottom:6px;"><span>Mar 13</span><span>Today</span><span>Jul 22</span></div>
-    <div class="burn-track"><div class="burn-fill" id="burnFill" style="width:1%;"></div></div>
-    <div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:0.58rem;color:var(--gray-1);margin-top:6px;"><span id="remaining">$45K remaining</span><span>$0 target</span></div>
-  </div>
-</section>
-
-<!-- ═══════════════════════════════════════════════ -->
-<!-- DISTRIBUTION -->
-<!-- ═══════════════════════════════════════════════ -->
-<section>
-  <div class="kicker r">Distribution</div>
-  <div class="section-title r">The podcaster play.</div>
-  <p class="deck r" style="margin-top:16px;">Every podcaster is a small business that needs tools. They're also natural amplifiers. Build something useful — they'll talk about it to thousands.</p>
-  <div class="card-grid g3 r" style="max-width:900px;">
-    <div class="card"><span class="icon">🎙</span><h4>What they need</h4><p>Audiogram makers. Show notes generators. Guest trackers. Episode planners. Newsletter builders.</p></div>
-    <div class="card"><span class="icon">📢</span><h4>Why they'll share</h4><p>Save them 2 hours/week. They mention it on-air, in newsletters, in group chats. One tool unlocks a network.</p></div>
-    <div class="card"><span class="icon">🔄</span><h4>The flywheel</h4><p>Build → gift → promote → audience discovers → some are creators too → build more. Each cycle amplifies.</p></div>
-  </div>
-  <div class="locked r">Business & tech podcasters first</div>
-</section>
-
-<!-- ═══════════════════════════════════════════════ -->
-<!-- DEMO ENGINE -->
-<!-- ═══════════════════════════════════════════════ -->
-<section class="centered">
-  <div class="kicker r">Demo engine</div>
-  <div class="section-title r">Every Scroll<br>sells <span class="accent">itself.</span></div>
-  <p class="deck r" style="margin-top:16px;">Self-playing demos baked in. Hostable, embeddable, screen-capturable. No manual recording.</p>
-  <div class="flow-grid r" style="max-width:900px; text-align:left;">
-    <div class="flow"><span class="num">01</span><h4>Script</h4><p>15–30 sec of clicks, typing, state changes.</p></div>
-    <div class="flow"><span class="num">02</span><h4>Embed</h4><p>JS animation baked in. Zero dependencies.</p></div>
-    <div class="flow"><span class="num">03</span><h4>Host</h4><p>Azure Static Web Apps. Iframe anywhere.</p></div>
-    <div class="flow"><span class="num">04</span><h4>Capture</h4><p>Playwright batch → 30+ social clips in one run.</p></div>
-  </div>
-</section>
-
-<!-- ═══════════════════════════════════════════════ -->
-<!-- REVENUE -->
-<!-- ═══════════════════════════════════════════════ -->
-<section id="revenue">
-  <div class="kicker r">Revenue</div>
-  <div class="section-title r">Three paths to <span class="accent">money.</span></div>
-  <p class="deck r" style="margin-top:12px;">$0 requirement. Active experiments. $500/mo by June validates the model.</p>
-  <div class="card-grid g3 r" style="max-width:900px;">
-    <div class="rev" style="border-top-color:var(--warm);"><div class="rtag" style="color:var(--warm);">Stream 01</div><h4>AI Credit Sales</h4><p>Buy credits for AI features. We proxy Azure OpenAI. 40–60% margin.</p><p style="margin-top:8px;"><strong style="color:var(--white);">$5/50 · $20/250 · $50/750.</strong> 5 free.</p><div class="locked">Launches Sprint 2</div></div>
-    <div class="rev" style="border-top-color:var(--green);"><div class="rtag" style="color:var(--green);">Stream 02</div><h4>Podcaster Pro Kit</h4><p>8–10 Scrolls bundled. <strong style="color:var(--white);">$29 or $9/mo.</strong></p></div>
-    <div class="rev" style="border-top-color:var(--blue);"><div class="rtag" style="color:var(--blue);">Stream 03</div><h4>Custom Scrolls</h4><p>"Tell us what you need." <strong style="color:var(--white);">$200–$2,000</strong> per Scroll.</p></div>
-  </div>
-</section>
-
-<!-- ═══════════════════════════════════════════════ -->
-<!-- SPRINTS -->
-<!-- ═══════════════════════════════════════════════ -->
-<section class="auto" id="timeline">
-  <div class="kicker r">Sprint plan</div>
-  <div class="section-title r">The countdown.</div>
-  <div class="sprint-grid r" style="max-width:1100px;">
-    <div class="sprint" style="border-top-color:var(--red);"><div class="stag" style="color:var(--red);">S1 · Days 0–14</div><h4>Lock & Load</h4><ul>
-      <li class="done">Polish top 10 Scrolls</li>
-      <li class="done">Build demo mode into all 10</li>
-      <li class="done">Deploy catalog skeleton</li>
-      <li class="active">10 demo videos</li>
-      <li class="active">AI credit purchase flow</li>
-      <li class="active">First 3 social posts</li>
-    </ul></div>
-    <div class="sprint" style="border-top-color:var(--warm);"><div class="stag" style="color:var(--warm);">S2 · Days 15–42</div><h4>Podcaster Blitz</h4><ul>
-      <li>5–8 podcaster Scrolls</li>
-      <li>Cold-outreach 10 podcasters</li>
-      <li>Full catalog with demos</li>
-      <li>Polish remaining 70+</li>
-      <li>30+ demo videos</li>
-      <li>AI credits live</li>
-      <li>Target: 90+ cataloged</li>
-    </ul></div>
-    <div class="sprint" style="border-top-color:var(--green);"><div class="stag" style="color:var(--green);">S3 · Days 43–84</div><h4>Amplification</h4><ul>
-      <li>15+ new Scrolls</li>
-      <li>Show HN + Product Hunt</li>
-      <li>YouTube series</li>
-      <li>Pro Kit — $29</li>
-      <li>3 custom clients</li>
-      <li>DocuSign + hash</li>
-      <li>Target: 100+, $1K rev</li>
-    </ul></div>
-    <div class="sprint" style="border-top-color:var(--blue);"><div class="stag" style="color:var(--blue);">S4 · Days 85–128</div><h4>Final Burn</h4><ul>
-      <li>Burn remaining credits</li>
-      <li>Pre-generate library</li>
-      <li>Lock pricing</li>
-      <li>Community Forge V3</li>
-      <li>Doccoin protocol</li>
-      <li>Target: 120+, sustainable</li>
-    </ul></div>
-  </div>
-</section>
-
-<!-- ═══════════════════════════════════════════════ -->
-<!-- GANTT -->
-<!-- ═══════════════════════════════════════════════ -->
-<section class="auto">
-  <div class="kicker r">Timeline</div>
-  <div class="section-title r" style="font-size:clamp(1.2rem,2.5vw,1.8rem);">The Gantt.</div>
-  <div class="gantt-wrap r" style="max-width:1100px;">
-    <table class="gantt"><thead><tr><th>Workstream</th><th>Mar</th><th>Apr</th><th>May</th><th>Jun</th><th>Jul</th></tr></thead><tbody id="gantt-body"></tbody></table>
-  </div>
-</section>
-
-<!-- ═══════════════════════════════════════════════ -->
-<!-- TACTICS -->
-<!-- ═══════════════════════════════════════════════ -->
-<section class="auto">
-  <div class="kicker r">Growth</div>
-  <div class="section-title r">Seven moves.<br><span class="dim">Zero ad spend.</span></div>
-  <div class="tbl-wrap r" style="max-width:900px;">
-    <table class="tbl">
-      <thead><tr><th>Tactic</th><th>How</th><th>Cost</th><th>When</th></tr></thead>
-      <tbody>
-        <tr><td><strong>Podcaster Gift</strong></td><td>Build a custom Scroll for a show. Send it.</td><td>~$2</td><td>S2</td></tr>
-        <tr><td><strong>Self-Playing Demos</strong></td><td><span class="mono">?demo=true</span>. Embed anywhere.</td><td>$0</td><td>S1</td></tr>
-        <tr><td><strong>30-Video Blitz</strong></td><td>Playwright batch → 2–3/day on social.</td><td>~$10</td><td>S2</td></tr>
-        <tr><td><strong>Kindness Loop</strong></td><td>Travel, Reel, Finance — every send is marketing.</td><td>$0</td><td>Always</td></tr>
-        <tr><td><strong>Credit Hook</strong></td><td>5 free AI credits → experience → buy.</td><td>Offset</td><td>S2</td></tr>
-        <tr><td><strong>Iframe Seeding</strong></td><td>One-line embed for bloggers.</td><td>$0</td><td>S3</td></tr>
-        <tr><td><strong>"There's a Scroll for That"</strong></td><td>Reply to SaaS complaints with a free Scroll.</td><td>$0</td><td>Always</td></tr>
-      </tbody>
-    </table>
-  </div>
-  <div class="locked r">Social: Twitter/X + TikTok first</div>
-</section>
-
-<!-- ═══════════════════════════════════════════════ -->
-<!-- CREATION ENGINE -->
-<!-- ═══════════════════════════════════════════════ -->
-<section class="centered" id="builder">
-  <div class="kicker r">Creation engine</div>
-  <div class="section-title r">Problem to Scroll.<br><span class="accent">24 hours.</span></div>
-  <div class="flow-grid r" style="max-width:900px; text-align:left;">
-    <div class="flow"><span class="num">01</span><h4>Capture</h4><p>Problem from social, podcasters, community.</p></div>
-    <div class="flow"><span class="num">02</span><h4>Generate</h4><p>Forge V2 → AI Scroll. Design tokens, responsive, offline. 10 min.</p></div>
-    <div class="flow"><span class="num">03</span><h4>Polish</h4><p>20% human: UX, edge cases, copy. Where taste lives.</p></div>
-    <div class="flow"><span class="num">04</span><h4>Ship</h4><p>Catalog → demo → social → iframe. Done.</p></div>
-  </div>
-</section>
-
-<!-- ═══════════════════════════════════════════════ -->
-<!-- ROADMAP -->
-<!-- ═══════════════════════════════════════════════ -->
-<section class="auto">
-  <div class="kicker r">Next wave</div>
-  <div class="section-title r">What to build <span class="accent">next.</span></div>
-  <div class="tbl-wrap r" style="max-width:1000px;">
-    <table class="tbl">
-      <thead><tr><th>Scroll</th><th>Category</th><th>Revenue</th><th>Sprint</th></tr></thead>
-      <tbody>
-        <tr><td><strong>Audiogram Maker</strong></td><td>Podcaster</td><td><span class="badge badge-warm">High</span></td><td><span class="badge badge-red">S2</span></td></tr>
-        <tr><td><strong>Show Notes Gen</strong></td><td>Podcaster / AI</td><td><span class="badge badge-warm">High</span></td><td><span class="badge badge-red">S2</span></td></tr>
-        <tr><td><strong>Invoice Generator</strong></td><td>Professional</td><td><span class="badge badge-blue">Med</span></td><td><span class="badge badge-warm">S2</span></td></tr>
-        <tr><td><strong>Social Calendar</strong></td><td>Creator</td><td><span class="badge badge-blue">Med</span></td><td><span class="badge badge-warm">S2</span></td></tr>
-        <tr><td><strong>DocuSign + Hash</strong></td><td>Professional</td><td><span class="badge badge-warm">High</span></td><td><span class="badge badge-green">S3</span></td></tr>
-        <tr><td><strong>Sponsor Rate Card</strong></td><td>Podcaster</td><td><span class="badge badge-blue">Med</span></td><td><span class="badge badge-green">S3</span></td></tr>
-        <tr><td><strong>CRM / Leads</strong></td><td>Professional</td><td><span class="badge badge-blue">Med</span></td><td><span class="badge badge-green">S3</span></td></tr>
-        <tr><td><strong>Meeting Notes AI</strong></td><td>Productivity</td><td><span class="badge badge-warm">High</span></td><td><span class="badge badge-green">S3</span></td></tr>
-        <tr><td><strong>Newsletter Builder</strong></td><td>Creator</td><td><span class="badge badge-blue">Med</span></td><td><span class="badge badge-gray">S3</span></td></tr>
-        <tr><td><strong>Budget Tracker</strong></td><td>Finance</td><td><span class="badge badge-gray">Low</span></td><td><span class="badge badge-blue">S4</span></td></tr>
-        <tr><td><strong>Contract Builder</strong></td><td>Professional</td><td><span class="badge badge-warm">High</span></td><td><span class="badge badge-blue">S4</span></td></tr>
-        <tr><td><strong>Course Builder</strong></td><td>Education</td><td><span class="badge badge-warm">High</span></td><td><span class="badge badge-blue">S4</span></td></tr>
-      </tbody>
-    </table>
-  </div>
-</section>
-
-<!-- ═══════════════════════════════════════════════ -->
-<!-- DECISIONS -->
-<!-- ═══════════════════════════════════════════════ -->
-<section class="auto">
-  <div class="kicker r">Decisions</div>
-  <div class="section-title r">Eight questions.<br><span class="blue">All answered.</span></div>
-  <div class="tbl-wrap r" style="max-width:800px;">
-    <table class="tbl">
-      <thead><tr><th>Decision</th><th>Resolution</th><th></th></tr></thead>
-      <tbody>
-        <tr><td><strong>Name</strong></td><td>Scrolls. "There's a Scroll for that."</td><td><span class="badge badge-green">Locked</span></td></tr>
-        <tr><td><strong>Podcasters</strong></td><td>Business & tech. 10 mid-tier, 5K–50K.</td><td><span class="badge badge-green">Locked</span></td></tr>
-        <tr><td><strong>AI Pricing</strong></td><td>$5/50, $20/250, $50/750. 5 free.</td><td><span class="badge badge-green">Locked</span></td></tr>
-        <tr><td><strong>Demos</strong></td><td>Top 10 most visual Scrolls first.</td><td><span class="badge badge-green">Locked</span></td></tr>
-        <tr><td><strong>Domain</strong></td><td>openintranet.com. Eval consumer domain S2.</td><td><span class="badge badge-green">Locked</span></td></tr>
-        <tr><td><strong>Revenue</strong></td><td>Sprint 2. Aggressive. Validates the model.</td><td><span class="badge badge-green">Locked</span></td></tr>
-        <tr><td><strong>Social</strong></td><td>Twitter/X + TikTok first.</td><td><span class="badge badge-green">Locked</span></td></tr>
-        <tr><td><strong>DocuSign</strong></td><td>Signature + hash S3. Blockchain S4.</td><td><span class="badge badge-green">Locked</span></td></tr>
-      </tbody>
-    </table>
-  </div>
-</section>
-
-<!-- ═══════════════════════════════════════════════ -->
-<!-- AND ONE MORE THING -->
-<!-- ═══════════════════════════════════════════════ -->
-<section class="centered">
-  <p class="r" style="color:var(--gray-2);font-size:0.88rem;font-weight:400;">And one more thing.</p>
-</section>
-
-<!-- ═══════════════════════════════════════════════ -->
-<!-- CLOSING -->
-<!-- ═══════════════════════════════════════════════ -->
-<section class="centered">
-  <div class="quote-text r" style="text-align:center;margin:0 auto;">
-    You carry two worlds inside you.<br>
-    One that remembers simplicity.<br>
-    One that builds with everything new.
-  </div>
-  <div class="hero-sub r" style="margin-top:32px;"><span class="accent">We're building where<br>those worlds meet.</span></div>
-</section>
-
-<section class="centered half">
-  <div class="hero-text r" style="font-size:clamp(1.6rem,3.5vw,2.4rem);color:var(--gray-5);font-weight:400;letter-spacing:-0.02em;">The clock started yesterday.</div>
-</section>
-
-<div class="footer">
-  <div class="wordmark">Scrolls</div>
-  <p>Edition 02 · March 14, 2026</p>
-  <p style="margin-top:2px;">Serverless HTML Solutions — 80 and counting</p>
+  <span>Scrolls · Edition 03</span>
+  <span>·</span>
+  <span class="hl amber" id="days">130</span> <span>days to July 22</span>
+  <span>·</span>
+  <span class="hl blue">7</span> <span>Scrolls</span>
+  <span>·</span>
+  <span>80+ tools</span>
 </div>
 
 <script>
-/* ─── Countdown ─── */
-function updateCountdown() {
-  const diff = Math.ceil((new Date('2026-07-22') - new Date()) / 864e5);
-  const d = Math.max(0, diff);
-  document.getElementById('daysLeft').textContent = d;
-  document.getElementById('daysNum').textContent = d;
-  document.getElementById('clockCard').textContent = d + ' days. Credits expire July 22. Every day produces at least one Scroll.';
-  // Burn gauge
-  const total = Math.ceil((new Date('2026-07-22') - new Date('2026-03-13')) / 864e5);
-  const elapsed = total - d;
-  const pct = Math.min(100, Math.max(0, (elapsed / total) * 100));
-  document.getElementById('burnFill').style.width = pct + '%';
-  const spent = Math.round((pct / 100) * 45000);
-  document.getElementById('remaining').textContent = '$' + (45000 - spent).toLocaleString() + ' remaining';
-}
-updateCountdown(); setInterval(updateCountdown, 60000);
-
-/* ─── Progress bar ─── */
-const pb = document.getElementById('progressBar');
+// Progress bar
+const prog = document.getElementById('progress');
 window.addEventListener('scroll', () => {
   const h = document.documentElement.scrollHeight - window.innerHeight;
-  pb.style.width = (h > 0 ? (window.scrollY / h) * 100 : 0) + '%';
-}, { passive: true });
+  prog.style.width = (window.scrollY / h * 100) + '%';
+});
 
-/* ─── Nav scroll state ─── */
+// Nav scroll state
 const nav = document.getElementById('nav');
 window.addEventListener('scroll', () => {
   nav.classList.toggle('scrolled', window.scrollY > 40);
-}, { passive: true });
+});
 
-/* ─── Reveal on scroll ─── */
-const obs = new IntersectionObserver(e => e.forEach(x => { if (x.isIntersecting) x.target.classList.add('v'); }), { threshold: 0.06, rootMargin: '0px 0px -30px 0px' });
+// Reveal on scroll
+const obs = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('v'); obs.unobserve(e.target); } });
+}, { threshold: 0.12 });
 document.querySelectorAll('.r').forEach(el => obs.observe(el));
 
-/* ─── App Drawer ─── */
-function openApp(url, title) {
-  const drawer = document.getElementById('appDrawer');
-  document.getElementById('drawerTitle').textContent = title;
-  document.getElementById('drawerFrame').src = url;
-  document.getElementById('drawerOpen').href = url;
-  drawer.style.display = 'flex';
-  requestAnimationFrame(() => { drawer.classList.add('open'); });
-  document.body.style.overflow = 'hidden';
-}
-function closeDrawer() {
-  const drawer = document.getElementById('appDrawer');
-  drawer.classList.remove('open');
-  document.getElementById('drawerFrame').src = '';
-  setTimeout(() => { drawer.style.display = 'none'; }, 350);
-  document.body.style.overflow = '';
-}
-document.getElementById('appDrawer').addEventListener('click', e => {
-  if (e.target === e.currentTarget) closeDrawer();
-});
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
-
-/* ─── Gantt ─── */
-const gd = [
-  { n: 'Scroll Polish (80)', s: 0, e: 1.5, c: '#ef4444' },
-  { n: 'Demo Mode', s: 0, e: 1, c: '#ef4444' },
-  { n: 'Catalog Site', s: .5, e: 2, c: '#f59e0b' },
-  { n: 'AI Credits', s: .5, e: 1.5, c: '#eab308' },
-  { n: 'Podcaster Scrolls', s: 1, e: 2.5, c: '#f59e0b' },
-  { n: 'Podcaster Outreach', s: 1.5, e: 3, c: '#f59e0b' },
-  { n: 'Demo Pipeline', s: .5, e: 4, c: '#a855f7' },
-  { n: 'Social Content', s: 1, e: 5, c: '#a855f7' },
-  { n: 'New Scrolls', s: 2, e: 3.5, c: '#22c55e' },
-  { n: 'Show HN + PH', s: 2.5, e: 3, c: '#3b82f6' },
-  { n: 'Premium Bundles', s: 2, e: 3.5, c: '#eab308' },
-  { n: 'Custom Scrolls', s: 2.5, e: 5, c: '#eab308' },
-  { n: 'Adjacent Scrolls', s: 3, e: 5, c: '#22c55e' },
-  { n: 'DocuSign', s: 3, e: 4.5, c: '#a855f7' },
-  { n: 'Forge V3', s: 3.5, e: 5, c: '#3b82f6' },
-  { n: 'Final Burn', s: 4, e: 5, c: '#ef4444' },
-  { n: 'Doccoin', s: 4, e: 5, c: '#64748b' },
-];
-const gb = document.getElementById('gantt-body');
-gd.forEach(i => {
-  const tr = document.createElement('tr');
-  const td0 = document.createElement('td');
-  td0.textContent = i.n; tr.appendChild(td0);
-  for (let m = 0; m < 5; m++) {
-    const td = document.createElement('td');
-    td.style.position = 'relative';
-    const ms = Math.floor(i.s), me = Math.ceil(i.e);
-    if (m >= ms && m < me) {
-      const b = document.createElement('div');
-      b.className = 'gantt-bar'; b.style.background = i.c;
-      if (m === ms && m === me-1) { b.style.left='3px';b.style.right='3px';b.style.borderRadius='100px'; }
-      else if (m === ms) { b.style.left='3px';b.style.right='0';b.style.borderRadius='100px 0 0 100px'; }
-      else if (m === me-1) { b.style.left='0';b.style.right='3px';b.style.borderRadius='0 100px 100px 0'; }
-      else { b.style.left='0';b.style.right='0'; }
-      td.appendChild(b);
-    }
-    tr.appendChild(td);
-  }
-  gb.appendChild(tr);
-});
+// Countdown
+const target = new Date('2026-07-22');
+const now = new Date();
+const diff = Math.ceil((target - now) / (1000 * 60 * 60 * 24));
+document.getElementById('days').textContent = diff;
 </script>
 </body>
 </html>
